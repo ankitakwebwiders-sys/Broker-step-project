@@ -2,7 +2,7 @@ import Image from 'next/image'
 
 export function Footer() {
   return (
-    <footer className="relative z-10 border-t border-slate-200 bg-white/60 px-6 py-5 backdrop-blur-sm lg:px-10">
+    <footer className="relative z-10 border-t border-slate-200 bg-white/60 px-6 py-1 backdrop-blur-sm lg:px-10">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
         <Image
           src="/images/logos/broker-logo-removebg-preview.png"

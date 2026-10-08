@@ -1,46 +1,12 @@
 'use client'
 
-import { ArrowRight, Check, ShieldCheck } from 'lucide-react'
+import { Check, LogOut } from 'lucide-react'
 import { useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Navbar } from '@/components/landing/Navbar'
 import { Footer } from '@/components/landing/Footer'
-
-const plans = [
-  {
-    name: 'Starter',
-    price: '$29',
-    description: 'For independent brokers getting organized.',
-    features: [
-      'Client and policy tracking',
-      'Renewal reminders',
-      'Basic commission visibility',
-    ],
-  },
-  {
-    name: 'Professional',
-    price: '$79',
-    description: 'For growing brokerages ready to move faster.',
-    features: [
-      'Everything in Starter',
-      'Automated lead capture',
-      'Advanced reporting',
-      'Team collaboration',
-    ],
-    popular: true,
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    description: 'For teams that need a tailored operation.',
-    features: [
-      'Everything in Professional',
-      'Admin controls and audit logs',
-      'Priority support',
-      'Custom workflows',
-    ],
-  },
-]
+import { pricingPlans } from '@/data/landing/pricing'
 
 export default function SelectPlanPage() {
   const router = useRouter()
@@ -53,7 +19,29 @@ export default function SelectPlanPage() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-950">
-      <Navbar />
+      {/* Top Navbar: Logo on left, Logout on right (No menu items) */}
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2.5 lg:px-10">
+          <Link href="/" className="transition-transform hover:scale-105">
+            <Image
+              src="/images/logos/broker-logo-removebg-preview.png"
+              alt="BrokerStep Logo"
+              width={220}
+              height={60}
+              priority
+              className="object-contain"
+            />
+          </Link>
+
+          <Link
+            href="/login"
+            className="group inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-rose-600"
+          >
+            <LogOut className="size-4 text-slate-500 transition-colors group-hover:text-rose-600" />
+            <span>Logout</span>
+          </Link>
+        </div>
+      </header>
 
       <main className="mx-auto max-w-7xl px-5 py-28 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
@@ -69,86 +57,94 @@ export default function SelectPlanPage() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 lg:grid-cols-3">
-          {plans.map((plan) => {
+        <div className="mt-14 grid gap-6 lg:grid-cols-3 max-w-6xl mx-auto items-stretch">
+          {pricingPlans.map((plan) => {
             const isSelected = selected === plan.name
             const isPopular = plan.popular
 
             return (
               <div
                 key={plan.name}
-                className={`relative flex h-full flex-col rounded-2xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg ${isPopular
-                  ? 'border-blue-600 ring-2 ring-blue-100'
-                  : isSelected
-                    ? 'border-blue-600 ring-2 ring-blue-100'
-                    : 'border-slate-200'
-                  }`}
+                className={`relative flex h-full flex-col justify-between rounded-2xl bg-white p-7 sm:p-8 transition-all duration-300 hover:-translate-y-1 ${
+                  isPopular || isSelected
+                    ? 'border-2 border-blue-600 shadow-xl shadow-blue-500/10'
+                    : 'border border-slate-200/90 shadow-sm hover:shadow-md'
+                }`}
               >
                 {isPopular && (
-                  <span className="absolute -top-3 left-6 rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white">
-                    Most popular
+                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-5 py-1 text-xs font-bold text-white shadow-sm whitespace-nowrap">
+                    Most Popular
                   </span>
                 )}
 
-                {/* Plan header */}
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h2 className="text-xl font-semibold">{plan.name}</h2>
-                    <p className="mt-2 min-h-12 text-sm leading-6 text-slate-500">
-                      {plan.description}
+                <div>
+                  {/* Plan Title & Subtitle (Centered) */}
+                  <div className="text-center">
+                    <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+                      {plan.name}
+                    </h2>
+                    <p className="mt-2 text-sm text-slate-500 min-h-[40px] flex items-center justify-center">
+                      {plan.subtitle}
                     </p>
                   </div>
-                  {isSelected && (
-                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-blue-600 text-white">
-                      <Check className="size-4" />
+
+                  {/* Price (Centered) */}
+                  <div className="mt-6 flex items-baseline justify-center">
+                    <span className="text-xs font-bold text-slate-800 mr-1.5">
+                      {plan.currency}
                     </span>
-                  )}
+                    <span className="text-4xl font-extrabold tracking-tight text-slate-950">
+                      {plan.price}
+                    </span>
+                    <span className="text-sm font-medium text-slate-500 ml-1.5">
+                      {plan.period}
+                    </span>
+                  </div>
+
+                  {/* Trial Badge Pill (Centered) */}
+                  <div className="mt-5">
+                    <div className="rounded-xl bg-blue-50/80 py-2.5 px-4 text-center text-xs font-semibold text-blue-600 ring-1 ring-blue-100/60">
+                      {plan.trial}
+                    </div>
+                  </div>
+
+                  {/* Features (Left-aligned) */}
+                  <div className="mt-7">
+                    <p className="text-xs font-bold text-slate-900 mb-3.5">
+                      {plan.includesTitle}
+                    </p>
+                    <div className="space-y-3">
+                      {plan.features.map((feature) => (
+                        <div
+                          key={feature}
+                          className="flex items-center gap-3 text-xs sm:text-[13px] text-slate-700"
+                        >
+                          <Check className="size-4 shrink-0 text-sky-500 stroke-[2.5]" />
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Price */}
-                <p className="mt-6 text-3xl font-semibold">
-                  {plan.price}
-                  <span className="text-sm font-normal text-slate-500">
-                    {plan.price !== 'Custom' && ' / month'}
-                  </span>
-                </p>
-
-                {/* Features */}
-                <div className="mt-7 flex flex-col gap-3 border-t border-slate-100 pt-6">
-                  {plan.features.map((feature) => (
-                    <span
-                      key={feature}
-                      className="flex items-center gap-2 text-sm text-slate-600"
-                    >
-                      <Check className="size-4 shrink-0 text-emerald-500" />
-                      {feature}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Select plan button */}
+                {/* Bottom Select Plan Button */}
                 <div className="mt-8 pt-2">
                   <button
                     type="button"
                     onClick={() => handleSelectPlan(plan.name)}
-                    className={`group inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-all ${isPopular
-                      ? 'bg-slate-950 text-white shadow-lg shadow-slate-950/20 hover:bg-blue-600'
-                      : isSelected
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700'
-                        : 'border border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50'
-                      }`}
+                    className={`inline-flex h-11 w-full items-center justify-center rounded-xl text-sm font-semibold transition-all ${
+                      isPopular || isSelected
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25 hover:bg-blue-700'
+                        : 'border border-blue-600 bg-white text-blue-600 hover:bg-blue-50'
+                    }`}
                   >
-                    {isSelected ? 'Selected' : `Choose ${plan.name}`}
-                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                    Start Free Trial
                   </button>
                 </div>
               </div>
             )
           })}
         </div>
-
-        {/* Trust line */}
-
       </main>
 
       <Footer />

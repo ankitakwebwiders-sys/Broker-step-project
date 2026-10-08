@@ -1,10 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Check, ChevronRight, FileCheck2, Sparkles, TrendingUp, Users, WalletCards, Zap, Target, BarChart3, Award, Clock, Globe, Rocket, Database, Shield, Layers, Star, LayoutGrid, DatabaseBackup, ChartNetwork } from 'lucide-react'
+import { ArrowRight, Check, ChevronRight, FileCheck2, Sparkles, TrendingUp, Users, WalletCards, Zap, Target, BarChart3, Award, Clock, Globe, Rocket, Database, Shield, Layers, Star, LayoutGrid, DatabaseBackup, ChartNetwork, HelpCircle, ChevronDown, MessageCircle } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { Navbar } from '@/components/landing/Navbar'
 import { Footer } from '@/components/landing/Footer'
+import { pricingPlans } from '@/data/landing/pricing'
+import { faqs } from '@/data/landing/faqs'
 
 const benefits = [
   { icon: Database, title: 'Unified Data Hub', description: 'All your client data in one place', color: 'from-blue-500 to-cyan-500', glow: 'rgba(59,130,246,0.22)' },
@@ -150,6 +152,7 @@ function Counter({ value, duration = 1600 }: { value: string; duration?: number 
 // ─────────────────────────────────────────────
 export default function LandingPage() {
   const [scrollProgress, setScrollProgress] = useState(0)
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0)
 
   useEffect(() => {
     const onScroll = () => {
@@ -250,7 +253,7 @@ export default function LandingPage() {
                 </div>
               </Reveal>
 
-            
+
             </div>
 
             {/* RIGHT — Product mock */}
@@ -337,7 +340,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-   
+
       {/* ═══════════ PLATFORM / BENEFITS ═══════════ */}
       <section id="platform" className="relative z-10 px-6 py-24 lg:px-10">
         <div className="mx-auto max-w-6xl">
@@ -487,56 +490,92 @@ export default function LandingPage() {
             </div>
           </Reveal>
 
-          <div className="mx-auto mt-16 grid max-w-5xl gap-6 md:grid-cols-2">
-            {/* Starter */}
-            <Reveal delay={100}>
-              <SpotlightCard className="group h-full rounded-3xl border border-slate-200 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl">
-                <p className="text-sm font-semibold text-slate-500">BrokerStep Starter</p>
-                <div className="mt-4 flex items-baseline gap-2">
-                  <span className="text-5xl font-semibold tracking-tight text-slate-950">Free</span>
-                  <span className="text-sm text-slate-500">for 14 days</span>
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                  Explore the full workspace with your team before choosing the right membership.
-                </p>
-                <Link
-                  href="/register"
-                  className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-950 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
-                >
-                  Start your trial <ArrowRight className="size-4" />
-                </Link>
-              </SpotlightCard>
-            </Reveal>
+          <div className="mx-auto mt-14 grid max-w-6xl gap-6 lg:grid-cols-3 items-stretch">
+            {pricingPlans.map((plan, i) => {
+              const isPopular = plan.popular
 
-            {/* Pro */}
-            <Reveal delay={200}>
-              <div className="group relative h-full overflow-hidden rounded-3xl border border-blue-200 bg-gradient-to-b from-blue-50/80 via-white to-white p-8 shadow-[0_20px_60px_-20px_rgba(59,130,246,0.35)]">
-                <div className="absolute -top-20 -right-20 size-64 rounded-full bg-blue-300/40 blur-3xl" />
-                <div className="absolute -bottom-20 -left-20 size-64 rounded-full bg-violet-200/50 blur-3xl" />
-                <div className="absolute top-6 right-6 rounded-full border border-blue-200 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-blue-700 shadow-sm">
-                  Most popular
-                </div>
-                <div className="relative">
-                  <p className="text-sm font-semibold text-blue-700">BrokerStep Professional</p>
-                  <div className="mt-4">
-                    <span className="text-4xl font-semibold tracking-tight text-slate-950">For growing teams</span>
-                  </div>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                    Unlock deeper reporting, shared workflows, and the visibility your brokerage needs to scale confidently.
-                  </p>
-                  <Magnetic strength={12}>
-                    <Link
-                      href="/register"
-                      className="group/btn mt-8 inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_40px_-10px_rgba(59,130,246,0.7)] transition-all hover:shadow-[0_10px_50px_-5px_rgba(59,130,246,0.9)]"
-                    >
-                      <span className="flex items-center gap-2">
-                        Get started <ArrowRight className="size-4 transition-transform group-hover/btn:translate-x-1" />
+              return (
+                <Reveal key={plan.name} delay={i * 120} className="h-full">
+                  <div
+                    className={`relative flex h-full flex-col justify-between rounded-2xl bg-white p-7 sm:p-8 transition-all duration-300 hover:-translate-y-1 ${
+                      isPopular
+                        ? 'border-2 border-blue-600 shadow-xl shadow-blue-500/10'
+                        : 'border border-slate-200/90 shadow-sm hover:shadow-md'
+                    }`}
+                  >
+                    {isPopular && (
+                      <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-5 py-1 text-xs font-bold text-white shadow-sm whitespace-nowrap">
+                        Most Popular
                       </span>
-                    </Link>
-                  </Magnetic>
-                </div>
-              </div>
-            </Reveal>
+                    )}
+
+                    <div>
+                      {/* Plan Title & Subtitle (Centered) */}
+                      <div className="text-center">
+                        <h3 className="text-2xl font-bold tracking-tight text-slate-900">
+                          {plan.name}
+                        </h3>
+                        <p className="mt-2 text-sm text-slate-500 min-h-[40px] flex items-center justify-center">
+                          {plan.subtitle}
+                        </p>
+                      </div>
+
+                      {/* Price (Centered) */}
+                      <div className="mt-6 flex items-baseline justify-center">
+                        <span className="text-xs font-bold text-slate-800 mr-1.5">
+                          {plan.currency}
+                        </span>
+                        <span className="text-4xl font-extrabold tracking-tight text-slate-950">
+                          {plan.price}
+                        </span>
+                        <span className="text-sm font-medium text-slate-500 ml-1.5">
+                          {plan.period}
+                        </span>
+                      </div>
+
+                      {/* Trial Badge Pill (Centered) */}
+                      <div className="mt-5">
+                        <div className="rounded-xl bg-blue-50/80 py-2.5 px-4 text-center text-xs font-semibold text-blue-600 ring-1 ring-blue-100/60">
+                          {plan.trial}
+                        </div>
+                      </div>
+
+                      {/* Features (Left-aligned) */}
+                      <div className="mt-7">
+                        <p className="text-xs font-bold text-slate-900 mb-3.5">
+                          {plan.includesTitle}
+                        </p>
+                        <div className="space-y-3">
+                          {plan.features.map((feature) => (
+                            <div
+                              key={feature}
+                              className="flex items-center gap-3 text-xs sm:text-[13px] text-slate-700"
+                            >
+                              <Check className="size-4 shrink-0 text-sky-500 stroke-[2.5]" />
+                              <span>{feature}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom CTA Button */}
+                    <div className="mt-8 pt-2">
+                      <Link
+                        href={`/register?plan=${plan.name.toLowerCase()}`}
+                        className={`inline-flex h-11 w-full items-center justify-center rounded-xl text-sm font-semibold transition-all ${
+                          isPopular
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25 hover:bg-blue-700'
+                            : 'border border-blue-600 bg-white text-blue-600 hover:bg-blue-50'
+                        }`}
+                      >
+                        Start Free Trial
+                      </Link>
+                    </div>
+                  </div>
+                </Reveal>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -583,6 +622,74 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ═══════════ FAQ ═══════════ */}
+      <section id="faq" className="relative z-10 px-6 py-24 lg:px-10">
+        <div className="mx-auto max-w-4xl">
+          <Reveal>
+            <div className="text-center">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
+                <HelpCircle className="size-3.5 text-blue-500" />
+                Frequently Asked Questions
+              </span>
+              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
+                Everything you need to know.
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-600">
+                Have questions about BrokerStep? Find clear answers below or reach out to our team anytime.
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="mt-14 space-y-4">
+            {faqs.map((faq, i) => {
+              const isOpen = openFaqIndex === i
+              return (
+                <Reveal key={faq.question} delay={i * 60}>
+                  <div
+                    className={`overflow-hidden rounded-2xl border transition-all duration-300 ${isOpen
+                      ? 'border-blue-600/60 bg-white shadow-lg shadow-blue-500/5 ring-2 ring-blue-100'
+                      : 'border-slate-200/90 bg-white/90 hover:border-slate-300 hover:bg-white'
+                      }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaqIndex(isOpen ? null : i)}
+                      className="flex w-full items-center justify-between gap-4 p-6 text-left transition-colors"
+                      aria-expanded={isOpen}
+                    >
+                      <span className="text-base font-semibold text-slate-900 sm:text-lg">
+                        {faq.question}
+                      </span>
+                      <span
+                        className={`flex size-8 shrink-0 items-center justify-center rounded-full transition-transform duration-300 ${isOpen
+                          ? 'rotate-180 bg-blue-600 text-white'
+                          : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                          }`}
+                      >
+                        <ChevronDown className="size-4" />
+                      </span>
+                    </button>
+
+                    <div
+                      className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                        }`}
+                    >
+                      <div className="overflow-hidden">
+                        <div className="border-t border-slate-100 px-6 pb-6 pt-4 text-sm leading-relaxed text-slate-600 sm:text-[15px]">
+                          {faq.answer}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Reveal>
+              )
+            })}
+          </div>
+
+
+        </div>
+      </section>
+
       {/* ═══════════ CTA ═══════════ */}
       <section id="about" className="relative z-10 px-6 py-24 lg:px-10">
         <div className="mx-auto max-w-6xl">
@@ -626,10 +733,7 @@ export default function LandingPage() {
                     Sign In to BrokerStep
                   </Link>
                 </div>
-                <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-slate-500">
-                  <span className="flex items-center gap-2"><Clock className="size-3.5" /> Setup in 5 minutes</span>
-                  <span className="flex items-center gap-2"><BarChart3 className="size-3.5" /> See results fast</span>
-                </div>
+
               </div>
             </div>
           </Reveal>

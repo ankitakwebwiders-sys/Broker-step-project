@@ -1,38 +1,60 @@
-export const pricingPlans = [
+export interface PricingPlan {
+  name: string
+  subtitle: string
+  currency: string
+  price: string
+  period: string
+  trial: string
+  popular?: boolean
+  includesTitle: string
+  features: string[]
+}
+
+export const pricingPlans: PricingPlan[] = [
   {
     name: 'Starter',
-    price: '$29',
-    period: '/month',
-    description: 'For independent brokers getting organized.',
+    subtitle: 'Perfect for new brokers getting started.',
+    currency: 'CAD',
+    price: '1,000',
+    period: '/ month',
+    trial: '3-Day Free Trial',
+    includesTitle: 'Includes:',
     features: [
-      'Client and policy tracking',
-      'Renewal reminders',
-      'Basic commission visibility',
+      'Full Access for 3 Days',
+      'Up to 100 Clients',
+      'Basic Features',
+      'Support via Email',
     ],
   },
   {
     name: 'Professional',
-    price: '$79',
-    period: '/month',
-    description: 'For growing brokerages ready to move faster.',
-    features: [
-      'Everything in Starter',
-      'Automated lead capture',
-      'Advanced reporting',
-      'Team collaboration',
-    ],
+    subtitle: 'For growing brokers and teams.',
+    currency: 'CAD',
+    price: '1,500',
+    period: '/ month',
+    trial: '3-Day Free Trial',
     popular: true,
+    includesTitle: 'Includes:',
+    features: [
+      'Up to 500 Clients',
+      'Lead Generation Form',
+      'All Core Features',
+      'Priority Support',
+    ],
   },
   {
-    name: 'Enterprise',
-    price: 'Custom',
-    period: '',
-    description: 'For teams that need a tailored operation.',
+    name: 'Business',
+    subtitle: 'For large brokerages and advanced needs.',
+    currency: 'CAD',
+    price: '2,000',
+    period: '/ month',
+    trial: '3-Day Free Trial',
+    includesTitle: 'Includes:',
     features: [
-      'Everything in Professional',
-      'Admin controls and audit logs',
-      'Priority support',
-      'Custom workflows',
+      'Unlimited Clients',
+      'Advanced Analytics & Reports',
+      'API Access',
+      'Dedicated Support',
     ],
   },
 ]

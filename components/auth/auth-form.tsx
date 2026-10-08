@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Mail, Lock, Sparkles, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, Mail, Lock, Sparkles, User, Phone } from 'lucide-react'
 import { FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -30,218 +30,156 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
   }
 
   return (
-    <main className="relative flex h-screen max-h-screen overflow-hidden bg-[#f8fafc] text-slate-950">
-
-      {/* Ambient aurora background */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-blue-300/40 blur-[120px]" />
-        <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-violet-300/40 blur-[120px]" />
+    <main className="relative flex h-screen max-h-screen w-full overflow-hidden bg-gradient-to-br from-[#07152f] via-[#0a1e42] to-[#07152f] text-white">
+      {/* Ambient background glow orbs */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-32 -left-32 size-[450px] rounded-full bg-blue-600/25 blur-[120px] animate-pulse" />
         <div
-          className="absolute inset-0 opacity-[0.4]"
+          className="absolute -bottom-32 -right-32 size-[450px] rounded-full bg-violet-600/20 blur-[120px] animate-pulse"
+          style={{ animationDelay: '2s' }}
+        />
+        <div className="absolute top-1/2 left-1/2 size-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-500/10 blur-[130px]" />
+        <div
+          className="absolute inset-0 opacity-[0.18]"
           style={{
-            backgroundImage: `linear-gradient(rgba(15,23,42,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.04) 1px, transparent 1px)`,
-            backgroundSize: '56px 56px',
-            maskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)',
-            WebkitMaskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)',
+            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.12) 1px, transparent 0)`,
+            backgroundSize: '28px 28px',
           }}
         />
       </div>
 
-      {/* ═══════════ LEFT SIDEBAR (dark) ═══════════ */}
-      <aside className="relative z-10 hidden h-screen w-[46%] flex-col overflow-hidden bg-gradient-to-br from-[#07152f] via-[#0a1e42] to-[#07152f] p-10 text-white lg:flex">
-
-        {/* Aurora orbs inside sidebar */}
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-24 -right-24 size-96 rounded-full bg-blue-600/30 blur-[100px] animate-pulse" />
-          <div className="absolute -bottom-24 -left-24 size-96 rounded-full bg-violet-600/25 blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
-          <div className="absolute top-1/2 left-1/3 size-72 rounded-full bg-cyan-500/15 blur-[100px] animate-pulse" style={{ animationDelay: '4s' }} />
-          <div
-            className="absolute inset-0 opacity-20"
-            style={{
-              backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.08) 1px, transparent 0)`,
-              backgroundSize: '32px 32px',
-            }}
-          />
-        </div>
-
-        {/* Logo */}
-        <Link href="/" className="relative z-10 inline-flex ">
-          <Image
-            src="/images/logos/broker-dark-theme.png"
-            alt="BrokerStep Logo"
-            width={180}
-            height={48}
-            className="object-contain"
-            priority
-          />
-        </Link>
-
-        {/* Main copy — pulled closer to logo */}
-        <div className="relative z-10 max-w-md mt-12">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-500/10 px-3 py-1.5 text-[11px] font-medium text-blue-200 backdrop-blur-sm">
-            <span className="relative flex size-1.5">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
-            </span>
-            Trusted by 2,500+ brokers
-          </div>
-
-          <h1 className="mt-6 text-[2.5rem] font-semibold leading-[1.05] tracking-[-0.045em]">
-            Move business
-            <br />
-            forward, one{' '}
-            <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-violet-400 bg-clip-text text-transparent">
-              clear step
-            </span>{' '}
-            at a time.
-          </h1>
-
-          <p className="mt-5 text-[15px] leading-7 text-slate-300">
-            The focused workspace for clients, policies, renewals, and commissions.
-          </p>
-
-          <ul className="mt-8 space-y-3.5">
-            {[
-              'One place for your whole book',
-              'Clear commission visibility',
-              'Built for modern teams',
-            ].map((item) => (
-              <li key={item} className="flex items-center gap-3 text-sm text-slate-200">
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 ring-1 ring-emerald-400/30">
-                  <Check className="size-3.5 text-emerald-400" strokeWidth={3} />
-                </span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Spacer — pushes footer to bottom */}
-        <div className="flex-1" />
-
-        {/* Footer */}
-        <div className="relative z-10 flex items-center justify-between text-xs text-slate-400">
-
-        </div>
-      </aside>
-
-      {/* ═══════════ RIGHT FORM SECTION ═══════════ */}
-      <section className="relative z-10 flex h-screen flex-1 flex-col overflow-y-auto">
-
-        {/* Top bar */}
-        <div className="flex items-center justify-between p-6 lg:p-8">
-          <Link
-            href="/"
-            className="group flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-slate-900 lg:hidden"
-          >
-            <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-0.5" />
-            Back to home
+      <div className="relative z-10 flex h-full w-full flex-col justify-between px-4 py-2 sm:px-8 sm:py-3">
+        {/* Top Header Bar */}
+        <header className="flex shrink-0 items-center justify-between">
+          <Link href="/" className="inline-flex items-center transition-transform hover:scale-[1.02]">
+            <Image
+              src="/images/logos/broker-dark-theme.png"
+              alt="BrokerStep Logo"
+              width={360}
+              height={100}
+              style={{ width: 'auto', height: '76px' }}
+              className="object-contain"
+              priority
+            />
           </Link>
 
-          <div className="ml-auto text-sm text-slate-500">
-            {isSignUp ? 'Already have an account?' : 'New to BrokerStep?'}{' '}
+          <div className="flex items-center gap-3 text-xs text-slate-300 sm:text-sm">
+            <span className="hidden sm:inline">
+              {isSignUp ? 'Already have an account?' : 'New to BrokerStep?'}
+            </span>
             <Link
               href={isSignUp ? '/login' : '/register'}
-              className="font-semibold text-blue-600 transition hover:text-blue-700 hover:underline underline-offset-4"
+              className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:border-blue-400 hover:bg-blue-600/25 hover:text-white sm:px-4 sm:py-2"
             >
               {isSignUp ? 'Sign in' : 'Create account'}
             </Link>
           </div>
-        </div>
+        </header>
 
-        {/* Form wrapper — vertically centered, fits viewport */}
-        <div className="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center px-6 pb-8 lg:px-0">
-          <div className="rounded-3xl border border-slate-200/80 bg-white/70 p-7 shadow-[0_8px_40px_-12px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-8">
-
+        {/* Center Form Card */}
+        <div className="flex flex-1 items-center justify-center py-1 min-h-0">
+          <div
+            className={`w-full ${isSignUp ? 'max-w-[480px]' : 'max-w-[440px]'
+              } rounded-2xl border border-white/20 bg-white p-4 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] sm:rounded-3xl sm:p-6`}
+          >
             {/* Header */}
-            <div className="mb-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-700">
+            <div className="mb-3 text-center sm:text-left sm:mb-4">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-blue-700">
                 <Sparkles className="size-3" />
                 {isSignUp ? 'Get started' : 'Welcome back'}
               </div>
 
-              <h2 className="mt-4 text-[1.65rem] font-semibold tracking-[-0.03em] text-slate-950">
+              <h1 className="mt-1 text-lg font-bold tracking-tight text-slate-950 sm:text-2xl">
                 {isSignUp ? 'Create your workspace' : 'Sign in to BrokerStep'}
-              </h2>
+              </h1>
 
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
                 {isSignUp
                   ? 'Set up your brokerage workspace and choose a plan next.'
-                  : 'Continue to your membership plan, then open your broker dashboard.'}
+                  : 'Enter your credentials to access your broker portal.'}
               </p>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
-              {/* Name - Only for sign-up */}
+            <form onSubmit={handleSubmit} className="flex flex-col gap-2.5 sm:gap-3">
+              {/* Name & Phone — 2 columns on sign up */}
               {isSignUp && (
-                <div>
-                  <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-slate-700">
-                    Full name
-                  </label>
-                  <div
-                    className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'name'
-                        ? 'border-blue-500 ring-4 ring-blue-100'
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="name" className="mb-1 block text-xs font-medium text-slate-700">
+                      Full name
+                    </label>
+                    <div
+                      className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'name'
+                        ? 'border-blue-500 ring-2 ring-blue-100'
                         : 'border-slate-200 hover:border-slate-300'
-                      }`}
-                  >
-                    <input
-                      id="name"
-                      required
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      onFocus={() => setFocused('name')}
-                      onBlur={() => setFocused(null)}
-                      placeholder="John Doe"
-                      autoComplete="name"
-                      className="h-11 w-full bg-transparent px-4 text-sm text-slate-900 outline-none placeholder:text-slate-400"
-                    />
+                        }`}
+                    >
+                      <User
+                        className={`ml-3 size-3.5 transition-colors ${focused === 'name' ? 'text-blue-500' : 'text-slate-400'
+                          }`}
+                      />
+                      <input
+                        id="name"
+                        required
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        onFocus={() => setFocused('name')}
+                        onBlur={() => setFocused(null)}
+                        placeholder="John Doe"
+                        autoComplete="name"
+                        className="h-9 w-full bg-transparent px-2.5 text-xs text-slate-900 outline-none placeholder:text-slate-400"
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
 
-              {/* Phone - Only for sign-up */}
-              {isSignUp && (
-                <div>
-                  <label htmlFor="phone" className="mb-1.5 block text-sm font-medium text-slate-700">
-                    Phone number
-                  </label>
-                  <div
-                    className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'phone'
-                        ? 'border-blue-500 ring-4 ring-blue-100'
+                  <div>
+                    <label htmlFor="phone" className="mb-1 block text-xs font-medium text-slate-700">
+                      Phone number
+                    </label>
+                    <div
+                      className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'phone'
+                        ? 'border-blue-500 ring-2 ring-blue-100'
                         : 'border-slate-200 hover:border-slate-300'
-                      }`}
-                  >
-                    <input
-                      id="phone"
-                      required
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      onFocus={() => setFocused('phone')}
-                      onBlur={() => setFocused(null)}
-                      placeholder="+1 (555) 000-0000"
-                      autoComplete="tel"
-                      className="h-11 w-full bg-transparent px-4 text-sm text-slate-900 outline-none placeholder:text-slate-400"
-                    />
+                        }`}
+                    >
+                      <Phone
+                        className={`ml-3 size-3.5 transition-colors ${focused === 'phone' ? 'text-blue-500' : 'text-slate-400'
+                          }`}
+                      />
+                      <input
+                        id="phone"
+                        required
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        onFocus={() => setFocused('phone')}
+                        onBlur={() => setFocused(null)}
+                        placeholder="+1 (555) 000-0000"
+                        autoComplete="tel"
+                        className="h-9 w-full bg-transparent px-2.5 text-xs text-slate-900 outline-none placeholder:text-slate-400"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-700">
+                <label htmlFor="email" className="mb-1 block text-xs font-medium text-slate-700">
                   Email address
                 </label>
                 <div
                   className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'email'
-                      ? 'border-blue-500 ring-4 ring-blue-100'
-                      : 'border-slate-200 hover:border-slate-300'
+                    ? 'border-blue-500 ring-2 ring-blue-100'
+                    : 'border-slate-200 hover:border-slate-300'
                     }`}
                 >
-                  <Mail className={`ml-4 size-4 transition-colors ${focused === 'email' ? 'text-blue-500' : 'text-slate-400'}`} />
+                  <Mail
+                    className={`ml-3.5 size-3.5 transition-colors sm:size-4 ${focused === 'email' ? 'text-blue-500' : 'text-slate-400'
+                      }`}
+                  />
                   <input
                     id="email"
                     required
@@ -252,125 +190,164 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
                     onBlur={() => setFocused(null)}
                     placeholder="you@brokerage.com"
                     autoComplete="email"
-                    className="h-11 w-full bg-transparent px-3 text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                    className="h-9.5 w-full bg-transparent px-3 text-xs text-slate-900 outline-none placeholder:text-slate-400 sm:text-sm"
                   />
                 </div>
               </div>
 
-              {/* Password */}
-              <div>
-                <div className="mb-1.5 flex items-center justify-between">
-                  <label htmlFor="password" className="text-sm font-medium text-slate-700">
-                    Password
-                  </label>
-                  {!isSignUp && (
+              {/* Password & Confirm Password */}
+              {isSignUp ? (
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="password" className="mb-1 block text-xs font-medium text-slate-700">
+                      Password
+                    </label>
+                    <div
+                      className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'password'
+                        ? 'border-blue-500 ring-2 ring-blue-100'
+                        : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                    >
+                      <Lock
+                        className={`ml-3 size-3.5 transition-colors ${focused === 'password' ? 'text-blue-500' : 'text-slate-400'
+                          }`}
+                      />
+                      <input
+                        id="password"
+                        required
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onFocus={() => setFocused('password')}
+                        onBlur={() => setFocused(null)}
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        className="h-9 w-full bg-transparent px-2.5 pr-8 text-xs text-slate-900 outline-none placeholder:text-slate-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        className="absolute right-2.5 text-slate-400 hover:text-slate-700"
+                      >
+                        {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="confirmPassword" className="mb-1 block text-xs font-medium text-slate-700">
+                      Confirm
+                    </label>
+                    <div
+                      className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'confirmPassword'
+                        ? 'border-blue-500 ring-2 ring-blue-100'
+                        : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                    >
+                      <Lock
+                        className={`ml-3 size-3.5 transition-colors ${focused === 'confirmPassword' ? 'text-blue-500' : 'text-slate-400'
+                          }`}
+                      />
+                      <input
+                        id="confirmPassword"
+                        required
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        onFocus={() => setFocused('confirmPassword')}
+                        onBlur={() => setFocused(null)}
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        className="h-9 w-full bg-transparent px-2.5 pr-8 text-xs text-slate-900 outline-none placeholder:text-slate-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                        className="absolute right-2.5 text-slate-400 hover:text-slate-700"
+                      >
+                        {showConfirmPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="mb-1 flex items-center justify-between">
+                    <label htmlFor="password" className="text-xs font-medium text-slate-700">
+                      Password
+                    </label>
                     <Link
                       href="/forgot-password"
-                      className="text-xs font-medium text-blue-600 transition hover:text-blue-700 hover:underline underline-offset-4"
+                      className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline underline-offset-4"
                     >
                       Forgot password?
                     </Link>
-                  )}
-                </div>
-                <div
-                  className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'password'
-                      ? 'border-blue-500 ring-4 ring-blue-100'
-                      : 'border-slate-200 hover:border-slate-300'
-                    }`}
-                >
-                  <Lock className={`ml-4 size-4 transition-colors ${focused === 'password' ? 'text-blue-500' : 'text-slate-400'}`} />
-                  <input
-                    id="password"
-                    required
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onFocus={() => setFocused('password')}
-                    onBlur={() => setFocused(null)}
-                    placeholder="Enter your password"
-                    autoComplete={isSignUp ? 'new-password' : 'current-password'}
-                    className="h-11 w-full bg-transparent px-3 pr-12 text-sm text-slate-900 outline-none placeholder:text-slate-400"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute right-2.5 flex size-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                  >
-                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Confirm Password - Only for sign-up */}
-              {isSignUp && (
-                <div>
-                  <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-medium text-slate-700">
-                    Confirm password
-                  </label>
+                  </div>
                   <div
-                    className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'confirmPassword'
-                        ? 'border-blue-500 ring-4 ring-blue-100'
-                        : 'border-slate-200 hover:border-slate-300'
+                    className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'password'
+                      ? 'border-blue-500 ring-2 ring-blue-100'
+                      : 'border-slate-200 hover:border-slate-300'
                       }`}
                   >
-                    <Lock className={`ml-4 size-4 transition-colors ${focused === 'confirmPassword' ? 'text-blue-500' : 'text-slate-400'}`} />
+                    <Lock
+                      className={`ml-3.5 size-4 transition-colors ${focused === 'password' ? 'text-blue-500' : 'text-slate-400'
+                        }`}
+                    />
                     <input
-                      id="confirmPassword"
+                      id="password"
                       required
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      onFocus={() => setFocused('confirmPassword')}
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      onFocus={() => setFocused('password')}
                       onBlur={() => setFocused(null)}
-                      placeholder="Confirm your password"
-                      autoComplete="new-password"
-                      className="h-11 w-full bg-transparent px-3 pr-12 text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                      placeholder="Enter your password"
+                      autoComplete="current-password"
+                      className="h-10 w-full bg-transparent px-3 pr-10 text-sm text-slate-900 outline-none placeholder:text-slate-400 sm:h-11"
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                      className="absolute right-2.5 flex size-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      className="absolute right-2.5 text-slate-400 hover:text-slate-700"
                     >
-                      {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* Submit */}
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative mt-1 inline-flex h-11 items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:shadow-[0_10px_40px_-10px_rgba(59,130,246,0.7)] disabled:opacity-70"
+                className="group relative mt-1 inline-flex h-9.5 items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all hover:bg-blue-600 disabled:opacity-70 sm:h-10"
               >
-                <span className="relative z-10 flex items-center gap-2">
-                  {loading ? (
-                    <>
-                      <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      Please wait…
-                    </>
-                  ) : (
-                    <>
-                      {isSignUp ? 'Create account' : 'Sign in'}
-                      <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-                    </>
-                  )}
-                </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                {loading ? (
+                  <>
+                    <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    Please wait…
+                  </>
+                ) : (
+                  <>
+                    {isSignUp ? 'Create workspace' : 'Sign in'}
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                  </>
+                )}
               </button>
             </form>
 
             {/* Terms (sign up) */}
             {isSignUp && (
-              <p className="mt-5 text-center text-xs leading-5 text-slate-500">
-                By creating an account, you agree to our{' '}
-                <Link href="/terms" className="font-medium text-slate-700 hover:text-blue-600 hover:underline underline-offset-2">
+              <p className="mt-2 text-center text-[10px] leading-tight text-slate-500 sm:text-[11px]">
+                By signing up, you agree to our{' '}
+                <Link href="/terms" className="font-medium text-slate-700 hover:text-blue-600 hover:underline">
                   Terms
                 </Link>{' '}
                 and{' '}
-                <Link href="/privacy" className="font-medium text-slate-700 hover:text-blue-600 hover:underline underline-offset-2">
+                <Link href="/privacy" className="font-medium text-slate-700 hover:text-blue-600 hover:underline">
                   Privacy Policy
                 </Link>
                 .
@@ -378,9 +355,23 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
             )}
           </div>
         </div>
-      </section>
 
-      {/* ═══════════ AUTOFILL FIX (global) ═══════════ */}
+        {/* Bottom Footer */}
+        <footer className="shrink-0 py-1 text-center text-[11px] text-slate-400">
+          <p>
+            © 2026 BrokerStep ·{' '}
+            <Link href="/privacy" className="transition-colors hover:text-white">
+              Privacy
+            </Link>{' '}
+            ·{' '}
+            <Link href="/terms" className="transition-colors hover:text-white">
+              Terms
+            </Link>
+          </p>
+        </footer>
+      </div>
+
+      {/* White form autofill fix */}
       <style jsx global>{`
         input:-webkit-autofill,
         input:-webkit-autofill:hover,

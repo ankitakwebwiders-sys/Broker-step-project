@@ -7,9 +7,39 @@ import { Navbar } from '@/components/landing/Navbar'
 import { Footer } from '@/components/landing/Footer'
 
 const plans = [
-  { name: 'Starter', price: '$29', description: 'For independent brokers getting organized.', features: ['Client and policy tracking', 'Renewal reminders', 'Basic commission visibility'] },
-  { name: 'Professional', price: '$79', description: 'For growing brokerages ready to move faster.', features: ['Everything in Starter', 'Automated lead capture', 'Advanced reporting', 'Team collaboration'], popular: true },
-  { name: 'Enterprise', price: 'Custom', description: 'For teams that need a tailored operation.', features: ['Everything in Professional', 'Admin controls and audit logs', 'Priority support', 'Custom workflows'] },
+  {
+    name: 'Starter',
+    price: '$29',
+    description: 'For independent brokers getting organized.',
+    features: [
+      'Client and policy tracking',
+      'Renewal reminders',
+      'Basic commission visibility',
+    ],
+  },
+  {
+    name: 'Professional',
+    price: '$79',
+    description: 'For growing brokerages ready to move faster.',
+    features: [
+      'Everything in Starter',
+      'Automated lead capture',
+      'Advanced reporting',
+      'Team collaboration',
+    ],
+    popular: true,
+  },
+  {
+    name: 'Enterprise',
+    price: 'Custom',
+    description: 'For teams that need a tailored operation.',
+    features: [
+      'Everything in Professional',
+      'Admin controls and audit logs',
+      'Priority support',
+      'Custom workflows',
+    ],
+  },
 ]
 
 export default function SelectPlanPage() {
@@ -25,7 +55,7 @@ export default function SelectPlanPage() {
     <div className="min-h-screen bg-[#f8fafc] text-slate-950">
       <Navbar />
 
-      <main className="mx-auto max-w-7xl px-5 py-20 lg:px-8">
+      <main className="mx-auto max-w-7xl px-5 py-28 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
             Choose your membership
@@ -34,58 +64,91 @@ export default function SelectPlanPage() {
             A plan built for your next step.
           </h1>
           <p className="mt-4 text-base leading-7 text-slate-500">
-            Pick the workspace that fits your brokerage today. You can change your membership whenever your business grows.
+            Pick the workspace that fits your brokerage today. You can change
+            your membership whenever your business grows.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-5 lg:grid-cols-3">
-          {plans.map((plan) => (
-            <button
-              key={plan.name}
-              onClick={() => handleSelectPlan(plan.name)}
-              className={`relative flex h-full flex-col rounded-2xl border bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg ${
-                selected === plan.name ? 'border-blue-600 ring-2 ring-blue-100' : 'border-slate-200'
-              }`}
-            >
-              {plan.popular && (
-                <span className="absolute -top-3 left-6 rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white">
-                  Most popular
-                </span>
-              )}
-              <div className="flex items-start justify-between">
-                <div>
-                  <h2 className="text-xl font-semibold">{plan.name}</h2>
-                  <p className="mt-2 min-h-12 text-sm leading-6 text-slate-500">{plan.description}</p>
-                </div>
-                {selected === plan.name && (
-                  <span className="grid size-6 place-items-center rounded-full bg-blue-600 text-white">
-                    <Check className="size-4" />
+        <div className="mt-12 grid gap-6 lg:grid-cols-3">
+          {plans.map((plan) => {
+            const isSelected = selected === plan.name
+            const isPopular = plan.popular
+
+            return (
+              <div
+                key={plan.name}
+                className={`relative flex h-full flex-col rounded-2xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg ${isPopular
+                  ? 'border-blue-600 ring-2 ring-blue-100'
+                  : isSelected
+                    ? 'border-blue-600 ring-2 ring-blue-100'
+                    : 'border-slate-200'
+                  }`}
+              >
+                {isPopular && (
+                  <span className="absolute -top-3 left-6 rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white">
+                    Most popular
                   </span>
                 )}
-              </div>
-              <p className="mt-6 text-3xl font-semibold">
-                {plan.price}
-                <span className="text-sm font-normal text-slate-500">
-                  {plan.price !== 'Custom' && ' / month'}
-                </span>
-              </p>
-              <div className="mt-7 flex flex-col gap-3 border-t border-slate-100 pt-6">
-                {plan.features.map((feature) => (
-                  <span key={feature} className="flex items-center gap-2 text-sm text-slate-600">
-                    <Check className="size-4 text-emerald-500" />
-                    {feature}
+
+                {/* Plan header */}
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold">{plan.name}</h2>
+                    <p className="mt-2 min-h-12 text-sm leading-6 text-slate-500">
+                      {plan.description}
+                    </p>
+                  </div>
+                  {isSelected && (
+                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-blue-600 text-white">
+                      <Check className="size-4" />
+                    </span>
+                  )}
+                </div>
+
+                {/* Price */}
+                <p className="mt-6 text-3xl font-semibold">
+                  {plan.price}
+                  <span className="text-sm font-normal text-slate-500">
+                    {plan.price !== 'Custom' && ' / month'}
                   </span>
-                ))}
+                </p>
+
+                {/* Features */}
+                <div className="mt-7 flex flex-col gap-3 border-t border-slate-100 pt-6">
+                  {plan.features.map((feature) => (
+                    <span
+                      key={feature}
+                      className="flex items-center gap-2 text-sm text-slate-600"
+                    >
+                      <Check className="size-4 shrink-0 text-emerald-500" />
+                      {feature}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Select plan button */}
+                <div className="mt-8 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPlan(plan.name)}
+                    className={`group inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-all ${isPopular
+                      ? 'bg-slate-950 text-white shadow-lg shadow-slate-950/20 hover:bg-blue-600'
+                      : isSelected
+                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700'
+                        : 'border border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50'
+                      }`}
+                  >
+                    {isSelected ? 'Selected' : `Choose ${plan.name}`}
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                  </button>
+                </div>
               </div>
-            </button>
-          ))}
+            )
+          })}
         </div>
 
-        <div className="mt-10 text-center">
-          <p className="text-sm text-slate-500">
-            Click on a plan to continue to your dashboard
-          </p>
-        </div>
+        {/* Trust line */}
+
       </main>
 
       <Footer />

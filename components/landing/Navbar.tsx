@@ -7,7 +7,7 @@ import { ArrowRight } from 'lucide-react'
 export function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2 lg:px-10">
         <Link href="/" className="transition-transform hover:scale-105">
           <Image
             src="/images/logos/broker-logo-removebg-preview.png"

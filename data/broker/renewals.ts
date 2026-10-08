@@ -1,0 +1,32 @@
+export const upcomingRenewals = [
+  {
+    client: 'Northstar Logistics',
+    type: 'Commercial Auto',
+    carrier: 'Travelers',
+    date: 'Oct 14, 2026',
+    premium: '$42,800',
+    status: 'On track',
+    initials: 'NL',
+    color: 'bg-blue-100 text-blue-700',
+  },
+  {
+    client: 'Riverside Dental Group',
+    type: 'Professional Liability',
+    carrier: 'AIG',
+    date: 'Oct 19, 2026',
+    premium: '$18,450',
+    status: 'Needs attention',
+    initials: 'RD',
+    color: 'bg-violet-100 text-violet-700',
+  },
+  {
+    client: 'Cedar & Co. Retail',
+    type: 'Business Owners',
+    carrier: 'Chubb',
+    date: 'Oct 23, 2026',
+    premium: '$9,240',
+    status: 'On track',
+    initials: 'CC',
+    color: 'bg-amber-100 text-amber-700',
+  },
+]

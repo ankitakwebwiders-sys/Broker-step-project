@@ -1,0 +1,149 @@
+'use client'
+
+import Link from 'next/link'
+import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, ShieldCheck } from 'lucide-react'
+import { FormEvent, useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+export default function ResetPasswordPage() {
+  const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    router.push('/login')
+  }
+
+  return (
+    <main className="flex min-h-screen bg-[#f8fafc] text-slate-950">
+      {/* Left Sidebar */}
+      <div className="hidden w-[44%] flex-col justify-between bg-[#07152f] p-10 text-white lg:flex">
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="flex size-9 items-center justify-center rounded-xl bg-blue-600">
+            <ShieldCheck className="size-5" strokeWidth={2.5} />
+          </div>
+          <span className="text-[17px] font-bold tracking-[-0.04em]">
+            Broker<span className="text-blue-400">Step</span>
+          </span>
+        </Link>
+
+        <div className="max-w-md">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-300">
+            The broker's workspace
+          </p>
+          <h1 className="mt-5 text-5xl font-semibold leading-[1.05] tracking-[-0.055em]">
+            Move business forward, one clear step at a time.
+          </h1>
+          <p className="mt-6 text-base leading-7 text-slate-300">
+            The focused workspace for clients, policies, renewals, and commissions.
+          </p>
+          <div className="mt-9 flex flex-col gap-3 text-sm text-slate-300">
+            <p className="flex items-center gap-3">
+              <Check className="size-4 text-emerald-400" />
+              One place for your whole book
+            </p>
+            <p className="flex items-center gap-3">
+              <Check className="size-4 text-emerald-400" />
+              Clear commission visibility
+            </p>
+            <p className="flex items-center gap-3">
+              <Check className="size-4 text-emerald-400" />
+              Built for modern teams
+            </p>
+          </div>
+        </div>
+
+        <p className="text-xs text-slate-500">© 2026 BrokerStep</p>
+      </div>
+
+      {/* Right Form Section */}
+      <div className="flex flex-1 flex-col">
+        <div className="flex items-center justify-between p-6 lg:p-10">
+          <Link href="/" className="flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-slate-900 lg:hidden">
+            <ArrowLeft className="size-4" />
+            Back to home
+          </Link>
+          <div className="ml-auto text-sm text-slate-500">
+            Remember your password?{' '}
+            <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-700">
+              Sign in
+            </Link>
+          </div>
+        </div>
+
+        <div className="mx-auto flex w-full max-w-[440px] flex-1 flex-col justify-center px-6 pb-12 lg:px-0">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-blue-600">
+            Password reset
+          </p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight">
+            Choose a new password
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-slate-500">
+            Create a strong password for your BrokerStep workspace.
+          </p>
+
+          <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
+            <label className="flex flex-col gap-2 text-sm font-medium">
+              New password
+              <div className="relative">
+                <input
+                  required
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="Enter new password"
+                  className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-12 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-700"
+                >
+                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                </button>
+              </div>
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm font-medium">
+              Confirm password
+              <div className="relative">
+                <input
+                  required
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  placeholder="Confirm new password"
+                  className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-12 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-700"
+                >
+                  {showConfirmPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                </button>
+              </div>
+            </label>
+
+            <button
+              type="submit"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"
+            >
+              Reset password
+              <ArrowRight className="size-4" />
+            </button>
+          </form>
+
+          <Link href="/login" className="mt-6 text-center text-sm font-medium text-blue-600 hover:text-blue-700">
+            Back to sign in
+          </Link>
+        </div>
+      </div>
+    </main>
+  )
+}

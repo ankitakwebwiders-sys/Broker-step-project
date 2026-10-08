@@ -1,0 +1,32 @@
+export const brokers = [
+  {
+    id: '1',
+    name: 'Jordan Davis',
+    email: 'jordan@horizon.com',
+    businessName: 'Horizon Insurance',
+    membership: 'Professional',
+    status: 'active',
+    totalPremium: '$2.84M',
+    createdAt: '2024-01-15',
+  },
+  {
+    id: '2',
+    name: 'Sarah Mitchell',
+    email: 'sarah@protective.com',
+    businessName: 'Protective Agency',
+    membership: 'Enterprise',
+    status: 'active',
+    totalPremium: '$5.2M',
+    createdAt: '2023-11-20',
+  },
+  {
+    id: '3',
+    name: 'Michael Chen',
+    email: 'michael@chensure.com',
+    businessName: "Chen's Insurance",
+    membership: 'Starter',
+    status: 'active',
+    totalPremium: '$890K',
+    createdAt: '2024-03-10',
+  },
+]

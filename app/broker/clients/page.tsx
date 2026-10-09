@@ -63,7 +63,7 @@ export default function ClientsPage() {
   // Modals & Drawers state
   const [selectedClientForView, setSelectedClientForView] = useState<ClientItem | null>(null)
   const [clientDetailTab, setClientDetailTab] = useState<'overview' | 'policies' | 'commissions' | 'consent' | 'notes' | 'timeline'>('overview')
-  
+
   // Add / Edit Client Modal state
   const [isClientModalOpen, setIsClientModalOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<ClientItem | null>(null)
@@ -360,7 +360,7 @@ export default function ClientsPage() {
   function openAddPolicyModal(client: ClientItem) {
     setPolicyClientTarget(client)
     setPolicyForm({
-      policyNumber: `POL-${Math.floor(1000 + Math.random() * 9000)}-${['TRAV','CHUB','HART','AIG'][Math.floor(Math.random()*4)]}`,
+      policyNumber: `POL-${Math.floor(1000 + Math.random() * 9000)}-${['TRAV', 'CHUB', 'HART', 'AIG'][Math.floor(Math.random() * 4)]}`,
       type: 'Commercial Auto',
       carrier: 'Travelers',
       premium: '$14,800',
@@ -512,8 +512,8 @@ export default function ClientsPage() {
   }
 
   return (
-    <div className="p-5 sm:p-8">
-      <div className="mx-auto max-w-[1480px]">
+    <div className="p-4 sm:p-7 max-w-[1600px] mx-auto space-y-7">
+      <div>
 
         {/* ───── Header ───── */}
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -615,48 +615,42 @@ export default function ClientsPage() {
             <div className="flex items-center gap-1 rounded-xl bg-slate-100/80 p-1">
               <button
                 onClick={() => setActiveTab('all')}
-                className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition ${
-                  activeTab === 'all'
+                className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition ${activeTab === 'all'
                     ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-500 hover:text-slate-900'
-                }`}
+                  }`}
               >
                 All Clients
-                <span className={`rounded-full px-2 py-0.2 text-[10px] font-semibold ${
-                  activeTab === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-600'
-                }`}>
+                <span className={`rounded-full px-2 py-0.2 text-[10px] font-semibold ${activeTab === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-600'
+                  }`}>
                   {totalClientsCount}
                 </span>
               </button>
 
               <button
                 onClick={() => setActiveTab('active')}
-                className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition ${
-                  activeTab === 'active'
+                className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition ${activeTab === 'active'
                     ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-500 hover:text-slate-900'
-                }`}
+                  }`}
               >
                 Active Clients
-                <span className={`rounded-full px-2 py-0.2 text-[10px] font-semibold ${
-                  activeTab === 'active' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
-                }`}>
+                <span className={`rounded-full px-2 py-0.2 text-[10px] font-semibold ${activeTab === 'active' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
+                  }`}>
                   {activeClientsCount}
                 </span>
               </button>
 
               <button
                 onClick={() => setActiveTab('inactive')}
-                className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition ${
-                  activeTab === 'inactive'
+                className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition ${activeTab === 'inactive'
                     ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-500 hover:text-slate-900'
-                }`}
+                  }`}
               >
                 Inactive Clients
-                <span className={`rounded-full px-2 py-0.2 text-[10px] font-semibold ${
-                  activeTab === 'inactive' ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-600'
-                }`}>
+                <span className={`rounded-full px-2 py-0.2 text-[10px] font-semibold ${activeTab === 'inactive' ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-600'
+                  }`}>
                   {inactiveClientsCount}
                 </span>
               </button>
@@ -746,9 +740,8 @@ export default function ClientsPage() {
             onMouseUp={handleMouseUp}
             onMouseMove={handleMouseMove}
             onScroll={checkTableScroll}
-            className={`mt-5 overflow-x-auto rounded-xl border border-slate-200/80 shadow-xs custom-scrollbar-table ${
-              isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'
-            }`}
+            className={`mt-5 overflow-x-auto rounded-xl border border-slate-200/80 shadow-xs custom-scrollbar-table ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'
+              }`}
           >
             <table className="w-full min-w-[1220px] text-left border-collapse">
               <thead>
@@ -849,11 +842,10 @@ export default function ClientsPage() {
                           <button
                             onClick={() => handleToggleStatus(client)}
                             title={`Click to mark as ${client.status === 'Active' ? 'Inactive' : 'Active'}`}
-                            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 transition cursor-pointer whitespace-nowrap ${
-                              client.status === 'Active'
+                            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 transition cursor-pointer whitespace-nowrap ${client.status === 'Active'
                                 ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100'
                                 : 'bg-slate-100 text-slate-600 ring-slate-200 hover:bg-slate-200'
-                            }`}
+                              }`}
                           >
                             {client.status === 'Active' ? (
                               <>
@@ -946,7 +938,7 @@ export default function ClientsPage() {
       {selectedClientForView && (
         <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-xs transition-opacity">
           <div className="flex h-full w-full max-w-3xl flex-col bg-white shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300">
-            
+
             {/* Drawer Header */}
             <div className="flex items-start justify-between border-b border-slate-200 bg-slate-50/50 px-6 py-5">
               <div className="flex items-center gap-4">
@@ -958,11 +950,10 @@ export default function ClientsPage() {
                     <h2 className="text-[18px] font-bold tracking-tight text-slate-900">
                       {selectedClientForView.name}
                     </h2>
-                    <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${
-                      selectedClientForView.status === 'Active'
+                    <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${selectedClientForView.status === 'Active'
                         ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
                         : 'bg-slate-100 text-slate-600 ring-slate-200'
-                    }`}>
+                      }`}>
                       {selectedClientForView.status}
                     </span>
                     {getConsentBadge(selectedClientForView.marketingConsent.status)}
@@ -1019,11 +1010,10 @@ export default function ClientsPage() {
                 <button
                   key={tab.key}
                   onClick={() => setClientDetailTab(tab.key as any)}
-                  className={`py-3 text-[12px] font-medium border-b-2 transition whitespace-nowrap ${
-                    clientDetailTab === tab.key
+                  className={`py-3 text-[12px] font-medium border-b-2 transition whitespace-nowrap ${clientDetailTab === tab.key
                       ? 'border-blue-600 text-blue-600'
                       : 'border-transparent text-slate-500 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -1032,7 +1022,7 @@ export default function ClientsPage() {
 
             {/* Tab Contents */}
             <div className="flex-1 overflow-y-auto p-6 bg-slate-50/40">
-              
+
               {/* TAB 1: OVERVIEW */}
               {clientDetailTab === 'overview' && (
                 <div className="flex flex-col gap-6">
@@ -1206,13 +1196,12 @@ export default function ClientsPage() {
                                 {policy.effectiveDate} &rarr; {policy.expirationDate}
                               </td>
                               <td className="px-3 py-3">
-                                <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${
-                                  policy.status === 'Active'
+                                <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${policy.status === 'Active'
                                     ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
                                     : policy.status === 'Pending Renewal'
-                                    ? 'bg-amber-50 text-amber-700 ring-amber-200'
-                                    : 'bg-slate-100 text-slate-600 ring-slate-200'
-                                }`}>
+                                      ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                                      : 'bg-slate-100 text-slate-600 ring-slate-200'
+                                  }`}>
                                   {policy.status}
                                 </span>
                               </td>
@@ -1279,11 +1268,10 @@ export default function ClientsPage() {
                               <td className="px-3 py-3 text-slate-600">{c.rate}</td>
                               <td className="px-3 py-3 font-bold text-emerald-600">{c.amount}</td>
                               <td className="px-3 py-3">
-                                <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${
-                                  c.status === 'Paid'
+                                <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${c.status === 'Paid'
                                     ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
                                     : 'bg-rose-50 text-rose-700 ring-rose-200'
-                                }`}>
+                                  }`}>
                                   {c.status}
                                 </span>
                               </td>
@@ -1451,7 +1439,7 @@ export default function ClientsPage() {
       {isClientModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
           <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
-            
+
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50/50">
               <div>
@@ -1472,7 +1460,7 @@ export default function ClientsPage() {
 
             {/* Modal Form Body */}
             <form onSubmit={handleSaveClient} className="flex-1 overflow-y-auto p-6 space-y-5">
-              
+
               {/* Names */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
@@ -1828,7 +1816,7 @@ export default function ClientsPage() {
                 <X className="size-5" />
               </button>
             </div>
-            
+
             <div className="mt-4 space-y-2.5 text-[12px]">
               <div className="flex justify-between py-1 border-b border-slate-50">
                 <span className="text-slate-500">Coverage Type</span>

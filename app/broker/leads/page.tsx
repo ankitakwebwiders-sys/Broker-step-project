@@ -628,8 +628,8 @@ export default function LeadsPage() {
   }
 
   return (
-    <div className="p-5 sm:p-8">
-      <div className="mx-auto max-w-[1480px]">
+    <div className="p-4 sm:p-7 max-w-[1600px] mx-auto space-y-7">
+      <div>
 
         {/* ───── Toast Notification for Conversion ───── */}
         {conversionSuccessToast && (
@@ -750,97 +750,58 @@ export default function LeadsPage() {
           </div>
         </div>
 
-        {/* ───── Table Section Container ───── */}
-        <section className="mt-7 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-
-          {/* 5.2 Status Filter Tabs */}
-          <div className="flex flex-col justify-between gap-4 border-b border-slate-100 pb-4 xl:flex-row xl:items-center">
-            <div className="flex flex-wrap items-center gap-1 rounded-xl bg-slate-100/80 p-1">
-              {[
-                { label: 'All', key: 'All' },
-                { label: 'New', key: 'New' },
-                { label: 'Contacted', key: 'Contacted' },
-                { label: 'Follow-Up', key: 'Follow-Up' },
-                { label: 'Quoted', key: 'Quoted' },
-                { label: 'Won / Converted', key: 'Won / Converted' },
-                { label: 'Lost', key: 'Lost' },
-                { label: 'Not Interested', key: 'Not Interested' },
-                { label: 'Archived', key: 'Archived' },
-              ].map((tab) => {
-                const count = (statusCounts as any)[tab.key] || 0
-                const isActive = activeTab === tab.key
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition cursor-pointer ${
-                      isActive
-                        ? 'bg-white text-slate-900 shadow-xs'
-                        : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
+        {/* ───── 5.2 Filter Tabs Bar ───── */}
+        <div className="mt-7 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-thin">
+            {[
+              { label: 'All Leads', key: 'All' },
+              { label: 'New', key: 'New' },
+              { label: 'Contacted', key: 'Contacted' },
+              { label: 'Follow-Up', key: 'Follow-Up' },
+              { label: 'Quoted', key: 'Quoted' },
+              { label: 'Won / Converted', key: 'Won / Converted' },
+              { label: 'Lost', key: 'Lost' },
+              { label: 'Not Interested', key: 'Not Interested' },
+              { label: 'Archived', key: 'Archived' },
+            ].map((tab) => {
+              const count = (statusCounts as any)[tab.key] || 0
+              const isActive = activeTab === tab.key
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-all cursor-pointer ${isActive
+                    ? 'bg-slate-950 text-white shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                     }`}
+                >
+                  <span>{tab.label}</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                      }`}
                   >
-                    <span>{tab.label}</span>
-                    <span className={`rounded-full px-1.5 py-0.2 text-[9px] font-semibold ${
-                      isActive
-                        ? tab.key === 'Won / Converted' ? 'bg-emerald-600 text-white'
-                          : tab.key === 'New' ? 'bg-blue-600 text-white'
-                          : 'bg-slate-900 text-white'
-                        : 'bg-slate-200 text-slate-600'
-                    }`}>
-                      {count}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Quick Count Info & Drag / Scroll controls */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="text-[12px] text-slate-500">
-                Showing <span className="font-semibold text-slate-800">{filteredLeads.length}</span> of {totalLeadsCount} leads
-              </div>
-              <div className="flex items-center gap-1.5 pl-3 border-l border-slate-200">
-                <span className="hidden sm:inline-flex items-center gap-1 rounded-md bg-slate-100/90 px-2 py-0.5 text-[10px] font-medium text-slate-500 select-none">
-                  <ArrowLeftRight className="size-2.5 text-slate-400" />
-                  Drag table
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleScrollTable('left')}
-                  disabled={!canScrollLeft}
-                  className="rounded-lg border border-slate-200 bg-white p-1 text-slate-500 shadow-2xs hover:bg-slate-50 hover:text-slate-900 disabled:opacity-25 disabled:pointer-events-none transition cursor-pointer"
-                  title="Scroll table left"
-                >
-                  <ChevronLeft className="size-3.5" />
+                    {count}
+                  </span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleScrollTable('right')}
-                  disabled={!canScrollRight}
-                  className="rounded-lg border border-slate-200 bg-white p-1 text-slate-500 shadow-2xs hover:bg-slate-50 hover:text-slate-900 disabled:opacity-25 disabled:pointer-events-none transition cursor-pointer"
-                  title="Scroll table right"
-                >
-                  <ChevronRight className="size-3.5" />
-                </button>
-              </div>
-            </div>
+              )
+            })}
           </div>
 
-          {/* Filters Bar: Search & Recommended Dropdowns */}
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* ───── Search & Secondary Dropdown Filters ───── */}
+          <div className="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search by lead name, business, phone, email, insurance type..."
+                placeholder="Search lead name, business, phone, email, or line..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9 pr-3 text-[12px] outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                className="h-9.5 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9.5 pr-8 text-[12.5px] text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                 >
                   <X className="size-3.5" />
                 </button>
@@ -849,12 +810,12 @@ export default function LeadsPage() {
 
             <div className="flex flex-wrap items-center gap-2">
               {/* Insurance Type Filter */}
-              <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-600">
-                <span className="text-slate-400">Line:</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11.5px] font-medium text-slate-500">Line:</span>
                 <select
                   value={insuranceTypeFilter}
                   onChange={(e) => setInsuranceTypeFilter(e.target.value)}
-                  className="bg-transparent font-medium text-slate-800 outline-none cursor-pointer"
+                  className="h-9 rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
                 >
                   <option value="All">All Lines</option>
                   <option value="Commercial Property">Commercial Property</option>
@@ -868,14 +829,14 @@ export default function LeadsPage() {
               </div>
 
               {/* Marketing Consent Filter */}
-              <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-600">
-                <span className="text-slate-400">Consent:</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11.5px] font-medium text-slate-500">Consent:</span>
                 <select
                   value={consentFilter}
                   onChange={(e) => setConsentFilter(e.target.value)}
-                  className="bg-transparent font-medium text-slate-800 outline-none cursor-pointer"
+                  className="h-9 rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
                 >
-                  <option value="All">All</option>
+                  <option value="All">All Statuses</option>
                   <option value="Granted">Granted</option>
                   <option value="Pending">Pending</option>
                   <option value="Declined">Declined</option>
@@ -891,16 +852,18 @@ export default function LeadsPage() {
                     setConsentFilter('All')
                     setActiveTab('All')
                   }}
-                  className="flex items-center gap-1 rounded-xl px-2.5 py-1 text-[11px] font-medium text-blue-600 hover:bg-blue-50 transition"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-2.5 text-[11.5px] font-medium text-slate-600 transition hover:bg-slate-100 cursor-pointer"
                 >
                   <RotateCcw className="size-3" />
-                  Reset
+                  <span>Reset</span>
                 </button>
               )}
             </div>
           </div>
+        </div>
 
-          {/* ───── 5.1 Common Lead Listing Table ───── */}
+        {/* ───── 5.1 Common Lead Listing Table ───── */}
+        <div className="mt-6 rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden">
           <div
             ref={tableContainerRef}
             onMouseDown={handleMouseDown}
@@ -908,23 +871,22 @@ export default function LeadsPage() {
             onMouseUp={handleMouseUp}
             onMouseMove={handleMouseMove}
             onScroll={checkTableScroll}
-            className={`mt-5 overflow-x-auto rounded-xl border border-slate-200/80 shadow-xs transition-colors custom-scrollbar-table ${
-              isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'
-            }`}
+            className={`overflow-x-auto custom-scrollbar-table ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'
+              }`}
           >
             <table className="w-full min-w-[1240px] text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-semibold uppercase tracking-wider text-slate-400 select-none">
-                  <th className="px-4 py-3 min-w-[200px]">Lead Name</th>
-                  <th className="px-4 py-3 min-w-[170px]">Business Name</th>
-                  <th className="px-4 py-3 min-w-[130px] whitespace-nowrap">Phone</th>
-                  <th className="px-4 py-3 min-w-[185px]">Email</th>
-                  <th className="px-3 py-3 min-w-[165px]">Insurance Type / Line</th>
-                  <th className="px-3 py-3 min-w-[115px] whitespace-nowrap">Renewal Date</th>
-                  <th className="px-3 py-3 min-w-[130px] whitespace-nowrap">Lead Status</th>
-                  <th className="px-3 py-3 min-w-[115px] whitespace-nowrap">Marketing Consent</th>
-                  <th className="px-3 py-3 min-w-[110px] whitespace-nowrap">Created Date</th>
-                  <th className="px-4 py-3 text-right min-w-[240px] w-[240px] whitespace-nowrap">Actions</th>
+                <tr className="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold uppercase tracking-wider text-slate-500 select-none">
+                  <th className="px-4 py-3.5 min-w-[200px]">Lead Name</th>
+                  <th className="px-4 py-3.5 min-w-[170px]">Business Name</th>
+                  <th className="px-4 py-3.5 min-w-[130px] whitespace-nowrap">Phone</th>
+                  <th className="px-4 py-3.5 min-w-[185px]">Email</th>
+                  <th className="px-3 py-3.5 min-w-[165px]">Insurance Type / Line</th>
+                  <th className="px-3 py-3.5 min-w-[115px] whitespace-nowrap">Renewal Date</th>
+                  <th className="px-3 py-3.5 min-w-[130px] whitespace-nowrap">Lead Status</th>
+                  <th className="px-3 py-3.5 min-w-[115px] whitespace-nowrap">Marketing Consent</th>
+                  <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Created Date</th>
+                  <th className="px-4 py-3.5 text-right min-w-[240px] w-[240px] whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -1118,7 +1080,7 @@ export default function LeadsPage() {
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
 
       </div>
 
@@ -1128,7 +1090,7 @@ export default function LeadsPage() {
       {selectedLeadForView && (
         <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-xs transition-opacity">
           <div className="flex h-full w-full max-w-3xl flex-col bg-white shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300">
-            
+
             {/* Drawer Header */}
             <div className="flex items-start justify-between border-b border-slate-200 bg-slate-50/50 px-6 py-5">
               <div className="flex items-center gap-4">
@@ -1202,11 +1164,10 @@ export default function LeadsPage() {
                 <button
                   key={tab.key}
                   onClick={() => setLeadDetailTab(tab.key as any)}
-                  className={`py-3 text-[12px] font-medium border-b-2 transition whitespace-nowrap cursor-pointer ${
-                    leadDetailTab === tab.key
-                      ? 'border-blue-600 text-blue-600 font-semibold'
-                      : 'border-transparent text-slate-500 hover:text-slate-900'
-                  }`}
+                  className={`py-3 text-[12px] font-medium border-b-2 transition whitespace-nowrap cursor-pointer ${leadDetailTab === tab.key
+                    ? 'border-blue-600 text-blue-600 font-semibold'
+                    : 'border-transparent text-slate-500 hover:text-slate-900'
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -1215,7 +1176,7 @@ export default function LeadsPage() {
 
             {/* Drawer Body */}
             <div className="flex-1 overflow-y-auto p-6 bg-slate-50/40">
-              
+
               {/* TAB 1: OVERVIEW & CONTACT */}
               {leadDetailTab === 'overview' && (
                 <div className="flex flex-col gap-5">
@@ -1518,7 +1479,7 @@ export default function LeadsPage() {
       {isPublicFormModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
           <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col">
-            
+
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50/70">
               <div className="flex items-center gap-2.5">
@@ -1541,7 +1502,7 @@ export default function LeadsPage() {
 
             {/* Public Form Body */}
             <form onSubmit={handlePublicFormSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
-              
+
               <div className="rounded-xl bg-blue-50/60 border border-blue-100 p-3 text-[12px] text-blue-900">
                 This is the exact responsive form displayed to prospective clients when they scan your QR code or open your public lead link.
               </div>
@@ -1949,11 +1910,10 @@ export default function LeadsPage() {
                 <button
                   key={statusOption}
                   onClick={() => handleChangeStatus(statusChangeTarget, statusOption as LeadStatus)}
-                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-[12px] font-medium transition cursor-pointer ${
-                    statusChangeTarget.status === statusOption
-                      ? 'bg-blue-50 text-blue-700 font-semibold border border-blue-200'
-                      : 'hover:bg-slate-50 text-slate-700'
-                  }`}
+                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-[12px] font-medium transition cursor-pointer ${statusChangeTarget.status === statusOption
+                    ? 'bg-blue-50 text-blue-700 font-semibold border border-blue-200'
+                    : 'hover:bg-slate-50 text-slate-700'
+                    }`}
                 >
                   <span>{statusOption}</span>
                   {statusChangeTarget.status === statusOption && <Check className="size-4 text-blue-600" />}

@@ -616,8 +616,8 @@ export default function ClientsPage() {
               <button
                 onClick={() => setActiveTab('all')}
                 className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition ${activeTab === 'all'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-900'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-900'
                   }`}
               >
                 All Clients
@@ -630,8 +630,8 @@ export default function ClientsPage() {
               <button
                 onClick={() => setActiveTab('active')}
                 className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition ${activeTab === 'active'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-900'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-900'
                   }`}
               >
                 Active Clients
@@ -644,8 +644,8 @@ export default function ClientsPage() {
               <button
                 onClick={() => setActiveTab('inactive')}
                 className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition ${activeTab === 'inactive'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-900'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-900'
                   }`}
               >
                 Inactive Clients
@@ -843,8 +843,8 @@ export default function ClientsPage() {
                             onClick={() => handleToggleStatus(client)}
                             title={`Click to mark as ${client.status === 'Active' ? 'Inactive' : 'Active'}`}
                             className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 transition cursor-pointer whitespace-nowrap ${client.status === 'Active'
-                                ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100'
-                                : 'bg-slate-100 text-slate-600 ring-slate-200 hover:bg-slate-200'
+                              ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100'
+                              : 'bg-slate-100 text-slate-600 ring-slate-200 hover:bg-slate-200'
                               }`}
                           >
                             {client.status === 'Active' ? (
@@ -951,8 +951,8 @@ export default function ClientsPage() {
                       {selectedClientForView.name}
                     </h2>
                     <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${selectedClientForView.status === 'Active'
-                        ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                        : 'bg-slate-100 text-slate-600 ring-slate-200'
+                      ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                      : 'bg-slate-100 text-slate-600 ring-slate-200'
                       }`}>
                       {selectedClientForView.status}
                     </span>
@@ -1011,8 +1011,8 @@ export default function ClientsPage() {
                   key={tab.key}
                   onClick={() => setClientDetailTab(tab.key as any)}
                   className={`py-3 text-[12px] font-medium border-b-2 transition whitespace-nowrap ${clientDetailTab === tab.key
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-slate-500 hover:text-slate-900'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-900'
                     }`}
                 >
                   {tab.label}
@@ -1197,10 +1197,10 @@ export default function ClientsPage() {
                               </td>
                               <td className="px-3 py-3">
                                 <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${policy.status === 'Active'
-                                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                    : policy.status === 'Pending Renewal'
-                                      ? 'bg-amber-50 text-amber-700 ring-amber-200'
-                                      : 'bg-slate-100 text-slate-600 ring-slate-200'
+                                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                  : policy.status === 'Pending Renewal'
+                                    ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                                    : 'bg-slate-100 text-slate-600 ring-slate-200'
                                   }`}>
                                   {policy.status}
                                 </span>
@@ -1269,8 +1269,8 @@ export default function ClientsPage() {
                               <td className="px-3 py-3 font-bold text-emerald-600">{c.amount}</td>
                               <td className="px-3 py-3">
                                 <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${c.status === 'Paid'
-                                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                    : 'bg-rose-50 text-rose-700 ring-rose-200'
+                                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                  : 'bg-rose-50 text-rose-700 ring-rose-200'
                                   }`}>
                                   {c.status}
                                 </span>

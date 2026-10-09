@@ -509,7 +509,7 @@ export default function PoliciesPage() {
 
       {/* ───── Header Bar (Matching Dashboard Header) ───── */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
+        <div className="min-w-0 max-w-xl">
           <p className="mb-1.5 inline-flex items-center gap-1.5 text-[12px] font-semibold text-blue-600">
             <span className="size-1.5 rounded-full bg-blue-500 animate-pulse" />
             Tuesday, October 8, 2026 · Book of Business
@@ -517,13 +517,13 @@ export default function PoliciesPage() {
           <h1 className="text-[26px] font-bold tracking-tight text-slate-900 sm:text-[30px]">
             Policies
           </h1>
-          <p className="mt-0.5 text-[13px] text-slate-500">
+          <p className="mt-0.5 text-[13px] text-slate-500 leading-relaxed">
             Common policy listing, lifecycle transaction tracking, commission reconciliation, and new business binding.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button className="hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[12px] font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 sm:flex">
+        <div className="flex items-center gap-2.5 shrink-0 flex-nowrap overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+          <button className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[12px] font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer">
             <CalendarDays className="size-4 text-slate-400" />
             <span>2026 Fiscal Year</span>
             <ChevronDown className="size-3.5 text-slate-400" />
@@ -532,7 +532,7 @@ export default function PoliciesPage() {
           {/* Export CSV button */}
           <button
             onClick={handleExportCsv}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[12px] font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+            className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[12px] font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
           >
             <Download className="size-4 text-slate-400" />
             <span>Export CSV</span>
@@ -544,7 +544,7 @@ export default function PoliciesPage() {
               setQuickEntryStep(1)
               setIsQuickEntryOpen(true)
             }}
-            className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-2 text-[12.5px] font-semibold text-blue-700 shadow-sm transition hover:bg-blue-100"
+            className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-2 text-[12.5px] font-semibold text-blue-700 shadow-sm transition hover:bg-blue-100 cursor-pointer"
           >
             <Zap className="size-4 text-blue-600" />
             <span>Quick-Entry</span>
@@ -553,7 +553,7 @@ export default function PoliciesPage() {
           {/* 6.3 Add Policy button styled like dashboard Add New Policy */}
           <button
             onClick={handleOpenCreate}
-            className="group flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-[12.5px] font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600"
+            className="group inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-slate-950 px-4 py-2 text-[12.5px] font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 cursor-pointer"
           >
             <Plus className="size-4 transition-transform group-hover:rotate-90" />
             <span>Add New Policy</span>

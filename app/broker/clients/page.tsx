@@ -113,6 +113,64 @@ export default function ClientsPage() {
   // New Note input in Client Details drawer
   const [newNoteText, setNewNoteText] = useState('')
 
+  // Sync URL query params with tabs, modals, and drawers
+  useEffect(() => {
+    function applyUrlParams(searchStr?: string) {
+      if (typeof window === 'undefined') return
+      const query = searchStr !== undefined ? searchStr : window.location.search
+      const params = new URLSearchParams(query)
+      const tab = params.get('tab')
+      const action = params.get('action')
+      const view = params.get('view')
+      if (tab) {
+        setActiveTab(tab)
+        if (tab === 'Active' || tab === 'Inactive') setStatusFilter(tab)
+      } else if (!params.toString()) {
+        setActiveTab('All')
+        setStatusFilter('All')
+      }
+      if (action === 'add') {
+        setEditingClient(null)
+        setIsClientModalOpen(true)
+      }
+      if (view === 'details' && initialClients.length > 0) {
+        setSelectedClientForView(initialClients[0])
+      }
+    }
+
+    applyUrlParams()
+
+    const handleNavChange = (e: any) => {
+      const search = e?.detail?.search !== undefined ? e.detail.search : undefined
+      applyUrlParams(search)
+    }
+
+    window.addEventListener('popstate', () => applyUrlParams())
+    window.addEventListener('broker-nav-change', handleNavChange)
+    return () => {
+      window.removeEventListener('popstate', () => applyUrlParams())
+      window.removeEventListener('broker-nav-change', handleNavChange)
+    }
+  }, [])
+
+  const handleTabSelect = (tabKey: string) => {
+    setActiveTab(tabKey)
+    if (tabKey === 'Active' || tabKey === 'Inactive') setStatusFilter(tabKey)
+    else if (tabKey === 'All') setStatusFilter('All')
+
+    let newHref = '/broker/clients'
+    if (tabKey === 'Active') newHref = '/broker/clients?tab=Active'
+    else if (tabKey === 'Inactive') newHref = '/broker/clients?tab=Inactive'
+
+    const targetSearch = newHref.includes('?') ? `?${newHref.split('?')[1]}` : ''
+    window.history.pushState(null, '', newHref)
+    window.dispatchEvent(
+      new CustomEvent('broker-nav-change', {
+        detail: { href: newHref, search: targetSearch, pathname: '/broker/clients' },
+      })
+    )
+  }
+
   // Summary Metrics
   const totalClientsCount = clients.length
   const activeClientsCount = useMemo(() => clients.filter(c => c.status === 'Active').length, [clients])
@@ -646,7 +704,7 @@ export default function ClientsPage() {
               return (
                 <button
                   key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
+                  onClick={() => handleTabSelect(tab.key)}
                   className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-all cursor-pointer ${isActive
                     ? 'bg-slate-950 text-white shadow-sm'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'

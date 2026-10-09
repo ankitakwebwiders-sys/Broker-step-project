@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Shield,
@@ -81,6 +81,52 @@ export default function PoliciesPage() {
   // Add / Edit Policy Modal State (6.3)
   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false)
   const [editingPolicy, setEditingPolicy] = useState<PolicyRecord | null>(null)
+
+  // Sync URL query params with tabs, modals, and actions
+  useEffect(() => {
+    function applyUrlParams(searchStr?: string) {
+      if (typeof window === 'undefined') return
+      const query = searchStr !== undefined ? searchStr : window.location.search
+      const params = new URLSearchParams(query)
+      const tab = params.get('tab') as TabType | null
+      const action = params.get('action')
+      if (tab) {
+        setActiveTab(tab)
+      } else if (!params.toString()) {
+        setActiveTab('all')
+      }
+      if (action === 'add') {
+        setEditingPolicy(null)
+        setIsPolicyModalOpen(true)
+      }
+    }
+
+    applyUrlParams()
+
+    const handleNavChange = (e: any) => {
+      const search = e?.detail?.search !== undefined ? e.detail.search : undefined
+      applyUrlParams(search)
+    }
+
+    window.addEventListener('popstate', () => applyUrlParams())
+    window.addEventListener('broker-nav-change', handleNavChange)
+    return () => {
+      window.removeEventListener('popstate', () => applyUrlParams())
+      window.removeEventListener('broker-nav-change', handleNavChange)
+    }
+  }, [])
+
+  const handleTabSelect = (tabId: TabType) => {
+    setActiveTab(tabId)
+    const newHref = tabId === 'all' ? '/broker/policies' : `/broker/policies?tab=${tabId}`
+    const targetSearch = tabId === 'all' ? '' : `?tab=${tabId}`
+    window.history.pushState(null, '', newHref)
+    window.dispatchEvent(
+      new CustomEvent('broker-nav-change', {
+        detail: { href: newHref, search: targetSearch, pathname: '/broker/policies' },
+      })
+    )
+  }
 
   // New Business Quick-Entry Flow State (6.4)
   const [isQuickEntryOpen, setIsQuickEntryOpen] = useState(false)
@@ -617,8 +663,8 @@ export default function PoliciesPage() {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as TabType)}
-                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-all ${
+                onClick={() => handleTabSelect(tab.id as TabType)}
+                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-all cursor-pointer ${
                   isActive
                     ? 'bg-slate-950 text-white shadow-sm'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'

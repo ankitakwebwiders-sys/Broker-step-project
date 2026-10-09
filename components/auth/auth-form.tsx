@@ -323,7 +323,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative mt-1 inline-flex h-9.5 items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all hover:bg-blue-600 disabled:opacity-70 sm:h-10"
+                className="group cursor-pointer relative mt-1 inline-flex h-9.5 items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all hover:bg-blue-600 disabled:opacity-70 sm:h-10"
               >
                 {loading ? (
                   <>

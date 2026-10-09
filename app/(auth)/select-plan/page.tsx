@@ -65,11 +65,10 @@ export default function SelectPlanPage() {
             return (
               <div
                 key={plan.name}
-                className={`relative flex h-full flex-col justify-between rounded-2xl bg-white p-7 sm:p-8 transition-all duration-300 hover:-translate-y-1 ${
-                  isPopular || isSelected
-                    ? 'border-2 border-blue-600 shadow-xl shadow-blue-500/10'
-                    : 'border border-slate-200/90 shadow-sm hover:shadow-md'
-                }`}
+                className={`relative flex h-full flex-col justify-between rounded-2xl bg-white p-7 sm:p-8 transition-all duration-300 hover:-translate-y-1 ${isPopular || isSelected
+                  ? 'border-2 border-blue-600 shadow-xl shadow-blue-500/10'
+                  : 'border border-slate-200/90 shadow-sm hover:shadow-md'
+                  }`}
               >
                 {isPopular && (
                   <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-5 py-1 text-xs font-bold text-white shadow-sm whitespace-nowrap">
@@ -132,11 +131,10 @@ export default function SelectPlanPage() {
                   <button
                     type="button"
                     onClick={() => handleSelectPlan(plan.name)}
-                    className={`inline-flex h-11 w-full items-center justify-center rounded-xl text-sm font-semibold transition-all ${
-                      isPopular || isSelected
-                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25 hover:bg-blue-700'
-                        : 'border border-blue-600 bg-white text-blue-600 hover:bg-blue-50'
-                    }`}
+                    className={`inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-xl text-sm font-semibold transition-all ${isPopular || isSelected
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25 hover:bg-blue-700'
+                      : 'border border-blue-600 bg-white text-blue-600 hover:bg-blue-50'
+                      }`}
                   >
                     Start Free Trial
                   </button>

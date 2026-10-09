@@ -94,11 +94,10 @@ export default function ForgotPasswordPage() {
                   Email address
                 </label>
                 <div
-                  className={`relative flex items-center rounded-xl border bg-white transition-all ${
-                    focused === 'email'
-                      ? 'border-blue-500 ring-2 ring-blue-100'
-                      : 'border-slate-200 hover:border-slate-300'
-                  }`}
+                  className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'email'
+                    ? 'border-blue-500 ring-2 ring-blue-100'
+                    : 'border-slate-200 hover:border-slate-300'
+                    }`}
                 >
                   <Mail className={`ml-3.5 size-4 transition-colors ${focused === 'email' ? 'text-blue-500' : 'text-slate-400'}`} />
                   <input
@@ -121,7 +120,7 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   onClick={handleVerify}
-                  className="group relative inline-flex h-10 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all hover:bg-blue-600"
+                  className="group relative cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all hover:bg-blue-600"
                 >
                   <span>Verify & Reset Password</span>
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -131,7 +130,7 @@ export default function ForgotPasswordPage() {
                   type="button"
                   onClick={handleResend}
                   disabled={resending}
-                  className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50"
+                  className="cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50"
                 >
                   <RefreshCw className={`size-3.5 ${resending ? 'animate-spin' : ''}`} />
                   {resending ? 'Sending…' : 'Resend'}

@@ -151,7 +151,7 @@ export default function ResetPasswordPage() {
 
               <button
                 type="submit"
-                className="group relative mt-1 inline-flex h-10 items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all hover:bg-blue-600"
+                className="cursor-pointer group relative mt-1 inline-flex h-10 items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all hover:bg-blue-600"
               >
                 <span>Reset password</span>
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />

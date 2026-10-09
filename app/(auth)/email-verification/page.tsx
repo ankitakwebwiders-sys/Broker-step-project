@@ -101,7 +101,7 @@ export default function EmailVerificationPage() {
             <div className="mt-4 flex flex-col gap-2.5">
               <button
                 onClick={handleVerify}
-                className="group relative inline-flex h-10 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all hover:bg-blue-600"
+                className="cursor-pointer group relative inline-flex h-10 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all hover:bg-blue-600"
               >
                 <span>Verify &amp; Continue</span>
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -110,7 +110,7 @@ export default function EmailVerificationPage() {
               <button
                 onClick={handleResend}
                 disabled={resending}
-                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50"
+                className="cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50"
               >
                 <RefreshCw className={`size-3.5 ${resending ? 'animate-spin' : ''}`} />
                 {resending ? 'Sending…' : 'Resend email'}

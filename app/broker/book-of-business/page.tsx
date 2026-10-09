@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Shield,
@@ -88,6 +88,47 @@ export default function BookOfBusinessPage() {
   // ── Master State ──
   const [policies, setPolicies] = useState<PolicyRecord[]>(initialPolicies)
   const [activeTab, setActiveTab] = useState<BookTabType>('overview')
+
+  // Sync URL query params with active tab
+  useEffect(() => {
+    function applyUrlParams(searchStr?: string) {
+      if (typeof window === 'undefined') return
+      const query = searchStr !== undefined ? searchStr : window.location.search
+      const params = new URLSearchParams(query)
+      const tab = params.get('tab') as BookTabType | null
+      if (tab) {
+        setActiveTab(tab)
+      } else if (!params.toString()) {
+        setActiveTab('overview')
+      }
+    }
+
+    applyUrlParams()
+
+    const handleNavChange = (e: any) => {
+      const search = e?.detail?.search !== undefined ? e.detail.search : undefined
+      applyUrlParams(search)
+    }
+
+    window.addEventListener('popstate', () => applyUrlParams())
+    window.addEventListener('broker-nav-change', handleNavChange)
+    return () => {
+      window.removeEventListener('popstate', () => applyUrlParams())
+      window.removeEventListener('broker-nav-change', handleNavChange)
+    }
+  }, [])
+
+  const handleTabSelect = (tabId: BookTabType) => {
+    setActiveTab(tabId)
+    const newHref = tabId === 'overview' ? '/broker/book-of-business' : `/broker/book-of-business?tab=${tabId}`
+    const targetSearch = tabId === 'overview' ? '' : `?tab=${tabId}`
+    window.history.pushState(null, '', newHref)
+    window.dispatchEvent(
+      new CustomEvent('broker-nav-change', {
+        detail: { href: newHref, search: targetSearch, pathname: '/broker/book-of-business' },
+      })
+    )
+  }
 
   // ── Toast Notifications ──
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -591,7 +632,7 @@ export default function BookOfBusinessPage() {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as BookTabType)}
+                onClick={() => handleTabSelect(tab.id as BookTabType)}
                 className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-all cursor-pointer ${isActive
                   ? 'bg-slate-950 text-white shadow-sm'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'

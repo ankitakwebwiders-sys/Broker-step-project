@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Award,
   BarChart3,
@@ -29,7 +29,15 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+
+
+interface SubNavItemDef {
+  label: string
+  href: string
+  count?: string
+  badge?: string
+}
 
 interface NavItemDef {
   label: string
@@ -37,6 +45,7 @@ interface NavItemDef {
   href: string
   count?: string
   badge?: string
+  subItems?: SubNavItemDef[]
 }
 
 interface NavSectionDef {
@@ -46,39 +55,193 @@ interface NavSectionDef {
 
 const navSections: NavSectionDef[] = [
   {
-    label: 'MAIN',
+    label: 'OVERVIEW',
     items: [
-      { label: 'Dashboard', icon: LayoutDashboard, href: '/broker/dashboard' },
+      {
+        label: 'Dashboard',
+        icon: LayoutDashboard,
+        href: '/broker/dashboard',
+        subItems: [
+          { label: 'Dashboard / Home', href: '/broker/dashboard' },
+        ],
+      },
     ],
   },
   {
-    label: 'WORKSPACE',
+    label: 'CLIENTS & LEADS',
     items: [
-      { label: 'Clients', icon: Users, count: '248', href: '/broker/clients' },
-      { label: 'Leads', icon: Zap, count: '12', href: '/broker/leads' },
-      { label: 'Policies', icon: ClipboardList, href: '/broker/policies' },
-      { label: 'Book of Business', icon: BookOpen, href: '/broker/book-of-business' },
-      { label: 'Renewals', icon: CalendarDays, count: '8', href: '/broker/renewals' },
+      {
+        label: 'Clients',
+        icon: Users,
+        count: '248',
+        href: '/broker/clients',
+        subItems: [
+          { label: 'All Clients', href: '/broker/clients' },
+          { label: 'Active Clients', href: '/broker/clients?tab=Active' },
+          { label: 'Inactive Clients', href: '/broker/clients?tab=Inactive' },
+          { label: 'Client Details', href: '/broker/clients?view=details' },
+          { label: 'Add Client', href: '/broker/clients?action=add' },
+        ],
+      },
+      {
+        label: 'Leads',
+        icon: Zap,
+        count: '12',
+        href: '/broker/leads',
+        subItems: [
+          { label: 'All Leads', href: '/broker/leads' },
+          { label: 'New', href: '/broker/leads?tab=New' },
+          { label: 'Contacted', href: '/broker/leads?tab=Contacted' },
+          { label: 'Follow-Up', href: '/broker/leads?tab=Follow-Up' },
+          { label: 'Quoted', href: '/broker/leads?tab=Quoted' },
+          { label: 'Won / Converted', href: '/broker/leads?tab=Won' },
+          { label: 'Lost', href: '/broker/leads?tab=Lost' },
+          { label: 'Not Interested', href: '/broker/leads?tab=Not+Interested' },
+          { label: 'Archived', href: '/broker/leads?tab=Archived' },
+          { label: 'Lead Details', href: '/broker/leads?view=details' },
+          { label: 'My QR Code / Lead Form', href: '/broker/qr-lead-capture' },
+        ],
+      },
+      {
+        label: 'Policies',
+        icon: ClipboardList,
+        href: '/broker/policies',
+        subItems: [
+          { label: 'All Policies', href: '/broker/policies' },
+          { label: 'Active Policies', href: '/broker/policies?tab=active' },
+          { label: 'Historical Policies', href: '/broker/policies?tab=historical' },
+          { label: 'New Business', href: '/broker/policies?tab=new-business' },
+          { label: 'Renewals', href: '/broker/policies?tab=renewals' },
+          { label: 'Rewrites', href: '/broker/policies?tab=rewrites' },
+          { label: 'Endorsements', href: '/broker/policies?tab=endorsements' },
+          { label: 'Cancellations', href: '/broker/policies?tab=cancellations' },
+          { label: 'Chargebacks', href: '/broker/policies?tab=chargebacks' },
+          { label: 'Adjustments', href: '/broker/policies?tab=adjustments' },
+          { label: 'Add Policy', href: '/broker/policies?action=add' },
+        ],
+      },
+      {
+        label: 'Book of Business',
+        icon: BookOpen,
+        href: '/broker/book-of-business',
+        subItems: [
+          { label: 'Overview', href: '/broker/book-of-business' },
+          { label: 'Active Book', href: '/broker/book-of-business?tab=active' },
+          { label: 'Historical Book', href: '/broker/book-of-business?tab=historical' },
+          { label: 'Import Book of Business', href: '/broker/book-of-business?tab=import' },
+          { label: 'Book Analytics', href: '/broker/book-of-business?tab=analytics' },
+        ],
+      },
     ],
   },
   {
-    label: 'COMMISSIONS',
+    label: 'COMMISSIONS & RECONCILIATION',
     items: [
-      { label: 'Commission Overview', icon: WalletCards, href: '/broker/commissions' },
-      { label: 'Statements', icon: FileSpreadsheet, count: '3', href: '/broker/statements' },
-      { label: 'Reconciliation', icon: FileCheck2, count: '7', href: '/broker/reconciliation' },
+      {
+        label: 'Commissions',
+        icon: WalletCards,
+        href: '/broker/commissions',
+        subItems: [
+          { label: 'Commission Overview', href: '/broker/commissions' },
+          { label: 'Expected Commission', href: '/broker/commissions?filter=expected' },
+          { label: 'Paid / Actual', href: '/broker/commissions?filter=paid' },
+          { label: 'Outstanding', href: '/broker/commissions?filter=outstanding' },
+          { label: 'Partial / Short Paid', href: '/broker/commissions?filter=partial' },
+          { label: 'Chargebacks', href: '/broker/commissions?filter=chargebacks' },
+          { label: 'Adjustments', href: '/broker/commissions?filter=adjustments' },
+          { label: 'Commission Transactions', href: '/broker/commissions?view=transactions' },
+        ],
+      },
+      {
+        label: 'Statements',
+        icon: FileSpreadsheet,
+        count: '3',
+        href: '/broker/statements',
+        subItems: [
+          { label: 'All Statements', href: '/broker/statements' },
+          { label: 'Upload Statement', href: '/broker/statements?tab=upload' },
+          { label: 'Processing', href: '/broker/statements?tab=processing' },
+          { label: 'Processed', href: '/broker/statements?tab=processed' },
+          { label: 'Matching Results', href: '/broker/statements?tab=matching' },
+          { label: 'Statement Details', href: '/broker/statements?tab=details' },
+        ],
+      },
+      {
+        label: 'Reconciliation',
+        icon: FileCheck2,
+        count: '7',
+        href: '/broker/reconciliation',
+        subItems: [
+          { label: 'Overview', href: '/broker/reconciliation' },
+          { label: 'Paid / Matched', href: '/broker/reconciliation?tab=paid' },
+          { label: 'Partial / Short Paid', href: '/broker/reconciliation?tab=partial' },
+          { label: 'Unpaid / Not Found', href: '/broker/reconciliation?tab=unpaid' },
+          { label: 'Needs Review', href: '/broker/reconciliation?tab=review' },
+          { label: 'Cancellations', href: '/broker/reconciliation?tab=cancellations' },
+          { label: 'Chargebacks', href: '/broker/reconciliation?tab=chargebacks' },
+          { label: 'Adjustments', href: '/broker/reconciliation?tab=adjustments' },
+          { label: 'Overpaid', href: '/broker/reconciliation?tab=overpaid' },
+        ],
+      },
     ],
   },
   {
-    label: 'ANALYTICS',
+    label: 'OPERATIONS & REPORTS',
     items: [
-      { label: 'Reports', icon: FileSpreadsheet, href: '/broker/reports' },
+      {
+        label: 'Renewals',
+        icon: CalendarDays,
+        count: '8',
+        href: '/broker/renewals',
+        subItems: [
+          { label: '7 Days', href: '/broker/renewals?horizon=7-days' },
+          { label: '30 Days', href: '/broker/renewals?horizon=30-days' },
+          { label: '60 Days', href: '/broker/renewals?horizon=60-days' },
+          { label: '90 Days', href: '/broker/renewals?horizon=90-days' },
+          { label: 'Custom', href: '/broker/renewals?horizon=custom' },
+        ],
+      },
+      {
+        label: 'Reports',
+        icon: BarChart3,
+        href: '/broker/reports',
+        subItems: [
+          { label: 'Book of Business', href: '/broker/reports?type=book-of-business' },
+          { label: 'Production', href: '/broker/reports?type=production' },
+          { label: 'Expected Commission', href: '/broker/reports?type=expected-commission' },
+          { label: 'Paid / Actual', href: '/broker/reports?type=paid-actual' },
+          { label: 'Outstanding', href: '/broker/reports?type=outstanding' },
+          { label: 'Partial / Short Paid', href: '/broker/reports?type=partial-short-paid' },
+          { label: 'Chargebacks', href: '/broker/reports?type=chargebacks' },
+          { label: 'Endorsements', href: '/broker/reports?type=endorsements' },
+          { label: 'Cancellations', href: '/broker/reports?type=cancellations' },
+          { label: 'Renewals', href: '/broker/reports?type=renewals' },
+          { label: 'Net Commission', href: '/broker/reports?type=net-commission' },
+          { label: 'Client Commission History', href: '/broker/reports?type=client-commission-history' },
+          { label: 'Statement / Reconciliation', href: '/broker/reports?type=statement-reconciliation' },
+          { label: 'Lead', href: '/broker/reports?type=lead' },
+          { label: 'Marketing Consent', href: '/broker/marketing-consent' },
+        ],
+      },
     ],
   },
   {
     label: 'CONFIGURATION',
     items: [
-      { label: 'Settings', icon: Settings, href: '/broker/settings' },
+      {
+        label: 'Settings',
+        icon: Settings,
+        href: '/broker/settings',
+        subItems: [
+          { label: 'My Profile', href: '/broker/settings' },
+          { label: 'Account', href: '/broker/settings?tab=account' },
+          { label: 'Membership / Subscription', href: '/broker/membership' },
+          { label: 'Carriers', href: '/broker/carriers' },
+          { label: 'Commission Settings', href: '/broker/commission-settings' },
+          { label: 'Marketing Consent', href: '/broker/marketing-consent' },
+          { label: 'QR / Lead Settings', href: '/broker/qr-lead-capture' },
+        ],
+      },
     ],
   },
 ]
@@ -102,58 +265,250 @@ function Logo() {
 function NavItem({
   item,
   active,
+  expanded,
+  onToggleExpand,
   onClick,
+  currentSearch,
+  pathname,
+  onCloseMobile,
 }: {
   item: NavItemDef
   active: boolean
+  expanded: boolean
+  onToggleExpand: () => void
   onClick: () => void
+  currentSearch: string
+  pathname: string
+  onCloseMobile: () => void
 }) {
   const Icon = item.icon
+  const hasSubItems = Boolean(item.subItems && item.subItems.length > 0)
+  const router = useRouter()
+
+  const isSubItemActive = (subHref: string) => {
+    if (subHref.includes('?')) {
+      const [subPath, subQuery] = subHref.split('?')
+      if (pathname !== subPath) return false
+      const currentParams = new URLSearchParams(currentSearch)
+      const subParams = new URLSearchParams(subQuery)
+      let matches = true
+      subParams.forEach((val, key) => {
+        if (currentParams.get(key) !== val) {
+          matches = false
+        }
+      })
+      return matches
+    }
+    return pathname === subHref && (!currentSearch || currentSearch === '' || currentSearch === '?')
+  }
+
+  const handleParentClick = (e: React.MouseEvent) => {
+    if (!expanded && hasSubItems) {
+      onToggleExpand()
+    }
+    onClick()
+
+    if (pathname === item.href) {
+      e.preventDefault()
+      window.history.pushState(null, '', item.href)
+      window.dispatchEvent(
+        new CustomEvent('broker-nav-change', {
+          detail: { href: item.href, search: '', pathname: item.href },
+        })
+      )
+    }
+  }
+
+  const handleSubClick = (e: React.MouseEvent, subHref: string) => {
+    onCloseMobile()
+    const [subPath, subQuery] = subHref.split('?')
+    const targetSearch = subQuery ? `?${subQuery}` : ''
+
+    if (pathname === subPath) {
+      // Same page: instant 1-click navigation without reload or router lag
+      e.preventDefault()
+      window.history.pushState(null, '', subHref)
+      window.dispatchEvent(
+        new CustomEvent('broker-nav-change', {
+          detail: { href: subHref, search: targetSearch, pathname: subPath },
+        })
+      )
+    } else {
+      // Navigate to target route
+      e.preventDefault()
+      router.push(subHref)
+    }
+  }
+
   return (
-    <Link
-      href={item.href}
-      onClick={onClick}
-      className={`group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ${active
-        ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold shadow-md shadow-blue-500/25'
-        : 'text-slate-300 hover:bg-white/[0.07] hover:text-white'
+    <div className="flex flex-col">
+      <div
+        className={`group relative flex w-full items-center rounded-xl transition-all duration-200 ${
+          active
+            ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold shadow-md shadow-blue-500/25'
+            : 'text-slate-300 hover:bg-white/[0.07] hover:text-white'
         }`}
-    >
-      <Icon
-        className={`size-[18px] shrink-0 transition-colors ${active ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'
-          }`}
-      />
-      <span className="flex-1 truncate">{item.label}</span>
-      {item.count && (
-        <span
-          className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${active
-            ? 'bg-white/20 text-white font-semibold'
-            : 'bg-slate-800 text-slate-300 border border-slate-700/60 group-hover:bg-slate-700/80 group-hover:text-white'
-            }`}
+      >
+        <Link
+          href={item.href}
+          onClick={handleParentClick}
+          className="flex flex-1 items-center gap-3 px-3 py-2.5 text-[13px] font-medium"
         >
-          {item.count}
-        </span>
-      )}
-      {item.badge && (
-        <span
-          className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase ${active
-            ? 'bg-white/25 text-white'
-            : 'bg-blue-500/15 text-blue-400 border border-blue-400/30'
+          <Icon
+            className={`size-[18px] shrink-0 transition-colors ${
+              active ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'
             }`}
-        >
-          {item.badge}
-        </span>
+          />
+          <span className="flex-1 truncate">{item.label}</span>
+          {item.count && (
+            <span
+              className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${
+                active
+                  ? 'bg-white/20 text-white font-semibold'
+                  : 'bg-slate-800 text-slate-300 border border-slate-700/60 group-hover:bg-slate-700/80 group-hover:text-white'
+              }`}
+            >
+              {item.count}
+            </span>
+          )}
+          {item.badge && (
+            <span
+              className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase ${
+                active
+                  ? 'bg-white/25 text-white'
+                  : 'bg-blue-500/15 text-blue-400 border border-blue-400/30'
+              }`}
+            >
+              {item.badge}
+            </span>
+          )}
+        </Link>
+
+        {hasSubItems && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onToggleExpand()
+            }}
+            className={`p-2 mr-1 rounded-lg transition-colors cursor-pointer ${
+              active
+                ? 'text-white/80 hover:text-white hover:bg-white/10'
+                : 'text-slate-400 hover:text-white hover:bg-white/10'
+            }`}
+            aria-label={`Toggle ${item.label} submenus`}
+          >
+            <ChevronDown
+              className={`size-3.5 transition-transform duration-200 ${
+                expanded ? 'rotate-180' : ''
+              }`}
+            />
+          </button>
+        )}
+      </div>
+
+      {/* Submenu Accordion */}
+      {hasSubItems && expanded && (
+        <div className="ml-5 my-1 border-l border-slate-800/90 pl-2.5 flex flex-col space-y-0.5 animate-in fade-in duration-150">
+          {item.subItems!.map((sub) => {
+            const isSubActive = isSubItemActive(sub.href)
+            return (
+              <Link
+                key={sub.label + sub.href}
+                href={sub.href}
+                onClick={(e) => handleSubClick(e, sub.href)}
+                className={`group relative flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
+                  isSubActive
+                    ? 'bg-blue-500/15 text-blue-400 font-semibold -ml-[11px] pl-[9px] border-l-2 border-blue-500'
+                    : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
+                }`}
+              >
+                <span className="truncate">{sub.label}</span>
+                {sub.count && (
+                  <span className="rounded px-1.5 py-0.2 text-[10px] font-semibold bg-slate-800/80 text-slate-400">
+                    {sub.count}
+                  </span>
+                )}
+              </Link>
+            )
+          })}
+        </div>
       )}
-    </Link>
+    </div>
   )
 }
 
 export default function BrokerLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
+  const [currentSearch, setCurrentSearch] = useState('')
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {}
+    for (const section of navSections) {
+      for (const item of section.items) {
+        if (
+          pathname === item.href ||
+          pathname.startsWith(item.href + '/') ||
+          (item.href === '/broker/settings' &&
+            ['/broker/carriers', '/broker/membership', '/broker/commission-settings', '/broker/marketing-consent', '/broker/qr-lead-capture'].includes(pathname))
+        ) {
+          initial[item.label] = true
+        }
+      }
+    }
+    return initial
+  })
+
+  // Track search params safely for client sub-item active state
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setCurrentSearch(window.location.search)
+    }
+    const updateSearch = (e?: any) => {
+      if (e?.detail?.search !== undefined) {
+        setCurrentSearch(e.detail.search)
+      } else if (typeof window !== 'undefined') {
+        setCurrentSearch(window.location.search)
+      }
+    }
+    window.addEventListener('popstate', updateSearch)
+    window.addEventListener('broker-nav-change', updateSearch)
+    return () => {
+      window.removeEventListener('popstate', updateSearch)
+      window.removeEventListener('broker-nav-change', updateSearch)
+    }
+  }, [pathname])
+
+  // Automatically expand the active parent menu
+  useEffect(() => {
+    for (const section of navSections) {
+      for (const item of section.items) {
+        if (
+          pathname === item.href ||
+          pathname.startsWith(item.href + '/') ||
+          (item.href === '/broker/settings' &&
+            ['/broker/carriers', '/broker/membership', '/broker/commission-settings', '/broker/marketing-consent', '/broker/qr-lead-capture'].includes(pathname))
+        ) {
+          setExpandedMenus((prev) => ({ ...prev, [item.label]: true }))
+        }
+      }
+    }
+  }, [pathname])
+
+  const toggleExpand = (label: string) => {
+    setExpandedMenus((prev) => ({ ...prev, [label]: !prev[label] }))
+  }
 
   const isItemActive = (href: string) => {
     if (href === '/broker/dashboard') {
       return pathname === '/broker/dashboard' || pathname === '/broker'
+    }
+    if (href === '/broker/settings') {
+      return (
+        pathname === '/broker/settings' ||
+        ['/broker/carriers', '/broker/membership', '/broker/commission-settings', '/broker/marketing-consent', '/broker/qr-lead-capture'].includes(pathname)
+      )
     }
     return pathname === href || pathname.startsWith(href + '/')
   }
@@ -162,8 +517,9 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
     <div className="min-h-screen bg-[#f8fafc] text-slate-900">
       {/* ───── Sidebar ───── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-slate-800/80 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 px-3.5 py-4 transition-transform duration-300 ease-in-out lg:translate-x-0 ${mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
-          }`}
+        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-slate-800/80 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 px-3.5 py-4 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+        }`}
       >
         {/* Brand Header */}
         <div className="flex items-center justify-between px-2 mb-3">
@@ -178,7 +534,7 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
         </div>
 
         {/* Navigation Sections */}
-        <div className="flex flex-1 flex-col space-y-5 overflow-y-auto pr-1 custom-scrollbar">
+        <div className="flex flex-1 flex-col space-y-4 overflow-y-auto pr-1 custom-scrollbar">
           {navSections.map((section) => (
             <div key={section.label}>
               <p className="mb-1.5 px-3 text-[10px] font-bold tracking-[0.16em] text-slate-400 uppercase">
@@ -187,10 +543,15 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
               <div className="flex flex-col gap-1">
                 {section.items.map((item) => (
                   <NavItem
-                    key={item.href}
+                    key={item.label}
                     item={item}
                     active={isItemActive(item.href)}
+                    expanded={Boolean(expandedMenus[item.label])}
+                    onToggleExpand={() => toggleExpand(item.label)}
                     onClick={() => setMobileOpen(false)}
+                    currentSearch={currentSearch}
+                    pathname={pathname}
+                    onCloseMobile={() => setMobileOpen(false)}
                   />
                 ))}
               </div>

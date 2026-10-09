@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Calendar,
@@ -61,6 +61,47 @@ export interface RenewalRecord {
 export default function RenewalsPage() {
   // ── Horizon Tabs State (7 Days, 30 Days, 60 Days, 90 Days, Custom Date Range) ──
   const [selectedHorizon, setSelectedHorizon] = useState<RenewalHorizon>('30-days')
+
+  // Sync URL query params with renewal horizon
+  useEffect(() => {
+    function applyUrlParams(searchStr?: string) {
+      if (typeof window === 'undefined') return
+      const query = searchStr !== undefined ? searchStr : window.location.search
+      const params = new URLSearchParams(query)
+      const horizon = params.get('horizon') as RenewalHorizon | null
+      if (horizon) {
+        setSelectedHorizon(horizon)
+      } else if (!params.toString()) {
+        setSelectedHorizon('30-days')
+      }
+    }
+
+    applyUrlParams()
+
+    const handleNavChange = (e: any) => {
+      const search = e?.detail?.search !== undefined ? e.detail.search : undefined
+      applyUrlParams(search)
+    }
+
+    window.addEventListener('popstate', () => applyUrlParams())
+    window.addEventListener('broker-nav-change', handleNavChange)
+    return () => {
+      window.removeEventListener('popstate', () => applyUrlParams())
+      window.removeEventListener('broker-nav-change', handleNavChange)
+    }
+  }, [])
+
+  const handleHorizonSelect = (horizon: RenewalHorizon) => {
+    setSelectedHorizon(horizon)
+    const newHref = `/broker/renewals?horizon=${horizon}`
+    const targetSearch = `?horizon=${horizon}`
+    window.history.pushState(null, '', newHref)
+    window.dispatchEvent(
+      new CustomEvent('broker-nav-change', {
+        detail: { href: newHref, search: targetSearch, pathname: '/broker/renewals' },
+      })
+    )
+  }
 
   // Custom Date Range State
   const [customStartDate, setCustomStartDate] = useState('2026-10-01')
@@ -583,7 +624,7 @@ export default function RenewalsPage() {
             return (
               <button
                 key={tab.id}
-                onClick={() => setSelectedHorizon(tab.id as RenewalHorizon)}
+                onClick={() => handleHorizonSelect(tab.id as RenewalHorizon)}
                 className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-all cursor-pointer ${isActive
                   ? 'bg-slate-950 text-white shadow-sm'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'

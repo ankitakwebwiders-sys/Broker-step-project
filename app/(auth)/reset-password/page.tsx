@@ -84,7 +84,7 @@ export default function ResetPasswordPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-700">
                   New password
@@ -97,7 +97,7 @@ export default function ResetPasswordPage() {
                 >
                   <Lock className={`ml-3.5 size-4 transition-colors ${focused === 'password' ? 'text-blue-500' : 'text-slate-400'}`} />
                   <input
-                    required
+
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -129,7 +129,7 @@ export default function ResetPasswordPage() {
                 >
                   <Lock className={`ml-3.5 size-4 transition-colors ${focused === 'confirm' ? 'text-blue-500' : 'text-slate-400'}`} />
                   <input
-                    required
+
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}

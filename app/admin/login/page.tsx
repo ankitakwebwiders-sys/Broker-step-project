@@ -96,7 +96,7 @@ export default function AdminLoginPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="flex flex-col gap-2.5 sm:gap-3">
+            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-2.5 sm:gap-3">
               {/* Email */}
               <div>
                 <label htmlFor="email" className="mb-1 block text-xs font-medium text-slate-700">
@@ -116,7 +116,6 @@ export default function AdminLoginPage() {
                   />
                   <input
                     id="email"
-                    required
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -148,7 +147,6 @@ export default function AdminLoginPage() {
                   />
                   <input
                     id="password"
-                    required
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}

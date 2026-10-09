@@ -88,7 +88,7 @@ export default function ForgotPasswordPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleVerify} className="flex flex-col gap-3">
+            <form onSubmit={handleVerify} noValidate className="flex flex-col gap-3">
               <div>
                 <label htmlFor="email" className="mb-1 block text-xs font-medium text-slate-700">
                   Email address
@@ -102,7 +102,6 @@ export default function ForgotPasswordPage() {
                   <Mail className={`ml-3.5 size-4 transition-colors ${focused === 'email' ? 'text-blue-500' : 'text-slate-400'}`} />
                   <input
                     id="email"
-                    required
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}

@@ -101,7 +101,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="flex flex-col gap-2.5 sm:gap-3">
+            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-2.5 sm:gap-3">
               {/* Name & Phone — 2 columns on sign up */}
               {isSignUp && (
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -121,7 +121,6 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
                       />
                       <input
                         id="name"
-                        required
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -150,7 +149,6 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
                       />
                       <input
                         id="phone"
-                        required
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
@@ -182,7 +180,6 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
                   />
                   <input
                     id="email"
-                    required
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -214,7 +211,6 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
                       />
                       <input
                         id="password"
-                        required
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -251,7 +247,6 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
                       />
                       <input
                         id="confirmPassword"
-                        required
                         type={showConfirmPassword ? 'text' : 'password'}
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
@@ -297,7 +292,6 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
                     />
                     <input
                       id="password"
-                      required
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}

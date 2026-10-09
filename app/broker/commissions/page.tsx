@@ -96,8 +96,17 @@ export default function CommissionsPage() {
         setReconciliationFilter('All')
       }
 
-      if (view === 'transactions') {
+      if (view === 'transactions' || view === 'transaction') {
         setViewMode('table')
+        const txId = params.get('id') || params.get('tx')
+        const itemToOpen = txId
+          ? initialCommissions.find((c) => c.id === txId || c.transactionNumber === txId) || initialCommissions[0]
+          : initialCommissions[0]
+        if (itemToOpen) {
+          setSelectedCommissionForView(itemToOpen)
+        }
+      } else if (searchStr !== undefined && !view) {
+        setSelectedCommissionForView(null)
       }
     }
 
@@ -143,6 +152,37 @@ export default function CommissionsPage() {
   // Modals & Drawers
   const [selectedCommissionForView, setSelectedCommissionForView] = useState<CommissionItem | null>(null)
   const [detailTab, setDetailTab] = useState<'overview' | 'financials' | 'audit' | 'statement'>('overview')
+
+  const handleCloseDrawer = () => {
+    setSelectedCommissionForView(null)
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('view') === 'transactions' || params.get('view') === 'transaction') {
+        params.delete('view')
+        params.delete('id')
+        params.delete('tx')
+        const remaining = params.toString()
+        const newUrl = remaining ? `${window.location.pathname}?${remaining}` : window.location.pathname
+        window.history.replaceState(null, '', newUrl)
+        window.dispatchEvent(
+          new CustomEvent('broker-nav-change', {
+            detail: { href: newUrl, search: remaining ? `?${remaining}` : '', pathname: window.location.pathname },
+          })
+        )
+      }
+    }
+  }
+
+  // Keyboard shortcut: Escape to close transaction drawer
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selectedCommissionForView) {
+        handleCloseDrawer()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedCommissionForView])
 
   // Status Change Modal
   const [statusChangeTarget, setStatusChangeTarget] = useState<CommissionItem | null>(null)
@@ -1264,8 +1304,14 @@ export default function CommissionsPage() {
           All 15 specification fields directly laid out in full view
       ─────────────────────────────────────────────────────────────── */}
       {selectedCommissionForView && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200">
-          <div className="flex h-full w-full max-w-full sm:max-w-2xl lg:max-w-4xl flex-col bg-white shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300">
+        <div
+          onClick={handleCloseDrawer}
+          className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="flex h-full w-full max-w-full sm:max-w-2xl lg:max-w-4xl flex-col bg-white shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300"
+          >
 
             {/* Drawer Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 bg-slate-50/70 p-4 sm:px-6 sm:py-5 gap-3">
@@ -1306,7 +1352,7 @@ export default function CommissionsPage() {
                   <span>Update Status</span>
                 </button>
                 <button
-                  onClick={() => setSelectedCommissionForView(null)}
+                  onClick={handleCloseDrawer}
                   className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
                   title="Close"
                 >

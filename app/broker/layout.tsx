@@ -410,8 +410,8 @@ function NavItem({
 
       {/* Submenu Accordion */}
       {hasSubItems && expanded && (
-        <div className="ml-5 my-1 border-l border-slate-800/90 pl-2.5 flex flex-col space-y-0.5 animate-in fade-in duration-150">
-          {item.subItems!.map((sub) => {
+        <div className="ml-5 mt-2.5 mb-1.5 border-l border-slate-800/90 pl-2.5 flex flex-col space-y-1 pt-1 animate-in fade-in duration-150">
+          {item.subItems!.map((sub, subIdx) => {
             const isSubActive = isSubItemActive(sub.href)
             return (
               <Link
@@ -419,6 +419,8 @@ function NavItem({
                 href={sub.href}
                 onClick={(e) => handleSubClick(e, sub.href)}
                 className={`group relative flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
+                  subIdx === 0 ? 'mt-1.5' : ''
+                } ${
                   isSubActive
                     ? 'bg-blue-500/15 text-blue-400 font-semibold -ml-[11px] pl-[9px] border-l-2 border-blue-500'
                     : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'

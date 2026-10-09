@@ -508,9 +508,7 @@ export default function RenewalsPage() {
       <div className="rounded-2xl border border-blue-200/80 bg-gradient-to-br from-blue-50/70 via-white to-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-4">
         <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center border-b border-blue-100/80 pb-3">
           <div className="flex items-center gap-2.5">
-            <span className="flex size-7 items-center justify-center rounded-lg bg-blue-600 text-white text-xs font-bold shadow-sm">
-              11.1
-            </span>
+
             <div>
               <h3 className="text-[16px] font-bold text-slate-900">
                 Renewal Workflow
@@ -529,56 +527,56 @@ export default function RenewalsPage() {
           {[
             {
               step: '1',
-              title: '38. Existing Policy',
+              title: 'Existing Policy',
               desc: 'Active policy in Book of Business with in-force terms and contracted commission.',
               icon: Shield,
               color: 'text-blue-600 bg-blue-50',
             },
             {
               step: '2',
-              title: '39. Expiry Approaching',
+              title: 'Expiry Approaching',
               desc: 'Threshold alert triggered at 90, 60, 30, or 7 days prior to term expiration.',
               icon: Clock,
               color: 'text-amber-600 bg-amber-50',
             },
             {
               step: '3',
-              title: '40. Policy in Renewal View',
+              title: 'Policy in Renewal View',
               desc: 'Account automatically routed to the broker renewal horizon dashboard for review.',
               icon: CalendarDays,
               color: 'text-indigo-600 bg-indigo-50',
             },
             {
               step: '4',
-              title: '41. Broker Reviews',
+              title: 'Broker Reviews',
               desc: 'Broker evaluates client risk profile, claims history, and new carrier rate quotes.',
               icon: Eye,
               color: 'text-violet-600 bg-violet-50',
             },
             {
               step: '5',
-              title: '42. Outcome Decision',
+              title: 'Outcome Decision',
               desc: 'Broker executes decision: Renew, Rewrite, Non-Renew, or Mark Lost Business.',
               icon: RefreshCw,
               color: 'text-emerald-600 bg-emerald-50',
             },
             {
               step: '6',
-              title: '43. History Preserved',
+              title: 'History Preserved',
               desc: 'Expiring policy term archived in Historical Book for permanent audit integrity.',
               icon: Archive,
               color: 'text-slate-700 bg-slate-100',
             },
             {
               step: '7',
-              title: '44. New Term Recorded',
+              title: 'New Term Recorded',
               desc: 'Renewal/rewrite binder created with updated premium and expected commission.',
               icon: Layers,
               color: 'text-blue-600 bg-blue-50',
             },
             {
               step: '8',
-              title: '45. Statement Reconciled',
+              title: 'Statement Reconciled',
               desc: 'Remittance statement matched and reconciled against expected commission.',
               icon: CheckCircle2,
               color: 'text-emerald-600 bg-emerald-50',

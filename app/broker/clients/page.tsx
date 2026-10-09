@@ -694,10 +694,6 @@ export default function ClientsPage() {
               { label: 'All Clients', key: 'All' },
               { label: 'Active', key: 'Active' },
               { label: 'Inactive', key: 'Inactive' },
-              { label: 'Pending Renewal', key: 'Pending Renewal' },
-              { label: 'Consent Granted', key: 'Consent Granted' },
-              { label: 'Consent Pending', key: 'Consent Pending' },
-              { label: 'Consent Declined', key: 'Consent Declined' },
             ].map((tab) => {
               const count = (statusCounts as any)[tab.key] || 0
               const isActive = activeTab === tab.key
@@ -1022,78 +1018,82 @@ export default function ClientsPage() {
           <div className="flex h-full w-full max-w-3xl flex-col bg-white shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300">
 
             {/* Drawer Header */}
-            <div className="flex items-start justify-between border-b border-slate-200 bg-slate-50/50 px-6 py-5">
-              <div className="flex items-center gap-4">
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-[14px] font-bold text-white shadow-md">
-                  {selectedClientForView.firstName[0]}{selectedClientForView.lastName[0]}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-[18px] font-bold tracking-tight text-slate-900">
-                      {selectedClientForView.name}
-                    </h2>
-                    <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${selectedClientForView.status === 'Active'
-                      ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                      : 'bg-slate-100 text-slate-600 ring-slate-200'
-                      }`}>
-                      {selectedClientForView.status}
-                    </span>
-                    {getConsentBadge(selectedClientForView.marketingConsent.status)}
+            <div className="border-b border-slate-200 bg-slate-50/50 px-4 sm:px-6 py-4 sm:py-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="flex size-10 sm:size-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-[13px] sm:text-[14px] font-bold text-white shadow-md">
+                    {selectedClientForView.firstName[0]}{selectedClientForView.lastName[0]}
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 mt-1">
-                    {selectedClientForView.businessName !== '—' && (
-                      <span className="font-medium text-slate-700 flex items-center gap-1">
-                        <Building2 className="size-3 text-slate-400" />
-                        {selectedClientForView.businessName}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                      <h2 className="text-[16px] sm:text-[18px] font-bold tracking-tight text-slate-900 truncate">
+                        {selectedClientForView.name}
+                      </h2>
+                      <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${selectedClientForView.status === 'Active'
+                        ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                        : 'bg-slate-100 text-slate-600 ring-slate-200'
+                        }`}>
+                        {selectedClientForView.status}
                       </span>
-                    )}
-                    <span>Broker Code: <strong className="text-slate-800">{selectedClientForView.brokerCode}</strong></span>
-                    <span>ID: <strong className="text-slate-800">{selectedClientForView.otherIdentifier}</strong></span>
+                      {getConsentBadge(selectedClientForView.marketingConsent.status)}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[10.5px] sm:text-[11px] text-slate-500 mt-1">
+                      {selectedClientForView.businessName !== '—' && (
+                        <span className="font-medium text-slate-700 flex items-center gap-1">
+                          <Building2 className="size-3 text-slate-400" />
+                          {selectedClientForView.businessName}
+                        </span>
+                      )}
+                      <span>Broker Code: <strong className="text-slate-800">{selectedClientForView.brokerCode}</strong></span>
+                      <span>ID: <strong className="text-slate-800">{selectedClientForView.otherIdentifier}</strong></span>
+                    </div>
                   </div>
                 </div>
+
+                {/* Close Button */}
+                <button
+                  onClick={() => setSelectedClientForView(null)}
+                  className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition shrink-0 cursor-pointer"
+                  aria-label="Close Drawer"
+                >
+                  <X className="size-5" />
+                </button>
               </div>
 
               {/* Header Action Buttons */}
-              <div className="flex items-center gap-2">
+              <div className="mt-3.5 sm:mt-4 flex items-center gap-2">
                 <button
                   onClick={() => openEditClientModal(selectedClientForView)}
-                  className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50 transition"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11.5px] font-medium text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50 transition cursor-pointer"
                 >
                   <Edit3 className="size-3.5 text-slate-500" />
                   Edit Client
                 </button>
                 <button
                   onClick={() => openAddPolicyModal(selectedClientForView)}
-                  className="inline-flex items-center gap-1 rounded-xl bg-slate-950 px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-blue-600 transition"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-950 px-3 py-2 text-[11.5px] font-semibold text-white shadow-sm hover:bg-blue-600 transition cursor-pointer"
                 >
                   <Plus className="size-3.5" />
                   Add Policy
-                </button>
-                <button
-                  onClick={() => setSelectedClientForView(null)}
-                  className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
-                  aria-label="Close Drawer"
-                >
-                  <X className="size-5" />
                 </button>
               </div>
             </div>
 
             {/* Navigation Tabs (Overview, Policies, Commissions, Consent, Notes, Timeline) */}
-            <div className="flex border-b border-slate-200 px-6 gap-6 bg-white overflow-x-auto">
+            <div className="flex border-b border-slate-200 px-3 sm:px-6 gap-2 sm:gap-6 bg-white overflow-x-auto scrollbar-thin">
               {[
                 { key: 'overview', label: 'Overview' },
                 { key: 'policies', label: `Policies (${selectedClientForView.policies.length})` },
                 { key: 'commissions', label: `Commissions (${selectedClientForView.commissions.length})` },
-                { key: 'consent', label: 'Marketing Consent' },
+                { key: 'consent', label: 'Consent' },
                 { key: 'notes', label: `Notes (${selectedClientForView.notes.length})` },
-                { key: 'timeline', label: 'Timeline & Activity' },
+                { key: 'timeline', label: 'Timeline' },
               ].map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setClientDetailTab(tab.key as any)}
-                  className={`py-3 text-[12px] font-medium border-b-2 transition whitespace-nowrap ${clientDetailTab === tab.key
-                    ? 'border-blue-600 text-blue-600'
+                  className={`py-2.5 sm:py-3 text-[11.5px] sm:text-[12px] font-medium border-b-2 transition whitespace-nowrap px-1.5 sm:px-0 cursor-pointer ${clientDetailTab === tab.key
+                    ? 'border-blue-600 text-blue-600 font-semibold'
                     : 'border-transparent text-slate-500 hover:text-slate-900'
                     }`}
                 >
@@ -1103,14 +1103,14 @@ export default function ClientsPage() {
             </div>
 
             {/* Tab Contents */}
-            <div className="flex-1 overflow-y-auto p-6 bg-slate-50/40">
+            <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 bg-slate-50/40">
 
               {/* TAB 1: OVERVIEW */}
               {clientDetailTab === 'overview' && (
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-4 sm:gap-6">
                   {/* Primary Info Cards */}
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
+                    <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs">
                       <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">
                         Contact Information
                       </h3>
@@ -1123,9 +1123,9 @@ export default function ClientsPage() {
                           <span className="text-slate-500 flex items-center gap-1.5"><Mail className="size-3.5 text-slate-400" /> Email</span>
                           <a href={`mailto:${selectedClientForView.email}`} className="font-semibold text-blue-600 hover:underline">{selectedClientForView.email}</a>
                         </div>
-                        <div className="flex items-start justify-between">
-                          <span className="text-slate-500 flex items-center gap-1.5"><MapPin className="size-3.5 text-slate-400 shrink-0 mt-0.5" /> Address</span>
-                          <span className="font-medium text-slate-800 text-right max-w-[180px]">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+                          <span className="text-slate-500 flex items-center gap-1.5 shrink-0"><MapPin className="size-3.5 text-slate-400 shrink-0" /> Address</span>
+                          <span className="font-medium text-slate-800 sm:text-right text-left break-words">
                             {selectedClientForView.street}, {selectedClientForView.city}, {selectedClientForView.state} {selectedClientForView.zip}
                           </span>
                         </div>
@@ -1136,7 +1136,7 @@ export default function ClientsPage() {
                       </div>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
+                    <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs">
                       <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">
                         Broker Identifiers & Compliance
                       </h3>
@@ -1162,7 +1162,7 @@ export default function ClientsPage() {
                   </div>
 
                   {/* Policies Quick Peek */}
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
+                  <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                         In-Force Policies ({selectedClientForView.policies.length})
@@ -1179,14 +1179,14 @@ export default function ClientsPage() {
                     ) : (
                       <div className="flex flex-col gap-2">
                         {selectedClientForView.policies.map((p) => (
-                          <div key={p.id} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-[12px]">
+                          <div key={p.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 rounded-lg bg-slate-50 px-3 py-2.5 text-[12px]">
                             <div>
                               <p className="font-semibold text-slate-800">{p.type} <span className="text-slate-400 font-normal">({p.carrier})</span></p>
-                              <p className="text-[10px] text-slate-500">{p.policyNumber} · Expires {p.expirationDate}</p>
+                              <p className="text-[10.5px] text-slate-500">{p.policyNumber} · Expires {p.expirationDate}</p>
                             </div>
-                            <div className="text-right">
+                            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-slate-200/50 pt-1.5 sm:pt-0">
                               <p className="font-bold text-slate-900">{p.premium}</p>
-                              <span className={`text-[9px] font-bold uppercase ${p.status === 'Active' ? 'text-emerald-600' : 'text-slate-500'}`}>{p.status}</span>
+                              <span className={`text-[9.5px] font-bold uppercase ${p.status === 'Active' ? 'text-emerald-600' : 'text-slate-500'}`}>{p.status}</span>
                             </div>
                           </div>
                         ))}
@@ -1195,7 +1195,7 @@ export default function ClientsPage() {
                   </div>
 
                   {/* Recent Notes Preview */}
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
+                  <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                         Recent Broker Notes
@@ -1226,14 +1226,14 @@ export default function ClientsPage() {
               {/* TAB 2: POLICIES (Current & Historical) */}
               {clientDetailTab === 'policies' && (
                 <div className="flex flex-col gap-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                       <h3 className="text-[14px] font-semibold text-slate-900">Current &amp; Historical Policies</h3>
                       <p className="text-[11px] text-slate-500">Track all policies associated with this client record</p>
                     </div>
                     <button
                       onClick={() => openAddPolicyModal(selectedClientForView)}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-blue-600 transition"
+                      className="self-start sm:self-auto inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-blue-600 transition"
                     >
                       <Plus className="size-3.5" />
                       Add Policy
@@ -1252,54 +1252,90 @@ export default function ClientsPage() {
                       </button>
                     </div>
                   ) : (
-                    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs">
-                      <table className="w-full min-w-[580px] text-left">
-                        <thead>
-                          <tr className="border-b border-slate-100 text-[10px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-50/50">
-                            <th className="px-4 py-3">Policy #</th>
-                            <th className="px-3 py-3">Coverage Line</th>
-                            <th className="px-3 py-3">Carrier</th>
-                            <th className="px-3 py-3">Premium</th>
-                            <th className="px-3 py-3">Term Dates</th>
-                            <th className="px-3 py-3">Status</th>
-                            <th className="px-4 py-3 text-right">Action</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {selectedClientForView.policies.map((policy) => (
-                            <tr key={policy.id} className="border-b border-slate-50 text-[12px] hover:bg-slate-50/60 last:border-0">
-                              <td className="px-4 py-3 font-semibold text-slate-900 font-mono text-[11px]">
-                                {policy.policyNumber}
-                              </td>
-                              <td className="px-3 py-3 font-medium text-slate-800">{policy.type}</td>
-                              <td className="px-3 py-3 text-slate-600">{policy.carrier}</td>
-                              <td className="px-3 py-3 font-semibold text-slate-900">{policy.premium}</td>
-                              <td className="px-3 py-3 text-[11px] text-slate-500">
-                                {policy.effectiveDate} &rarr; {policy.expirationDate}
-                              </td>
-                              <td className="px-3 py-3">
-                                <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${policy.status === 'Active'
-                                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                  : policy.status === 'Pending Renewal'
-                                    ? 'bg-amber-50 text-amber-700 ring-amber-200'
-                                    : 'bg-slate-100 text-slate-600 ring-slate-200'
+                    <>
+                      {/* Mobile Cards View for Policies (< sm) */}
+                      <div className="sm:hidden space-y-2.5">
+                        {selectedClientForView.policies.map((policy) => (
+                          <div key={policy.id} className="rounded-xl border border-slate-200 bg-white p-3.5 text-[12px] shadow-2xs">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <p className="font-mono font-bold text-slate-900 text-[11.5px]">{policy.policyNumber}</p>
+                                <p className="font-medium text-slate-800 text-[12px] mt-0.5">{policy.type}</p>
+                                <p className="text-[11px] text-slate-500">{policy.carrier}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-bold text-slate-900 text-[13px]">{policy.premium}</p>
+                                <span className={`inline-block mt-0.5 rounded-md px-1.5 py-0.5 text-[9.5px] font-semibold ring-1 ${policy.status === 'Active'
+                                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                    : 'bg-amber-50 text-amber-700 ring-amber-200'
                                   }`}>
                                   {policy.status}
                                 </span>
-                              </td>
-                              <td className="px-4 py-3 text-right">
-                                <button
-                                  onClick={() => setPreviewPolicy({ clientName: selectedClientForView.name, policy })}
-                                  className="text-[11px] font-medium text-blue-600 hover:underline"
-                                >
-                                  View Policy
-                                </button>
-                              </td>
+                              </div>
+                            </div>
+                            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                              <span className="text-slate-500">{policy.effectiveDate} &rarr; {policy.expirationDate}</span>
+                              <button
+                                onClick={() => setPreviewPolicy({ clientName: selectedClientForView.name, policy })}
+                                className="text-blue-600 font-semibold hover:underline"
+                              >
+                                View Policy
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Desktop Table View for Policies (sm:block) */}
+                      <div className="hidden sm:block overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs custom-scrollbar">
+                        <table className="w-full min-w-[580px] text-left">
+                          <thead>
+                            <tr className="border-b border-slate-100 text-[10px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-50/50">
+                              <th className="px-4 py-3">Policy #</th>
+                              <th className="px-3 py-3">Coverage Line</th>
+                              <th className="px-3 py-3">Carrier</th>
+                              <th className="px-3 py-3">Premium</th>
+                              <th className="px-3 py-3">Term Dates</th>
+                              <th className="px-3 py-3">Status</th>
+                              <th className="px-4 py-3 text-right">Action</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                          </thead>
+                          <tbody>
+                            {selectedClientForView.policies.map((policy) => (
+                              <tr key={policy.id} className="border-b border-slate-50 text-[12px] hover:bg-slate-50/60 last:border-0">
+                                <td className="px-4 py-3 font-semibold text-slate-900 font-mono text-[11px]">
+                                  {policy.policyNumber}
+                                </td>
+                                <td className="px-3 py-3 font-medium text-slate-800">{policy.type}</td>
+                                <td className="px-3 py-3 text-slate-600">{policy.carrier}</td>
+                                <td className="px-3 py-3 font-semibold text-slate-900">{policy.premium}</td>
+                                <td className="px-3 py-3 text-[11px] text-slate-500">
+                                  {policy.effectiveDate} &rarr; {policy.expirationDate}
+                                </td>
+                                <td className="px-3 py-3">
+                                  <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${policy.status === 'Active'
+                                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                    : policy.status === 'Pending Renewal'
+                                      ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                                      : 'bg-slate-100 text-slate-600 ring-slate-200'
+                                    }`}>
+                                    {policy.status}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-3 text-right">
+                                  <button
+                                    onClick={() => setPreviewPolicy({ clientName: selectedClientForView.name, policy })}
+                                    className="text-[11px] font-medium text-blue-600 hover:underline cursor-pointer"
+                                  >
+                                    View Policy
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
                   )}
                 </div>
               )}
@@ -1307,14 +1343,14 @@ export default function ClientsPage() {
               {/* TAB 3: COMMISSION HISTORY */}
               {clientDetailTab === 'commissions' && (
                 <div className="flex flex-col gap-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                       <h3 className="text-[14px] font-semibold text-slate-900">Transaction-level Commission History</h3>
                       <p className="text-[11px] text-slate-500">Traceable carrier statements and revenue payouts</p>
                     </div>
                     <Link
                       href="/broker/commissions"
-                      className="text-[11px] font-semibold text-blue-600 hover:underline flex items-center gap-1"
+                      className="self-start sm:self-auto text-[11px] font-semibold text-blue-600 hover:underline flex items-center gap-1"
                     >
                       Commission Ledger <ArrowUpRight className="size-3" />
                     </Link>
@@ -1326,60 +1362,96 @@ export default function ClientsPage() {
                       <p className="text-[13px] font-medium text-slate-600">No commission records for this client yet</p>
                     </div>
                   ) : (
-                    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs">
-                      <table className="w-full min-w-[580px] text-left">
-                        <thead>
-                          <tr className="border-b border-slate-100 text-[10px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-50/50">
-                            <th className="px-4 py-3">Date</th>
-                            <th className="px-3 py-3">Statement #</th>
-                            <th className="px-3 py-3">Carrier</th>
-                            <th className="px-3 py-3">Premium</th>
-                            <th className="px-3 py-3">Rate</th>
-                            <th className="px-3 py-3">Amount</th>
-                            <th className="px-3 py-3">Status</th>
-                            <th className="px-4 py-3 text-right">Trace Statement</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {selectedClientForView.commissions.map((c) => (
-                            <tr key={c.id} className="border-b border-slate-50 text-[12px] hover:bg-slate-50/60 last:border-0">
-                              <td className="px-4 py-3 text-slate-600 font-medium">{c.date}</td>
-                              <td className="px-3 py-3 font-mono font-semibold text-slate-900">{c.statementNumber}</td>
-                              <td className="px-3 py-3 text-slate-600">{c.carrier}</td>
-                              <td className="px-3 py-3 text-slate-700">{c.premium}</td>
-                              <td className="px-3 py-3 text-slate-600">{c.rate}</td>
-                              <td className="px-3 py-3 font-bold text-emerald-600">{c.amount}</td>
-                              <td className="px-3 py-3">
-                                <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${c.status === 'Paid'
-                                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                  : 'bg-rose-50 text-rose-700 ring-rose-200'
+                    <>
+                      {/* Mobile Cards View for Commissions (< sm) */}
+                      <div className="sm:hidden space-y-2.5">
+                        {selectedClientForView.commissions.map((c) => (
+                          <div key={c.id} className="rounded-xl border border-slate-200 bg-white p-3.5 text-[12px] shadow-2xs">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <span className="font-mono font-bold text-slate-900 text-[11.5px]">{c.statementNumber}</span>
+                                <p className="text-[11.5px] text-slate-600 mt-0.5">{c.carrier}</p>
+                                <p className="text-[10.5px] text-slate-400">{c.date}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-bold text-emerald-600 text-[13px]">{c.amount}</p>
+                                <p className="text-[10.5px] text-slate-400">Prem: {c.premium} ({c.rate})</p>
+                                <span className={`inline-block mt-0.5 rounded-md px-1.5 py-0.5 text-[9.5px] font-semibold ring-1 ${c.status === 'Paid'
+                                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                    : 'bg-rose-50 text-rose-700 ring-rose-200'
                                   }`}>
                                   {c.status}
                                 </span>
-                              </td>
-                              <td className="px-4 py-3 text-right">
-                                <button
-                                  onClick={() => setPreviewStatement(c)}
-                                  className="text-[11px] font-medium text-blue-600 hover:underline inline-flex items-center gap-1"
-                                >
-                                  View Source
-                                  <ExternalLink className="size-2.5" />
-                                </button>
-                              </td>
+                              </div>
+                            </div>
+                            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-end">
+                              <button
+                                onClick={() => setPreviewStatement(c)}
+                                className="text-[11px] font-semibold text-blue-600 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                              >
+                                View Source <ExternalLink className="size-2.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Desktop Table View for Commissions (sm:block) */}
+                      <div className="hidden sm:block overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs custom-scrollbar">
+                        <table className="w-full min-w-[580px] text-left">
+                          <thead>
+                            <tr className="border-b border-slate-100 text-[10px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-50/50">
+                              <th className="px-4 py-3">Date</th>
+                              <th className="px-3 py-3">Statement #</th>
+                              <th className="px-3 py-3">Carrier</th>
+                              <th className="px-3 py-3">Premium</th>
+                              <th className="px-3 py-3">Rate</th>
+                              <th className="px-3 py-3">Amount</th>
+                              <th className="px-3 py-3">Status</th>
+                              <th className="px-4 py-3 text-right">Trace Statement</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                          </thead>
+                          <tbody>
+                            {selectedClientForView.commissions.map((c) => (
+                              <tr key={c.id} className="border-b border-slate-50 text-[12px] hover:bg-slate-50/60 last:border-0">
+                                <td className="px-4 py-3 text-slate-600 font-medium">{c.date}</td>
+                                <td className="px-3 py-3 font-mono font-semibold text-slate-900">{c.statementNumber}</td>
+                                <td className="px-3 py-3 text-slate-600">{c.carrier}</td>
+                                <td className="px-3 py-3 text-slate-700">{c.premium}</td>
+                                <td className="px-3 py-3 text-slate-600">{c.rate}</td>
+                                <td className="px-3 py-3 font-bold text-emerald-600">{c.amount}</td>
+                                <td className="px-3 py-3">
+                                  <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${c.status === 'Paid'
+                                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                    : 'bg-rose-50 text-rose-700 ring-rose-200'
+                                    }`}>
+                                    {c.status}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-3 text-right">
+                                  <button
+                                    onClick={() => setPreviewStatement(c)}
+                                    className="text-[11px] font-medium text-blue-600 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                                  >
+                                    View Source
+                                    <ExternalLink className="size-2.5" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
                   )}
                 </div>
               )}
 
               {/* TAB 4: MARKETING CONSENT */}
               {clientDetailTab === 'consent' && (
-                <div className="flex flex-col gap-5">
-                  <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-                    <div className="flex items-start justify-between">
+                <div className="flex flex-col gap-4 sm:gap-5">
+                  <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs">
+                    <div className="flex items-start justify-between gap-2">
                       <div>
                         <h3 className="text-[14px] font-semibold text-slate-900">Current Consent Status</h3>
                         <p className="text-[11px] text-slate-500 mt-0.5">Compliance records with TCPA &amp; data privacy regulations</p>
@@ -1387,7 +1459,7 @@ export default function ClientsPage() {
                       {getConsentBadge(selectedClientForView.marketingConsent.status)}
                     </div>
 
-                    <div className="mt-5 grid gap-4 sm:grid-cols-2 text-[12px]">
+                    <div className="mt-4 sm:mt-5 grid gap-3 sm:gap-4 sm:grid-cols-2 text-[12px]">
                       <div className="rounded-lg bg-slate-50 p-3">
                         <span className="text-[11px] text-slate-400 block font-medium">Opted Channels</span>
                         <div className="mt-1 flex flex-wrap gap-1.5">
@@ -1419,7 +1491,7 @@ export default function ClientsPage() {
 
                       <div className="rounded-lg bg-slate-50 p-3">
                         <span className="text-[11px] text-slate-400 block font-medium">IP Address / Signature Stamp</span>
-                        <span className="mt-1 block font-mono text-[11px] text-slate-800">
+                        <span className="mt-1 block font-mono text-[11px] text-slate-800 break-all">
                           {selectedClientForView.marketingConsent.ipAddress || 'Verified via paper/verbal intake'}
                         </span>
                       </div>
@@ -1438,7 +1510,7 @@ export default function ClientsPage() {
               {clientDetailTab === 'notes' && (
                 <div className="flex flex-col gap-4">
                   {/* Add Note Input */}
-                  <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+                  <div className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-xs">
                     <h3 className="text-[12px] font-semibold text-slate-900 mb-2">Add Internal Broker Note</h3>
                     <textarea
                       rows={3}
@@ -1451,7 +1523,7 @@ export default function ClientsPage() {
                       <button
                         onClick={handleAddNote}
                         disabled={!newNoteText.trim()}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-3.5 py-1.5 text-[11px] font-semibold text-white shadow-xs hover:bg-blue-600 disabled:opacity-40 transition"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-3.5 py-1.5 text-[11px] font-semibold text-white shadow-xs hover:bg-blue-600 disabled:opacity-40 transition cursor-pointer"
                       >
                         <Send className="size-3" />
                         Save Note
@@ -1462,7 +1534,7 @@ export default function ClientsPage() {
                   {/* Notes List */}
                   <div className="flex flex-col gap-3">
                     {selectedClientForView.notes.map((n) => (
-                      <div key={n.id} className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
+                      <div key={n.id} className="rounded-xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs">
                         <div className="flex items-center justify-between text-[11px] text-slate-400 border-b border-slate-100 pb-2 mb-2">
                           <span className="font-semibold text-slate-700">{n.author}</span>
                           <span>{n.date}</span>
@@ -1478,15 +1550,15 @@ export default function ClientsPage() {
               {clientDetailTab === 'timeline' && (
                 <div className="flex flex-col gap-4">
                   <h3 className="text-[14px] font-semibold text-slate-900">Chronological Client History</h3>
-                  <div className="relative pl-6 border-l-2 border-slate-200 space-y-6">
+                  <div className="relative pl-5 sm:pl-6 border-l-2 border-slate-200 space-y-6">
                     {selectedClientForView.timeline.map((event) => (
                       <div key={event.id} className="relative group">
                         {/* Dot */}
-                        <div className="absolute -left-[31px] top-0.5 size-4 rounded-full border-2 border-white bg-blue-600 ring-2 ring-blue-100" />
+                        <div className="absolute -left-[27px] sm:-left-[31px] top-0.5 size-3.5 sm:size-4 rounded-full border-2 border-white bg-blue-600 ring-2 ring-blue-100" />
                         <div>
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between gap-2">
                             <h4 className="text-[13px] font-semibold text-slate-900">{event.title}</h4>
-                            <span className="text-[10px] text-slate-400">{event.date}</span>
+                            <span className="text-[10px] text-slate-400 shrink-0">{event.date}</span>
                           </div>
                           <p className="mt-1 text-[12px] text-slate-600">{event.detail}</p>
                           <p className="mt-1 text-[10px] text-slate-400">Actor: <span className="font-medium text-slate-600">{event.actor}</span></p>
@@ -1500,13 +1572,13 @@ export default function ClientsPage() {
             </div>
 
             {/* Drawer Footer */}
-            <div className="flex items-center justify-between border-t border-slate-200 bg-white px-6 py-4">
-              <span className="text-[11px] text-slate-400">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-200 bg-white px-4 sm:px-6 py-3.5 sm:py-4">
+              <span className="text-[10.5px] sm:text-[11px] text-slate-400 leading-tight">
                 Last recorded activity: {selectedClientForView.lastActivity.description} ({selectedClientForView.lastActivity.time})
               </span>
               <button
                 onClick={() => setSelectedClientForView(null)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-[12px] font-semibold text-slate-700 hover:bg-slate-50 transition"
+                className="w-full sm:w-auto rounded-xl border border-slate-200 px-4 py-2 text-[12px] font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
               >
                 Close
               </button>

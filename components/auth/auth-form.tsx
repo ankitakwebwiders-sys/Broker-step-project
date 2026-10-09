@@ -366,6 +366,10 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
             ·{' '}
             <Link href="/terms" className="transition-colors hover:text-white">
               Terms
+            </Link>{' '}
+            ·{' '}
+            <Link href="/admin/login" className="transition-colors hover:text-blue-400 font-medium">
+              Admin Portal
             </Link>
           </p>
         </footer>

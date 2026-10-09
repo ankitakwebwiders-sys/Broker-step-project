@@ -847,30 +847,98 @@ export default function BrokerDashboardPage() {
       {/* ───── 3.2 Leads Requiring Attention + Reconciliation Records ───── */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Leads Requiring Attention */}
-        <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+        <section className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+          <div className="flex items-start sm:items-center justify-between gap-2 border-b border-slate-100 pb-3.5">
             <div>
               <div className="flex items-center gap-2">
                 <span className="flex size-6 items-center justify-center rounded-lg bg-rose-50 text-rose-600 ring-1 ring-rose-100">
                   <AlertCircle className="size-3.5" />
                 </span>
-                <h2 className="text-[15px] font-bold text-slate-900">
+                <h2 className="text-[14px] sm:text-[15px] font-bold text-slate-900">
                   Leads Requiring Attention
                 </h2>
               </div>
-              <p className="mt-0.5 text-[11.5px] text-slate-400">
+              <p className="mt-0.5 text-[11px] sm:text-[11.5px] text-slate-400">
                 Prospects needing immediate outreach or quote finalization
               </p>
             </div>
             <Link
               href="/broker/leads"
-              className="text-[11.5px] font-semibold text-blue-600 transition hover:text-blue-700 hover:underline"
+              className="text-[11.5px] font-semibold text-blue-600 transition hover:text-blue-700 hover:underline shrink-0"
             >
               View all leads
             </Link>
           </div>
 
-          <div className="mt-4 overflow-x-auto custom-scrollbar">
+          {/* Mobile Cards View (Visible on < sm screens) */}
+          <div className="mt-3.5 space-y-2.5 sm:hidden">
+            {[
+              {
+                name: 'Maya Patel',
+                company: 'Patel Hospitality Group',
+                type: 'Commercial Property',
+                status: 'Hot Lead',
+                days: '2 days ago',
+                phone: '+1 (555) 392-1190',
+              },
+              {
+                name: 'Marcus Vance',
+                company: 'Tech Solutions Inc',
+                type: 'Cyber & D&O',
+                status: 'Follow-up Required',
+                days: '5 days ago',
+                phone: '+1 (555) 728-3019',
+              },
+              {
+                name: 'Elena Rostova',
+                company: 'Green Valley Farms',
+                type: 'Farm & Ranch Package',
+                status: 'Quote Pending',
+                days: '8 days ago',
+                phone: '+1 (555) 481-9234',
+              },
+            ].map((lead) => (
+              <div
+                key={lead.name}
+                className="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3 transition hover:border-slate-300"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-bold text-slate-900">{lead.name}</p>
+                    <p className="truncate text-[11px] text-slate-500">{lead.company}</p>
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${
+                      lead.status === 'Hot Lead'
+                        ? 'bg-rose-50 text-rose-600 ring-rose-100'
+                        : lead.status === 'Follow-up Required'
+                        ? 'bg-amber-50 text-amber-600 ring-amber-100'
+                        : 'bg-blue-50 text-blue-600 ring-blue-100'
+                    }`}
+                  >
+                    {lead.status}
+                  </span>
+                </div>
+
+                <div className="mt-2.5 flex items-center justify-between border-t border-slate-200/50 pt-2 text-[11px]">
+                  <span className="truncate text-slate-600 max-w-[60%]">{lead.type}</span>
+                  <span className="text-slate-400 shrink-0">{lead.days}</span>
+                </div>
+
+                <div className="mt-2.5 flex items-center justify-end">
+                  <Link
+                    href="/broker/leads"
+                    className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+                  >
+                    Contact <ArrowUpRight className="size-3" />
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop & Tablet Table View (Hidden on < sm screens) */}
+          <div className="mt-4 hidden sm:block overflow-x-auto custom-scrollbar">
             <table className="w-full min-w-[500px] text-left">
               <thead>
                 <tr className="border-b border-slate-100 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
@@ -952,30 +1020,30 @@ export default function BrokerDashboardPage() {
         </section>
 
         {/* Records Requiring Reconciliation / Review */}
-        <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+        <section className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-slate-100 pb-3.5">
             <div>
               <div className="flex items-center gap-2">
                 <span className="flex size-6 items-center justify-center rounded-lg bg-amber-50 text-amber-600 ring-1 ring-amber-100">
                   <Scale className="size-3.5" />
                 </span>
-                <h2 className="text-[15px] font-bold text-slate-900">
+                <h2 className="text-[14px] sm:text-[15px] font-bold text-slate-900">
                   Records Requiring Reconciliation
                 </h2>
               </div>
-              <p className="mt-0.5 text-[11.5px] text-slate-400">
+              <p className="mt-0.5 text-[11px] sm:text-[11.5px] text-slate-400">
                 Statements and commission deltas awaiting manual match
               </p>
             </div>
             <Link
               href="/broker/reconciliation"
-              className="text-[11.5px] font-semibold text-blue-600 transition hover:text-blue-700 hover:underline"
+              className="text-[11.5px] font-semibold text-blue-600 transition hover:text-blue-700 hover:underline shrink-0"
             >
               View portal
             </Link>
           </div>
 
-          <div className="mt-4 space-y-3">
+          <div className="mt-3.5 sm:mt-4 space-y-2.5 sm:space-y-3">
             {[
               {
                 carrier: 'Travelers Commercial',
@@ -1005,9 +1073,9 @@ export default function BrokerDashboardPage() {
               <Link
                 key={record.carrier}
                 href={record.link}
-                className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 p-3 transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-slate-50/60 hover:shadow-sm"
+                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 rounded-xl border border-slate-200/70 p-3 sm:p-3.5 transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-slate-50/60 hover:shadow-xs"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <div
                     className={`flex size-9 shrink-0 items-center justify-center rounded-lg ring-1 ${record.priority === 'High'
                         ? 'bg-rose-100 text-rose-700 ring-rose-200'
@@ -1018,20 +1086,20 @@ export default function BrokerDashboardPage() {
                   >
                     <FileCheck2 className="size-4" />
                   </div>
-                  <div>
-                    <p className="text-[12.5px] font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
+                  <div className="min-w-0 flex-1 truncate">
+                    <p className="truncate text-[12.5px] font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
                       {record.carrier}
                     </p>
-                    <p className="text-[10.5px] text-slate-400">{record.statement}</p>
+                    <p className="truncate text-[10.5px] text-slate-400">{record.statement}</p>
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <p className="text-[11.5px] font-bold text-slate-900">
+                <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-slate-100/80 pt-2 sm:pt-0 shrink-0">
+                  <p className="text-[12px] sm:text-[11.5px] font-bold text-slate-900">
                     {record.discrepancy}
                   </p>
                   <span
-                    className={`text-[10px] font-semibold ${record.status === 'Discrepancy Found'
+                    className={`text-[10.5px] sm:text-[10px] font-semibold ${record.status === 'Discrepancy Found'
                         ? 'text-rose-600'
                         : record.status === 'Pending Review'
                           ? 'text-amber-600'

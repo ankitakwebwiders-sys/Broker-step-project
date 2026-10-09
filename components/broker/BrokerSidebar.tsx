@@ -285,12 +285,27 @@ export function BrokerSidebar({ active, onActiveChange }: { active: string; onAc
                   </div>
 
                   {hasSub && isExpanded && (
-                    <div className="ml-5 my-1 border-l border-slate-200 pl-2.5 flex flex-col space-y-0.5">
-                      {item.subItems!.map((sub) => (
+                    <div className="ml-5 mt-2.5 mb-1.5 border-l border-slate-200 pl-2.5 flex flex-col space-y-1 pt-1">
+                      {item.subItems!.map((sub, subIdx) => (
                         <Link
                           key={sub.label}
                           href={sub.href}
-                          className="px-2.5 py-1 text-[12px] text-slate-500 hover:text-blue-600 rounded-md hover:bg-slate-50 transition-colors"
+                          onClick={() => {
+                            if (typeof window !== 'undefined') {
+                              const [targetPath, targetQuery] = sub.href.split('?')
+                              if (window.location.pathname === targetPath) {
+                                window.history.pushState(null, '', sub.href)
+                                window.dispatchEvent(
+                                  new CustomEvent('broker-nav-change', {
+                                    detail: { href: sub.href, search: targetQuery ? `?${targetQuery}` : '', pathname: targetPath },
+                                  })
+                                )
+                              }
+                            }
+                          }}
+                          className={`px-2.5 py-1 text-[12px] text-slate-500 hover:text-blue-600 rounded-md hover:bg-slate-50 transition-colors ${
+                            subIdx === 0 ? 'mt-1.5' : ''
+                          }`}
                         >
                           {sub.label}
                         </Link>

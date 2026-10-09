@@ -54,10 +54,11 @@ export default function ClientsPage() {
   // Clients state (interactive client data)
   const [clients, setClients] = useState<ClientItem[]>(initialClients)
 
-  // Filters & Tabs
-  const [activeTab, setActiveTab] = useState<'all' | 'active' | 'inactive'>('all')
+  // Status Filter Tabs
+  const [activeTab, setActiveTab] = useState<string>('All')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'All' | 'Active' | 'Inactive'>('All')
+  const [policyLineFilter, setPolicyLineFilter] = useState('All')
   const [consentFilter, setConsentFilter] = useState<'All' | 'Granted' | 'Pending' | 'Declined' | 'Revoked'>('All')
 
   // Modals & Drawers state
@@ -120,15 +121,35 @@ export default function ClientsPage() {
   const consentGrantedCount = useMemo(() => clients.filter(c => c.marketingConsent.status === 'Granted').length, [clients])
   const consentRate = Math.round((consentGrantedCount / totalClientsCount) * 100) || 0
 
+  // Status Tab Counts
+  const statusCounts = useMemo(() => {
+    return {
+      All: clients.length,
+      Active: clients.filter(c => c.status === 'Active').length,
+      Inactive: clients.filter(c => c.status === 'Inactive').length,
+      'Pending Renewal': clients.filter(c => c.policies.some(p => p.status === 'Pending Renewal')).length,
+      'Consent Granted': clients.filter(c => c.marketingConsent.status === 'Granted').length,
+      'Consent Pending': clients.filter(c => c.marketingConsent.status === 'Pending').length,
+      'Consent Declined': clients.filter(c => c.marketingConsent.status === 'Declined' || c.marketingConsent.status === 'Revoked').length,
+    }
+  }, [clients])
+
   // Filtered Clients List
   const filteredClients = useMemo(() => {
     return clients.filter(client => {
       // Tab filter
-      if (activeTab === 'active' && client.status !== 'Active') return false
-      if (activeTab === 'inactive' && client.status !== 'Inactive') return false
+      if (activeTab === 'Active' && client.status !== 'Active') return false
+      if (activeTab === 'Inactive' && client.status !== 'Inactive') return false
+      if (activeTab === 'Pending Renewal' && !client.policies.some(p => p.status === 'Pending Renewal')) return false
+      if (activeTab === 'Consent Granted' && client.marketingConsent.status !== 'Granted') return false
+      if (activeTab === 'Consent Pending' && client.marketingConsent.status !== 'Pending') return false
+      if (activeTab === 'Consent Declined' && client.marketingConsent.status !== 'Declined' && client.marketingConsent.status !== 'Revoked') return false
 
       // Dropdown status filter
       if (statusFilter !== 'All' && client.status !== statusFilter) return false
+
+      // Policy Line filter
+      if (policyLineFilter !== 'All' && !client.policies.some(p => p.type.toLowerCase().includes(policyLineFilter.toLowerCase()))) return false
 
       // Consent filter
       if (consentFilter !== 'All' && client.marketingConsent.status !== consentFilter) return false
@@ -142,14 +163,15 @@ export default function ClientsPage() {
         const matchesEmail = client.email.toLowerCase().includes(q)
         const matchesBrokerCode = client.brokerCode.toLowerCase().includes(q)
         const matchesIdentifier = client.otherIdentifier.toLowerCase().includes(q)
-        if (!matchesName && !matchesBusiness && !matchesPhone && !matchesEmail && !matchesBrokerCode && !matchesIdentifier) {
+        const matchesPolicy = client.policies.some(p => p.policyNumber.toLowerCase().includes(q) || p.type.toLowerCase().includes(q))
+        if (!matchesName && !matchesBusiness && !matchesPhone && !matchesEmail && !matchesBrokerCode && !matchesIdentifier && !matchesPolicy) {
           return false
         }
       }
 
       return true
     })
-  }, [clients, activeTab, statusFilter, consentFilter, searchQuery])
+  }, [clients, activeTab, statusFilter, policyLineFilter, consentFilter, searchQuery])
 
   // Table horizontal drag-to-scroll state & handlers
   const tableContainerRef = useRef<HTMLDivElement>(null)
@@ -607,63 +629,43 @@ export default function ClientsPage() {
           </div>
         </div>
 
-        {/* ───── Table Section Container ───── */}
-        <section className="mt-7 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-
-          {/* Tabs: All / Active / Inactive (Sections 4.1, 4.2, 4.3) */}
-          <div className="flex flex-col justify-between gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-center">
-            <div className="flex items-center gap-1 rounded-xl bg-slate-100/80 p-1">
-              <button
-                onClick={() => setActiveTab('all')}
-                className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition ${activeTab === 'all'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-900'
-                  }`}
-              >
-                All Clients
-                <span className={`rounded-full px-2 py-0.2 text-[10px] font-semibold ${activeTab === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-600'
-                  }`}>
-                  {totalClientsCount}
-                </span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('active')}
-                className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition ${activeTab === 'active'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-900'
-                  }`}
-              >
-                Active Clients
-                <span className={`rounded-full px-2 py-0.2 text-[10px] font-semibold ${activeTab === 'active' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
-                  }`}>
-                  {activeClientsCount}
-                </span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('inactive')}
-                className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition ${activeTab === 'inactive'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-900'
-                  }`}
-              >
-                Inactive Clients
-                <span className={`rounded-full px-2 py-0.2 text-[10px] font-semibold ${activeTab === 'inactive' ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-600'
-                  }`}>
-                  {inactiveClientsCount}
-                </span>
-              </button>
-            </div>
-
-            {/* Quick Count Info */}
-            <div className="text-[12px] text-slate-500">
-              Showing <span className="font-semibold text-slate-800">{filteredClients.length}</span> of {totalClientsCount} clients
-            </div>
+        {/* ───── 4.1 Filter Tabs Bar ───── */}
+        <div className="mt-7 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-thin">
+            {[
+              { label: 'All Clients', key: 'All' },
+              { label: 'Active', key: 'Active' },
+              { label: 'Inactive', key: 'Inactive' },
+              { label: 'Pending Renewal', key: 'Pending Renewal' },
+              { label: 'Consent Granted', key: 'Consent Granted' },
+              { label: 'Consent Pending', key: 'Consent Pending' },
+              { label: 'Consent Declined', key: 'Consent Declined' },
+            ].map((tab) => {
+              const count = (statusCounts as any)[tab.key] || 0
+              const isActive = activeTab === tab.key
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-all cursor-pointer ${isActive
+                    ? 'bg-slate-950 text-white shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    }`}
+                >
+                  <span>{tab.label}</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                      }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              )
+            })}
           </div>
 
-          {/* Filters Bar: Search & Recommended Select Filters */}
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* ───── Search & Secondary Dropdown Filters ───── */}
+          <div className="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
               <input
@@ -671,12 +673,12 @@ export default function ClientsPage() {
                 placeholder="Search by client name, business, phone, email, identifier..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9 pr-3 text-[12px] outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                className="h-9.5 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9.5 pr-8 text-[12.5px] text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                 >
                   <X className="size-3.5" />
                 </button>
@@ -685,28 +687,47 @@ export default function ClientsPage() {
 
             <div className="flex flex-wrap items-center gap-2">
               {/* Client Status Filter */}
-              <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-600">
-                <span className="text-slate-400">Status:</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11.5px] font-medium text-slate-500">Status:</span>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value as any)}
-                  className="bg-transparent font-medium text-slate-800 outline-none cursor-pointer"
+                  className="h-9 rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
                 >
-                  <option value="All">All</option>
+                  <option value="All">All Statuses</option>
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
                 </select>
               </div>
 
+              {/* Policy Line Filter */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11.5px] font-medium text-slate-500">Line:</span>
+                <select
+                  value={policyLineFilter}
+                  onChange={(e) => setPolicyLineFilter(e.target.value)}
+                  className="h-9 rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+                >
+                  <option value="All">All Lines</option>
+                  <option value="Commercial Auto">Commercial Auto</option>
+                  <option value="General Liability">General Liability</option>
+                  <option value="Commercial Property">Commercial Property</option>
+                  <option value="Professional Liability">Professional Liability</option>
+                  <option value="Workers Comp">Workers Comp</option>
+                  <option value="Business Owners">Business Owners</option>
+                  <option value="Commercial Umbrella">Commercial Umbrella</option>
+                </select>
+              </div>
+
               {/* Marketing Consent Filter */}
-              <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-600">
-                <span className="text-slate-400">Consent:</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11.5px] font-medium text-slate-500">Consent:</span>
                 <select
                   value={consentFilter}
                   onChange={(e) => setConsentFilter(e.target.value as any)}
-                  className="bg-transparent font-medium text-slate-800 outline-none cursor-pointer"
+                  className="h-9 rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
                 >
-                  <option value="All">All</option>
+                  <option value="All">All Consents</option>
                   <option value="Granted">Granted</option>
                   <option value="Pending">Pending</option>
                   <option value="Declined">Declined</option>
@@ -715,24 +736,27 @@ export default function ClientsPage() {
               </div>
 
               {/* Reset Filters */}
-              {(searchQuery || statusFilter !== 'All' || consentFilter !== 'All' || activeTab !== 'all') && (
+              {(searchQuery || statusFilter !== 'All' || policyLineFilter !== 'All' || consentFilter !== 'All' || activeTab !== 'All') && (
                 <button
                   onClick={() => {
                     setSearchQuery('')
                     setStatusFilter('All')
+                    setPolicyLineFilter('All')
                     setConsentFilter('All')
-                    setActiveTab('all')
+                    setActiveTab('All')
                   }}
-                  className="flex items-center gap-1 rounded-xl px-2.5 py-1 text-[11px] font-medium text-blue-600 hover:bg-blue-50 transition"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-2.5 text-[11.5px] font-medium text-slate-600 transition hover:bg-slate-100 cursor-pointer"
                 >
                   <RotateCcw className="size-3" />
-                  Reset
+                  <span>Reset</span>
                 </button>
               )}
             </div>
           </div>
+        </div>
 
-          {/* ───── 4.1 All Clients Listing Table ───── */}
+        {/* ───── 4.1 All Clients Listing Table ───── */}
+        <div className="mt-6 rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden">
           <div
             ref={tableContainerRef}
             onMouseDown={handleMouseDown}
@@ -740,21 +764,21 @@ export default function ClientsPage() {
             onMouseUp={handleMouseUp}
             onMouseMove={handleMouseMove}
             onScroll={checkTableScroll}
-            className={`mt-5 overflow-x-auto rounded-xl border border-slate-200/80 shadow-xs custom-scrollbar-table ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'
+            className={`overflow-x-auto custom-scrollbar-table ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'
               }`}
           >
             <table className="w-full min-w-[1220px] text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200/80 bg-slate-50/60 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                  <th className="px-4 py-3 min-w-[210px]">Client Name</th>
-                  <th className="px-4 py-3 min-w-[170px]">Business Name</th>
-                  <th className="px-4 py-3 min-w-[135px] whitespace-nowrap">Phone</th>
-                  <th className="px-4 py-3 min-w-[185px]">Email</th>
-                  <th className="px-3 py-3 min-w-[110px] whitespace-nowrap">Client Status</th>
-                  <th className="px-3 py-3 min-w-[110px] whitespace-nowrap">Policies</th>
-                  <th className="px-3 py-3 min-w-[125px] whitespace-nowrap">Marketing Consent</th>
-                  <th className="px-4 py-3 min-w-[175px]">Last Activity</th>
-                  <th className="px-4 py-3 text-right min-w-[210px] w-[210px] whitespace-nowrap">Actions</th>
+                <tr className="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold uppercase tracking-wider text-slate-500 select-none">
+                  <th className="px-4 py-3.5 min-w-[210px]">Client Name</th>
+                  <th className="px-4 py-3.5 min-w-[170px]">Business Name</th>
+                  <th className="px-4 py-3.5 min-w-[135px] whitespace-nowrap">Phone</th>
+                  <th className="px-4 py-3.5 min-w-[185px]">Email</th>
+                  <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Client Status</th>
+                  <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Policies</th>
+                  <th className="px-3 py-3.5 min-w-[125px] whitespace-nowrap">Marketing Consent</th>
+                  <th className="px-4 py-3.5 min-w-[175px]">Last Activity</th>
+                  <th className="px-4 py-3.5 text-right min-w-[210px] w-[210px] whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -763,7 +787,7 @@ export default function ClientsPage() {
                     <td colSpan={9} className="py-12 text-center text-slate-400">
                       <Users className="mx-auto size-8 text-slate-300 mb-2" />
                       <p className="text-[13px] font-medium text-slate-600">No clients matched your criteria</p>
-                      <p className="text-[11px] text-slate-400 mt-1">Try resetting the search query or status filter.</p>
+                      <p className="text-[11px] text-slate-400 mt-1">Try selecting another status tab or resetting the search filter.</p>
                     </td>
                   </tr>
                 ) : (
@@ -928,7 +952,7 @@ export default function ClientsPage() {
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
 
       </div>
 

@@ -620,13 +620,7 @@ export default function CommissionsPage() {
         <div className="mt-5 sm:mt-7 grid gap-2.5 sm:gap-3.5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 
           {/* 1. Expected Commission */}
-          <div
-            onClick={() => handleTabSelect('Expected')}
-            className={`relative overflow-hidden rounded-2xl border p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${activeTab === 'Expected'
-                ? 'border-blue-500 bg-blue-50/20 ring-2 ring-blue-500/20 shadow-md'
-                : 'border-slate-200/80 bg-white hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]'
-              }`}
-          >
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
             <div className="flex items-start justify-between">
               <p className="text-[11.5px] font-medium text-slate-500">Expected</p>
               <span className="rounded-md bg-blue-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-blue-600 ring-1 ring-blue-100">
@@ -638,13 +632,7 @@ export default function CommissionsPage() {
           </div>
 
           {/* 2. Paid / Actual Commission */}
-          <div
-            onClick={() => handleTabSelect('Paid')}
-            className={`relative overflow-hidden rounded-2xl border p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${activeTab === 'Paid'
-                ? 'border-emerald-500 bg-emerald-50/20 ring-2 ring-emerald-500/20 shadow-md'
-                : 'border-slate-200/80 bg-white hover:border-emerald-300 hover:shadow-[0_8px_30px_-12px_rgba(16,185,129,0.25)]'
-              }`}
-          >
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-[0_8px_30px_-12px_rgba(16,185,129,0.25)]">
             <div className="flex items-start justify-between">
               <p className="text-[11.5px] font-medium text-slate-500">Actual / Paid</p>
               <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-emerald-700 ring-1 ring-emerald-100">
@@ -656,13 +644,7 @@ export default function CommissionsPage() {
           </div>
 
           {/* 3. Outstanding Commission */}
-          <div
-            onClick={() => handleTabSelect('Outstanding')}
-            className={`relative overflow-hidden rounded-2xl border p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${activeTab === 'Outstanding'
-                ? 'border-amber-500 bg-amber-50/20 ring-2 ring-amber-500/20 shadow-md'
-                : 'border-slate-200/80 bg-white hover:border-amber-300 hover:shadow-[0_8px_30px_-12px_rgba(245,158,11,0.25)]'
-              }`}
-          >
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-[0_8px_30px_-12px_rgba(245,158,11,0.25)]">
             <div className="flex items-start justify-between">
               <p className="text-[11.5px] font-medium text-slate-500">Outstanding</p>
               <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-amber-700 ring-1 ring-amber-100">
@@ -674,13 +656,7 @@ export default function CommissionsPage() {
           </div>
 
           {/* 4. Partial / Short Paid */}
-          <div
-            onClick={() => handleTabSelect('Partial')}
-            className={`relative overflow-hidden rounded-2xl border p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${activeTab === 'Partial'
-                ? 'border-indigo-500 bg-indigo-50/20 ring-2 ring-indigo-500/20 shadow-md'
-                : 'border-slate-200/80 bg-white hover:border-indigo-300 hover:shadow-[0_8px_30px_-12px_rgba(99,102,241,0.25)]'
-              }`}
-          >
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-[0_8px_30px_-12px_rgba(99,102,241,0.25)]">
             <div className="flex items-start justify-between">
               <p className="text-[11.5px] font-medium text-slate-500">Short Paid</p>
               <span className="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-indigo-700 ring-1 ring-indigo-100">
@@ -692,13 +668,7 @@ export default function CommissionsPage() {
           </div>
 
           {/* 5. Chargebacks */}
-          <div
-            onClick={() => handleTabSelect('Chargeback')}
-            className={`relative overflow-hidden rounded-2xl border p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${activeTab === 'Chargeback'
-                ? 'border-rose-500 bg-rose-50/20 ring-2 ring-rose-500/20 shadow-md'
-                : 'border-slate-200/80 bg-white hover:border-rose-300 hover:shadow-[0_8px_30px_-12px_rgba(244,63,94,0.25)]'
-              }`}
-          >
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-[0_8px_30px_-12px_rgba(244,63,94,0.25)]">
             <div className="flex items-start justify-between">
               <p className="text-[11.5px] font-medium text-slate-500">Chargebacks</p>
               <span className="rounded-md bg-rose-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-rose-700 ring-1 ring-rose-100">
@@ -710,13 +680,7 @@ export default function CommissionsPage() {
           </div>
 
           {/* 6. Adjustments */}
-          <div
-            onClick={() => handleTabSelect('Adjustment')}
-            className={`relative overflow-hidden rounded-2xl border p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${activeTab === 'Adjustment'
-                ? 'border-purple-500 bg-purple-50/20 ring-2 ring-purple-500/20 shadow-md'
-                : 'border-slate-200/80 bg-white hover:border-purple-300 hover:shadow-[0_8px_30px_-12px_rgba(168,85,247,0.25)]'
-              }`}
-          >
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-[0_8px_30px_-12px_rgba(168,85,247,0.25)]">
             <div className="flex items-start justify-between">
               <p className="text-[11.5px] font-medium text-slate-500">Adjustments</p>
               <span className="rounded-md bg-purple-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-purple-700 ring-1 ring-purple-100">
@@ -728,13 +692,7 @@ export default function CommissionsPage() {
           </div>
 
           {/* 7. Net Commission */}
-          <div
-            onClick={() => handleTabSelect('All')}
-            className={`relative overflow-hidden rounded-2xl border p-4 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl col-span-2 sm:col-span-1 md:col-span-1 xl:col-span-1 cursor-pointer ${activeTab === 'All'
-                ? 'border-slate-700 bg-slate-950 ring-2 ring-blue-400/40 text-white'
-                : 'border-slate-900/10 bg-slate-900 text-white'
-              }`}
-          >
+          <div className="relative overflow-hidden rounded-2xl border border-slate-900/10 bg-slate-900 text-white p-4 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl col-span-2 sm:col-span-1 md:col-span-1 xl:col-span-1">
             <div className="flex items-start justify-between">
               <p className="text-[11.5px] font-medium text-slate-300">Net Revenue</p>
               <span className="rounded-md bg-white/20 px-1.5 py-0.5 text-[9.5px] font-semibold text-white">

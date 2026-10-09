@@ -73,7 +73,7 @@ export default function EmailVerificationPage() {
 
             {/* Header */}
             <div className="mb-4 text-center sm:text-left">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-blue-700">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0170FE]/20 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#0170FE]">
                 <Mail className="size-3" />
                 Verification
               </div>
@@ -90,7 +90,7 @@ export default function EmailVerificationPage() {
             {/* Info banner */}
             <div className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50/80 p-3.5">
               <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-blue-500/15 ring-1 ring-blue-400/40">
-                <Mail className="size-3 text-blue-600" />
+                <Mail className="size-3 text-[#0170FE]" />
               </span>
               <p className="text-xs leading-5 text-blue-950">
                 Verification email sent! If you don&apos;t see it, check your spam or junk folder.
@@ -101,7 +101,7 @@ export default function EmailVerificationPage() {
             <div className="mt-4 flex flex-col gap-2.5">
               <button
                 onClick={handleVerify}
-                className="cursor-pointer group relative inline-flex h-10 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all hover:bg-blue-600"
+                className="cursor-pointer group relative inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#0170FE] px-5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition-all hover:bg-[#0061e0] hover:shadow-[0_4px_20px_rgba(1,112,254,0.4)]"
               >
                 <span>Verify &amp; Continue</span>
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -110,7 +110,7 @@ export default function EmailVerificationPage() {
               <button
                 onClick={handleResend}
                 disabled={resending}
-                className="cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50"
+                className="cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200/90 bg-white px-5 text-xs sm:text-sm font-semibold text-slate-700 shadow-xs transition hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE] disabled:opacity-50"
               >
                 <RefreshCw className={`size-3.5 ${resending ? 'animate-spin' : ''}`} />
                 {resending ? 'Sending…' : 'Resend email'}
@@ -120,7 +120,7 @@ export default function EmailVerificationPage() {
             <div className="mt-4 border-t border-slate-100 pt-4 text-center">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 transition hover:text-blue-600"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 transition hover:text-[#0170FE]"
               >
                 <ArrowLeft className="size-3.5" />
                 Back to sign in

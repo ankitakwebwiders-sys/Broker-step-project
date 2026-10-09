@@ -235,18 +235,15 @@ export default function LandingPage() {
                   <Magnetic strength={14}>
                     <Link
                       href="/register"
-                      className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_10px_40px_-10px_rgba(59,130,246,0.7)] transition-all hover:shadow-[0_10px_50px_-5px_rgba(59,130,246,0.9)]"
+                      className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-[#0170FE] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#0170FE]/25 transition-all hover:bg-[#0061e0] hover:shadow-[0_10px_35px_-5px_rgba(1,112,254,0.6)]"
                     >
-                      <span className="relative z-10 flex items-center gap-2">
-                        Create Account
-                        <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                      </span>
-                      <span className="absolute inset-0 bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                      Create Account
+                      <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </Magnetic>
                   <Link
                     href="/login"
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white/80 px-7 py-3.5 text-sm font-semibold text-slate-950 shadow-sm backdrop-blur-sm transition-all hover:border-slate-300 hover:bg-white"
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white px-7 py-3.5 text-sm font-semibold text-slate-800 shadow-xs backdrop-blur-sm transition-all hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE]"
                   >
                     Sign In
                   </Link>
@@ -431,7 +428,7 @@ export default function LandingPage() {
               <Magnetic strength={12}>
                 <Link
                   href="/register"
-                  className="mt-8 inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-slate-950/10 transition-all hover:shadow-[0_10px_40px_-10px_rgba(59,130,246,0.7)]"
+                  className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#0170FE] px-6 py-3.5 text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition-all hover:bg-[#0061e0] hover:shadow-[0_10px_35px_-5px_rgba(1,112,254,0.5)]"
                 >
                   See your workspace <ArrowRight className="size-4" />
                 </Link>
@@ -495,12 +492,12 @@ export default function LandingPage() {
                 <Reveal key={plan.name} delay={i * 120} className="h-full">
                   <div
                     className={`relative flex h-full flex-col justify-between rounded-2xl bg-white p-7 sm:p-8 transition-all duration-300 hover:-translate-y-1 ${isPopular
-                      ? 'border-2 border-blue-600 shadow-xl shadow-blue-500/10'
+                      ? 'border-2 border-[#0170FE] shadow-xl shadow-[#0170FE]/10'
                       : 'border border-slate-200/90 shadow-sm hover:shadow-md'
                       }`}
                   >
                     {isPopular && (
-                      <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-5 py-1 text-xs font-bold text-white shadow-sm whitespace-nowrap">
+                      <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-[#0170FE] px-5 py-1 text-xs font-bold text-white shadow-sm whitespace-nowrap">
                         Most Popular
                       </span>
                     )}
@@ -531,7 +528,7 @@ export default function LandingPage() {
 
                       {/* Trial Badge Pill (Centered) */}
                       <div className="mt-5">
-                        <div className="rounded-xl bg-blue-50/80 py-2.5 px-4 text-center text-xs font-semibold text-blue-600 ring-1 ring-blue-100/60">
+                        <div className="rounded-xl bg-blue-50/80 py-2.5 px-4 text-center text-xs font-semibold text-[#0170FE] ring-1 ring-[#0170FE]/20">
                           {plan.trial}
                         </div>
                       </div>
@@ -547,7 +544,7 @@ export default function LandingPage() {
                               key={feature}
                               className="flex items-center gap-3 text-xs sm:text-[13px] text-slate-700"
                             >
-                              <Check className="size-4 shrink-0 text-sky-500 stroke-[2.5]" />
+                              <Check className="size-4 shrink-0 text-[#0170FE] stroke-[2.5]" />
                               <span>{feature}</span>
                             </div>
                           ))}
@@ -560,8 +557,8 @@ export default function LandingPage() {
                       <Link
                         href={`/register?plan=${plan.name.toLowerCase()}`}
                         className={`inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-xl text-sm font-semibold transition-all ${isPopular
-                          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25 hover:bg-blue-700'
-                          : 'border border-blue-600 bg-white text-blue-600 hover:bg-blue-50'
+                          ? 'bg-[#0170FE] text-white shadow-md shadow-[#0170FE]/25 hover:bg-[#0061e0]'
+                          : 'border border-slate-200/90 bg-white text-slate-800 shadow-xs hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE]'
                           }`}
                       >
                         Start Free Trial
@@ -600,8 +597,8 @@ export default function LandingPage() {
                 <Reveal key={step.title} delay={i * 150}>
                   <div className="group relative">
                     <div className="relative mx-auto flex size-14 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-500 group-hover:border-blue-300 group-hover:shadow-[0_0_30px_rgba(59,130,246,0.25)]">
-                      <step.icon className="size-6 text-blue-600" />
-                      <div className="absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-[10px] font-bold text-white shadow-lg">
+                      <step.icon className="size-6 text-[#0170FE]" />
+                      <div className="absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full bg-[#0170FE] text-[10px] font-bold text-white shadow-md">
                         {i + 1}
                       </div>
                     </div>
@@ -623,7 +620,7 @@ export default function LandingPage() {
           <Reveal>
             <div className="text-center">
               <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
-                <HelpCircle className="size-3.5 text-blue-500" />
+                <HelpCircle className="size-3.5 text-[#0170FE]" />
                 Frequently Asked Questions
               </span>
               <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
@@ -642,7 +639,7 @@ export default function LandingPage() {
                 <Reveal key={faq.question} delay={i * 60}>
                   <div
                     className={`overflow-hidden rounded-2xl border transition-all duration-300 ${isOpen
-                      ? 'border-blue-600/60 bg-white shadow-lg shadow-blue-500/5 ring-2 ring-blue-100'
+                      ? 'border-[#0170FE]/60 bg-white shadow-lg shadow-[#0170FE]/5 ring-2 ring-[#0170FE]/20'
                       : 'border-slate-200/90 bg-white/90 hover:border-slate-300 hover:bg-white'
                       }`}
                   >
@@ -657,7 +654,7 @@ export default function LandingPage() {
                       </span>
                       <span
                         className={`flex size-8 shrink-0 items-center justify-center rounded-full transition-transform duration-300 ${isOpen
-                          ? 'rotate-180 bg-blue-600 text-white'
+                          ? 'rotate-180 bg-[#0170FE] text-white'
                           : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                           }`}
                       >
@@ -715,7 +712,7 @@ export default function LandingPage() {
                   <Magnetic strength={16}>
                     <Link
                       href="/register"
-                      className="group inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-8 py-4 text-sm font-semibold text-white shadow-xl shadow-slate-950/15 transition-all hover:shadow-[0_0_40px_rgba(59,130,246,0.5)]"
+                      className="group inline-flex items-center justify-center gap-2 rounded-full bg-[#0170FE] px-8 py-4 text-sm font-semibold text-white shadow-xl shadow-[#0170FE]/25 transition-all hover:bg-[#0061e0] hover:shadow-[0_0_40px_rgba(1,112,254,0.5)]"
                     >
                       Create Your Free Account
                       <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
@@ -723,7 +720,7 @@ export default function LandingPage() {
                   </Magnetic>
                   <Link
                     href="/login"
-                    className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-8 py-4 text-sm font-semibold text-slate-950 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
+                    className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white px-8 py-4 text-sm font-semibold text-slate-800 shadow-xs transition-all hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE]"
                   >
                     Sign In to BrokerStep
                   </Link>

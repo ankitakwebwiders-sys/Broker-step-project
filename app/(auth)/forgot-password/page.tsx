@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
             <span className="hidden sm:inline">Remember your password?</span>
             <Link
               href="/login"
-              className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:border-blue-400 hover:bg-blue-600/25 hover:text-white sm:px-4 sm:py-2"
+              className="inline-flex items-center justify-center rounded-xl border border-white/80 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-900 shadow-xs backdrop-blur-md transition hover:bg-slate-100 hover:text-[#0170FE] sm:px-4 sm:py-2"
             >
               Sign in
             </Link>
@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
 
             {/* Header */}
             <div className="mb-4 text-center sm:text-left">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-blue-700">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0170FE]/20 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#0170FE]">
                 <KeyRound className="size-3" />
                 Password recovery
               </div>
@@ -95,11 +95,11 @@ export default function ForgotPasswordPage() {
                 </label>
                 <div
                   className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'email'
-                    ? 'border-blue-500 ring-2 ring-blue-100'
+                    ? 'border-[#0170FE] ring-2 ring-[#0170FE]/20'
                     : 'border-slate-200 hover:border-slate-300'
                     }`}
                 >
-                  <Mail className={`ml-3.5 size-4 transition-colors ${focused === 'email' ? 'text-blue-500' : 'text-slate-400'}`} />
+                  <Mail className={`ml-3.5 size-4 transition-colors ${focused === 'email' ? 'text-[#0170FE]' : 'text-slate-400'}`} />
                   <input
                     id="email"
                     type="email"
@@ -119,7 +119,7 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   onClick={handleVerify}
-                  className="group relative cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all hover:bg-blue-600"
+                  className="group relative cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#0170FE] px-5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition-all hover:bg-[#0061e0] hover:shadow-[0_4px_20px_rgba(1,112,254,0.4)]"
                 >
                   <span>Verify & Reset Password</span>
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -129,7 +129,7 @@ export default function ForgotPasswordPage() {
                   type="button"
                   onClick={handleResend}
                   disabled={resending}
-                  className="cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50"
+                  className="cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200/90 bg-white px-5 text-xs sm:text-sm font-semibold text-slate-700 shadow-xs transition hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE] disabled:opacity-50"
                 >
                   <RefreshCw className={`size-3.5 ${resending ? 'animate-spin' : ''}`} />
                   {resending ? 'Sending…' : 'Resend'}
@@ -140,7 +140,7 @@ export default function ForgotPasswordPage() {
             <div className="mt-4 border-t border-slate-100 pt-4 text-center">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 transition hover:text-blue-600"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 transition hover:text-[#0170FE]"
               >
                 <ArrowLeft className="size-3.5" />
                 Back to sign in

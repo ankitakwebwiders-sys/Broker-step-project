@@ -42,7 +42,7 @@ export default function VerifyPage() {
             <span className="hidden sm:inline">Already verified?</span>
             <Link
               href="/login"
-              className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:border-blue-400 hover:bg-blue-600/25 hover:text-white sm:px-4 sm:py-2"
+              className="inline-flex items-center justify-center rounded-xl border border-white/80 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-900 shadow-xs backdrop-blur-md transition hover:bg-slate-100 hover:text-[#0170FE] sm:px-4 sm:py-2"
             >
               Sign in
             </Link>
@@ -55,7 +55,7 @@ export default function VerifyPage() {
 
             {/* Header */}
             <div className="mb-4 text-center sm:text-left">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-blue-700">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0170FE]/20 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#0170FE]">
                 <Mail className="size-3" />
                 Verification
               </div>
@@ -78,7 +78,7 @@ export default function VerifyPage() {
             <div className="mt-4">
               <Link
                 href="/login"
-                className="group relative inline-flex h-10 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all hover:bg-blue-600"
+                className="group relative inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#0170FE] px-5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition-all hover:bg-[#0061e0] hover:shadow-[0_4px_20px_rgba(1,112,254,0.4)]"
               >
                 <span>Back to sign in</span>
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />

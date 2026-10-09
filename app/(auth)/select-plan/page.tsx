@@ -45,7 +45,7 @@ export default function SelectPlanPage() {
 
       <main className="mx-auto max-w-7xl px-5 py-28 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#0170FE]">
             Choose your membership
           </p>
           <h1 className="mt-4 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
@@ -66,12 +66,12 @@ export default function SelectPlanPage() {
               <div
                 key={plan.name}
                 className={`relative flex h-full flex-col justify-between rounded-2xl bg-white p-7 sm:p-8 transition-all duration-300 hover:-translate-y-1 ${isPopular || isSelected
-                  ? 'border-2 border-blue-600 shadow-xl shadow-blue-500/10'
+                  ? 'border-2 border-[#0170FE] shadow-xl shadow-[#0170FE]/10'
                   : 'border border-slate-200/90 shadow-sm hover:shadow-md'
                   }`}
               >
                 {isPopular && (
-                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-5 py-1 text-xs font-bold text-white shadow-sm whitespace-nowrap">
+                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-[#0170FE] px-5 py-1 text-xs font-bold text-white shadow-sm whitespace-nowrap">
                     Most Popular
                   </span>
                 )}
@@ -102,7 +102,7 @@ export default function SelectPlanPage() {
 
                   {/* Trial Badge Pill (Centered) */}
                   <div className="mt-5">
-                    <div className="rounded-xl bg-blue-50/80 py-2.5 px-4 text-center text-xs font-semibold text-blue-600 ring-1 ring-blue-100/60">
+                    <div className="rounded-xl bg-blue-50/80 py-2.5 px-4 text-center text-xs font-semibold text-[#0170FE] ring-1 ring-[#0170FE]/20">
                       {plan.trial}
                     </div>
                   </div>
@@ -118,7 +118,7 @@ export default function SelectPlanPage() {
                           key={feature}
                           className="flex items-center gap-3 text-xs sm:text-[13px] text-slate-700"
                         >
-                          <Check className="size-4 shrink-0 text-sky-500 stroke-[2.5]" />
+                          <Check className="size-4 shrink-0 text-[#0170FE] stroke-[2.5]" />
                           <span>{feature}</span>
                         </div>
                       ))}
@@ -132,8 +132,8 @@ export default function SelectPlanPage() {
                     type="button"
                     onClick={() => handleSelectPlan(plan.name)}
                     className={`inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-xl text-sm font-semibold transition-all ${isPopular || isSelected
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25 hover:bg-blue-700'
-                      : 'border border-blue-600 bg-white text-blue-600 hover:bg-blue-50'
+                      ? 'bg-[#0170FE] text-white shadow-md shadow-[#0170FE]/25 hover:bg-[#0061e0]'
+                      : 'border border-slate-200/90 bg-white text-slate-800 shadow-xs hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE]'
                       }`}
                   >
                     Start Free Trial

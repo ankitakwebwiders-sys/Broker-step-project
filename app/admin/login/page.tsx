@@ -69,7 +69,7 @@ export default function AdminLoginPage() {
             <span className="hidden sm:inline">Broker Portal?</span>
             <Link
               href="/login"
-              className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:border-blue-400 hover:bg-blue-600/25 hover:text-white sm:px-4 sm:py-2"
+              className="inline-flex items-center justify-center rounded-xl border border-white/80 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-900 shadow-xs backdrop-blur-md transition hover:bg-slate-100 hover:text-[#0170FE] sm:px-4 sm:py-2"
             >
               Broker sign in
             </Link>
@@ -81,7 +81,7 @@ export default function AdminLoginPage() {
           <div className="w-full max-w-[440px] rounded-2xl border border-white/20 bg-white p-4 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] sm:rounded-3xl sm:p-6">
             {/* Header */}
             <div className="mb-3 text-center sm:text-left sm:mb-4">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-blue-700">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0170FE]/20 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#0170FE]">
                 <Sparkles className="size-3" />
                 Super Admin
               </div>
@@ -105,13 +105,13 @@ export default function AdminLoginPage() {
                 <div
                   className={`relative flex items-center rounded-xl border bg-white transition-all ${
                     focused === 'email'
-                      ? 'border-blue-500 ring-2 ring-blue-100'
+                      ? 'border-[#0170FE] ring-2 ring-[#0170FE]/20'
                       : 'border-slate-200 hover:border-slate-300'
                   }`}
                 >
                   <Mail
                     className={`ml-3.5 size-3.5 transition-colors sm:size-4 ${
-                      focused === 'email' ? 'text-blue-500' : 'text-slate-400'
+                      focused === 'email' ? 'text-[#0170FE]' : 'text-slate-400'
                     }`}
                   />
                   <input
@@ -136,13 +136,13 @@ export default function AdminLoginPage() {
                 <div
                   className={`relative flex items-center rounded-xl border bg-white transition-all ${
                     focused === 'password'
-                      ? 'border-blue-500 ring-2 ring-blue-100'
+                      ? 'border-[#0170FE] ring-2 ring-[#0170FE]/20'
                       : 'border-slate-200 hover:border-slate-300'
                   }`}
                 >
                   <Lock
                     className={`ml-3.5 size-4 transition-colors ${
-                      focused === 'password' ? 'text-blue-500' : 'text-slate-400'
+                      focused === 'password' ? 'text-[#0170FE]' : 'text-slate-400'
                     }`}
                   />
                   <input
@@ -171,7 +171,7 @@ export default function AdminLoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="group cursor-pointer relative mt-1 inline-flex h-9.5 items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all hover:bg-blue-600 disabled:opacity-70 sm:h-10"
+                className="group cursor-pointer relative mt-1 inline-flex h-9.5 items-center justify-center gap-2 rounded-xl bg-[#0170FE] px-5 text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition-all hover:bg-[#0061e0] hover:shadow-[0_4px_20px_rgba(1,112,254,0.4)] disabled:opacity-70 sm:h-10"
               >
                 {loading ? (
                   <>

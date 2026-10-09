@@ -69,7 +69,11 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
             </span>
             <Link
               href={isSignUp ? '/login' : '/register'}
-              className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:border-blue-400 hover:bg-blue-600/25 hover:text-white sm:px-4 sm:py-2"
+              className={`inline-flex items-center justify-center rounded-xl px-3.5 py-1.5 text-xs font-semibold backdrop-blur-md transition sm:px-4 sm:py-2 ${
+                isSignUp
+                  ? 'border border-white/80 bg-white text-slate-900 shadow-xs hover:bg-slate-100 hover:text-[#0170FE]'
+                  : 'bg-[#0170FE] text-white shadow-md shadow-[#0170FE]/25 hover:bg-[#0061e0]'
+              }`}
             >
               {isSignUp ? 'Sign in' : 'Create account'}
             </Link>
@@ -84,7 +88,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
           >
             {/* Header */}
             <div className="mb-3 text-center sm:text-left sm:mb-4">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-blue-700">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0170FE]/20 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#0170FE]">
                 <Sparkles className="size-3" />
                 {isSignUp ? 'Get started' : 'Welcome back'}
               </div>
@@ -111,12 +115,12 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
                     </label>
                     <div
                       className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'name'
-                        ? 'border-blue-500 ring-2 ring-blue-100'
+                        ? 'border-[#0170FE] ring-2 ring-[#0170FE]/20'
                         : 'border-slate-200 hover:border-slate-300'
                         }`}
                     >
                       <User
-                        className={`ml-3 size-3.5 transition-colors ${focused === 'name' ? 'text-blue-500' : 'text-slate-400'
+                        className={`ml-3 size-3.5 transition-colors ${focused === 'name' ? 'text-[#0170FE]' : 'text-slate-400'
                           }`}
                       />
                       <input
@@ -139,12 +143,12 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
                     </label>
                     <div
                       className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'phone'
-                        ? 'border-blue-500 ring-2 ring-blue-100'
+                        ? 'border-[#0170FE] ring-2 ring-[#0170FE]/20'
                         : 'border-slate-200 hover:border-slate-300'
                         }`}
                     >
                       <Phone
-                        className={`ml-3 size-3.5 transition-colors ${focused === 'phone' ? 'text-blue-500' : 'text-slate-400'
+                        className={`ml-3 size-3.5 transition-colors ${focused === 'phone' ? 'text-[#0170FE]' : 'text-slate-400'
                           }`}
                       />
                       <input
@@ -170,12 +174,12 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
                 </label>
                 <div
                   className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'email'
-                    ? 'border-blue-500 ring-2 ring-blue-100'
+                    ? 'border-[#0170FE] ring-2 ring-[#0170FE]/20'
                     : 'border-slate-200 hover:border-slate-300'
                     }`}
                 >
                   <Mail
-                    className={`ml-3.5 size-3.5 transition-colors sm:size-4 ${focused === 'email' ? 'text-blue-500' : 'text-slate-400'
+                    className={`ml-3.5 size-3.5 transition-colors sm:size-4 ${focused === 'email' ? 'text-[#0170FE]' : 'text-slate-400'
                       }`}
                   />
                   <input
@@ -201,12 +205,12 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
                     </label>
                     <div
                       className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'password'
-                        ? 'border-blue-500 ring-2 ring-blue-100'
+                        ? 'border-[#0170FE] ring-2 ring-[#0170FE]/20'
                         : 'border-slate-200 hover:border-slate-300'
                         }`}
                     >
                       <Lock
-                        className={`ml-3 size-3.5 transition-colors ${focused === 'password' ? 'text-blue-500' : 'text-slate-400'
+                        className={`ml-3 size-3.5 transition-colors ${focused === 'password' ? 'text-[#0170FE]' : 'text-slate-400'
                           }`}
                       />
                       <input
@@ -237,12 +241,12 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
                     </label>
                     <div
                       className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'confirmPassword'
-                        ? 'border-blue-500 ring-2 ring-blue-100'
+                        ? 'border-[#0170FE] ring-2 ring-[#0170FE]/20'
                         : 'border-slate-200 hover:border-slate-300'
                         }`}
                     >
                       <Lock
-                        className={`ml-3 size-3.5 transition-colors ${focused === 'confirmPassword' ? 'text-blue-500' : 'text-slate-400'
+                        className={`ml-3 size-3.5 transition-colors ${focused === 'confirmPassword' ? 'text-[#0170FE]' : 'text-slate-400'
                           }`}
                       />
                       <input
@@ -275,19 +279,19 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
                     </label>
                     <Link
                       href="/forgot-password"
-                      className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline underline-offset-4"
+                      className="text-xs font-medium text-[#0170FE] hover:text-[#0061e0] hover:underline underline-offset-4"
                     >
                       Forgot password?
                     </Link>
                   </div>
                   <div
                     className={`relative flex items-center rounded-xl border bg-white transition-all ${focused === 'password'
-                      ? 'border-blue-500 ring-2 ring-blue-100'
+                      ? 'border-[#0170FE] ring-2 ring-[#0170FE]/20'
                       : 'border-slate-200 hover:border-slate-300'
                       }`}
                   >
                     <Lock
-                      className={`ml-3.5 size-4 transition-colors ${focused === 'password' ? 'text-blue-500' : 'text-slate-400'
+                      className={`ml-3.5 size-4 transition-colors ${focused === 'password' ? 'text-[#0170FE]' : 'text-slate-400'
                         }`}
                     />
                     <input
@@ -317,7 +321,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="group cursor-pointer relative mt-1 inline-flex h-9.5 items-center justify-center gap-2 overflow-hidden rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all hover:bg-blue-600 disabled:opacity-70 sm:h-10"
+                className="group cursor-pointer relative mt-1 inline-flex h-9.5 items-center justify-center gap-2 rounded-xl bg-[#0170FE] px-5 text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition-all hover:bg-[#0061e0] hover:shadow-[0_4px_20px_rgba(1,112,254,0.4)] disabled:opacity-70 sm:h-10"
               >
                 {loading ? (
                   <>
@@ -337,11 +341,11 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
             {isSignUp && (
               <p className="mt-2 text-center text-[10px] leading-tight text-slate-500 sm:text-[11px]">
                 By signing up, you agree to our{' '}
-                <Link href="/terms" className="font-medium text-slate-700 hover:text-blue-600 hover:underline">
+                <Link href="/terms" className="font-medium text-slate-700 hover:text-[#0170FE] hover:underline">
                   Terms
                 </Link>{' '}
                 and{' '}
-                <Link href="/privacy" className="font-medium text-slate-700 hover:text-blue-600 hover:underline">
+                <Link href="/privacy" className="font-medium text-slate-700 hover:text-[#0170FE] hover:underline">
                   Privacy Policy
                 </Link>
                 .

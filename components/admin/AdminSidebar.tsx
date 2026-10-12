@@ -154,7 +154,7 @@ export const adminNavSections: AdminNavSectionDef[] = [
 
 export function AdminLogo() {
   return (
-    <Link href="/admin/dashboard" className="inline-flex items-center transition-opacity hover:opacity-90">
+    <Link href="/" className="inline-flex items-center transition-opacity hover:opacity-90">
       <Image
         src="/images/logos/broker-dark-theme.png"
         alt="BrokerStep Logo"
@@ -247,41 +247,37 @@ function NavItem({
   return (
     <div className="flex flex-col">
       <div
-        className={`group relative flex w-full items-center rounded-xl transition-all duration-200 ${
-          active
-            ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold shadow-md shadow-blue-500/25'
-            : 'text-slate-300 hover:bg-white/[0.07] hover:text-white font-medium'
-        }`}
+        className={`group relative flex w-full items-center rounded-xl transition-all duration-200 ${active
+          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold shadow-md shadow-blue-500/25'
+          : 'text-slate-300 hover:bg-white/[0.07] hover:text-white font-medium'
+          }`}
       >
         <Link
           href={item.href}
           onClick={handleParentClick}
-          className="flex flex-1 items-center gap-3 px-3 py-2.5 text-[13px]"
+          className="flex flex-1 items-center gap-3 px-3 py-2.5 text-sm"
         >
           <Icon
-            className={`size-[18px] shrink-0 transition-colors ${
-              active ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'
-            }`}
+            className={`size-[18px] shrink-0 transition-colors ${active ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'
+              }`}
           />
           <span className="flex-1 truncate">{item.label}</span>
           {item.count && (
             <span
-              className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${
-                active
-                  ? 'bg-white/20 text-white font-semibold'
-                  : 'bg-slate-800 text-slate-300 border border-slate-700/60 group-hover:bg-slate-700/80 group-hover:text-white'
-              }`}
+              className={`rounded-full px-2 py-0.5 text-xs font-semibold transition-colors ${active
+                ? 'bg-white/20 text-white font-semibold'
+                : 'bg-slate-800 text-slate-300 border border-slate-700/60 group-hover:bg-slate-700/80 group-hover:text-white'
+                }`}
             >
               {item.count}
             </span>
           )}
           {item.badge && (
             <span
-              className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase ${
-                active
-                  ? 'bg-white/25 text-white'
-                  : 'bg-blue-500/15 text-blue-400 border border-blue-400/30'
-              }`}
+              className={`rounded-md px-1.5 py-0.5 text-xs font-bold tracking-wide uppercase ${active
+                ? 'bg-white/25 text-white'
+                : 'bg-blue-500/15 text-blue-400 border border-blue-400/30'
+                }`}
             >
               {item.badge}
             </span>
@@ -296,17 +292,15 @@ function NavItem({
               e.stopPropagation()
               onToggleExpand()
             }}
-            className={`p-2 mr-1 rounded-lg transition-colors cursor-pointer ${
-              active
-                ? 'text-white/80 hover:text-white hover:bg-white/10'
-                : 'text-slate-400 hover:text-white hover:bg-white/10'
-            }`}
+            className={`p-2 mr-1 rounded-lg transition-colors cursor-pointer ${active
+              ? 'text-white/80 hover:text-white hover:bg-white/10'
+              : 'text-slate-400 hover:text-white hover:bg-white/10'
+              }`}
             aria-label={`Toggle ${item.label} submenus`}
           >
             <ChevronDown
-              className={`size-3.5 transition-transform duration-200 ${
-                expanded ? 'rotate-180' : ''
-              }`}
+              className={`size-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''
+                }`}
             />
           </button>
         )}
@@ -322,17 +316,15 @@ function NavItem({
                 key={sub.label + sub.href}
                 href={sub.href}
                 onClick={(e) => handleSubClick(e, sub.href)}
-                className={`group relative flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                  subIdx === 0 ? 'mt-1.5' : ''
-                } ${
-                  isSubActive
+                className={`group relative flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs sm:text-[13px] font-medium transition-all cursor-pointer ${subIdx === 0 ? 'mt-1.5' : ''
+                  } ${isSubActive
                     ? 'bg-blue-500/15 text-blue-400 font-semibold -ml-[11px] pl-[9px] border-l-2 border-blue-500'
                     : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
-                }`}
+                  }`}
               >
                 <span className="truncate">{sub.label}</span>
                 {sub.count && (
-                  <span className="rounded px-1.5 py-0.2 text-[10px] font-semibold bg-slate-800/80 text-slate-400">
+                  <span className="rounded px-1.5 py-0.5 text-xs font-semibold bg-slate-800/80 text-slate-400">
                     {sub.count}
                   </span>
                 )}
@@ -457,7 +449,7 @@ export function AdminSidebar({
       <div className="flex flex-1 flex-col space-y-4 overflow-y-auto pr-1 scrollbar-thin">
         {adminNavSections.map((section) => (
           <div key={section.label}>
-            <p className="mb-1.5 px-3 text-[10px] font-bold tracking-[0.16em] text-slate-400 uppercase">
+            <p className="mb-2 px-3 text-xs font-bold tracking-wider text-slate-400 uppercase">
               {section.label}
             </p>
             <div className="flex flex-col gap-1">
@@ -487,14 +479,14 @@ export function AdminSidebar({
             onClick={onCloseMobile}
             className="flex items-center gap-2.5 min-w-0 flex-1"
           >
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-[11px] font-bold text-white shadow-sm">
+            <div className="flex size-8.5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-sm">
               AD
             </div>
             <div className="truncate">
-              <p className="truncate text-[12px] font-semibold text-slate-200 leading-tight">
+              <p className="truncate text-sm font-semibold text-slate-200 leading-tight">
                 Admin User
               </p>
-              <p className="truncate text-[10px] text-slate-400 leading-tight">
+              <p className="truncate text-xs text-slate-400 leading-tight mt-0.5">
                 System Administrator
               </p>
             </div>

@@ -6,11 +6,12 @@ import Image from 'next/image'
 import { ArrowRight, Menu, X } from 'lucide-react'
 
 const navLinks = [
-  { href: '#platform', label: 'Benefits' },
-  { href: '#features', label: 'Features' },
-  { href: '#pricing', label: 'Pricing' },
-  { href: '#workflow', label: 'How It Works' },
-  { href: '#faq', label: 'FAQ' },
+  { href: '/#platform', label: 'Benefits' },
+  { href: '/#features', label: 'Features' },
+  { href: '/#pricing', label: 'Pricing' },
+  { href: '/#workflow', label: 'How It Works' },
+  { href: '/#faq', label: 'FAQ' },
+  { href: '/contact', label: 'Contact' },
 ]
 
 export function Navbar() {
@@ -33,13 +34,13 @@ export function Navbar() {
         {/* Desktop Navigation Links */}
         <div className="hidden items-center gap-1 rounded-full border border-slate-200 bg-white/80 p-1 shadow-xs md:flex">
           {navLinks.map((item) => (
-            <a
+            <Link
               key={item.href}
               href={item.href}
               className="rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-950"
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -79,14 +80,14 @@ export function Navbar() {
         <div className="border-t border-slate-200/80 bg-white/95 px-4 pt-3 pb-5 backdrop-blur-xl md:hidden animate-in slide-in-from-top-2 duration-200 shadow-xl">
           <div className="flex flex-col space-y-1">
             {navLinks.map((item) => (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className="rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950"
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </div>
 

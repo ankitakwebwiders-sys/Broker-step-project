@@ -386,43 +386,43 @@ export default function CommissionsPage() {
     switch (status) {
       case 'Reconciled':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-200 whitespace-nowrap">
-            <CheckCircle2 className="size-2.5 text-emerald-600 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200 whitespace-nowrap">
+            <CheckCircle2 className="size-3 text-emerald-600 shrink-0" />
             Reconciled
           </span>
         )
       case 'Pending':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-200 whitespace-nowrap">
-            <Clock className="size-2.5 text-amber-500 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200 whitespace-nowrap">
+            <Clock className="size-3 text-amber-500 shrink-0" />
             Pending
           </span>
         )
       case 'Partial Paid':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 ring-1 ring-indigo-200 whitespace-nowrap">
-            <Scale className="size-2.5 text-indigo-500 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-200 whitespace-nowrap">
+            <Scale className="size-3 text-indigo-500 shrink-0" />
             Partial Paid
           </span>
         )
       case 'Discrepancy':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 ring-1 ring-rose-200 whitespace-nowrap">
-            <AlertCircle className="size-2.5 text-rose-500 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-200 whitespace-nowrap">
+            <AlertCircle className="size-3 text-rose-500 shrink-0" />
             Discrepancy
           </span>
         )
       case 'In Review':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 ring-1 ring-blue-200 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-blue-200 whitespace-nowrap">
             <span className="size-1.5 rounded-full bg-blue-500 animate-pulse shrink-0" />
             In Review
           </span>
         )
       case 'Chargeback':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-800 ring-1 ring-rose-300 whitespace-nowrap">
-            <TrendingDown className="size-2.5 text-rose-600 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-800 ring-1 ring-rose-300 whitespace-nowrap">
+            <TrendingDown className="size-3 text-rose-600 shrink-0" />
             Chargeback
           </span>
         )
@@ -434,43 +434,43 @@ export default function CommissionsPage() {
     switch (type) {
       case 'New Business':
         return (
-          <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700 ring-1 ring-blue-200 whitespace-nowrap">
+          <span className="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-blue-200 whitespace-nowrap">
             New Business
           </span>
         )
       case 'Renewal':
         return (
-          <span className="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-medium text-purple-700 ring-1 ring-purple-200 whitespace-nowrap">
+          <span className="inline-flex items-center rounded-md bg-purple-50 px-2.5 py-0.5 text-xs font-semibold text-purple-700 ring-1 ring-purple-200 whitespace-nowrap">
             Renewal
           </span>
         )
       case 'Endorsement':
         return (
-          <span className="inline-flex items-center rounded-md bg-sky-50 px-2 py-0.5 text-[10px] font-medium text-sky-700 ring-1 ring-sky-200 whitespace-nowrap">
+          <span className="inline-flex items-center rounded-md bg-sky-50 px-2.5 py-0.5 text-xs font-semibold text-sky-700 ring-1 ring-sky-200 whitespace-nowrap">
             Endorsement
           </span>
         )
       case 'Chargeback':
         return (
-          <span className="inline-flex items-center rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-medium text-rose-700 ring-1 ring-rose-200 whitespace-nowrap">
+          <span className="inline-flex items-center rounded-md bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-200 whitespace-nowrap">
             Chargeback
           </span>
         )
       case 'Adjustment':
         return (
-          <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 ring-1 ring-amber-200 whitespace-nowrap">
+          <span className="inline-flex items-center rounded-md bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200 whitespace-nowrap">
             Adjustment
           </span>
         )
       case 'Cancellation':
         return (
-          <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700 ring-1 ring-slate-200 whitespace-nowrap">
+          <span className="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 whitespace-nowrap">
             Cancellation
           </span>
         )
       case 'Bonus / Additional':
         return (
-          <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700 ring-1 ring-emerald-200 whitespace-nowrap">
+          <span className="inline-flex items-center rounded-md bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200 whitespace-nowrap">
             Bonus
           </span>
         )
@@ -624,33 +624,33 @@ export default function CommissionsPage() {
       <div>
 
         {/* ───── Header ───── */}
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <p className="mb-1 inline-flex items-center gap-1.5 text-[11.5px] sm:text-[12px] font-medium text-blue-600">
+            <p className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600">
               <span className="size-1.5 rounded-full bg-blue-500" />
               Broker Workspace · Commission Accounting &amp; Reconciliation
             </p>
-            <h1 className="text-[24px] sm:text-[28px] font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
               Commissions
             </h1>
-            <p className="mt-0.5 text-[12px] sm:text-[13px] text-slate-500">
+            <p className="mt-1 text-sm sm:text-[15px] text-slate-500 leading-relaxed">
               Track expected revenue, reconcile carrier statement payouts, and audit commission discrepancies.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
             <button
               onClick={() => alert(`Exporting ${filteredCommissions.length} commission ledger rows to CSV...`)}
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 sm:px-3.5 py-2 text-[12px] font-medium text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
             >
-              <Download className="size-3.5 sm:size-4 text-slate-500" />
+              <Download className="size-4 text-slate-500" />
               <span>Export CSV</span>
             </button>
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-950 px-3 sm:px-3.5 py-2 text-[12px] font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.5)] cursor-pointer"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.5)] cursor-pointer"
             >
-              <Plus className="size-3.5 sm:size-4 transition-transform group-hover:rotate-90" />
+              <Plus className="size-4 transition-transform group-hover:rotate-90" />
               <span>Log Transaction</span>
             </button>
           </div>
@@ -662,91 +662,91 @@ export default function CommissionsPage() {
           {/* 1. Expected Commission */}
           <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-[11.5px] font-medium text-slate-500">Expected</p>
-              <span className="rounded-md bg-blue-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-blue-600 ring-1 ring-blue-100">
+              <p className="text-sm font-medium text-slate-500">Expected</p>
+              <span className="rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600 ring-1 ring-blue-100">
                 Calculated
               </span>
             </div>
-            <p className="mt-2.5 text-[20px] font-semibold tracking-[-0.04em] text-slate-900">{fmt(totalExpected)}</p>
-            <p className="mt-1 text-[10.5px] text-slate-400">Total projected book</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-mono">{fmt(totalExpected)}</p>
+            <p className="mt-1 text-xs text-slate-400">Total projected book</p>
           </div>
 
           {/* 2. Paid / Actual Commission */}
           <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-[0_8px_30px_-12px_rgba(16,185,129,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-[11.5px] font-medium text-slate-500">Actual / Paid</p>
-              <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-emerald-700 ring-1 ring-emerald-100">
+              <p className="text-sm font-medium text-slate-500">Actual / Paid</p>
+              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
                 Cleared
               </span>
             </div>
-            <p className="mt-2.5 text-[20px] font-semibold tracking-[-0.04em] text-emerald-600">{fmt(totalPaidActual)}</p>
-            <p className="mt-1 text-[10.5px] text-slate-400">Deposited remittances</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-600 font-mono">{fmt(totalPaidActual)}</p>
+            <p className="mt-1 text-xs text-slate-400">Deposited remittances</p>
           </div>
 
           {/* 3. Outstanding Commission */}
           <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-[0_8px_30px_-12px_rgba(245,158,11,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-[11.5px] font-medium text-slate-500">Outstanding</p>
-              <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-amber-700 ring-1 ring-amber-100">
+              <p className="text-sm font-medium text-slate-500">Outstanding</p>
+              <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-100">
                 Uncollected
               </span>
             </div>
-            <p className="mt-2.5 text-[20px] font-semibold tracking-[-0.04em] text-amber-600">{fmt(totalOutstanding)}</p>
-            <p className="mt-1 text-[10.5px] text-slate-400">Awaiting statements</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-600 font-mono">{fmt(totalOutstanding)}</p>
+            <p className="mt-1 text-xs text-slate-400">Awaiting statements</p>
           </div>
 
           {/* 4. Partial / Short Paid */}
           <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-[0_8px_30px_-12px_rgba(99,102,241,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-[11.5px] font-medium text-slate-500">Short Paid</p>
-              <span className="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-indigo-700 ring-1 ring-indigo-100">
+              <p className="text-sm font-medium text-slate-500">Short Paid</p>
+              <span className="rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-100">
                 Variance
               </span>
             </div>
-            <p className="mt-2.5 text-[20px] font-semibold tracking-[-0.04em] text-indigo-600">{fmt(totalPartialShortPaid)}</p>
-            <p className="mt-1 text-[10.5px] text-slate-400">Carrier rate delta</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-indigo-600 font-mono">{fmt(totalPartialShortPaid)}</p>
+            <p className="mt-1 text-xs text-slate-400">Carrier rate delta</p>
           </div>
 
           {/* 5. Chargebacks */}
           <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-[0_8px_30px_-12px_rgba(244,63,94,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-[11.5px] font-medium text-slate-500">Chargebacks</p>
-              <span className="rounded-md bg-rose-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-rose-700 ring-1 ring-rose-100">
+              <p className="text-sm font-medium text-slate-500">Chargebacks</p>
+              <span className="rounded-md bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-100">
                 Clawbacks
               </span>
             </div>
-            <p className="mt-2.5 text-[20px] font-semibold tracking-[-0.04em] text-rose-600">-{fmt(totalChargebacks)}</p>
-            <p className="mt-1 text-[10.5px] text-slate-400">Cancelled / returned</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-rose-600 font-mono">-{fmt(totalChargebacks)}</p>
+            <p className="mt-1 text-xs text-slate-400">Cancelled / returned</p>
           </div>
 
           {/* 6. Adjustments */}
           <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-[0_8px_30px_-12px_rgba(168,85,247,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-[11.5px] font-medium text-slate-500">Adjustments</p>
-              <span className="rounded-md bg-purple-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-purple-700 ring-1 ring-purple-100">
+              <p className="text-sm font-medium text-slate-500">Adjustments</p>
+              <span className="rounded-md bg-purple-50 px-2 py-0.5 text-xs font-semibold text-purple-700 ring-1 ring-purple-100">
                 Audits &amp; Fees
               </span>
             </div>
-            <p className="mt-2.5 text-[20px] font-semibold tracking-[-0.04em] text-slate-900">{fmt(totalAdjustments)}</p>
-            <p className="mt-1 text-[10.5px] text-slate-400">Corrections net</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-mono">{fmt(totalAdjustments)}</p>
+            <p className="mt-1 text-xs text-slate-400">Corrections net</p>
           </div>
 
           {/* 7. Net Commission */}
           <div className="relative overflow-hidden rounded-2xl border border-slate-900/10 bg-slate-900 text-white p-4 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl col-span-2 sm:col-span-1 md:col-span-1 xl:col-span-1">
             <div className="flex items-start justify-between">
-              <p className="text-[11.5px] font-medium text-slate-300">Net Revenue</p>
-              <span className="rounded-md bg-white/20 px-1.5 py-0.5 text-[9.5px] font-semibold text-white">
+              <p className="text-sm font-medium text-slate-300">Net Revenue</p>
+              <span className="rounded-md bg-white/20 px-2 py-0.5 text-xs font-semibold text-white">
                 Total Net
               </span>
             </div>
-            <p className="mt-2.5 text-[20px] font-bold tracking-[-0.04em] text-white">{fmt(totalNetCommission)}</p>
-            <p className="mt-1 text-[10.5px] text-slate-300">Reconciled broker book</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-mono">{fmt(totalNetCommission)}</p>
+            <p className="mt-1 text-xs text-slate-300">Reconciled broker book</p>
           </div>
 
         </div>
 
         {/* ───── 8.2 Filter Tabs Bar (Matches Leads & Clients Exactly) ───── */}
-        <div className="mt-7 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+        <div className="mt-7 rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-thin">
             {[
               { label: 'All Commissions', key: 'All' },
@@ -763,14 +763,14 @@ export default function CommissionsPage() {
                 <button
                   key={tab.key}
                   onClick={() => handleTabSelect(tab.key)}
-                  className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-all cursor-pointer ${isActive
+                  className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isActive
                       ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                     }`}
                 >
                   <span>{tab.label}</span>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                    className={`rounded-full px-2 py-0.5 text-xs font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                       }`}
                   >
                     {count}
@@ -781,7 +781,7 @@ export default function CommissionsPage() {
           </div>
 
           {/* ───── Search & Secondary Dropdown Filters ───── */}
-          <div className="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mt-3.5 flex flex-col gap-3 border-t border-slate-100 pt-3.5 lg:flex-row lg:items-center lg:justify-between">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
               <input
@@ -789,7 +789,7 @@ export default function CommissionsPage() {
                 placeholder="Search by client, policy #, carrier, statement, transaction ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9.5 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9.5 pr-8 text-[12.5px] text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9.5 pr-8 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
               />
               {searchQuery && (
                 <button
@@ -801,14 +801,14 @@ export default function CommissionsPage() {
               )}
             </div>
 
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full lg:w-auto">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 w-full lg:w-auto">
               {/* Carrier Filter */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 w-full sm:w-auto">
-                <span className="text-[11px] font-medium text-slate-500">Carrier:</span>
+                <span className="text-xs font-semibold text-slate-500">Carrier:</span>
                 <select
                   value={carrierFilter}
                   onChange={(e) => setCarrierFilter(e.target.value)}
-                  className="h-9 w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none cursor-pointer"
+                  className="h-9.5 w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none cursor-pointer"
                 >
                   <option value="All">All Carriers</option>
                   <option value="Travelers">Travelers</option>
@@ -822,11 +822,11 @@ export default function CommissionsPage() {
 
               {/* Reconciliation Status Filter */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 w-full sm:w-auto">
-                <span className="text-[11px] font-medium text-slate-500">Status:</span>
+                <span className="text-xs font-semibold text-slate-500">Status:</span>
                 <select
                   value={reconciliationFilter}
                   onChange={(e) => setReconciliationFilter(e.target.value)}
-                  className="h-9 w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none cursor-pointer"
+                  className="h-9.5 w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none cursor-pointer"
                 >
                   <option value="All">All Statuses</option>
                   <option value="Reconciled">Reconciled</option>
@@ -840,11 +840,11 @@ export default function CommissionsPage() {
 
               {/* Transaction Type Filter */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 w-full sm:w-auto">
-                <span className="text-[11px] font-medium text-slate-500">Type:</span>
+                <span className="text-xs font-semibold text-slate-500">Type:</span>
                 <select
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value)}
-                  className="h-9 w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none cursor-pointer"
+                  className="h-9.5 w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none cursor-pointer"
                 >
                   <option value="All">All Types</option>
                   <option value="New Business">New Business</option>
@@ -866,9 +866,9 @@ export default function CommissionsPage() {
                     setTypeFilter('All')
                     handleTabSelect('All')
                   }}
-                  className="col-span-2 sm:col-span-1 lg:w-auto inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-2.5 text-[11.5px] font-medium text-slate-600 transition hover:bg-slate-100 cursor-pointer"
+                  className="col-span-2 sm:col-span-1 lg:w-auto inline-flex h-9.5 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 cursor-pointer"
                 >
-                  <RotateCcw className="size-3" />
+                  <RotateCcw className="size-3.5" />
                   <span>Reset</span>
                 </button>
               )}
@@ -877,7 +877,7 @@ export default function CommissionsPage() {
         </div>
 
         {/* ───── Table / Cards View Controls ───── */}
-        <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[12px] text-slate-500">
+        <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm text-slate-500">
           <div className="flex items-center gap-2">
             <span>
               Showing <strong className="text-slate-900">{filteredCommissions.length}</strong> of {commissions.length} transactions
@@ -958,7 +958,7 @@ export default function CommissionsPage() {
             >
               <table className="w-full min-w-[1780px] text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold uppercase tracking-wider text-slate-500 select-none">
+                  <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold uppercase tracking-wider text-slate-500 select-none">
                     <th className="px-4 py-3.5 min-w-[210px]">Client</th>
                     <th className="px-3 py-3.5 min-w-[180px]">Policy</th>
                     <th className="px-3 py-3.5 min-w-[130px]">Carrier</th>
@@ -979,13 +979,13 @@ export default function CommissionsPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="font-medium">
                   {filteredCommissions.length === 0 ? (
                     <tr>
                       <td colSpan={16} className="py-16 text-center text-slate-400">
                         <Receipt className="mx-auto size-9 text-slate-300 mb-2" />
-                        <p className="text-[13.5px] font-medium text-slate-600">No commission records found</p>
-                        <p className="text-[11.5px] text-slate-400 mt-1">Try selecting another status tab or resetting the search filter.</p>
+                        <p className="text-sm font-semibold text-slate-700">No commission records found</p>
+                        <p className="text-xs text-slate-400 mt-1">Try selecting another status tab or resetting the search filter.</p>
                       </td>
                     </tr>
                   ) : (
@@ -1001,7 +1001,7 @@ export default function CommissionsPage() {
                           {/* 1. Client */}
                           <td className="px-4 py-3.5">
                             <div className="flex items-center gap-2.5">
-                              <div className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[11px] font-bold text-blue-700 ring-1 ring-blue-100">
+                              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-blue-700 ring-1 ring-blue-100">
                                 {item.clientName[0] || 'C'}
                               </div>
                               <div className="min-w-0">
@@ -1010,11 +1010,11 @@ export default function CommissionsPage() {
                                     setSelectedCommissionForView(item)
                                     setDetailTab('overview')
                                   }}
-                                  className="text-[12.5px] font-semibold text-slate-900 transition hover:text-blue-600 text-left truncate block cursor-pointer"
+                                  className="text-sm font-semibold text-slate-900 transition hover:text-blue-600 text-left truncate block cursor-pointer"
                                 >
                                   {item.clientName}
                                 </button>
-                                <p className="text-[10.5px] text-slate-400 truncate max-w-[170px]">{item.businessName}</p>
+                                <p className="text-xs text-slate-400 truncate max-w-[170px]">{item.businessName}</p>
                               </div>
                             </div>
                           </td>
@@ -1023,17 +1023,17 @@ export default function CommissionsPage() {
                           <td className="px-3 py-3.5">
                             <button
                               onClick={() => setPolicyPreviewTarget(item)}
-                              className="font-mono text-[11.5px] font-semibold text-slate-900 hover:text-blue-600 transition flex items-center gap-1 cursor-pointer"
+                              className="font-mono text-sm font-semibold text-slate-900 hover:text-blue-600 transition flex items-center gap-1 cursor-pointer"
                             >
                               <span>{item.policyNumber}</span>
-                              <ExternalLink className="size-2.5 opacity-40 group-hover:opacity-100" />
+                              <ExternalLink className="size-3 opacity-40 group-hover:opacity-100" />
                             </button>
-                            <p className="text-[10.5px] text-slate-500 mt-0.5">{item.lineOfBusiness}</p>
+                            <p className="text-xs text-slate-500 mt-0.5">{item.lineOfBusiness}</p>
                           </td>
 
                           {/* 3. Carrier */}
                           <td className="px-3 py-3.5">
-                            <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                            <span className="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
                               {item.carrier}
                             </span>
                           </td>
@@ -1044,59 +1044,59 @@ export default function CommissionsPage() {
                           </td>
 
                           {/* 5. Date */}
-                          <td className="px-3 py-3.5 text-[11.5px] text-slate-600 whitespace-nowrap">
+                          <td className="px-3 py-3.5 text-xs font-mono text-slate-600 whitespace-nowrap">
                             {item.transactionDate}
                           </td>
 
                           {/* 6. Premium */}
-                          <td className="px-3 py-3.5 text-right font-medium text-[12px] text-slate-800">
+                          <td className="px-3 py-3.5 text-right font-mono font-bold text-sm text-slate-900">
                             {fmt(item.premium)}
                           </td>
 
                           {/* 7. Commission Rate */}
-                          <td className="px-3 py-3.5 text-right text-[11.5px] font-semibold text-slate-700">
+                          <td className="px-3 py-3.5 text-right text-xs font-mono font-bold text-slate-700">
                             {item.commissionRate > 0 ? `${item.commissionRate.toFixed(1)}%` : '—'}
                           </td>
 
                           {/* 8. Expected */}
-                          <td className="px-3 py-3.5 text-right font-medium text-[12px] text-slate-600">
+                          <td className="px-3 py-3.5 text-right font-mono font-bold text-sm text-blue-600">
                             {fmt(item.expectedCommission)}
                           </td>
 
                           {/* 9. Actual / Paid */}
-                          <td className="px-3 py-3.5 text-right text-[12px]">
-                            <span className={`font-semibold ${item.actualPaidCommission > 0 ? 'text-emerald-700' : 'text-slate-400'}`}>
+                          <td className="px-3 py-3.5 text-right">
+                            <span className={`font-mono font-bold text-sm ${item.actualPaidCommission > 0 ? 'text-emerald-700' : 'text-slate-400'}`}>
                               {fmt(item.actualPaidCommission)}
                             </span>
                             {hasDiscrepancy && (
-                              <span className="block text-[9.5px] text-amber-600 font-medium">
+                              <span className="block text-xs text-amber-600 font-semibold font-mono">
                                 Short by {fmt(variance)}
                               </span>
                             )}
                           </td>
 
                           {/* 10. Additional */}
-                          <td className="px-3 py-3.5 text-right text-[12px]">
+                          <td className="px-3 py-3.5 text-right text-sm font-mono">
                             {item.additionalCommission > 0 ? (
-                              <span className="font-semibold text-emerald-600">+{fmt(item.additionalCommission)}</span>
+                              <span className="font-bold text-emerald-600">+{fmt(item.additionalCommission)}</span>
                             ) : (
                               <span className="text-slate-300">—</span>
                             )}
                           </td>
 
                           {/* 11. Chargeback */}
-                          <td className="px-3 py-3.5 text-right text-[12px]">
+                          <td className="px-3 py-3.5 text-right text-sm font-mono">
                             {item.chargeback < 0 ? (
-                              <span className="font-semibold text-rose-600">{fmt(item.chargeback)}</span>
+                              <span className="font-bold text-rose-600">{fmt(item.chargeback)}</span>
                             ) : (
                               <span className="text-slate-300">—</span>
                             )}
                           </td>
 
                           {/* 12. Adjustment */}
-                          <td className="px-3 py-3.5 text-right text-[12px]">
+                          <td className="px-3 py-3.5 text-right text-sm font-mono">
                             {item.adjustment !== 0 ? (
-                              <span className={`font-semibold ${item.adjustment > 0 ? 'text-purple-600' : 'text-slate-700'}`}>
+                              <span className={`font-bold ${item.adjustment > 0 ? 'text-purple-600' : 'text-slate-700'}`}>
                                 {item.adjustment > 0 ? `+${fmt(item.adjustment)}` : fmt(item.adjustment)}
                               </span>
                             ) : (
@@ -1105,7 +1105,7 @@ export default function CommissionsPage() {
                           </td>
 
                           {/* 13. Net */}
-                          <td className="px-3 py-3.5 text-right text-[12.5px] font-bold text-slate-900">
+                          <td className="px-3 py-3.5 text-right text-sm font-mono font-extrabold text-slate-900">
                             <span className={item.netCommission > 0 ? 'text-slate-900' : 'text-rose-600'}>
                               {fmt(item.netCommission)}
                             </span>

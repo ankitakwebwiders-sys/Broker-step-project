@@ -296,63 +296,63 @@ export default function ReconciliationPage() {
     switch (status) {
       case 'Paid / Matched':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
-            <CheckCircle2 className="size-3 text-emerald-600 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
+            <CheckCircle2 className="size-3.5 text-emerald-600 shrink-0" />
             Paid / Matched
           </span>
         )
       case 'Partial / Short Paid':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 ring-1 ring-indigo-200">
-            <Scale className="size-3 text-indigo-600 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-200">
+            <Scale className="size-3.5 text-indigo-600 shrink-0" />
             Partial / Short Paid
           </span>
         )
       case 'Unpaid / Not Found':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200">
-            <Clock className="size-3 text-amber-600 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+            <Clock className="size-3.5 text-amber-600 shrink-0" />
             Unpaid / Not Found
           </span>
         )
       case 'Needs Review':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700 ring-1 ring-rose-200">
-            <AlertCircle className="size-3 text-rose-600 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">
+            <AlertCircle className="size-3.5 text-rose-600 shrink-0" />
             Needs Review
           </span>
         )
       case 'Cancellations':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
-            <XCircle className="size-3 text-slate-500 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+            <XCircle className="size-3.5 text-slate-500 shrink-0" />
             Cancellations
           </span>
         )
       case 'Chargebacks':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700 ring-1 ring-rose-300">
-            <TrendingDown className="size-3 text-rose-600 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-300">
+            <TrendingDown className="size-3.5 text-rose-600 shrink-0" />
             Chargebacks
           </span>
         )
       case 'Adjustments':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-2.5 py-1 text-[11px] font-semibold text-purple-700 ring-1 ring-purple-200">
-            <RotateCcw className="size-3 text-purple-600 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-semibold text-purple-700 ring-1 ring-purple-200">
+            <RotateCcw className="size-3.5 text-purple-600 shrink-0" />
             Adjustments
           </span>
         )
       case 'Overpaid':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-semibold text-teal-700 ring-1 ring-teal-200">
-            <Sparkles className="size-3 text-teal-600 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-semibold text-teal-700 ring-1 ring-teal-200">
+            <Sparkles className="size-3.5 text-teal-600 shrink-0" />
             Overpaid
           </span>
         )
       default:
         return (
-          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
             {status}
           </span>
         )
@@ -479,16 +479,16 @@ export default function ReconciliationPage() {
   return (
     <div className="p-3 sm:p-5 md:p-7 max-w-[1600px] mx-auto space-y-6">
       {/* ───── Page Header ───── */}
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="mb-1 inline-flex items-center gap-1.5 text-[11.5px] sm:text-[12px] font-medium text-blue-600">
+          <p className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600">
             <span className="size-1.5 rounded-full bg-blue-500" />
             Broker Workspace · Reconciliation
           </p>
-          <h1 className="text-[26px] sm:text-[30px] font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
             Reconciliation
           </h1>
-          <p className="mt-0.5 text-[13px] sm:text-[14px] text-slate-500 max-w-2xl">
+          <p className="mt-1 text-sm sm:text-[15px] text-slate-500 max-w-2xl leading-relaxed">
             {currentTabConfig.description}
           </p>
         </div>
@@ -496,16 +496,16 @@ export default function ReconciliationPage() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setIsWorkflowExpanded(!isWorkflowExpanded)}
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[12px] font-medium text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
           >
-            <Workflow className="size-3.5 text-blue-600" />
+            <Workflow className="size-4 text-blue-600" />
             <span>{isWorkflowExpanded ? 'Hide Workflow' : '10.1 Workflow'}</span>
           </button>
           <button
             onClick={() => alert(`Exporting ${filteredData.length} reconciliation records to CSV...`)}
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[12px] font-medium text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
           >
-            <Download className="size-3.5 text-slate-500" />
+            <Download className="size-4 text-slate-500" />
             <span>Export CSV</span>
           </button>
         </div>
@@ -514,11 +514,11 @@ export default function ReconciliationPage() {
       {/* ───── 10.1 Reconciliation Workflow Section ───── */}
       {isWorkflowExpanded && (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
-          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/70 px-5 py-3">
+          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/70 px-5 py-3.5">
             <div className="flex items-center gap-2.5">
               <div>
-                <h2 className="text-[14px] font-bold text-slate-900">Reconciliation workflow</h2>
-                <p className="text-[11.5px] text-slate-500">
+                <h2 className="text-sm font-bold text-slate-900">Reconciliation workflow</h2>
+                <p className="text-xs text-slate-500 mt-0.5">
                   Sequential 10-step automated &amp; broker-supervised commission reconciliation pipeline
                 </p>
               </div>
@@ -544,7 +544,7 @@ export default function ReconciliationPage() {
                     <div className="flex items-center justify-between gap-1">
 
                       <span
-                        className={`text-[9.5px] font-semibold uppercase tracking-wider ${isActive
+                        className={`text-xs font-semibold uppercase tracking-wider ${isActive
                           ? 'text-blue-600'
                           : isDone
                             ? 'text-emerald-700'
@@ -555,26 +555,26 @@ export default function ReconciliationPage() {
                       </span>
                     </div>
 
-                    <h3 className="mt-2 text-[12.5px] font-bold text-slate-900 leading-snug">
+                    <h3 className="mt-2 text-sm font-bold text-slate-900 leading-snug">
                       {step.title}
                     </h3>
-                    <p className="mt-1 text-[11px] text-slate-500 leading-normal line-clamp-3">
+                    <p className="mt-1 text-xs text-slate-500 leading-relaxed line-clamp-3">
                       {step.description}
                     </p>
 
                     <div className="mt-2.5 flex items-center gap-1.5 pt-2 border-t border-slate-100/80">
                       {isDone ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-700">
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
                           <CheckCircle2 className="size-3 text-emerald-600" />
                           Processed
                         </span>
                       ) : isActive ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-medium text-blue-700">
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-700">
                           <span className="size-1.5 rounded-full bg-blue-500 animate-pulse" />
                           Processing
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-400">
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-400">
                           <Clock className="size-3 text-slate-400" />
                           Queued
                         </span>
@@ -593,48 +593,48 @@ export default function ReconciliationPage() {
         <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-slate-500">Expected Commission</span>
-              <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 ring-1 ring-blue-100">
+              <span className="text-sm font-medium text-slate-500">Expected Commission</span>
+              <span className="rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-blue-100">
                 Scheduled
               </span>
             </div>
-            <p className="mt-2 text-[24px] font-bold tracking-tight text-slate-900">{fmt(totalExpected)}</p>
-            <p className="mt-1 text-[11px] text-slate-400">Total expected across active policies</p>
+            <p className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-mono">{fmt(totalExpected)}</p>
+            <p className="mt-1 text-xs text-slate-400">Total expected across active policies</p>
           </div>
 
           <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-slate-500">Actual / Paid</span>
-              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-100">
+              <span className="text-sm font-medium text-slate-500">Actual / Paid</span>
+              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
                 Cleared
               </span>
             </div>
-            <p className="mt-2 text-[24px] font-bold tracking-tight text-emerald-600">{fmt(totalActual)}</p>
-            <p className="mt-1 text-[11px] text-slate-400">Deposited carrier statement payouts</p>
+            <p className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-600 font-mono">{fmt(totalActual)}</p>
+            <p className="mt-1 text-xs text-slate-400">Deposited carrier statement payouts</p>
           </div>
 
           <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-slate-500">Difference / Outstanding</span>
-              <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-100">
+              <span className="text-sm font-medium text-slate-500">Difference / Outstanding</span>
+              <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-100">
                 Variances
               </span>
             </div>
-            <p className="mt-2 text-[24px] font-bold tracking-tight text-amber-600">{fmt(totalDifference)}</p>
-            <p className="mt-1 text-[11px] text-slate-400">Short paid or pending statement match</p>
+            <p className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-600 font-mono">{fmt(totalDifference)}</p>
+            <p className="mt-1 text-xs text-slate-400">Short paid or pending statement match</p>
           </div>
 
           <div className="rounded-2xl border border-slate-200/80 bg-slate-900 p-4 text-white shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-slate-300">Reconciliation Health</span>
-              <span className="rounded-md bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
+              <span className="text-sm font-medium text-slate-300">Reconciliation Health</span>
+              <span className="rounded-md bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-300">
                 Active Match
               </span>
             </div>
-            <p className="mt-2 text-[24px] font-bold tracking-tight text-white">
+            <p className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-mono">
               {Math.round((tabCounts.paid / (data.length || 1)) * 100)}% Matched
             </p>
-            <p className="mt-1 text-[11px] text-slate-300">
+            <p className="mt-1 text-xs text-slate-300">
               {tabCounts.review + tabCounts.partial + tabCounts.unpaid} transactions require action
             </p>
           </div>
@@ -642,7 +642,7 @@ export default function ReconciliationPage() {
       )}
 
       {/* ───── Listing Tabs Bar ───── */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-xs">
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-xs">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
           {TABS.map((tab) => {
             const count = tabCounts[tab.key]
@@ -651,14 +651,14 @@ export default function ReconciliationPage() {
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
-                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-all cursor-pointer ${isActive
+                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isActive
                   ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                   }`}
               >
                 <span>{tab.title}</span>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                  className={`rounded-full px-2 py-0.5 text-xs font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                     }`}
                 >
                   {count}
@@ -669,7 +669,7 @@ export default function ReconciliationPage() {
         </div>
 
         {/* ───── Search & Filters ───── */}
-        <div className="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mt-3.5 flex flex-col gap-3 border-t border-slate-100 pt-3.5 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
             <input
@@ -677,7 +677,7 @@ export default function ReconciliationPage() {
               placeholder="Search Client, Policy, Carrier, Statement Source, Status..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9.5 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9.5 pr-8 text-[12.5px] text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9.5 pr-8 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
             />
             {searchQuery && (
               <button
@@ -691,11 +691,11 @@ export default function ReconciliationPage() {
 
           <div className="flex items-center gap-2.5">
             <div className="flex items-center gap-1.5">
-              <span className="text-[12px] text-slate-500 whitespace-nowrap">Carrier:</span>
+              <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">Carrier:</span>
               <select
                 value={carrierFilter}
                 onChange={(e) => setCarrierFilter(e.target.value)}
-                className="h-9 rounded-xl border border-slate-200 bg-slate-50/70 px-3 text-[12px] font-medium text-slate-700 focus:border-blue-500 focus:bg-white focus:outline-none cursor-pointer"
+                className="h-9.5 rounded-xl border border-slate-200 bg-slate-50/70 px-3 text-xs sm:text-sm font-medium text-slate-700 focus:border-blue-500 focus:bg-white focus:outline-none cursor-pointer"
               >
                 {carriersList.map((c) => (
                   <option key={c} value={c}>
@@ -705,7 +705,7 @@ export default function ReconciliationPage() {
               </select>
             </div>
 
-            <div className="text-[12px] text-slate-500 pl-2">
+            <div className="text-xs text-slate-500 pl-2">
               Showing <span className="font-semibold text-slate-800">{filteredData.length}</span> items
             </div>
           </div>
@@ -715,8 +715,8 @@ export default function ReconciliationPage() {
       {/* ───── Section Title & Subtitle Badge Banner ───── */}
       <div className="rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
-          <span className="text-[13px] font-bold text-slate-900">{currentTabConfig.title}</span>
-          <p className="text-[12px] text-slate-500 mt-0.5">{currentTabConfig.description}</p>
+          <span className="text-sm font-bold text-slate-900">{currentTabConfig.title}</span>
+          <p className="text-xs text-slate-500 mt-0.5">{currentTabConfig.description}</p>
         </div>
 
       </div>
@@ -724,30 +724,30 @@ export default function ReconciliationPage() {
       {/* ───── Reconciliation Table ───── */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
         <div className="overflow-x-auto scrollbar-thin">
-          <table className="w-full text-left border-collapse text-[12.5px]">
+          <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">
-                <th className="py-3 px-4">Client</th>
-                <th className="py-3 px-4">Policy</th>
-                <th className="py-3 px-4">Carrier</th>
-                <th className="py-3 px-4">Transaction Type</th>
-                <th className="py-3 px-4 text-right">Expected</th>
-                <th className="py-3 px-4 text-right">Actual/Paid</th>
-                <th className="py-3 px-4 text-right">Difference/Outstanding</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Statement Source</th>
-                <th className="py-3 px-4">Transaction Date</th>
-                <th className="py-3 px-4 text-center">Actions</th>
+              <tr className="border-b border-slate-200 bg-slate-50/80 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">
+                <th className="py-3.5 px-4">Client</th>
+                <th className="py-3.5 px-4">Policy</th>
+                <th className="py-3.5 px-4">Carrier</th>
+                <th className="py-3.5 px-4">Transaction Type</th>
+                <th className="py-3.5 px-4 text-right">Expected</th>
+                <th className="py-3.5 px-4 text-right">Actual/Paid</th>
+                <th className="py-3.5 px-4 text-right">Difference/Outstanding</th>
+                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-4">Statement Source</th>
+                <th className="py-3.5 px-4">Transaction Date</th>
+                <th className="py-3.5 px-4 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 font-medium">
               {filteredData.length === 0 ? (
                 <tr>
                   <td colSpan={11} className="py-12 text-center text-slate-400">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <FileSpreadsheet className="size-8 text-slate-300" />
-                      <p className="font-medium text-slate-600">No reconciliation records found</p>
-                      <p className="text-[12px] text-slate-400">Try adjusting your filters or search terms</p>
+                      <p className="font-semibold text-slate-700">No reconciliation records found</p>
+                      <p className="text-xs text-slate-400">Try adjusting your filters or search terms</p>
                     </div>
                   </td>
                 </tr>
@@ -758,44 +758,44 @@ export default function ReconciliationPage() {
                     className="hover:bg-slate-50/70 transition-colors"
                   >
                     {/* 1. Client */}
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4">
                       <div className="font-semibold text-slate-900 whitespace-nowrap">{item.client}</div>
                       {item.businessName && (
-                        <div className="text-[11px] text-slate-400">{item.businessName}</div>
+                        <div className="text-xs text-slate-400">{item.businessName}</div>
                       )}
                     </td>
 
                     {/* 2. Policy */}
-                    <td className="py-3 px-4">
-                      <div className="font-mono text-[12px] font-medium text-slate-900 whitespace-nowrap">
+                    <td className="py-3.5 px-4">
+                      <div className="font-mono text-sm font-semibold text-slate-900 whitespace-nowrap">
                         {item.policy}
                       </div>
                       {item.lineOfBusiness && (
-                        <div className="text-[11px] text-slate-400">{item.lineOfBusiness}</div>
+                        <div className="text-xs text-slate-400">{item.lineOfBusiness}</div>
                       )}
                     </td>
 
                     {/* 3. Carrier */}
-                    <td className="py-3 px-4">
-                      <span className="font-medium text-slate-800 whitespace-nowrap">{item.carrier}</span>
+                    <td className="py-3.5 px-4">
+                      <span className="font-semibold text-slate-800 whitespace-nowrap">{item.carrier}</span>
                     </td>
 
                     {/* 4. Transaction Type */}
-                    <td className="py-3 px-4">
-                      <span className="inline-flex rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700 whitespace-nowrap">
+                    <td className="py-3.5 px-4">
+                      <span className="inline-flex rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 whitespace-nowrap">
                         {item.transactionType}
                       </span>
                     </td>
 
                     {/* 5. Expected */}
-                    <td className="py-3 px-4 text-right font-medium text-slate-900 whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-right font-mono font-bold text-sm text-blue-600 whitespace-nowrap">
                       {fmt(item.expected)}
                     </td>
 
                     {/* 6. Actual/Paid */}
-                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap font-mono font-bold text-sm">
                       <span
-                        className={`font-semibold ${item.actualPaid > 0
+                        className={`${item.actualPaid > 0
                           ? 'text-emerald-600'
                           : item.actualPaid < 0
                             ? 'text-rose-600'
@@ -807,9 +807,9 @@ export default function ReconciliationPage() {
                     </td>
 
                     {/* 7. Difference/Outstanding */}
-                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap font-mono font-bold text-sm">
                       <span
-                        className={`font-semibold ${item.differenceOutstanding === 0
+                        className={`${item.differenceOutstanding === 0
                           ? 'text-slate-400 font-normal'
                           : item.differenceOutstanding > 0
                             ? 'text-amber-600'
@@ -821,29 +821,29 @@ export default function ReconciliationPage() {
                     </td>
 
                     {/* 8. Status */}
-                    <td className="py-3 px-4 whitespace-nowrap">{getStatusBadge(item.status)}</td>
+                    <td className="py-3.5 px-4 whitespace-nowrap">{getStatusBadge(item.status)}</td>
 
                     {/* 9. Statement Source */}
-                    <td className="py-3 px-4">
-                      <span className="inline-flex items-center gap-1 font-mono text-[11px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded whitespace-nowrap">
-                        <FileText className="size-2.5 text-slate-400" />
+                    <td className="py-3.5 px-4">
+                      <span className="inline-flex items-center gap-1 font-mono text-xs text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded whitespace-nowrap">
+                        <FileText className="size-3 text-slate-400" />
                         {item.statementSource}
                       </span>
                     </td>
 
                     {/* 10. Transaction Date */}
-                    <td className="py-3 px-4 text-slate-600 whitespace-nowrap">{item.transactionDate}</td>
+                    <td className="py-3.5 px-4 font-mono text-xs text-slate-600 whitespace-nowrap">{item.transactionDate}</td>
 
                     {/* 11. Actions: View; Review; Match/Resolve where applicable; Update status where allowed */}
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-3.5 px-4 text-center">
                       <div className="inline-flex items-center gap-1.5 whitespace-nowrap">
                         {/* View */}
                         <button
                           onClick={() => setViewRecord(item)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
                           title="View Details"
                         >
-                          <Eye className="size-3 text-slate-500" />
+                          <Eye className="size-3.5 text-slate-500" />
                           <span>View</span>
                         </button>
 
@@ -853,10 +853,10 @@ export default function ReconciliationPage() {
                             setReviewRecord(item)
                             setReviewNote('')
                           }}
-                          className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50/50 px-2.5 py-1 text-[11px] font-semibold text-blue-700 hover:bg-blue-100/70 cursor-pointer"
+                          className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50/50 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100/70 cursor-pointer"
                           title="Review Transaction"
                         >
-                          <Edit3 className="size-3 text-blue-600" />
+                          <Edit3 className="size-3.5 text-blue-600" />
                           <span>Review</span>
                         </button>
 
@@ -868,19 +868,19 @@ export default function ReconciliationPage() {
                               setResolveMethod('accept_carrier')
                               setResolveNote('')
                             }}
-                            className="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 hover:bg-indigo-100 cursor-pointer"
+                            className="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 cursor-pointer"
                             title="Match or Resolve Variance"
                           >
-                            <Scale className="size-3 text-indigo-600" />
+                            <Scale className="size-3.5 text-indigo-600" />
                             <span>Match/Resolve</span>
                           </button>
                         ) : (
                           <button
                             disabled
-                            className="inline-flex items-center gap-1 rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-1 text-[11px] font-normal text-slate-300 cursor-not-allowed"
+                            className="inline-flex items-center gap-1 rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-300 cursor-not-allowed"
                             title="Not applicable for matched transactions"
                           >
-                            <Scale className="size-3 text-slate-300" />
+                            <Scale className="size-3.5 text-slate-300" />
                             <span>Match/Resolve</span>
                           </button>
                         )}
@@ -893,10 +893,10 @@ export default function ReconciliationPage() {
                               setSelectedNewStatus(item.status)
                               setStatusUpdateNote('')
                             }}
-                            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+                            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
                             title="Update Status"
                           >
-                            <RotateCcw className="size-3 text-slate-500" />
+                            <RotateCcw className="size-3.5 text-slate-500" />
                             <span>Update status</span>
                           </button>
                         ) : (

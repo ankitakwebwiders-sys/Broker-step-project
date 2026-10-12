@@ -556,20 +556,20 @@ export default function PoliciesPage() {
       {/* ───── Header Bar (Matching Dashboard Header) ───── */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div className="min-w-0 max-w-xl">
-          <p className="mb-1.5 inline-flex items-center gap-1.5 text-[12px] font-semibold text-blue-600">
+          <p className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600">
             <span className="size-1.5 rounded-full bg-blue-500 animate-pulse" />
             Tuesday, October 8, 2026 · Book of Business
           </p>
-          <h1 className="text-[26px] font-bold tracking-tight text-slate-900 sm:text-[30px]">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
             Policies
           </h1>
-          <p className="mt-0.5 text-[13px] text-slate-500 leading-relaxed">
+          <p className="mt-1 text-sm sm:text-[15px] text-slate-500 leading-relaxed">
             Common policy listing, lifecycle transaction tracking, commission reconciliation, and new business binding.
           </p>
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0 flex-nowrap overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-          <button className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[12px] font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer">
+          <button className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer">
             <CalendarDays className="size-4 text-slate-400" />
             <span>2026 Fiscal Year</span>
             <ChevronDown className="size-3.5 text-slate-400" />
@@ -578,7 +578,7 @@ export default function PoliciesPage() {
           {/* Export CSV button */}
           <button
             onClick={handleExportCsv}
-            className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[12px] font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+            className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
           >
             <Download className="size-4 text-slate-400" />
             <span>Export CSV</span>
@@ -590,7 +590,7 @@ export default function PoliciesPage() {
               setQuickEntryStep(1)
               setIsQuickEntryOpen(true)
             }}
-            className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-2 text-[12.5px] font-semibold text-blue-700 shadow-sm transition hover:bg-blue-100 cursor-pointer"
+            className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-2 text-sm font-semibold text-blue-700 shadow-sm transition hover:bg-blue-100 cursor-pointer"
           >
             <Zap className="size-4 text-blue-600" />
             <span>Quick-Entry</span>
@@ -599,7 +599,7 @@ export default function PoliciesPage() {
           {/* 6.3 Add Policy button styled like dashboard Add New Policy */}
           <button
             onClick={handleOpenCreate}
-            className="group inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-slate-950 px-4 py-2 text-[12.5px] font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 cursor-pointer"
+            className="group inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 cursor-pointer"
           >
             <Plus className="size-4 transition-transform group-hover:rotate-90" />
             <span>Add New Policy</span>
@@ -610,42 +610,42 @@ export default function PoliciesPage() {
       {/* ───── Summary KPI Strip ───── */}
       <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
         <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-          <p className="text-[11.5px] font-medium text-slate-500">Total Book Premium</p>
-          <p className="mt-1 text-[22px] font-bold text-slate-900">
+          <p className="text-sm font-medium text-slate-500">Total Book Premium</p>
+          <p className="mt-1 text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             ${financialTotals.totalPremium.toLocaleString()}
           </p>
-          <p className="mt-0.5 text-[11px] text-slate-400">
+          <p className="mt-1 text-xs text-slate-400">
             Across {filteredPolicies.length} listed policies
           </p>
         </div>
 
         <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-          <p className="text-[11.5px] font-medium text-slate-500">Expected Commission</p>
-          <p className="mt-1 text-[22px] font-bold text-blue-600">
+          <p className="text-sm font-medium text-slate-500">Expected Commission</p>
+          <p className="mt-1 text-2xl sm:text-3xl font-extrabold text-blue-600 tracking-tight">
             ${financialTotals.expectedCommission.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </p>
-          <p className="mt-0.5 text-[11px] text-slate-400">Calculated projected revenue</p>
+          <p className="mt-1 text-xs text-slate-400">Calculated projected revenue</p>
         </div>
 
         <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-          <p className="text-[11.5px] font-medium text-slate-500">Actual / Paid Commission</p>
-          <p className="mt-1 text-[22px] font-bold text-emerald-600">
+          <p className="text-sm font-medium text-slate-500">Actual / Paid Commission</p>
+          <p className="mt-1 text-2xl sm:text-3xl font-extrabold text-emerald-600 tracking-tight">
             ${financialTotals.actualPaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </p>
-          <p className="mt-0.5 text-[11px] text-slate-400">Collected carrier statements</p>
+          <p className="mt-1 text-xs text-slate-400">Collected carrier statements</p>
         </div>
 
         <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-          <p className="text-[11.5px] font-medium text-slate-500">Outstanding Commission</p>
-          <p className={`mt-1 text-[22px] font-bold ${financialTotals.outstanding > 0 ? 'text-amber-600' : 'text-slate-900'}`}>
+          <p className="text-sm font-medium text-slate-500">Outstanding Commission</p>
+          <p className={`mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight ${financialTotals.outstanding > 0 ? 'text-amber-600' : 'text-slate-900'}`}>
             ${financialTotals.outstanding.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </p>
-          <p className="mt-0.5 text-[11px] text-slate-400">Uncollected / Pending variance</p>
+          <p className="mt-1 text-xs text-slate-400">Uncollected / Pending variance</p>
         </div>
       </div>
 
       {/* ───── 6.2 Filter Tabs Bar ───── */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-thin">
           {[
             { id: 'all', label: 'All Policies', count: tabCounts.all },
@@ -664,7 +664,7 @@ export default function PoliciesPage() {
               <button
                 key={tab.id}
                 onClick={() => handleTabSelect(tab.id as TabType)}
-                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   isActive
                     ? 'bg-slate-950 text-white shadow-sm'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -672,7 +672,7 @@ export default function PoliciesPage() {
               >
                 <span>{tab.label}</span>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${
+                  className={`rounded-full px-2 py-0.5 text-xs font-bold ${
                     isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                   }`}
                 >
@@ -684,7 +684,7 @@ export default function PoliciesPage() {
         </div>
 
         {/* ───── Search & Secondary Dropdown Filters ───── */}
-        <div className="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mt-3.5 flex flex-col gap-3 border-t border-slate-100 pt-3.5 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
             <input
@@ -692,7 +692,7 @@ export default function PoliciesPage() {
               placeholder="Search policy #, client, business, carrier, or line..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9.5 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9.5 pr-8 text-[12.5px] text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9.5 pr-8 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
             />
             {searchQuery && (
               <button
@@ -704,14 +704,14 @@ export default function PoliciesPage() {
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             {/* Carrier Filter */}
             <div className="flex items-center gap-1.5">
-              <span className="text-[11.5px] font-medium text-slate-500">Carrier:</span>
+              <span className="text-xs font-semibold text-slate-500">Carrier:</span>
               <select
                 value={carrierFilter}
                 onChange={(e) => setCarrierFilter(e.target.value)}
-                className="h-9 rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+                className="h-9.5 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
               >
                 <option value="All">All Carriers</option>
                 {carrierOptions.map((c) => (
@@ -724,11 +724,11 @@ export default function PoliciesPage() {
 
             {/* Line of Business Filter */}
             <div className="flex items-center gap-1.5">
-              <span className="text-[11.5px] font-medium text-slate-500">LOB:</span>
+              <span className="text-xs font-semibold text-slate-500">LOB:</span>
               <select
                 value={lobFilter}
                 onChange={(e) => setLobFilter(e.target.value)}
-                className="h-9 rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+                className="h-9.5 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
               >
                 <option value="All">All Lines</option>
                 {lineOfBusinessOptions.map((lob) => (
@@ -741,11 +741,11 @@ export default function PoliciesPage() {
 
             {/* Reconciliation Filter */}
             <div className="flex items-center gap-1.5">
-              <span className="text-[11.5px] font-medium text-slate-500">Recon:</span>
+              <span className="text-xs font-semibold text-slate-500">Recon:</span>
               <select
                 value={reconciliationFilter}
                 onChange={(e) => setReconciliationFilter(e.target.value)}
-                className="h-9 rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+                className="h-9.5 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
               >
                 <option value="All">All Statuses</option>
                 <option value="Reconciled">Reconciled</option>
@@ -764,9 +764,9 @@ export default function PoliciesPage() {
                   setReconciliationFilter('All')
                   setSearchQuery('')
                 }}
-                className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-2.5 text-[11.5px] font-medium text-slate-600 transition hover:bg-slate-100"
+                className="inline-flex h-9.5 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
               >
-                <RotateCcw className="size-3" />
+                <RotateCcw className="size-3.5" />
                 <span>Reset</span>
               </button>
             )}
@@ -777,9 +777,9 @@ export default function PoliciesPage() {
       {/* ───── 6.1 Common Policy Listing Table ───── */}
       <div className="rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-[12.5px]">
+          <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <th className="px-4 py-3.5">Policy Number</th>
                 <th className="px-4 py-3.5">Client / Business</th>
                 <th className="px-4 py-3.5">Carrier</th>
@@ -796,13 +796,13 @@ export default function PoliciesPage() {
                 <th className="px-4 py-3.5 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 font-medium">
               {filteredPolicies.length === 0 ? (
                 <tr>
                   <td colSpan={14} className="py-12 text-center text-slate-400">
                     <Shield className="mx-auto mb-2 size-8 text-slate-300" />
-                    <p className="font-medium text-slate-600">No policy records match your filters</p>
-                    <p className="text-[12px] text-slate-400">Try adjusting your search criteria or filter options.</p>
+                    <p className="font-semibold text-slate-700">No policy records match your filters</p>
+                    <p className="text-xs text-slate-400">Try adjusting your search criteria or filter options.</p>
                   </td>
                 </tr>
               ) : (
@@ -819,12 +819,12 @@ export default function PoliciesPage() {
                       {/* Policy Number */}
                       <td className="px-4 py-3.5 whitespace-nowrap">
                         {p.isPendingNumber || p.policyNumber === 'Pending' ? (
-                          <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200/80">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200/80">
                             <Clock className="size-3" />
                             Pending
                           </span>
                         ) : (
-                          <span className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                          <span className="font-semibold font-mono text-slate-900 group-hover:text-blue-600 transition-colors">
                             {p.policyNumber}
                           </span>
                         )}
@@ -833,12 +833,12 @@ export default function PoliciesPage() {
                       {/* Client / Business */}
                       <td className="px-4 py-3.5 max-w-[200px]">
                         <p className="font-semibold text-slate-900 truncate">{p.clientName}</p>
-                        <p className="text-[11px] text-slate-500 truncate">{p.businessName}</p>
+                        <p className="text-xs text-slate-500 truncate">{p.businessName}</p>
                       </td>
 
                       {/* Carrier */}
                       <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11.5px] font-medium text-slate-700">
+                        <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
                           <Building2 className="size-3 text-slate-400" />
                           {p.carrier}
                         </span>
@@ -850,7 +850,7 @@ export default function PoliciesPage() {
                       </td>
 
                       {/* Line of Business */}
-                      <td className="px-4 py-3.5 whitespace-nowrap text-slate-700">
+                      <td className="px-4 py-3.5 whitespace-nowrap text-slate-700 text-xs sm:text-sm">
                         {p.lineOfBusiness}
                       </td>
 
@@ -860,34 +860,34 @@ export default function PoliciesPage() {
                       </td>
 
                       {/* Effective Date */}
-                      <td className="px-4 py-3.5 whitespace-nowrap text-slate-600 font-mono text-[11.5px]">
+                      <td className="px-4 py-3.5 whitespace-nowrap text-slate-600 font-mono text-xs">
                         {p.effectiveDate}
                       </td>
 
                       {/* Expiry Date */}
-                      <td className="px-4 py-3.5 whitespace-nowrap text-slate-600 font-mono text-[11.5px]">
+                      <td className="px-4 py-3.5 whitespace-nowrap text-slate-600 font-mono text-xs">
                         {p.expiryDate}
                       </td>
 
                       {/* Premium */}
-                      <td className="px-4 py-3.5 text-right whitespace-nowrap font-semibold text-slate-900 font-mono">
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap font-bold text-slate-900 font-mono">
                         ${p.premium.toLocaleString()}
                       </td>
 
                       {/* Expected Commission */}
-                      <td className="px-4 py-3.5 text-right whitespace-nowrap font-semibold text-blue-600 font-mono">
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap font-bold text-blue-600 font-mono">
                         ${p.expectedCommission.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
 
                       {/* Actual/Paid Commission */}
-                      <td className="px-4 py-3.5 text-right whitespace-nowrap font-medium text-emerald-600 font-mono">
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap font-semibold text-emerald-600 font-mono">
                         ${p.actualPaidCommission.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
 
                       {/* Outstanding */}
                       <td className="px-4 py-3.5 text-right whitespace-nowrap font-mono">
                         <span
-                          className={`font-semibold ${
+                          className={`font-bold ${
                             p.outstandingCommission > 0 ? 'text-amber-600' : 'text-slate-400'
                           }`}
                         >
@@ -912,16 +912,16 @@ export default function PoliciesPage() {
                               setSelectedPolicyForView(p)
                               setDetailTab('overview')
                             }}
-                            className="flex size-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition"
+                            className="flex size-7.5 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition"
                           >
-                            <Eye className="size-3.5" />
+                            <Eye className="size-4" />
                           </button>
                           <button
                             title="Edit Policy (6.3)"
                             onClick={() => handleOpenEdit(p)}
-                            className="flex size-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition"
+                            className="flex size-7.5 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition"
                           >
-                            <Edit3 className="size-3.5" />
+                            <Edit3 className="size-4" />
                           </button>
                         </div>
                       </td>
@@ -934,7 +934,7 @@ export default function PoliciesPage() {
         </div>
 
         {/* Table Footer info */}
-        <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-4 py-2.5 text-[11.5px] text-slate-500">
+        <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-4 py-3 text-xs text-slate-500">
           <span>Showing {filteredPolicies.length} of {policies.length} total policies</span>
           <span>Click any policy row to inspect financial details & transaction timeline</span>
         </div>
@@ -1985,7 +1985,7 @@ export default function PoliciesPage() {
 function StatusBadge({ status }: { status: PolicyStatus }) {
   if (status === 'Active') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
         <span className="size-1.5 rounded-full bg-emerald-500" />
         Active
       </span>
@@ -1993,7 +1993,7 @@ function StatusBadge({ status }: { status: PolicyStatus }) {
   }
   if (status === 'Pending') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200">
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
         <span className="size-1.5 rounded-full bg-amber-500" />
         Pending
       </span>
@@ -2001,20 +2001,20 @@ function StatusBadge({ status }: { status: PolicyStatus }) {
   }
   if (status === 'Under Review') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700 ring-1 ring-blue-200">
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">
         Under Review
       </span>
     )
   }
   if (status === 'Cancelled') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-[11px] font-semibold text-rose-700 ring-1 ring-rose-200">
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">
         Cancelled
       </span>
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200">
+    <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
       {status}
     </span>
   )
@@ -2033,7 +2033,7 @@ function TransactionBadge({ type }: { type: TransactionType }) {
 
   return (
     <span
-      className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold ring-1 ${
+      className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ${
         styles[type] || 'bg-slate-100 text-slate-700 ring-slate-200'
       }`}
     >
@@ -2045,30 +2045,30 @@ function TransactionBadge({ type }: { type: TransactionType }) {
 function ReconciliationBadge({ status }: { status: ReconciliationStatus }) {
   if (status === 'Reconciled') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
-        <CheckCircle2 className="size-3 text-emerald-600" />
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
+        <CheckCircle2 className="size-3.5 text-emerald-600" />
         Reconciled
       </span>
     )
   }
   if (status === 'Discrepancy') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-[11px] font-semibold text-rose-700 ring-1 ring-rose-200">
-        <AlertTriangle className="size-3 text-rose-600" />
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">
+        <AlertTriangle className="size-3.5 text-rose-600" />
         Discrepancy
       </span>
     )
   }
   if (status === 'Pending') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200">
-        <Clock className="size-3 text-amber-600" />
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+        <Clock className="size-3.5 text-amber-600" />
         Pending
       </span>
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200">
+    <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
       Unmatched
     </span>
   )

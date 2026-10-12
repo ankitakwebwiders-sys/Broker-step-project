@@ -247,36 +247,36 @@ export default function StatementsPage() {
     switch (status) {
       case 'Completed':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200 whitespace-nowrap">
-            <CheckCircle2 className="size-3 text-emerald-600 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200 whitespace-nowrap">
+            <CheckCircle2 className="size-3.5 text-emerald-600 shrink-0" />
             Completed
           </span>
         )
       case 'Processed':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700 ring-1 ring-blue-200 whitespace-nowrap">
-            <FileCheck2 className="size-3 text-blue-600 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-blue-200 whitespace-nowrap">
+            <FileCheck2 className="size-3.5 text-blue-600 shrink-0" />
             Processed
           </span>
         )
       case 'Processing':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200 whitespace-nowrap">
             <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
             Processing
           </span>
         )
       case 'Needs Review':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-md bg-rose-50 px-2 py-0.5 text-[11px] font-semibold text-rose-700 ring-1 ring-rose-200 whitespace-nowrap">
-            <AlertCircle className="size-3 text-rose-600 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-200 whitespace-nowrap">
+            <AlertCircle className="size-3.5 text-rose-600 shrink-0" />
             Needs Review
           </span>
         )
       case 'Uploaded':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200 whitespace-nowrap">
-            <Clock className="size-3 text-slate-500 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 whitespace-nowrap">
+            <Clock className="size-3.5 text-slate-500 shrink-0" />
             Uploaded
           </span>
         )
@@ -468,33 +468,33 @@ export default function StatementsPage() {
       )}
 
       {/* ───── Header ───── */}
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="mb-1 inline-flex items-center gap-1.5 text-[11.5px] sm:text-[12px] font-medium text-blue-600">
+          <p className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600">
             <span className="size-1.5 rounded-full bg-blue-500" />
             Broker Workspace · Statement Accounting &amp; Extraction
           </p>
-          <h1 className="text-[24px] sm:text-[28px] font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
             Statements
           </h1>
-          <p className="mt-0.5 text-[12px] sm:text-[13px] text-slate-500">
+          <p className="mt-1 text-sm sm:text-[15px] text-slate-500 leading-relaxed">
             Ingest, parse, and reconcile multi-carrier electronic remittances, Excel, CSV, and text-based PDF statements.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
           <button
             onClick={() => alert(`Exporting audit log of ${statements.length} statements to CSV...`)}
-            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 sm:px-3.5 py-2 text-[12px] font-medium text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
           >
-            <Download className="size-3.5 sm:size-4 text-slate-500" />
+            <Download className="size-4 text-slate-500" />
             <span>Export CSV</span>
           </button>
           <button
             onClick={() => handleTabSelect('upload')}
-            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-950 px-3 sm:px-3.5 py-2 text-[12px] font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.5)] cursor-pointer"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.5)] cursor-pointer"
           >
-            <Upload className="size-3.5 sm:size-4" />
+            <Upload className="size-4" />
             <span>Upload Statement</span>
           </button>
         </div>
@@ -505,80 +505,80 @@ export default function StatementsPage() {
         {/* 1. Total Statements */}
         <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
           <div className="flex items-start justify-between">
-            <p className="text-[11.5px] font-medium text-slate-500">Statements</p>
-            <span className="rounded-md bg-blue-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-blue-600 ring-1 ring-blue-100">
+            <p className="text-sm font-medium text-slate-500">Statements</p>
+            <span className="rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600 ring-1 ring-blue-100">
               Total Ingested
             </span>
           </div>
-          <p className="mt-2 text-[22px] font-bold tracking-tight text-slate-900">{totalStatementsCount}</p>
-          <p className="mt-0.5 text-[10.5px] text-slate-400">Carrier batches</p>
+          <p className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-mono">{totalStatementsCount}</p>
+          <p className="mt-1 text-xs text-slate-400">Carrier batches</p>
         </div>
 
         {/* 2. Completed */}
         <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-[0_8px_30px_-12px_rgba(16,185,129,0.25)]">
           <div className="flex items-start justify-between">
-            <p className="text-[11.5px] font-medium text-slate-500">Processed</p>
-            <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-emerald-700 ring-1 ring-emerald-100">
+            <p className="text-sm font-medium text-slate-500">Processed</p>
+            <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
               Reconciled
             </span>
           </div>
-          <p className="mt-2 text-[22px] font-bold tracking-tight text-emerald-600">{completedStatementsCount}</p>
-          <p className="mt-0.5 text-[10.5px] text-slate-400">Ledger booked</p>
+          <p className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-600 font-mono">{completedStatementsCount}</p>
+          <p className="mt-1 text-xs text-slate-400">Ledger booked</p>
         </div>
 
         {/* 3. In Pipeline */}
         <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-[0_8px_30px_-12px_rgba(245,158,11,0.25)]">
           <div className="flex items-start justify-between">
-            <p className="text-[11.5px] font-medium text-slate-500">Processing</p>
-            <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-amber-700 ring-1 ring-amber-100">
+            <p className="text-sm font-medium text-slate-500">Processing</p>
+            <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-100">
               Active Pipeline
             </span>
           </div>
-          <p className="mt-2 text-[22px] font-bold tracking-tight text-amber-600">{inProcessingPipelineCount}</p>
-          <p className="mt-0.5 text-[10.5px] text-slate-400">Parsing &amp; matching</p>
+          <p className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-600 font-mono">{inProcessingPipelineCount}</p>
+          <p className="mt-1 text-xs text-slate-400">Parsing &amp; matching</p>
         </div>
 
         {/* 4. Needs Review */}
         <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-[0_8px_30px_-12px_rgba(244,63,94,0.25)]">
           <div className="flex items-start justify-between">
-            <p className="text-[11.5px] font-medium text-slate-500">Needs Review</p>
-            <span className="rounded-md bg-rose-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-rose-700 ring-1 ring-rose-100">
+            <p className="text-sm font-medium text-slate-500">Needs Review</p>
+            <span className="rounded-md bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-100">
               Discrepancies
             </span>
           </div>
-          <p className="mt-2 text-[22px] font-bold tracking-tight text-rose-600">{needsReviewCount}</p>
-          <p className="mt-0.5 text-[10.5px] text-slate-400">Action required</p>
+          <p className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-rose-600 font-mono">{needsReviewCount}</p>
+          <p className="mt-1 text-xs text-slate-400">Action required</p>
         </div>
 
         {/* 5. Total Remittance */}
         <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
           <div className="flex items-start justify-between">
-            <p className="text-[11.5px] font-medium text-slate-500">Total Volume</p>
-            <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[9.5px] font-semibold text-slate-700">
+            <p className="text-sm font-medium text-slate-500">Total Volume</p>
+            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
               Payouts
             </span>
           </div>
-          <p className="mt-2 text-[19px] sm:text-[21px] font-bold tracking-tight text-slate-900">
+          <p className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-mono">
             {fmtCurrency(totalRemittanceVolume)}
           </p>
-          <p className="mt-0.5 text-[10.5px] text-slate-400">Sum remittances</p>
+          <p className="mt-1 text-xs text-slate-400">Sum remittances</p>
         </div>
 
         {/* 6. Match Accuracy */}
         <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-[0_8px_30px_-12px_rgba(99,102,241,0.25)]">
           <div className="flex items-start justify-between">
-            <p className="text-[11.5px] font-medium text-slate-500">Match Rate</p>
-            <span className="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[9.5px] font-semibold text-indigo-700 ring-1 ring-indigo-100">
+            <p className="text-sm font-medium text-slate-500">Match Rate</p>
+            <span className="rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-100">
               Engine
             </span>
           </div>
-          <p className="mt-2 text-[22px] font-bold tracking-tight text-indigo-600">{matchAccuracyRate}%</p>
-          <p className="mt-0.5 text-[10.5px] text-slate-400">{totalMatchedCount} of {totalTransactionsCount} matched</p>
+          <p className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-indigo-600 font-mono">{matchAccuracyRate}%</p>
+          <p className="mt-1 text-xs text-slate-400">{totalMatchedCount} of {totalTransactionsCount} matched</p>
         </div>
       </div>
 
       {/* ───── Navigation Tabs Bar (Matches All Broker Pages Exactly) ───── */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-thin">
           {[
             { id: 'all' as StatementTab, label: 'All Statements', badge: totalStatementsCount },
@@ -593,7 +593,7 @@ export default function StatementsPage() {
               <button
                 key={tab.id}
                 onClick={() => handleTabSelect(tab.id)}
-                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   isActive
                     ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -601,7 +601,7 @@ export default function StatementsPage() {
               >
                 <span>{tab.label}</span>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${
+                  className={`rounded-full px-2 py-0.5 text-xs font-bold ${
                     isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                   }`}
                 >
@@ -759,7 +759,7 @@ export default function StatementsPage() {
               >
                 <table className="w-full min-w-[1350px] text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold uppercase tracking-wider text-slate-500 select-none">
+                    <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold uppercase tracking-wider text-slate-500 select-none">
                       <th className="px-4 py-3.5 min-w-[280px]">Statement / File Identifier</th>
                       <th className="px-3.5 py-3.5 min-w-[160px]">Carrier</th>
                       <th className="px-3.5 py-3.5 min-w-[140px]">Statement Period</th>
@@ -774,13 +774,13 @@ export default function StatementsPage() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="font-medium">
                     {filteredStatements.length === 0 ? (
                       <tr>
                         <td colSpan={10} className="py-16 text-center text-slate-400">
                           <FileSpreadsheet className="mx-auto size-9 text-slate-300 mb-2" />
-                          <p className="text-[13.5px] font-medium text-slate-600">No statements found</p>
-                          <p className="text-[11.5px] text-slate-400 mt-1">Try adjusting the carrier or status filter.</p>
+                          <p className="text-sm font-semibold text-slate-700">No statements found</p>
+                          <p className="text-xs text-slate-400 mt-1">Try adjusting the carrier or status filter.</p>
                         </td>
                       </tr>
                     ) : (
@@ -800,11 +800,11 @@ export default function StatementsPage() {
                                 <div className="min-w-0">
                                   <button
                                     onClick={() => handleTabSelect('details', stmt.id)}
-                                    className="font-semibold text-slate-900 hover:text-blue-600 transition-colors text-[13px] truncate block text-left cursor-pointer"
+                                    className="font-semibold text-slate-900 hover:text-blue-600 transition-colors text-sm truncate block text-left cursor-pointer"
                                   >
                                     {stmt.statementIdentifier}
                                   </button>
-                                  <p className="text-[11px] text-slate-500 truncate mt-0.5" title={stmt.fileName}>
+                                  <p className="text-xs text-slate-500 truncate mt-0.5" title={stmt.fileName}>
                                     {stmt.fileName} · {stmt.fileSize}
                                   </p>
                                 </div>
@@ -815,20 +815,20 @@ export default function StatementsPage() {
                             <td className="px-3.5 py-3.5">
                               <div className="flex items-center gap-1.5">
                                 <Building2 className="size-3.5 text-slate-400 shrink-0" />
-                                <span className="text-[12.5px] font-semibold text-slate-800">{stmt.carrier}</span>
+                                <span className="text-sm font-semibold text-slate-800">{stmt.carrier}</span>
                               </div>
                             </td>
 
                             {/* 3. Statement Period */}
                             <td className="px-3.5 py-3.5">
-                              <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                              <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
                                 <Calendar className="size-3 text-slate-500" />
                                 {stmt.statementPeriod}
                               </span>
                             </td>
 
                             {/* 4. Upload Date */}
-                            <td className="px-3.5 py-3.5 text-[12px] text-slate-600 whitespace-nowrap">
+                            <td className="px-3.5 py-3.5 text-xs font-mono text-slate-600 whitespace-nowrap">
                               {stmt.uploadDate}
                             </td>
 
@@ -838,34 +838,34 @@ export default function StatementsPage() {
                             </td>
 
                             {/* 6. Transactions */}
-                            <td className="px-3.5 py-3.5 text-right font-semibold text-slate-800 text-[12.5px]">
+                            <td className="px-3.5 py-3.5 text-right font-bold text-slate-900 text-sm font-mono">
                               {stmt.transactionsCount}
                             </td>
 
                             {/* 7. Matched */}
                             <td className="px-3.5 py-3.5 text-right">
                               <div className="flex flex-col items-end">
-                                <span className="font-semibold text-emerald-600 text-[12.5px]">
+                                <span className="font-bold text-emerald-600 text-sm font-mono">
                                   {stmt.matchedCount}
                                 </span>
-                                <span className="text-[10px] text-slate-400">{matchPct}% matched</span>
+                                <span className="text-xs text-slate-400">{matchPct}% matched</span>
                               </div>
                             </td>
 
                             {/* 8. Unmatched */}
                             <td className="px-3.5 py-3.5 text-right">
                               {stmt.unmatchedCount > 0 ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-700 ring-1 ring-rose-200">
-                                  <AlertCircle className="size-2.5" />
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-bold text-rose-700 ring-1 ring-rose-200">
+                                  <AlertCircle className="size-3" />
                                   {stmt.unmatchedCount} Action Req.
                                 </span>
                               ) : (
-                                <span className="text-[11px] text-slate-400 font-medium">0</span>
+                                <span className="text-xs text-slate-400 font-medium">0</span>
                               )}
                             </td>
 
                             {/* 9. Remittance Amount */}
-                            <td className="px-4 py-3.5 text-right font-bold text-slate-900 text-[12.5px]">
+                            <td className="px-4 py-3.5 text-right font-bold text-slate-900 text-sm font-mono">
                               {fmtCurrency(stmt.totalRemittance)}
                             </td>
 
@@ -874,10 +874,10 @@ export default function StatementsPage() {
                               <div className="flex items-center justify-end gap-1.5">
                                 <button
                                   onClick={() => handleTabSelect('details', stmt.id)}
-                                  className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11.5px] font-medium text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-blue-600 transition cursor-pointer"
+                                  className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-blue-600 transition cursor-pointer"
                                   title="View full statement details & line items"
                                 >
-                                  <Eye className="size-3" />
+                                  <Eye className="size-3.5" />
                                   <span>View</span>
                                 </button>
 

@@ -598,14 +598,14 @@ export default function ClientsPage() {
         {/* ───── Header ───── */}
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <p className="mb-1.5 inline-flex items-center gap-1.5 text-[12px] font-medium text-blue-600">
+            <p className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600">
               <span className="size-1.5 rounded-full bg-blue-500" />
               Broker Workspace · Client Directory
             </p>
-            <h1 className="text-[28px] font-semibold tracking-[-0.04em] text-slate-900">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
               Clients
             </h1>
-            <p className="mt-1 text-[13px] text-slate-500">
+            <p className="mt-1 text-sm sm:text-[15px] text-slate-500 leading-relaxed">
               Comprehensive roster of individual and business policyholders, consent compliance, and policies.
             </p>
           </div>
@@ -614,14 +614,14 @@ export default function ClientsPage() {
               onClick={() => {
                 alert(`Exporting ${filteredClients.length} clients to CSV...`)
               }}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[12px] font-medium text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
             >
               <Download className="size-4 text-slate-400" />
               Export CSV
             </button>
             <button
               onClick={openAddClientModal}
-              className="group flex items-center gap-2 rounded-xl bg-slate-950 px-3.5 py-2 text-[12px] font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.5)]"
+              className="group flex items-center gap-2 rounded-xl bg-slate-950 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.5)] cursor-pointer"
             >
               <Plus className="size-4 transition-transform group-hover:rotate-90" />
               Add Client
@@ -633,62 +633,62 @@ export default function ClientsPage() {
         <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-[12px] font-medium text-slate-500">Total Clients</p>
-              <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-600 ring-1 ring-blue-100">
+              <p className="text-sm font-medium text-slate-600">Total Clients</p>
+              <span className="rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600 ring-1 ring-blue-100">
                 Book roster
               </span>
             </div>
-            <p className="mt-3 text-[26px] font-semibold tracking-[-0.04em] text-slate-900">{totalClientsCount}</p>
-            <p className="mt-1 text-[11px] text-slate-400">All managed accounts</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">{totalClientsCount}</p>
+            <p className="mt-1 text-xs text-slate-500">All managed accounts</p>
           </div>
 
           <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-[12px] font-medium text-slate-500">Active Clients</p>
-              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 ring-1 ring-emerald-100">
+              <p className="text-sm font-medium text-slate-600">Active Clients</p>
+              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-600 ring-1 ring-emerald-100">
                 {Math.round((activeClientsCount / totalClientsCount) * 100)}% active
               </span>
             </div>
-            <p className="mt-3 text-[26px] font-semibold tracking-[-0.04em] text-emerald-600">{activeClientsCount}</p>
-            <p className="mt-1 text-[11px] text-slate-400">In-force relationships</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-bold tracking-tight text-emerald-600">{activeClientsCount}</p>
+            <p className="mt-1 text-xs text-slate-500">In-force relationships</p>
           </div>
 
           <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-[12px] font-medium text-slate-500">Inactive Clients</p>
-              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600 ring-1 ring-slate-200">
+              <p className="text-sm font-medium text-slate-600">Inactive Clients</p>
+              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
                 Archived
               </span>
             </div>
-            <p className="mt-3 text-[26px] font-semibold tracking-[-0.04em] text-slate-700">{inactiveClientsCount}</p>
-            <p className="mt-1 text-[11px] text-slate-400">Historical records kept</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-bold tracking-tight text-slate-700">{inactiveClientsCount}</p>
+            <p className="mt-1 text-xs text-slate-500">Historical records kept</p>
           </div>
 
           <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-[12px] font-medium text-slate-500">In-force Policies</p>
-              <span className="rounded-md bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-600 ring-1 ring-violet-100">
+              <p className="text-sm font-medium text-slate-600">In-force Policies</p>
+              <span className="rounded-md bg-violet-50 px-2 py-0.5 text-xs font-semibold text-violet-600 ring-1 ring-violet-100">
                 Coverage
               </span>
             </div>
-            <p className="mt-3 text-[26px] font-semibold tracking-[-0.04em] text-slate-900">{totalPoliciesCount}</p>
-            <p className="mt-1 text-[11px] text-slate-400">Active policies in book</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">{totalPoliciesCount}</p>
+            <p className="mt-1 text-xs text-slate-500">Active policies in book</p>
           </div>
 
           <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-[12px] font-medium text-slate-500">Marketing Consent</p>
-              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 ring-1 ring-emerald-100">
+              <p className="text-sm font-medium text-slate-600">Marketing Consent</p>
+              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-600 ring-1 ring-emerald-100">
                 {consentRate}% opt-in
               </span>
             </div>
-            <p className="mt-3 text-[26px] font-semibold tracking-[-0.04em] text-slate-900">{consentGrantedCount}/{totalClientsCount}</p>
-            <p className="mt-1 text-[11px] text-slate-400">Compliant consent granted</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">{consentGrantedCount}/{totalClientsCount}</p>
+            <p className="mt-1 text-xs text-slate-500">Compliant consent granted</p>
           </div>
         </div>
 
         {/* ───── 4.1 Filter Tabs Bar ───── */}
-        <div className="mt-7 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+        <div className="mt-7 rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-thin">
             {[
               { label: 'All Clients', key: 'All' },
@@ -701,14 +701,14 @@ export default function ClientsPage() {
                 <button
                   key={tab.key}
                   onClick={() => handleTabSelect(tab.key)}
-                  className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-all cursor-pointer ${isActive
+                  className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isActive
                     ? 'bg-slate-950 text-white shadow-sm'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                     }`}
                 >
                   <span>{tab.label}</span>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                    className={`rounded-full px-2 py-0.5 text-xs font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                       }`}
                   >
                     {count}
@@ -727,7 +727,7 @@ export default function ClientsPage() {
                 placeholder="Search by client name, business, phone, email, identifier..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9.5 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9.5 pr-8 text-[12.5px] text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-10 pr-8 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
               />
               {searchQuery && (
                 <button
@@ -739,14 +739,14 @@ export default function ClientsPage() {
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2.5">
               {/* Client Status Filter */}
               <div className="flex items-center gap-1.5">
-                <span className="text-[11.5px] font-medium text-slate-500">Status:</span>
+                <span className="text-xs font-medium text-slate-600">Status:</span>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value as any)}
-                  className="h-9 rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+                  className="h-9.5 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
                 >
                   <option value="All">All Statuses</option>
                   <option value="Active">Active</option>
@@ -756,11 +756,11 @@ export default function ClientsPage() {
 
               {/* Policy Line Filter */}
               <div className="flex items-center gap-1.5">
-                <span className="text-[11.5px] font-medium text-slate-500">Line:</span>
+                <span className="text-xs font-medium text-slate-600">Line:</span>
                 <select
                   value={policyLineFilter}
                   onChange={(e) => setPolicyLineFilter(e.target.value)}
-                  className="h-9 rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+                  className="h-9.5 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
                 >
                   <option value="All">All Lines</option>
                   <option value="Commercial Auto">Commercial Auto</option>
@@ -775,11 +775,11 @@ export default function ClientsPage() {
 
               {/* Marketing Consent Filter */}
               <div className="flex items-center gap-1.5">
-                <span className="text-[11.5px] font-medium text-slate-500">Consent:</span>
+                <span className="text-xs font-medium text-slate-600">Consent:</span>
                 <select
                   value={consentFilter}
                   onChange={(e) => setConsentFilter(e.target.value as any)}
-                  className="h-9 rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+                  className="h-9.5 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
                 >
                   <option value="All">All Consents</option>
                   <option value="Granted">Granted</option>
@@ -799,7 +799,7 @@ export default function ClientsPage() {
                     setConsentFilter('All')
                     setActiveTab('All')
                   }}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-2.5 text-[11.5px] font-medium text-slate-600 transition hover:bg-slate-100 cursor-pointer"
+                  className="inline-flex h-9.5 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-100 cursor-pointer"
                 >
                   <RotateCcw className="size-3" />
                   <span>Reset</span>
@@ -823,7 +823,7 @@ export default function ClientsPage() {
           >
             <table className="w-full min-w-[1220px] text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold uppercase tracking-wider text-slate-500 select-none">
+                <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold uppercase tracking-wider text-slate-500 select-none">
                   <th className="px-4 py-3.5 min-w-[210px]">Client Name</th>
                   <th className="px-4 py-3.5 min-w-[170px]">Business Name</th>
                   <th className="px-4 py-3.5 min-w-[135px] whitespace-nowrap">Phone</th>
@@ -840,8 +840,8 @@ export default function ClientsPage() {
                   <tr>
                     <td colSpan={9} className="py-12 text-center text-slate-400">
                       <Users className="mx-auto size-8 text-slate-300 mb-2" />
-                      <p className="text-[13px] font-medium text-slate-600">No clients matched your criteria</p>
-                      <p className="text-[11px] text-slate-400 mt-1">Try selecting another status tab or resetting the search filter.</p>
+                      <p className="text-sm font-semibold text-slate-700">No clients matched your criteria</p>
+                      <p className="text-xs text-slate-400 mt-1">Try selecting another status tab or resetting the search filter.</p>
                     </td>
                   </tr>
                 ) : (
@@ -858,7 +858,7 @@ export default function ClientsPage() {
                         {/* 1. Client Name */}
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-3">
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-[11px] font-bold text-white shadow-sm">
+                            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-sm">
                               {initials}
                             </div>
                             <div className="min-w-0">
@@ -867,11 +867,11 @@ export default function ClientsPage() {
                                   setSelectedClientForView(client)
                                   setClientDetailTab('overview')
                                 }}
-                                className="text-[13px] font-semibold text-slate-900 transition hover:text-blue-600 text-left truncate block"
+                                className="text-sm font-semibold text-slate-900 transition hover:text-blue-600 text-left truncate block cursor-pointer"
                               >
                                 {client.name}
                               </button>
-                              <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                              <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
                                 <span>{client.brokerCode}</span>
                                 <span>·</span>
                                 <span>{client.otherIdentifier}</span>
@@ -883,12 +883,12 @@ export default function ClientsPage() {
                         {/* 2. Business Name */}
                         <td className="px-4 py-3.5">
                           {client.businessName !== '—' ? (
-                            <div className="flex items-center gap-1.5 text-[12px] font-medium text-slate-800">
+                            <div className="flex items-center gap-1.5 text-sm font-medium text-slate-800">
                               <Building2 className="size-3.5 text-slate-400 shrink-0" />
                               <span className="truncate max-w-[170px]">{client.businessName}</span>
                             </div>
                           ) : (
-                            <span className="text-[11px] text-slate-400 italic">Personal</span>
+                            <span className="text-xs text-slate-400 italic">Personal</span>
                           )}
                         </td>
 
@@ -896,7 +896,7 @@ export default function ClientsPage() {
                         <td className="px-4 py-3.5 whitespace-nowrap">
                           <a
                             href={`tel:${client.phone}`}
-                            className="inline-flex items-center gap-1.5 text-[12px] text-slate-600 hover:text-blue-600 transition whitespace-nowrap"
+                            className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 hover:text-blue-600 transition whitespace-nowrap font-medium"
                           >
                             <Phone className="size-3 text-slate-400 shrink-0" />
                             {client.phone}
@@ -907,7 +907,7 @@ export default function ClientsPage() {
                         <td className="px-4 py-3.5">
                           <a
                             href={`mailto:${client.email}`}
-                            className="inline-flex items-center gap-1.5 text-[12px] text-slate-600 hover:text-blue-600 transition truncate max-w-[180px]"
+                            className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 hover:text-blue-600 transition truncate max-w-[180px] font-medium"
                             title={client.email}
                           >
                             <Mail className="size-3 text-slate-400 shrink-0" />
@@ -920,7 +920,7 @@ export default function ClientsPage() {
                           <button
                             onClick={() => handleToggleStatus(client)}
                             title={`Click to mark as ${client.status === 'Active' ? 'Inactive' : 'Active'}`}
-                            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 transition cursor-pointer whitespace-nowrap ${client.status === 'Active'
+                            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 transition cursor-pointer whitespace-nowrap ${client.status === 'Active'
                               ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100'
                               : 'bg-slate-100 text-slate-600 ring-slate-200 hover:bg-slate-200'
                               }`}
@@ -942,10 +942,10 @@ export default function ClientsPage() {
                         {/* 6. Policies (Current / Historical count) */}
                         <td className="px-3 py-3.5 whitespace-nowrap">
                           <div className="flex flex-col whitespace-nowrap">
-                            <span className="text-[12px] font-semibold text-slate-800">
-                              {activePolicies} <span className="text-[11px] font-normal text-slate-400">Active</span>
+                            <span className="text-sm font-semibold text-slate-800">
+                              {activePolicies} <span className="text-xs font-normal text-slate-400">Active</span>
                             </span>
-                            <span className="text-[10px] text-slate-400">
+                            <span className="text-xs text-slate-400">
                               {totalPolicies} total in book
                             </span>
                           </div>
@@ -959,11 +959,11 @@ export default function ClientsPage() {
                         {/* 8. Last Activity */}
                         <td className="px-4 py-3.5">
                           <div className="flex flex-col max-w-[170px]">
-                            <span className="text-[11px] font-medium text-slate-700 truncate" title={client.lastActivity.description}>
+                            <span className="text-xs font-medium text-slate-700 truncate" title={client.lastActivity.description}>
                               {client.lastActivity.description}
                             </span>
-                            <span className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5 whitespace-nowrap">
-                              <Clock className="size-2.5 shrink-0" />
+                            <span className="text-xs text-slate-400 flex items-center gap-1 mt-0.5 whitespace-nowrap">
+                              <Clock className="size-3 shrink-0" />
                               {client.lastActivity.time}
                             </span>
                           </div>
@@ -977,24 +977,24 @@ export default function ClientsPage() {
                                 setSelectedClientForView(client)
                                 setClientDetailTab('overview')
                               }}
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-700 shadow-xs transition hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-600 whitespace-nowrap shrink-0"
+                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-600 whitespace-nowrap shrink-0 cursor-pointer"
                             >
-                              <Eye className="size-3 text-slate-400 shrink-0" />
+                              <Eye className="size-3.5 text-slate-400 shrink-0" />
                               <span>View</span>
                             </button>
                             <button
                               onClick={() => openEditClientModal(client)}
-                              className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 shrink-0"
+                              className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 shrink-0 cursor-pointer"
                               title="Edit Client"
                             >
                               <Edit3 className="size-3.5" />
                             </button>
                             <button
                               onClick={() => openAddPolicyModal(client)}
-                              className="inline-flex items-center gap-1 rounded-lg bg-slate-950 px-3 py-1.5 text-[11px] font-semibold text-white shadow-xs transition hover:bg-blue-600 whitespace-nowrap shrink-0"
+                              className="inline-flex items-center gap-1 rounded-lg bg-slate-950 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-blue-600 whitespace-nowrap shrink-0 cursor-pointer"
                               title="Add Policy to Client"
                             >
-                              <Plus className="size-3 shrink-0" />
+                              <Plus className="size-3.5 shrink-0" />
                               <span>Policy</span>
                             </button>
                           </div>
@@ -1266,8 +1266,8 @@ export default function ClientsPage() {
                               <div className="text-right">
                                 <p className="font-bold text-slate-900 text-[13px]">{policy.premium}</p>
                                 <span className={`inline-block mt-0.5 rounded-md px-1.5 py-0.5 text-[9.5px] font-semibold ring-1 ${policy.status === 'Active'
-                                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                    : 'bg-amber-50 text-amber-700 ring-amber-200'
+                                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                  : 'bg-amber-50 text-amber-700 ring-amber-200'
                                   }`}>
                                   {policy.status}
                                 </span>
@@ -1377,8 +1377,8 @@ export default function ClientsPage() {
                                 <p className="font-bold text-emerald-600 text-[13px]">{c.amount}</p>
                                 <p className="text-[10.5px] text-slate-400">Prem: {c.premium} ({c.rate})</p>
                                 <span className={`inline-block mt-0.5 rounded-md px-1.5 py-0.5 text-[9.5px] font-semibold ring-1 ${c.status === 'Paid'
-                                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                    : 'bg-rose-50 text-rose-700 ring-rose-200'
+                                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                  : 'bg-rose-50 text-rose-700 ring-rose-200'
                                   }`}>
                                   {c.status}
                                 </span>

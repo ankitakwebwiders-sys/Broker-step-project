@@ -81,7 +81,7 @@ export default function AdminLoginPage() {
           <div className="w-full max-w-[440px] rounded-2xl border border-white/20 bg-white p-4 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] sm:rounded-3xl sm:p-6">
             {/* Header */}
             <div className="mb-3 text-center sm:text-left sm:mb-4">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0170FE]/20 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#0170FE]">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0170FE]/20 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-[#0170FE]">
                 <Sparkles className="size-3" />
                 Super Admin
               </div>
@@ -190,7 +190,7 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Bottom Footer */}
-        <footer className="shrink-0 py-1 text-center text-[11px] text-slate-400">
+        <footer className="shrink-0 py-1 text-center text-xs text-slate-400">
           <p>
             © 2026 BrokerStep ·{' '}
             <Link href="/privacy" className="transition-colors hover:text-white">

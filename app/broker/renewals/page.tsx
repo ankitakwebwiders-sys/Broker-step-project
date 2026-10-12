@@ -466,14 +466,14 @@ export default function RenewalsPage() {
       {/* ───── Header Bar (11. Broker – Renewals) ───── */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div className="min-w-0 max-w-xl">
-          <p className="mb-1.5 inline-flex items-center gap-1.5 text-[12px] font-semibold text-blue-600">
+          <p className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600">
             <span className="size-1.5 rounded-full bg-blue-500 animate-pulse" />
             Tuesday, October 8, 2026 · Renewal Management
           </p>
-          <h1 className="text-[26px] font-bold tracking-tight text-slate-900 sm:text-[30px]">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
             Renewals
           </h1>
-          <p className="mt-0.5 text-[13px] text-slate-500 leading-relaxed">
+          <p className="mt-1 text-sm sm:text-[15px] text-slate-500 leading-relaxed">
             Policy expiration horizon tracking, broker reviews, renewal/rewrite actions, and preserved historical policy records.
           </p>
         </div>
@@ -481,22 +481,22 @@ export default function RenewalsPage() {
         {/* Header Summary KPI */}
         <div className="flex items-center gap-2.5 shrink-0 flex-nowrap overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           <div className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-right shadow-sm">
-            <span className="text-[11px] font-medium text-slate-400 block">Total Horizon Premium</span>
-            <span className="text-[15px] font-bold text-slate-900 font-mono">
+            <span className="text-xs font-medium text-slate-400 block">Total Horizon Premium</span>
+            <span className="text-base sm:text-lg font-bold text-slate-900 font-mono">
               ${totalHorizonPremium.toLocaleString()}
             </span>
           </div>
 
           <div className="rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-2 text-right shadow-sm">
-            <span className="text-[11px] font-medium text-blue-600 block">Listed Policies</span>
-            <span className="text-[15px] font-bold text-blue-700">
+            <span className="text-xs font-medium text-blue-600 block">Listed Policies</span>
+            <span className="text-base sm:text-lg font-bold text-blue-700">
               {horizonFilteredRecords.length} Policies
             </span>
           </div>
 
           <Link
             href="/broker/book-of-business"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[12px] font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
           >
             <Archive className="size-4 text-slate-400" />
             <span>Book of Business</span>
@@ -510,15 +510,15 @@ export default function RenewalsPage() {
           <div className="flex items-center gap-2.5">
 
             <div>
-              <h3 className="text-[16px] font-bold text-slate-900">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">
                 Renewal Workflow
               </h3>
-              <p className="text-[12.5px] text-slate-500">
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
                 End-to-end policy lifecycle tracking from approaching expiration to final statement reconciliation.
               </p>
             </div>
           </div>
-          <span className="rounded-full bg-blue-100 px-3 py-1 text-[12px] font-bold text-blue-700 self-start sm:self-auto">
+          <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700 self-start sm:self-auto">
             Automated Pipeline
           </span>
         </div>
@@ -589,17 +589,17 @@ export default function RenewalsPage() {
                 className="group rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs transition-all hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md"
               >
                 <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center rounded-lg bg-blue-50 px-2.5 py-1 text-[11.5px] font-bold font-mono text-blue-700 ring-1 ring-blue-100">
+                  <span className="inline-flex items-center rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-bold font-mono text-blue-700 ring-1 ring-blue-100">
                     Step {s.step}
                   </span>
-                  <div className={`flex size-7 items-center justify-center rounded-lg ${s.color}`}>
-                    <IconComponent className="size-3.5" />
+                  <div className={`flex size-7.5 items-center justify-center rounded-lg ${s.color}`}>
+                    <IconComponent className="size-4" />
                   </div>
                 </div>
-                <h4 className="font-bold text-slate-900 text-[14px] mt-2.5 group-hover:text-blue-600 transition">
+                <h4 className="font-bold text-slate-900 text-sm mt-2.5 group-hover:text-blue-600 transition">
                   {s.title}
                 </h4>
-                <p className="text-[12.5px] text-slate-600 mt-1 leading-relaxed">
+                <p className="text-xs sm:text-[13px] text-slate-600 mt-1 leading-relaxed">
                   {s.desc}
                 </p>
               </div>
@@ -609,7 +609,7 @@ export default function RenewalsPage() {
       </div>
 
       {/* ───── Horizon Filter Tabs Bar (7 Days, 30 Days, 60 Days, 90 Days, Custom Date Range) ───── */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-3">
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-3.5">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-thin">
           {[
             { id: '7-days', label: '7 Days', count: horizonCounts['7-days'] },
@@ -623,14 +623,14 @@ export default function RenewalsPage() {
               <button
                 key={tab.id}
                 onClick={() => handleHorizonSelect(tab.id as RenewalHorizon)}
-                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-all cursor-pointer ${isActive
+                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isActive
                   ? 'bg-slate-950 text-white shadow-sm'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                   }`}
               >
                 <span>{tab.label}</span>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                  className={`rounded-full px-2 py-0.5 text-xs font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                     }`}
                 >
                   {tab.count}
@@ -642,34 +642,34 @@ export default function RenewalsPage() {
 
         {/* Custom Date Range Picker (Visible only when 'Custom Date Range' tab is active) */}
         {selectedHorizon === 'custom' && (
-          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-blue-200 bg-blue-50/50 p-3 text-[12px]">
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-blue-200 bg-blue-50/50 p-3 text-xs sm:text-sm">
             <span className="font-semibold text-blue-900 flex items-center gap-1.5">
               <Calendar className="size-4 text-blue-600" />
               Custom Date Range:
             </span>
             <div className="flex items-center gap-2">
-              <label className="text-slate-500 text-[11px]">From:</label>
+              <label className="text-slate-500 text-xs font-medium">From:</label>
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
               />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-slate-500 text-[11px]">To:</label>
+              <label className="text-slate-500 text-xs font-medium">To:</label>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
               />
             </div>
           </div>
         )}
 
         {/* Search & Secondary Filter Dropdowns */}
-        <div className="flex flex-col gap-3 border-t border-slate-100 pt-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 border-t border-slate-100 pt-3.5 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
             <input
@@ -677,7 +677,7 @@ export default function RenewalsPage() {
               placeholder="Search by client, policy #, carrier, or line of business..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9.5 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9.5 pr-8 text-[12.5px] text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9.5 pr-8 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
             />
             {searchQuery && (
               <button
@@ -689,14 +689,14 @@ export default function RenewalsPage() {
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             {/* Carrier Filter */}
             <div className="flex items-center gap-1.5">
-              <span className="text-[11.5px] font-medium text-slate-500">Carrier:</span>
+              <span className="text-xs font-semibold text-slate-500">Carrier:</span>
               <select
                 value={carrierFilter}
                 onChange={(e) => setCarrierFilter(e.target.value)}
-                className="h-9 rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none cursor-pointer"
+                className="h-9.5 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none cursor-pointer"
               >
                 <option value="All">All Carriers</option>
                 <option value="Travelers">Travelers</option>
@@ -711,11 +711,11 @@ export default function RenewalsPage() {
 
             {/* Renewal Status Filter */}
             <div className="flex items-center gap-1.5">
-              <span className="text-[11.5px] font-medium text-slate-500">Status:</span>
+              <span className="text-xs font-semibold text-slate-500">Status:</span>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="h-9 rounded-xl border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none cursor-pointer"
+                className="h-9.5 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none cursor-pointer"
               >
                 <option value="All">All Statuses</option>
                 <option value="Pending Review">Pending Review</option>
@@ -737,9 +737,9 @@ export default function RenewalsPage() {
                   setStatusFilter('All')
                   setSearchQuery('')
                 }}
-                className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-2.5 text-[11.5px] font-medium text-slate-600 transition hover:bg-slate-100 cursor-pointer"
+                className="inline-flex h-9.5 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 cursor-pointer"
               >
-                <RotateCcw className="size-3" />
+                <RotateCcw className="size-3.5" />
                 <span>Reset</span>
               </button>
             )}
@@ -752,7 +752,7 @@ export default function RenewalsPage() {
         <div className="overflow-x-auto scrollbar-thin">
           <table className="w-full min-w-[1440px] text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold uppercase tracking-wider text-slate-500 select-none">
+              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold uppercase tracking-wider text-slate-500 select-none">
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[210px]">Client</th>
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[160px]">Policy Number</th>
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[130px]">Carrier</th>
@@ -764,15 +764,15 @@ export default function RenewalsPage() {
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[350px] text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 font-medium">
               {horizonFilteredRecords.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="py-12 text-center text-slate-400">
                     <Clock className="mx-auto size-8 text-slate-300 mb-2" />
-                    <p className="text-[13px] font-medium text-slate-600">
+                    <p className="text-sm font-semibold text-slate-700">
                       No policies found in {selectedHorizon.replace('-', ' ')}
                     </p>
-                    <p className="text-[11px] text-slate-400 mt-1">
+                    <p className="text-xs text-slate-400 mt-1">
                       Try selecting another horizon tab or resetting your filter criteria.
                     </p>
                   </td>
@@ -784,29 +784,29 @@ export default function RenewalsPage() {
                       {/* 1. Client */}
                       <td className="px-4 py-3.5 whitespace-nowrap">
                         <p className="font-semibold text-slate-900 leading-snug">{policy.client}</p>
-                        <p className="text-[11px] text-slate-500 leading-snug">{policy.businessName}</p>
+                        <p className="text-xs text-slate-500 leading-snug">{policy.businessName}</p>
                       </td>
 
                       {/* 2. Policy Number */}
-                      <td className="px-4 py-3.5 whitespace-nowrap font-semibold text-slate-900 font-mono text-[12px]">
+                      <td className="px-4 py-3.5 whitespace-nowrap font-semibold text-slate-900 font-mono text-sm">
                         {policy.policyNumber}
                       </td>
 
                       {/* 3. Carrier */}
                       <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span className="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-[11.5px] font-medium text-slate-800">
+                        <span className="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-800">
                           {policy.carrier}
                         </span>
                       </td>
 
                       {/* 4. Line of Business */}
-                      <td className="px-4 py-3.5 whitespace-nowrap text-slate-700 font-medium">{policy.lineOfBusiness}</td>
+                      <td className="px-4 py-3.5 whitespace-nowrap text-slate-700 font-medium text-xs sm:text-sm">{policy.lineOfBusiness}</td>
 
                       {/* 5. Expiry Date */}
-                      <td className="px-4 py-3.5 whitespace-nowrap font-mono text-[12px]">
+                      <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs">
                         <p className="font-semibold text-slate-900 leading-snug">{policy.expiryDate}</p>
                         <span
-                          className={`inline-block text-[10.5px] font-bold leading-snug ${policy.daysUntilExpiry <= 7
+                          className={`inline-block text-xs font-bold leading-snug ${policy.daysUntilExpiry <= 7
                             ? 'text-rose-600'
                             : policy.daysUntilExpiry <= 30
                               ? 'text-amber-600'
@@ -818,14 +818,14 @@ export default function RenewalsPage() {
                       </td>
 
                       {/* 6. Premium */}
-                      <td className="px-4 py-3.5 whitespace-nowrap text-right font-bold text-slate-900 font-mono text-[13px]">
+                      <td className="px-4 py-3.5 whitespace-nowrap text-right font-bold text-slate-900 font-mono text-sm">
                         ${policy.premium.toLocaleString()}
                       </td>
 
                       {/* 7. Policy Status */}
                       <td className="px-4 py-3.5 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10.5px] font-bold ${policy.policyStatus === 'Expiring Soon'
+                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${policy.policyStatus === 'Expiring Soon'
                             ? 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
                             : policy.policyStatus === 'Pending Renewal'
                               ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
@@ -839,7 +839,7 @@ export default function RenewalsPage() {
                       {/* 8. Renewal Status */}
                       <td className="px-4 py-3.5 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10.5px] font-bold ${policy.renewalStatus === 'Renewed'
+                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${policy.renewalStatus === 'Renewed'
                             ? 'bg-emerald-100 text-emerald-800'
                             : policy.renewalStatus === 'Rewritten'
                               ? 'bg-blue-100 text-blue-800'
@@ -862,50 +862,50 @@ export default function RenewalsPage() {
                           {/* Review Action */}
                           <button
                             onClick={() => handleOpenAction('review', policy)}
-                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                             title="Review Policy (Step 41)"
                           >
-                            <Eye className="size-3 text-slate-400" />
+                            <Eye className="size-3.5 text-slate-400" />
                             <span>Review</span>
                           </button>
 
                           {/* Renew Action */}
                           <button
                             onClick={() => handleOpenAction('renew', policy)}
-                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-emerald-700 transition cursor-pointer"
+                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-emerald-700 transition cursor-pointer"
                             title="Renew Policy (Step 42)"
                           >
-                            <Check className="size-3" />
+                            <Check className="size-3.5" />
                             <span>Renew</span>
                           </button>
 
                           {/* Rewrite Action */}
                           <button
                             onClick={() => handleOpenAction('rewrite', policy)}
-                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700 hover:bg-blue-100 transition cursor-pointer"
+                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition cursor-pointer"
                             title="Rewrite to Carrier (Step 42)"
                           >
-                            <RefreshCw className="size-3 text-blue-600" />
+                            <RefreshCw className="size-3.5 text-blue-600" />
                             <span>Rewrite</span>
                           </button>
 
                           {/* Non-Renew Action */}
                           <button
                             onClick={() => handleOpenAction('non-renew', policy)}
-                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 transition cursor-pointer"
                             title="Non-Renew Policy (Step 42)"
                           >
-                            <Ban className="size-3 text-slate-400" />
+                            <Ban className="size-3.5 text-slate-400" />
                             <span>Non-Renew</span>
                           </button>
 
                           {/* Mark Lost Business Action */}
                           <button
                             onClick={() => handleOpenAction('lost', policy)}
-                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-medium text-rose-700 hover:bg-rose-100 transition cursor-pointer"
+                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-100 transition cursor-pointer"
                             title="Mark Lost Business (Step 42)"
                           >
-                            <XCircle className="size-3 text-rose-500" />
+                            <XCircle className="size-3.5 text-rose-500" />
                             <span>Lost</span>
                           </button>
                         </div>

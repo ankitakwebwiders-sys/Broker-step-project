@@ -61,7 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <input
                 type="text"
                 placeholder="Search brokers, carriers, policies, logs..."
-                className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/80 pl-10 pr-4 text-[12.5px] text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100/60"
+                className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/80 pl-10 pr-4 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100/60"
               />
             </div>
           </div>
@@ -97,15 +97,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               href="/admin/settings"
               className="group flex items-center gap-2.5 rounded-xl p-1 pr-2 transition-colors hover:bg-slate-100/90"
             >
-              <div className="relative flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-[11px] font-bold text-white shadow-sm ring-1 ring-black/5">
+              <div className="relative flex size-8.5 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-xs font-bold text-white shadow-sm ring-1 ring-black/5">
                 AD
                 <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-white bg-emerald-500" />
               </div>
               <div className="hidden text-left sm:block">
-                <p className="text-[12px] font-semibold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">
+                <p className="text-sm font-semibold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">
                   Admin User
                 </p>
-                <p className="text-[10px] font-medium text-slate-400 leading-tight">
+                <p className="text-xs font-medium text-slate-400 leading-tight mt-0.5">
                   System Administrator
                 </p>
               </div>

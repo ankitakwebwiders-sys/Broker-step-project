@@ -1,12 +1,51 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Check, ChevronRight, FileCheck2, Sparkles, TrendingUp, Users, WalletCards, Zap, Target, BarChart3, Award, Clock, Globe, Rocket, Database, Shield, Layers, Star, LayoutGrid, DatabaseBackup, ChartNetwork, HelpCircle, ChevronDown, MessageCircle } from 'lucide-react'
+import { ArrowRight, Check, ChevronRight, FileCheck2, Sparkles, TrendingUp, Users, WalletCards, Zap, Target, BarChart3, Award, Clock, Globe, Rocket, Database, Shield, Layers, Star, LayoutGrid, DatabaseBackup, ChartNetwork, HelpCircle, ChevronDown, MessageCircle, Mail, CreditCard, ShieldAlert } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { Navbar } from '@/components/landing/Navbar'
 import { Footer } from '@/components/landing/Footer'
 import { pricingPlans } from '@/data/landing/pricing'
 import { faqs } from '@/data/landing/faqs'
+
+const contactChannels = [
+  {
+    title: 'General Inquiries',
+    email: 'inquiry@brokerstep.com',
+    mailto: 'mailto:inquiry@brokerstep.com',
+    desc: 'Platform questions, partnerships, media requests, and general advice.',
+    icon: Mail,
+    badge: 'General',
+    color: 'from-blue-500 to-cyan-500',
+  },
+  {
+    title: 'Sales & Onboarding',
+    email: 'Sales@brokerstep.com',
+    mailto: 'mailto:Sales@brokerstep.com',
+    desc: 'Custom enterprise demos, team plans, and migration help.',
+    icon: Sparkles,
+    badge: 'Sales',
+    color: 'from-blue-600 to-indigo-600',
+  },
+  {
+    title: 'Billing & Accounts',
+    email: 'Billing@brokerstep.com',
+    mailto: 'mailto:Billing@brokerstep.com',
+    desc: 'Invoicing, receipts, payment questions, and subscription terms.',
+    icon: CreditCard,
+    badge: 'Billing',
+    color: 'from-emerald-500 to-teal-500',
+  },
+  {
+    title: 'Complaints & Support',
+    email: 'Complaints@brokerstep.com',
+    mailto: 'mailto:Complaints@brokerstep.com',
+    desc: 'Disputes, incident escalation, and prioritized customer care.',
+    icon: ShieldAlert,
+    badge: 'Support',
+    color: 'from-rose-500 to-pink-500',
+  },
+]
 
 const benefits = [
   { icon: Database, title: 'Unified Data Hub', description: 'All your client data in one place', color: 'from-blue-500 to-cyan-500', glow: 'rgba(59,130,246,0.22)' },
@@ -679,6 +718,74 @@ export default function LandingPage() {
           </div>
 
 
+        </div>
+      </section>
+
+      {/* ═══════════ CONTACT ═══════════ */}
+      <section id="contact" className="relative z-10 px-6 py-24 lg:px-10">
+        <div className="mx-auto max-w-6xl">
+          <Reveal>
+            <div className="text-center">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
+                <Mail className="size-3.5 text-[#0170FE]" />
+                Direct Contact Channels
+              </span>
+              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
+                Get in touch with our team.
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-600">
+                Reach out directly to the right department or visit our dedicated contact hub for immediate assistance.
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {contactChannels.map((item, i) => {
+              const Icon = item.icon
+              return (
+                <Reveal key={item.email} delay={i * 80}>
+                  <div className="group flex h-full flex-col justify-between rounded-2xl border border-slate-200/90 bg-white/95 p-6 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0170FE]/40 hover:shadow-xl hover:shadow-blue-500/5">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <div className={`flex size-11 items-center justify-center rounded-xl bg-gradient-to-br ${item.color} text-white shadow-md transition-transform duration-300 group-hover:scale-105`}>
+                          <Icon className="size-5" />
+                        </div>
+                        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
+                          {item.badge}
+                        </span>
+                      </div>
+
+                      <h3 className="mt-4 text-base font-bold text-slate-950">{item.title}</h3>
+                      <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{item.desc}</p>
+                    </div>
+
+                    <div className="mt-6 border-t border-slate-100 pt-4">
+                      <a
+                        href={item.mailto}
+                        className="group/link inline-flex items-center gap-1.5 text-xs font-semibold text-[#0170FE] transition-colors hover:text-[#0060db]"
+                      >
+                        <span className="truncate">{item.email}</span>
+                        <ArrowRight className="size-3 transition-transform group-hover/link:translate-x-0.5" />
+                      </a>
+                    </div>
+                  </div>
+                </Reveal>
+              )
+            })}
+          </div>
+
+          <Reveal delay={300}>
+            <div className="mt-12 flex flex-col items-center justify-center gap-4 text-center sm:flex-row">
+              <span className="text-xs text-slate-500">Need to send a direct message or custom request?</span>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200/90 bg-white px-5 py-2.5 text-xs font-semibold text-slate-800 shadow-xs transition-all hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE]"
+              >
+                <span>Open Full Contact Page</span>
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </div>
+          </Reveal>
         </div>
       </section>
 

@@ -69,11 +69,10 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
             </span>
             <Link
               href={isSignUp ? '/login' : '/register'}
-              className={`inline-flex items-center justify-center rounded-xl px-3.5 py-1.5 text-xs font-semibold backdrop-blur-md transition sm:px-4 sm:py-2 ${
-                isSignUp
-                  ? 'border border-white/80 bg-white text-slate-900 shadow-xs hover:bg-slate-100 hover:text-[#0170FE]'
-                  : 'bg-[#0170FE] text-white shadow-md shadow-[#0170FE]/25 hover:bg-[#0061e0]'
-              }`}
+              className={`inline-flex items-center justify-center rounded-xl px-3.5 py-1.5 text-xs font-semibold backdrop-blur-md transition sm:px-4 sm:py-2 ${isSignUp
+                ? 'border border-white/80 bg-white text-slate-900 shadow-xs hover:bg-slate-100 hover:text-[#0170FE]'
+                : 'bg-[#0170FE] text-white shadow-md shadow-[#0170FE]/25 hover:bg-[#0061e0]'
+                }`}
             >
               {isSignUp ? 'Sign in' : 'Create account'}
             </Link>

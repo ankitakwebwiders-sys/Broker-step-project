@@ -26,10 +26,12 @@ import {
   WalletCards,
   X,
   Zap,
+  ArrowRight,
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
+import { HeaderNotificationCenter } from '@/components/broker/HeaderNotificationCenter'
 
 
 interface SubNavItemDef {
@@ -98,8 +100,7 @@ const navSections: NavSectionDef[] = [
           { label: 'Lost', href: '/broker/leads?tab=Lost' },
           { label: 'Not Interested', href: '/broker/leads?tab=Not+Interested' },
           { label: 'Archived', href: '/broker/leads?tab=Archived' },
-          { label: 'Lead Details', href: '/broker/leads?view=details' },
-          { label: 'My QR Code / Lead Form', href: '/broker/qr-lead-capture' },
+
         ],
       },
       {
@@ -125,11 +126,7 @@ const navSections: NavSectionDef[] = [
         icon: BookOpen,
         href: '/broker/book-of-business',
         subItems: [
-          { label: 'Overview', href: '/broker/book-of-business' },
           { label: 'Active Book', href: '/broker/book-of-business?tab=active' },
-          { label: 'Historical Book', href: '/broker/book-of-business?tab=historical' },
-          { label: 'Import Book of Business', href: '/broker/book-of-business?tab=import' },
-          { label: 'Book Analytics', href: '/broker/book-of-business?tab=analytics' },
         ],
       },
     ],
@@ -220,7 +217,7 @@ const navSections: NavSectionDef[] = [
           { label: 'Client Commission History', href: '/broker/reports?type=client-commission-history' },
           { label: 'Statement / Reconciliation', href: '/broker/reports?type=statement-reconciliation' },
           { label: 'Lead', href: '/broker/reports?type=lead' },
-          { label: 'Marketing Consent', href: '/broker/marketing-consent' },
+          { label: 'Marketing Consent', href: '/broker/reports?type=marketing-consent' },
         ],
       },
     ],
@@ -233,13 +230,13 @@ const navSections: NavSectionDef[] = [
         icon: Settings,
         href: '/broker/settings',
         subItems: [
-          { label: 'My Profile', href: '/broker/settings' },
+          { label: 'My Profile', href: '/broker/settings?tab=profile' },
           { label: 'Account', href: '/broker/settings?tab=account' },
-          { label: 'Membership / Subscription', href: '/broker/membership' },
-          { label: 'Carriers', href: '/broker/carriers' },
-          { label: 'Commission Settings', href: '/broker/commission-settings' },
-          { label: 'Marketing Consent', href: '/broker/marketing-consent' },
-          { label: 'QR / Lead Settings', href: '/broker/qr-lead-capture' },
+          { label: 'Membership / Subscription', href: '/broker/settings?tab=membership' },
+          { label: 'Carriers', href: '/broker/settings?tab=carriers' },
+          { label: 'Commission Settings', href: '/broker/settings?tab=commissions' },
+          { label: 'Marketing Consent', href: '/broker/settings?tab=consent' },
+          { label: 'QR / Lead Settings', href: '/broker/settings?tab=qr-leads' },
         ],
       },
     ],
@@ -291,6 +288,21 @@ function NavItem({
       if (pathname !== subPath) return false
       const currentParams = new URLSearchParams(currentSearch)
       const subParams = new URLSearchParams(subQuery)
+
+      if (subParams.get('tab') === 'profile') {
+        const currentTab = currentParams.get('tab')
+        if (!currentTab || currentTab === 'profile') {
+          return true
+        }
+      }
+
+      if (subParams.get('type') === 'book-of-business') {
+        const currentType = currentParams.get('type')
+        if (!currentType || currentType === 'book-of-business') {
+          return true
+        }
+      }
+
       let matches = true
       subParams.forEach((val, key) => {
         if (currentParams.get(key) !== val) {
@@ -343,41 +355,37 @@ function NavItem({
   return (
     <div className="flex flex-col">
       <div
-        className={`group relative flex w-full items-center rounded-xl transition-all duration-200 ${
-          active
-            ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold shadow-md shadow-blue-500/25'
-            : 'text-slate-300 hover:bg-white/[0.07] hover:text-white'
-        }`}
+        className={`group relative flex w-full items-center rounded-xl transition-all duration-200 ${active
+          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold shadow-md shadow-blue-500/25'
+          : 'text-slate-300 hover:bg-white/[0.07] hover:text-white'
+          }`}
       >
         <Link
           href={item.href}
           onClick={handleParentClick}
-          className="flex flex-1 items-center gap-3 px-3 py-2.5 text-[13px] font-medium"
+          className="flex flex-1 items-center gap-3 px-3 py-2.5 text-sm font-medium"
         >
           <Icon
-            className={`size-[18px] shrink-0 transition-colors ${
-              active ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'
-            }`}
+            className={`size-[18px] shrink-0 transition-colors ${active ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'
+              }`}
           />
           <span className="flex-1 truncate">{item.label}</span>
           {item.count && (
             <span
-              className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${
-                active
-                  ? 'bg-white/20 text-white font-semibold'
-                  : 'bg-slate-800 text-slate-300 border border-slate-700/60 group-hover:bg-slate-700/80 group-hover:text-white'
-              }`}
+              className={`rounded-full px-2 py-0.5 text-xs font-semibold transition-colors ${active
+                ? 'bg-white/20 text-white'
+                : 'bg-slate-800 text-slate-300 border border-slate-700/60 group-hover:bg-slate-700/80 group-hover:text-white'
+                }`}
             >
               {item.count}
             </span>
           )}
           {item.badge && (
             <span
-              className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase ${
-                active
-                  ? 'bg-white/25 text-white'
-                  : 'bg-blue-500/15 text-blue-400 border border-blue-400/30'
-              }`}
+              className={`rounded-md px-2 py-0.5 text-xs font-bold tracking-wide uppercase ${active
+                ? 'bg-white/25 text-white'
+                : 'bg-blue-500/15 text-blue-400 border border-blue-400/30'
+                }`}
             >
               {item.badge}
             </span>
@@ -392,17 +400,15 @@ function NavItem({
               e.stopPropagation()
               onToggleExpand()
             }}
-            className={`p-2 mr-1 rounded-lg transition-colors cursor-pointer ${
-              active
-                ? 'text-white/80 hover:text-white hover:bg-white/10'
-                : 'text-slate-400 hover:text-white hover:bg-white/10'
-            }`}
+            className={`p-2 mr-1 rounded-lg transition-colors cursor-pointer ${active
+              ? 'text-white/80 hover:text-white hover:bg-white/10'
+              : 'text-slate-400 hover:text-white hover:bg-white/10'
+              }`}
             aria-label={`Toggle ${item.label} submenus`}
           >
             <ChevronDown
-              className={`size-3.5 transition-transform duration-200 ${
-                expanded ? 'rotate-180' : ''
-              }`}
+              className={`size-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''
+                }`}
             />
           </button>
         )}
@@ -418,17 +424,15 @@ function NavItem({
                 key={sub.label + sub.href}
                 href={sub.href}
                 onClick={(e) => handleSubClick(e, sub.href)}
-                className={`group relative flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                  subIdx === 0 ? 'mt-1.5' : ''
-                } ${
-                  isSubActive
+                className={`group relative flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition-all cursor-pointer ${subIdx === 0 ? 'mt-1.5' : ''
+                  } ${isSubActive
                     ? 'bg-blue-500/15 text-blue-400 font-semibold -ml-[11px] pl-[9px] border-l-2 border-blue-500'
                     : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
-                }`}
+                  }`}
               >
                 <span className="truncate">{sub.label}</span>
                 {sub.count && (
-                  <span className="rounded px-1.5 py-0.2 text-[10px] font-semibold bg-slate-800/80 text-slate-400">
+                  <span className="rounded px-1.5 py-0.5 text-xs font-semibold bg-slate-800/80 text-slate-400">
                     {sub.count}
                   </span>
                 )}
@@ -443,6 +447,7 @@ function NavItem({
 
 export default function BrokerLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [showPaymentBanner, setShowPaymentBanner] = useState(true)
   const pathname = usePathname()
   const [currentSearch, setCurrentSearch] = useState('')
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>(() => {
@@ -519,9 +524,8 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
     <div className="min-h-screen bg-[#f8fafc] text-slate-900">
       {/* ───── Sidebar ───── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-slate-800/80 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 px-3.5 py-4 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-slate-800/80 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 px-3.5 py-4 transition-transform duration-300 ease-in-out lg:translate-x-0 ${mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+          }`}
       >
         {/* Brand Header */}
         <div className="flex items-center justify-between px-2 mb-3">
@@ -539,7 +543,7 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
         <div className="flex flex-1 flex-col space-y-4 overflow-y-auto pr-1 custom-scrollbar">
           {navSections.map((section) => (
             <div key={section.label}>
-              <p className="mb-1.5 px-3 text-[10px] font-bold tracking-[0.16em] text-slate-400 uppercase">
+              <p className="mb-2 px-3 text-xs font-bold tracking-wider text-slate-400 uppercase">
                 {section.label}
               </p>
               <div className="flex flex-col gap-1">
@@ -565,12 +569,12 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
         <div className="mt-3 pt-3 border-t border-slate-800/80">
           <div className="flex items-center justify-between rounded-xl p-2 text-left transition hover:bg-white/[0.05]">
             <Link href="/broker/settings" className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-[11px] font-bold text-white shadow-sm">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-sm">
                 JD
               </div>
               <div className="truncate">
-                <p className="truncate text-[12px] font-semibold text-slate-200 leading-tight">Jordan Davis</p>
-                <p className="truncate text-[10px] text-slate-400 leading-tight">jordan@brokerstep.com</p>
+                <p className="truncate text-sm font-semibold text-slate-200 leading-tight">Jordan Davis</p>
+                <p className="truncate text-xs text-slate-400 leading-tight mt-0.5">jordan@brokerstep.com</p>
               </div>
             </Link>
             <Link
@@ -613,7 +617,7 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
               <input
                 type="text"
                 placeholder="Search clients, policies, statements..."
-                className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/80 pl-10 pr-12 text-[12.5px] text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100/60"
+                className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/80 pl-10 pr-12 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100/60"
               />
 
             </div>
@@ -632,36 +636,25 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
               <CircleHelp className="size-[18px]" />
             </button>
 
-            {/* Notifications */}
-            <button
-              type="button"
-              className="relative flex size-9 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
-              aria-label="Notifications"
-              title="Notifications"
-            >
-              <Bell className="size-[18px]" />
-              <span className="absolute top-1.5 right-1.5 flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-blue-500 opacity-75" />
-                <span className="relative inline-flex size-2 rounded-full bg-blue-600 ring-2 ring-white" />
-              </span>
-            </button>
+            {/* Notifications Center with Failed Payment & Expiry alerts */}
+            <HeaderNotificationCenter />
 
             <div className="h-6 w-px bg-slate-200/90 mx-0.5" />
 
             {/* User Profile Pill */}
             <Link
               href="/broker/settings"
-              className="group flex items-center gap-2.5 rounded-xl p-1 pr-2 transition-colors hover:bg-slate-100/90"
+              className="group flex items-center gap-2.5 rounded-xl p-1.5 pr-2.5 transition-colors hover:bg-slate-100/90"
             >
-              <div className="relative flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-[11px] font-bold text-white shadow-sm ring-1 ring-black/5">
+              <div className="relative flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-xs font-bold text-white shadow-sm ring-1 ring-black/5">
                 JD
                 <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-white bg-emerald-500" />
               </div>
               <div className="hidden text-left sm:block">
-                <p className="text-[12px] font-semibold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">
+                <p className="text-sm font-semibold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">
                   Jordan Davis
                 </p>
-                <p className="text-[10px] font-medium text-slate-400 leading-tight">
+                <p className="text-xs font-medium text-slate-500 leading-tight mt-0.5">
                   Principal Broker · Pro
                 </p>
               </div>
@@ -669,6 +662,35 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
             </Link>
           </div>
         </header>
+
+        {/* Failed Membership Payment Notification Banner (Linkable to affected membership page) */}
+        {showPaymentBanner && (
+          <div className="bg-rose-50 border-b border-rose-200/90 px-4 py-2.5 text-sm text-rose-900 flex items-center justify-between gap-3 sm:px-8 animate-in fade-in">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="flex size-2 rounded-full bg-rose-600 animate-pulse shrink-0" />
+              <p className="font-medium text-sm truncate sm:whitespace-normal">
+                <strong className="font-bold text-rose-950">Action Required:</strong> Recurring Professional Plan payment ($79.00) on Visa ending in 4242 failed to process.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <Link
+                href="/broker/settings?tab=membership"
+                className="font-bold text-rose-700 hover:text-rose-950 hover:underline flex items-center gap-1 text-xs"
+              >
+                <span>Update Method</span>
+                <ArrowRight className="size-3" />
+              </Link>
+              <button
+                type="button"
+                onClick={() => setShowPaymentBanner(false)}
+                className="text-rose-400 hover:text-rose-700 p-0.5 rounded cursor-pointer"
+                aria-label="Dismiss banner"
+              >
+                <X className="size-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Page Content */}
         <main>{children}</main>

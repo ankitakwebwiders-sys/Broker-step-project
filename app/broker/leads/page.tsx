@@ -710,7 +710,7 @@ export default function LeadsPage() {
               Leads
             </h1>
             <p className="mt-1 text-sm sm:text-[15px] text-slate-500 leading-relaxed">
-              Inbound prospect pipeline, QR capture links, quote management, and client conversion workflow.
+              Inbound prospect pipeline, QR capture links, quote management, <br />and client conversion workflow.
             </p>
           </div>
 
@@ -1453,30 +1453,36 @@ export default function LeadsPage() {
 
             {/* QR Visual */}
             <div className="my-5 flex flex-col items-center justify-center rounded-2xl bg-slate-50 p-6 border border-slate-200/60">
-              <div className="relative size-44 rounded-2xl bg-white p-3 shadow-md border border-slate-100 flex items-center justify-center">
-                {/* Clean SVG representation of Broker QR code */}
-                <svg viewBox="0 0 100 100" className="size-full">
-                  <path d="M0,0 h30 v30 h-30 z M5,5 v20 h20 v-20 z M10,10 h10 v10 h-10 z" fill="#0f172a" />
-                  <path d="M70,0 h30 v30 h-30 z M75,5 v20 h20 v-20 z M80,10 h10 v10 h-10 z" fill="#0f172a" />
-                  <path d="M0,70 h30 v30 h-30 z M5,75 v20 h20 v-20 z M10,80 h10 v10 h-10 z" fill="#0f172a" />
-                  <rect x="38" y="10" width="8" height="8" fill="#2563eb" />
-                  <rect x="52" y="10" width="8" height="8" fill="#0f172a" />
-                  <rect x="38" y="24" width="8" height="8" fill="#0f172a" />
-                  <rect x="10" y="38" width="8" height="8" fill="#0f172a" />
-                  <rect x="24" y="38" width="8" height="8" fill="#2563eb" />
-                  <rect x="38" y="38" width="24" height="24" fill="#0f172a" rx="4" />
-                  <circle cx="50" cy="50" r="6" fill="#ffffff" />
-                  <rect x="70" y="38" width="8" height="8" fill="#2563eb" />
-                  <rect x="84" y="38" width="8" height="8" fill="#0f172a" />
-                  <rect x="70" y="52" width="8" height="8" fill="#0f172a" />
-                  <rect x="84" y="52" width="8" height="8" fill="#2563eb" />
-                  <rect x="38" y="70" width="8" height="8" fill="#0f172a" />
-                  <rect x="52" y="70" width="8" height="8" fill="#2563eb" />
-                  <rect x="70" y="70" width="8" height="8" fill="#0f172a" />
-                  <rect x="84" y="70" width="8" height="8" fill="#0f172a" />
-                  <rect x="70" y="84" width="8" height="8" fill="#2563eb" />
-                  <rect x="84" y="84" width="8" height="8" fill="#0f172a" />
-                </svg>
+              <div className="rounded-2xl border-4 border-[#0170FE] bg-white p-4 shadow-md">
+                {/* High visual QR placeholder */}
+                <div className="size-44 flex flex-col justify-between p-1 bg-white">
+                  <div className="flex justify-between">
+                    <div className="size-11 border-4 border-slate-950 flex items-center justify-center">
+                      <div className="size-5 bg-[#0170FE]" />
+                    </div>
+                    <div className="size-11 border-4 border-slate-950 flex items-center justify-center">
+                      <div className="size-5 bg-[#0170FE]" />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <div className="rounded-lg bg-[#0170FE] px-2 py-1 text-xs font-extrabold text-white">
+                      BROKERSTEP
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-end">
+                    <div className="size-11 border-4 border-slate-950 flex items-center justify-center">
+                      <div className="size-5 bg-[#0170FE]" />
+                    </div>
+                    <div className="grid grid-cols-3 gap-1 size-9">
+                      <div className="bg-slate-950" />
+                      <div className="bg-[#0170FE]" />
+                      <div className="bg-slate-950" />
+                      <div className="bg-[#0170FE]" />
+                      <div className="bg-slate-950" />
+                      <div className="bg-[#0170FE]" />
+                    </div>
+                  </div>
+                </div>
               </div>
               <p className="mt-3 text-[11px] font-medium text-slate-500">Scan with mobile camera to test public form</p>
             </div>

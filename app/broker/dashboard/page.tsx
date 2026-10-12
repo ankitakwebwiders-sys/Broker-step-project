@@ -288,7 +288,7 @@ export default function BrokerDashboardPage() {
             className="group rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 transition hover:border-blue-300 hover:bg-blue-50/30"
           >
             <p className="text-xs sm:text-sm font-medium text-slate-600">New Business</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900 group-hover:text-blue-600">
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-dark">
               $45,000
             </p>
             <span className="mt-1 inline-flex items-center text-xs font-semibold text-emerald-600">
@@ -301,7 +301,7 @@ export default function BrokerDashboardPage() {
             className="group rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 transition hover:border-blue-300 hover:bg-blue-50/30"
           >
             <p className="text-xs sm:text-sm font-medium text-slate-600">Renewals</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900 group-hover:text-blue-600">
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-dark">
               $97,000
             </p>
             <span className="mt-1 inline-flex items-center text-xs font-semibold text-blue-600">
@@ -314,7 +314,7 @@ export default function BrokerDashboardPage() {
             className="group rounded-xl border border-blue-200/80 bg-blue-50/40 p-4 transition hover:border-blue-300 hover:bg-blue-50/60"
           >
             <p className="text-xs sm:text-sm font-medium text-blue-700">Total Production</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-blue-950">
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-dark">
               $142,000
             </p>
             <span className="mt-1 inline-flex items-center text-xs font-semibold text-blue-600">
@@ -327,10 +327,10 @@ export default function BrokerDashboardPage() {
             className="group rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 transition hover:border-blue-300 hover:bg-blue-50/30"
           >
             <p className="text-xs sm:text-sm font-medium text-slate-600">Top Carrier Share</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900 group-hover:text-blue-600">
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-dark">
               Travelers (41%)
             </p>
-            <span className="mt-1 inline-flex text-xs font-medium text-slate-500">
+            <span className="mt-1 inline-flex text-xs font-medium text-dark">
               $58,000 volume
             </span>
           </Link>
@@ -340,7 +340,7 @@ export default function BrokerDashboardPage() {
             className="group col-span-2 sm:col-span-1 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 transition hover:border-blue-300 hover:bg-blue-50/30"
           >
             <p className="text-xs sm:text-sm font-medium text-slate-600">Active Policies</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900 group-hover:text-blue-600">
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-dark">
               1,192
             </p>
             <span className="mt-1 inline-flex text-xs font-semibold text-emerald-600">

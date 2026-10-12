@@ -154,8 +154,8 @@ function SettingsContent() {
                 type="button"
                 onClick={() => handleTabChange(tab.id)}
                 className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isActive
-                    ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                   }`}
               >
                 <Icon className={`size-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
@@ -691,8 +691,8 @@ function MembershipTab({ onSave }: { onSave: () => void }) {
                 type="button"
                 onClick={() => setBillingCycle('monthly')}
                 className={`cursor-pointer rounded-xl border p-3.5 text-left transition ${billingCycle === 'monthly'
-                    ? 'border-[#0170FE] bg-blue-50/50 ring-1 ring-[#0170FE]'
-                    : 'border-slate-200 hover:border-slate-300'
+                  ? 'border-[#0170FE] bg-blue-50/50 ring-1 ring-[#0170FE]'
+                  : 'border-slate-200 hover:border-slate-300'
                   }`}
               >
                 <p className="text-sm font-bold text-slate-900">Monthly Billing</p>
@@ -703,8 +703,8 @@ function MembershipTab({ onSave }: { onSave: () => void }) {
                 type="button"
                 onClick={() => setBillingCycle('yearly')}
                 className={`cursor-pointer rounded-xl border p-3.5 text-left transition relative ${billingCycle === 'yearly'
-                    ? 'border-[#0170FE] bg-blue-50/50 ring-1 ring-[#0170FE]'
-                    : 'border-slate-200 hover:border-slate-300'
+                  ? 'border-[#0170FE] bg-blue-50/50 ring-1 ring-[#0170FE]'
+                  : 'border-slate-200 hover:border-slate-300'
                   }`}
               >
                 <span className="absolute -top-2 right-2 rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-bold text-white">
@@ -920,8 +920,8 @@ function CarriersTab({ onSave }: { onSave: () => void }) {
                 </div>
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${carrier.status === 'Active'
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      : 'bg-amber-50 text-amber-700 border border-amber-200'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-amber-50 text-amber-700 border border-amber-200'
                     }`}
                 >
                   {carrier.status}
@@ -951,25 +951,7 @@ function CarriersTab({ onSave }: { onSave: () => void }) {
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <a
-                href={`https://${carrier.portal}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-xs font-semibold text-[#0170FE] hover:underline"
-              >
-                <span>Carrier Portal</span>
-                <ExternalLink className="size-3.5" />
-              </a>
 
-              <button
-                type="button"
-                onClick={onSave}
-                className="text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer"
-              >
-                Configure Splits
-              </button>
-            </div>
           </div>
         ))}
       </div>
@@ -1203,10 +1185,10 @@ function MarketingConsentTab({
                   <td className="py-3">
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${r.status === 'Consented'
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : r.status === 'Withdrawn'
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                            : 'bg-rose-50 text-rose-700 border border-rose-200'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : r.status === 'Withdrawn'
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : 'bg-rose-50 text-rose-700 border border-rose-200'
                         }`}
                     >
                       {r.status}
@@ -1309,11 +1291,34 @@ function QrLeadSettingsTab({
             </button>
             <button
               type="button"
-              onClick={onSave}
-              className="flex-1 inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs sm:text-sm font-semibold text-slate-800 shadow-xs hover:border-[#0170FE]"
+              onClick={() => {
+                if (typeof navigator !== 'undefined' && navigator.share) {
+                  navigator
+                    .share({
+                      title: 'Apex Horizon Brokerage Intake',
+                      text: 'Submit your insurance quote request directly through our intake portal:',
+                      url: leadUrl,
+                    })
+                    .catch(() => {
+                      onCopy(leadUrl, 'qrshare')
+                    })
+                } else {
+                  onCopy(leadUrl, 'qrshare')
+                }
+              }}
+              className="flex-1 inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs sm:text-sm font-semibold text-slate-800 shadow-xs hover:border-[#0170FE] transition"
             >
-              <Download className="size-4" />
-              Download SVG
+              {copiedKey === 'qrshare' ? (
+                <>
+                  <Check className="size-4 text-emerald-600" />
+                  <span>Link Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="size-4" />
+                  <span>Share</span>
+                </>
+              )}
             </button>
           </div>
         </div>

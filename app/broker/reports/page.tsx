@@ -532,13 +532,13 @@ function ReportsContent() {
     // Generate CSV data from current records
     const recordsToExport = selectedReport === 'catalog'
       ? REPORT_DEFINITIONS.map((r) => ({
-          Report: r.title,
-          Category: r.category,
-          Description: r.description,
-          Main_Content: r.mainContent,
-          SOW_Filters: r.sowFilters,
-          Export_Formats: r.exportFormats.join(' / '),
-        }))
+        Report: r.title,
+        Category: r.category,
+        Description: r.description,
+        Main_Content: r.mainContent,
+        SOW_Filters: r.sowFilters,
+        Export_Formats: r.exportFormats.join(' / '),
+      }))
       : currentRecords
 
     if (recordsToExport.length === 0) {
@@ -652,18 +652,16 @@ function ReportsContent() {
           <button
             type="button"
             onClick={() => handleSelectReport('catalog')}
-            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-              selectedReport === 'catalog'
-                ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
+            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${selectedReport === 'catalog'
+              ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
           >
             <Layers className={`size-4 ${selectedReport === 'catalog' ? 'text-white' : 'text-slate-500'}`} />
             <span>All Reports Directory</span>
             <span
-              className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                selectedReport === 'catalog' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-              }`}
+              className={`rounded-full px-2 py-0.5 text-xs font-bold ${selectedReport === 'catalog' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                }`}
             >
               15
             </span>
@@ -678,11 +676,10 @@ function ReportsContent() {
                 key={rep.key}
                 type="button"
                 onClick={() => handleSelectReport(rep.key)}
-                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
+                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isActive
+                  ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
               >
                 <Icon className={`size-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
                 <span>{rep.title}</span>
@@ -749,11 +746,10 @@ function ReportsContent() {
             <button
               type="button"
               onClick={() => setShowFiltersDrawer(!showFiltersDrawer)}
-              className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-xs sm:text-sm font-semibold transition cursor-pointer ${
-                showFiltersDrawer || activeFiltersCount > 0
-                  ? 'border-[#0170FE] bg-blue-50/60 text-[#0170FE]'
-                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-              }`}
+              className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-xs sm:text-sm font-semibold transition cursor-pointer ${showFiltersDrawer || activeFiltersCount > 0
+                ? 'border-[#0170FE] bg-blue-50/60 text-[#0170FE]'
+                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                }`}
             >
               <SlidersHorizontal className="size-3.5" />
               <span>More Filters</span>
@@ -956,10 +952,10 @@ function ReportsContent() {
                 <button
                   type="button"
                   onClick={() => triggerExport('Excel', 'BrokerStep_All_15_Reports_Catalog')}
-                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-slate-950 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-slate-800 transition"
+                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#0170FE] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 hover:bg-[#0060db] transition"
                 >
                   <Download className="size-4" />
-                  <span>Export Catalog (Excel)</span>
+                  <span>Export</span>
                 </button>
               </div>
             </div>
@@ -1038,7 +1034,7 @@ function ReportsContent() {
                               className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-950 hover:text-white transition"
                             >
                               <Eye className="size-3.5" />
-                              <span>View Data</span>
+                              <span>View </span>
                             </button>
                             <button
                               type="button"
@@ -1187,13 +1183,12 @@ function ReportsContent() {
                                   </span>
                                 ) : isStatus ? (
                                   <span
-                                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                                      v === 'Active' || v === 'Paid' || v === 'Reconciled' || v === 'Consented' || v === 'Bound / Won'
-                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                        : v === 'Outstanding' || v === 'Pending' || v === 'In Review' || v === 'Quoted'
+                                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${v === 'Active' || v === 'Paid' || v === 'Reconciled' || v === 'Consented' || v === 'Bound / Won'
+                                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                      : v === 'Outstanding' || v === 'Pending' || v === 'In Review' || v === 'Quoted'
                                         ? 'bg-amber-50 text-amber-700 border border-amber-200'
                                         : 'bg-rose-50 text-rose-700 border border-rose-200'
-                                    }`}
+                                      }`}
                                   >
                                     {String(v)}
                                   </span>

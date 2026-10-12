@@ -38,6 +38,14 @@ import {
   ArrowUpRight,
   Save,
   HelpCircle,
+  X,
+  Send,
+  FileText,
+  CheckSquare,
+  Square,
+  Fingerprint,
+  Clock,
+  Sparkles,
 } from 'lucide-react'
 
 // Tabs definition
@@ -896,14 +904,7 @@ function CarriersTab({ onSave }: { onSave: () => void }) {
           />
         </div>
 
-        <button
-          type="button"
-          onClick={onSave}
-          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#0170FE] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-[#0060db]"
-        >
-          <Plus className="size-4" />
-          <span>Add New Carrier / Appointment</span>
-        </button>
+
       </div>
 
       {/* Carriers Grid */}
@@ -1082,6 +1083,18 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
 /* =========================================================================
    6. TAB: MARKETING CONSENT
    ========================================================================= */
+interface ConsentRecordItem {
+  id: string
+  client: string
+  contact: string
+  channel: string
+  date: string
+  status: 'Consented' | 'Pending' | 'Withdrawn' | 'Declined'
+  hash: string
+  ip: string
+  scope: string[]
+}
+
 function MarketingConsentTab({
   onSave,
   onCopy,
@@ -1093,73 +1106,675 @@ function MarketingConsentTab({
 }) {
   const consentLink = 'https://brokerstep.app/consent/req/brk-ny-90214'
 
-  const consentRecords = [
-    { client: 'Apex Logistics Inc.', contact: 'Robert Vance', channel: 'SMS + Email', date: 'Oct 08, 2026', status: 'Consented', hash: 'SHA256:8891..c4' },
-    { client: 'Harbor Dental Care', contact: 'Dr. Amy Lin', channel: 'Email Verification', date: 'Oct 02, 2026', status: 'Consented', hash: 'SHA256:4910..a1' },
-    { client: 'Cascade Manufacturing', contact: 'Thomas Miller', channel: 'SMS Automated', date: 'Sep 24, 2026', status: 'Withdrawn', hash: 'SHA256:1192..e9' },
-    { client: 'Skyline Restaurant Group', contact: 'Mario Conti', channel: 'In-Person Digital', date: 'Sep 18, 2026', status: 'Consented', hash: 'SHA256:6630..d8' },
-    { client: 'Beacon Freight LLC', contact: 'Marcus Brody', channel: 'Phone Verification', date: 'Sep 12, 2026', status: 'Declined', hash: 'SHA256:0041..f2' },
-  ]
+  // Records state
+  const [records, setRecords] = useState<ConsentRecordItem[]>([
+    {
+      id: 'REC-901',
+      client: 'Apex Logistics Inc.',
+      contact: 'Robert Vance',
+      channel: 'SMS + Email',
+      date: 'Oct 08, 2026',
+      status: 'Consented',
+      hash: 'SHA256:8891c4d92a104e76',
+      ip: '198.51.100.42 (New York, NY)',
+      scope: ['SMS Renewal Notices', 'Email Quotes', 'Electronic Delivery'],
+    },
+    {
+      id: 'REC-902',
+      client: 'Harbor Dental Care',
+      contact: 'Dr. Amy Lin',
+      channel: 'Email Verification',
+      date: 'Oct 02, 2026',
+      status: 'Consented',
+      hash: 'SHA256:4910a173bd9120ee',
+      ip: '198.51.100.11 (Brooklyn, NY)',
+      scope: ['Email Quotes', 'Policy Revisions'],
+    },
+    {
+      id: 'REC-903',
+      client: 'Cascade Manufacturing',
+      contact: 'Thomas Miller',
+      channel: 'SMS Automated',
+      date: 'Sep 24, 2026',
+      status: 'Withdrawn',
+      hash: 'SHA256:1192e9bf4327aa81',
+      ip: '203.0.113.88 (Albany, NY)',
+      scope: ['SMS Renewal Notices'],
+    },
+    {
+      id: 'REC-904',
+      client: 'Skyline Restaurant Group',
+      contact: 'Mario Conti',
+      channel: 'In-Person Digital',
+      date: 'Sep 18, 2026',
+      status: 'Consented',
+      hash: 'SHA256:6630d88470aefb19',
+      ip: '198.51.100.95 (Manhattan, NY)',
+      scope: ['SMS Renewal Notices', 'Email Quotes', 'Direct Calls'],
+    },
+    {
+      id: 'REC-905',
+      client: 'Beacon Freight LLC',
+      contact: 'Marcus Brody',
+      channel: 'Phone Verification',
+      date: 'Sep 12, 2026',
+      status: 'Declined',
+      hash: 'SHA256:0041f2e1a88c39b7',
+      ip: '203.0.113.4 (Queens, NY)',
+      scope: ['Direct Calls'],
+    },
+  ])
+
+  // Customizer form settings
+  const [formSettings, setFormSettings] = useState({
+    agencyName: 'Apex Horizon Brokerage LLC',
+    licenseNumber: 'BR-NY-882109',
+    allowSms: true,
+    allowEmail: true,
+    allowVoice: true,
+    requireSignature: true,
+    autoConfirmationReceipt: true,
+    disclaimerText:
+      'I acknowledge that consent is voluntary and not a condition of purchasing insurance coverage. Message and data rates may apply. Reply STOP to cancel at any time.',
+  })
+
+  // Live interactive preview states
+  const [clientName, setClientName] = useState('Robert Vance')
+  const [clientBusiness, setClientBusiness] = useState('Apex Logistics Inc.')
+  const [clientPhone, setClientPhone] = useState('(555) 234-5678')
+  const [clientEmail, setClientEmail] = useState('r.vance@apexlogistics.com')
+  const [smsOptIn, setSmsOptIn] = useState(true)
+  const [emailOptIn, setEmailOptIn] = useState(true)
+  const [voiceOptIn, setVoiceOptIn] = useState(false)
+  const [signature, setSignature] = useState('Robert Vance')
+  const [acknowledged, setAcknowledged] = useState(true)
+  const [previewSubmitted, setPreviewSubmitted] = useState(false)
+
+  // Modals state
+  const [isSendModalOpen, setIsSendModalOpen] = useState(false)
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop')
+  const [selectedAuditRecord, setSelectedAuditRecord] = useState<ConsentRecordItem | null>(null)
+  const [filterStatus, setFilterStatus] = useState<string>('All')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // New Send Request Modal form fields
+  const [sendName, setSendName] = useState('')
+  const [sendCompany, setSendCompany] = useState('')
+  const [sendContactValue, setSendContactValue] = useState('')
+  const [sendMethod, setSendMethod] = useState<'SMS' | 'Email' | 'Both'>('SMS')
+  const [sendRenewalAlerts, setSendRenewalAlerts] = useState(true)
+  const [sendQuoteMarketing, setSendQuoteMarketing] = useState(true)
+
+  // Handle preview form submit test
+  const handleTestSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!acknowledged) {
+      alert('Please check the authorization confirmation checkbox.')
+      return
+    }
+    setPreviewSubmitted(true)
+    onSave()
+    setTimeout(() => {
+      setPreviewSubmitted(false)
+    }, 4500)
+  }
+
+  // Handle sending new consent request
+  const handleSendRequest = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!sendName.trim()) return
+
+    const newRecord: ConsentRecordItem = {
+      id: `REC-${Math.floor(100 + Math.random() * 900)}`,
+      client: sendCompany.trim() || `${sendName.trim()} Commercial`,
+      contact: sendName.trim(),
+      channel: sendMethod === 'Both' ? 'SMS + Email' : sendMethod,
+      date: 'Today, Just Now',
+      status: 'Pending',
+      hash: `SHA256:${Math.random().toString(36).substring(2, 10)}..${Math.random().toString(36).substring(2, 4)}`,
+      ip: 'Awaiting Client Signature',
+      scope: [
+        ...(sendRenewalAlerts ? ['SMS Renewal Notices'] : []),
+        ...(sendQuoteMarketing ? ['Email Quotes & Marketing'] : []),
+      ],
+    }
+
+    setRecords([newRecord, ...records])
+    setIsSendModalOpen(false)
+    setSendName('')
+    setSendCompany('')
+    setSendContactValue('')
+    onSave()
+  }
+
+  const filteredRecords = records.filter((r) => {
+    const matchesFilter = filterStatus === 'All' || r.status === filterStatus
+    const matchesSearch =
+      r.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.contact.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.channel.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesFilter && matchesSearch
+  })
 
   return (
     <div className="space-y-6">
-      {/* Consent Engine Status & Request Link */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4">
+      {/* 1. Header Overview & Compliance Metrics Bar */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-100 pb-5">
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
-                <FileCheck2 className="size-5 text-[#0170FE]" />
-                Marketing Consent Engine Status
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h3 className="text-xl font-bold text-slate-950 flex items-center gap-2">
+                <FileCheck2 className="size-6 text-[#0170FE]" />
+                Marketing &amp; TCPA Consent Management
               </h3>
-              <span className="rounded-full bg-emerald-50 px-3 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
+              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
+                <ShieldCheck className="size-3.5" />
                 TCPA &amp; GLBA Compliant
               </span>
+              <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#0170FE] border border-blue-200 flex items-center gap-1.5">
+                <Lock className="size-3.5" />
+                SHA-256 Audit Trail
+              </span>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Verify client consent before marketing automated quote reminders, SMS notifications, and policy reviews.
+            <p className="text-sm text-slate-500 mt-1.5 max-w-2xl">
+              Configure, customize, and dispatch digital communication consent forms to policyholders. Meets FCC TCPA 10DLC,
+              GLBA privacy regulations, and state insurance solicitation standards.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={onSave}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#0170FE] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-[#0060db]"
-          >
-            <Plus className="size-4" />
-            Send Consent Request
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsPreviewModalOpen(true)}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-xs hover:border-[#0170FE] hover:text-[#0170FE] transition"
+            >
+              <Eye className="size-4" />
+              <span>Preview Client Form</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsSendModalOpen(true)}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#0170FE] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-[#0060db] transition"
+            >
+              <Send className="size-4" />
+              <span>Send Consent Request</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Compliance Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 pt-1">
+          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Registry</p>
+            <p className="text-xl font-extrabold text-slate-900 mt-0.5">248</p>
+            <p className="text-xs text-emerald-600 font-medium mt-0.5">+14 this month</p>
+          </div>
+          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Active Consent Rate</p>
+            <p className="text-xl font-extrabold text-emerald-600 mt-0.5">95.2%</p>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">236 valid consents</p>
+          </div>
+          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">SMS 10DLC Opt-in</p>
+            <p className="text-xl font-extrabold text-[#0170FE] mt-0.5">218</p>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">Direct SMS enabled</p>
+          </div>
+          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Pending Requests</p>
+            <p className="text-xl font-extrabold text-amber-600 mt-0.5">12</p>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">Awaiting signature</p>
+          </div>
         </div>
 
         {/* Shareable Consent Request Link */}
-        <div>
+        <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1.5">
-            Broker Public Consent Intake Link
+            Broker Public Consent Intake Link (Send to any client or embed in quote emails)
           </label>
           <div className="flex gap-2">
             <input
               type="text"
               readOnly
               value={consentLink}
-              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-xs sm:text-sm font-mono text-slate-800 outline-none"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-xs sm:text-sm font-mono text-slate-800 outline-none"
             />
             <button
               type="button"
               onClick={() => onCopy(consentLink, 'consent')}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-xs sm:text-sm font-semibold hover:border-[#0170FE] hover:text-[#0170FE]"
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-xs sm:text-sm font-semibold text-slate-800 hover:border-[#0170FE] hover:text-[#0170FE] transition"
             >
               {copiedKey === 'consent' ? <Check className="size-4 text-emerald-600" /> : <Copy className="size-4 text-slate-500" />}
               <span>{copiedKey === 'consent' ? 'Copied' : 'Copy'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsPreviewModalOpen(true)}
+              className="hidden sm:inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs sm:text-sm font-semibold text-slate-800 hover:border-[#0170FE] hover:text-[#0170FE] transition"
+            >
+              <ExternalLink className="size-4 text-slate-500" />
+              <span>Preview</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Consent History Table */}
+      {/* 2. Consent Form Suite: Form Customizer & Live Interactive Form */}
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Left Column: Form Builder & Disclosures Customizer */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5 lg:col-span-5">
+          <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
+                <Sliders className="size-5 text-[#0170FE]" />
+                Consent Form Builder
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                Customize disclosure terms, signature requirements, and communication channels.
+              </p>
+            </div>
+            <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">
+              Form v3.2
+            </span>
+          </div>
+
+          {/* Agency & License Details */}
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                Agency Name on Consent Agreement
+              </label>
+              <input
+                type="text"
+                value={formSettings.agencyName}
+                onChange={(e) => setFormSettings({ ...formSettings, agencyName: e.target.value })}
+                className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm text-slate-900 outline-none focus:border-[#0170FE]"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                Broker License / NPN Number
+              </label>
+              <input
+                type="text"
+                value={formSettings.licenseNumber}
+                onChange={(e) => setFormSettings({ ...formSettings, licenseNumber: e.target.value })}
+                className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm text-slate-900 outline-none focus:border-[#0170FE]"
+              />
+            </div>
+          </div>
+
+          {/* Toggle Switches */}
+          <div className="space-y-3 pt-2 border-t border-slate-100">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-600">
+              Consent Channels to Request
+            </p>
+
+            <label className="flex items-start gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formSettings.allowSms}
+                onChange={(e) => setFormSettings({ ...formSettings, allowSms: e.target.checked })}
+                className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
+              />
+              <div className="text-xs">
+                <span className="font-bold text-slate-900 block">Automated SMS &amp; Text Alerts</span>
+                <span className="text-slate-500">Requires explicit TCPA 10DLC disclosure with STOP reply support</span>
+              </div>
+            </label>
+
+            <label className="flex items-start gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formSettings.allowEmail}
+                onChange={(e) => setFormSettings({ ...formSettings, allowEmail: e.target.checked })}
+                className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
+              />
+              <div className="text-xs">
+                <span className="font-bold text-slate-900 block">Electronic Policy &amp; Email Marketing</span>
+                <span className="text-slate-500">Covers email proposals, rate changes, and policy delivery</span>
+              </div>
+            </label>
+
+            <label className="flex items-start gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formSettings.allowVoice}
+                onChange={(e) => setFormSettings({ ...formSettings, allowVoice: e.target.checked })}
+                className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
+              />
+              <div className="text-xs">
+                <span className="font-bold text-slate-900 block">Direct Broker Calls &amp; Voicemails</span>
+                <span className="text-slate-500">Permits agent calls regarding renewal quotes and bound policies</span>
+              </div>
+            </label>
+
+            <label className="flex items-start gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formSettings.requireSignature}
+                onChange={(e) => setFormSettings({ ...formSettings, requireSignature: e.target.checked })}
+                className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
+              />
+              <div className="text-xs">
+                <span className="font-bold text-slate-900 block">Require E-Signature &amp; Timestamp</span>
+                <span className="text-slate-500">Creates legally binding electronic signature record</span>
+              </div>
+            </label>
+          </div>
+
+          {/* Legal Disclaimer Box */}
+          <div className="space-y-1.5 pt-2 border-t border-slate-100">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
+              Mandatory Legal Disclaimer Text
+            </label>
+            <textarea
+              rows={3}
+              value={formSettings.disclaimerText}
+              onChange={(e) => setFormSettings({ ...formSettings, disclaimerText: e.target.value })}
+              className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs text-slate-700 outline-none focus:border-[#0170FE]"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={onSave}
+            className="w-full inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-slate-950 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-slate-800 transition"
+          >
+            <Save className="size-4" />
+            <span>Submit</span>
+          </button>
+        </div>
+
+        {/* Right Column: Live Client-Facing Consent Form Preview */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5 lg:col-span-7">
+          <div className="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-bold text-slate-950">Live Client Consent Form Preview</h3>
+                <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200">
+                  Interactive
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                Exact form your policyholder views and signs when opening your consent link.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setClientName('Jane M. Vance')
+                setClientBusiness('Apex Logistics Inc.')
+                setPreviewSubmitted(false)
+              }}
+              className="text-xs text-[#0170FE] font-semibold hover:underline cursor-pointer"
+            >
+              Reset Sample Data
+            </button>
+          </div>
+
+          {/* The Actual Rendered Form Card */}
+          <form
+            onSubmit={handleTestSubmit}
+            className="rounded-2xl border-2 border-slate-200 bg-slate-50/30 p-5 sm:p-6 shadow-sm space-y-5"
+          >
+            {/* Form Agency Header */}
+            <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="size-2 rounded-full bg-[#0170FE]" />
+                    <h4 className="text-sm sm:text-base font-bold text-slate-950">{formSettings.agencyName}</h4>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    Licensed Broker ID: <span className="font-mono font-medium">{formSettings.licenseNumber}</span>
+                  </p>
+                </div>
+                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 shrink-0">
+                  Form 10DLC-A
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 mt-2.5 pt-2 border-t border-blue-100/80">
+                <strong>Authorization Agreement:</strong> Please verify your preferred contact channels to receive official policy notices,
+                claim updates, and insurance quotes.
+              </p>
+            </div>
+
+            {/* Step 1: Policyholder Identification */}
+            <div className="space-y-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+                1. Policyholder / Business Contact Info
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                <div>
+                  <label className="text-xs font-medium text-slate-600 block mb-1">Full Legal Name</label>
+                  <input
+                    type="text"
+                    value={clientName}
+                    onChange={(e) => setClientName(e.target.value)}
+                    required
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-slate-900 outline-none focus:border-[#0170FE]"
+                    placeholder="e.g. John Doe"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-600 block mb-1">Business / Company Name</label>
+                  <input
+                    type="text"
+                    value={clientBusiness}
+                    onChange={(e) => setClientBusiness(e.target.value)}
+                    required
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-slate-900 outline-none focus:border-[#0170FE]"
+                    placeholder="e.g. Acme Corp LLC"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-600 block mb-1">Mobile Phone (for SMS)</label>
+                  <input
+                    type="text"
+                    value={clientPhone}
+                    onChange={(e) => setClientPhone(e.target.value)}
+                    required
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-slate-900 outline-none focus:border-[#0170FE]"
+                    placeholder="(555) 000-0000"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-600 block mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    value={clientEmail}
+                    onChange={(e) => setClientEmail(e.target.value)}
+                    required
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-slate-900 outline-none focus:border-[#0170FE]"
+                    placeholder="john@example.com"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2: Communication Channel Consent Toggles */}
+            <div className="space-y-2.5 pt-2 border-t border-slate-200/80">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+                2. Communication Permissions &amp; Authorizations
+              </span>
+
+              {formSettings.allowSms && (
+                <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-[#0170FE]/50 transition cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={smsOptIn}
+                    onChange={(e) => setSmsOptIn(e.target.checked)}
+                    className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
+                  />
+                  <div className="text-xs">
+                    <span className="font-bold text-slate-900 block">
+                      Authorize Automated SMS Policy &amp; Renewal Notifications
+                    </span>
+                    <span className="text-slate-600 mt-0.5 block leading-relaxed">
+                      I agree to receive automated policy renewal alerts, payment reminders, and quote status messages via SMS from{' '}
+                      {formSettings.agencyName}. Msg &amp; data rates may apply. Reply STOP to cancel anytime.
+                    </span>
+                  </div>
+                </label>
+              )}
+
+              {formSettings.allowEmail && (
+                <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-[#0170FE]/50 transition cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={emailOptIn}
+                    onChange={(e) => setEmailOptIn(e.target.checked)}
+                    className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
+                  />
+                  <div className="text-xs">
+                    <span className="font-bold text-slate-900 block">
+                      Electronic Delivery &amp; Marketing Disclosures
+                    </span>
+                    <span className="text-slate-600 mt-0.5 block leading-relaxed">
+                      I consent to receive electronic policy binders, insurance rate revisions, coverage advisory summaries, and promotional
+                      quotes at my provided email.
+                    </span>
+                  </div>
+                </label>
+              )}
+
+              {formSettings.allowVoice && (
+                <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-[#0170FE]/50 transition cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={voiceOptIn}
+                    onChange={(e) => setVoiceOptIn(e.target.checked)}
+                    className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
+                  />
+                  <div className="text-xs">
+                    <span className="font-bold text-slate-900 block">
+                      Direct Voice Follow-ups &amp; Claims Consultation
+                    </span>
+                    <span className="text-slate-600 mt-0.5 block leading-relaxed">
+                      I authorize agency brokers and account managers to contact me by phone regarding open claims or policy binding questions.
+                    </span>
+                  </div>
+                </label>
+              )}
+            </div>
+
+            {/* Step 3: Legal Disclaimer Notice Box */}
+            <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3 text-xs text-amber-900 leading-relaxed">
+              <div className="flex items-center gap-1.5 font-bold mb-1">
+                <AlertCircle className="size-3.5 text-amber-700" />
+                <span>TCPA &amp; Regulatory Disclosure Notice</span>
+              </div>
+              <p>{formSettings.disclaimerText}</p>
+            </div>
+
+            {/* Step 4: Electronic Signature Canvas / Field */}
+            {formSettings.requireSignature && (
+              <div className="space-y-3 pt-2 border-t border-slate-200/80">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+                  3. Digital Electronic Signature
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label className="text-xs font-medium text-slate-600 block mb-1">Type Full Name as E-Signature</label>
+                    <input
+                      type="text"
+                      value={signature}
+                      onChange={(e) => setSignature(e.target.value)}
+                      required
+                      placeholder="Jane M. Vance"
+                      className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 font-serif italic text-base font-bold text-slate-900 outline-none focus:border-[#0170FE]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-slate-600 block mb-1">Timestamp / Date</label>
+                    <div className="h-10 rounded-lg border border-slate-200 bg-slate-100/70 px-3 flex items-center font-mono text-xs text-slate-600">
+                      <Clock className="size-3.5 mr-1.5 text-slate-400" />
+                      Oct 12, 2026 · 17:30 UTC (Auto-Logged)
+                    </div>
+                  </div>
+                </div>
+
+                <label className="flex items-start gap-2.5 pt-1 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acknowledged}
+                    onChange={(e) => setAcknowledged(e.target.checked)}
+                    className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
+                  />
+                  <span className="text-xs text-slate-700 font-medium leading-relaxed">
+                    I declare that I am the authorized contact or officer for the named business and agree that this digital signature has
+                    the same legal validity as a handwritten signature under the ESIGN Act.
+                  </span>
+                </label>
+              </div>
+            )}
+
+            {/* Success state feedback on submit test */}
+            {previewSubmitted && (
+              <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-900 flex items-center gap-3">
+                <CheckCircle2 className="size-6 text-emerald-600 shrink-0" />
+                <div className="text-xs sm:text-sm">
+                  <p className="font-bold">Digital Consent Successfully Verified &amp; Logged!</p>
+                  <p className="text-xs text-emerald-700 font-mono mt-0.5">
+                    Audit Verification Hash: SHA256:7f3b8901ac9941a · IP: 127.0.0.1
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#0170FE] py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-[#0170FE]/20 hover:bg-[#0060db] transition"
+              >
+                <Fingerprint className="size-4" />
+                <span>Authorize &amp; Submit Digital Consent</span>
+              </button>
+              <p className="text-[11px] text-center text-slate-400 mt-2">
+                256-Bit SSL Encrypted Verification · Immediate TCPA 10DLC Registry Logging
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* 3. Consent History Table & Registry */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 className="text-lg font-bold text-slate-950">Consent History &amp; Client Registry</h3>
-          <span className="text-xs sm:text-sm font-medium text-slate-500">236 Consented · 8 Withdrawn · 4 Declined</span>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h3 className="text-lg font-bold text-slate-950">Consent History &amp; Client Registry</h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Complete verifiable registry of all policyholder opt-in agreements with cryptographic audit fingerprints.
+            </p>
+          </div>
+
+          {/* Filter pills & search */}
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              placeholder="Search client or contact..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-8.5 rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none focus:border-[#0170FE]"
+            />
+            <div className="flex items-center rounded-lg border border-slate-200 p-0.5 bg-slate-50">
+              {['All', 'Consented', 'Pending', 'Withdrawn'].map((st) => (
+                <button
+                  key={st}
+                  type="button"
+                  onClick={() => setFilterStatus(st)}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-md transition cursor-pointer ${filterStatus === st ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                >
+                  {st}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -1168,7 +1783,7 @@ function MarketingConsentTab({
               <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <th className="pb-3">Client / Business</th>
                 <th className="pb-3">Contact</th>
-                <th className="pb-3">Channel</th>
+                <th className="pb-3">Channel Authorized</th>
                 <th className="pb-3">Date</th>
                 <th className="pb-3">Status</th>
                 <th className="pb-3">Audit Verification Hash</th>
@@ -1176,29 +1791,41 @@ function MarketingConsentTab({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {consentRecords.map((r) => (
-                <tr key={r.client} className="hover:bg-slate-50/50">
-                  <td className="py-3 font-semibold text-slate-900">{r.client}</td>
-                  <td className="py-3 text-slate-600">{r.contact}</td>
-                  <td className="py-3 text-slate-500">{r.channel}</td>
-                  <td className="py-3 text-slate-500">{r.date}</td>
+              {filteredRecords.map((r) => (
+                <tr key={r.id} className="hover:bg-slate-50/60 transition">
+                  <td className="py-3 font-semibold text-slate-900">
+                    <div>{r.client}</div>
+                    <span className="text-[11px] font-mono text-slate-400 font-normal">{r.id}</span>
+                  </td>
+                  <td className="py-3 text-slate-700">{r.contact}</td>
+                  <td className="py-3 text-slate-600 text-xs font-medium">
+                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-slate-700">{r.channel}</span>
+                  </td>
+                  <td className="py-3 text-slate-500 text-xs">{r.date}</td>
                   <td className="py-3">
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${r.status === 'Consented'
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        : r.status === 'Withdrawn'
-                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                          : 'bg-rose-50 text-rose-700 border border-rose-200'
+                        : r.status === 'Pending'
+                          ? 'bg-blue-50 text-[#0170FE] border border-blue-200'
+                          : r.status === 'Withdrawn'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                            : 'bg-rose-50 text-rose-700 border border-rose-200'
                         }`}
                     >
                       {r.status}
                     </span>
                   </td>
-                  <td className="py-3 font-mono text-xs text-slate-400">{r.hash}</td>
+                  <td className="py-3 font-mono text-xs text-slate-400">
+                    <span className="inline-flex items-center gap-1">
+                      <Lock className="size-3 text-slate-400" />
+                      {r.hash}
+                    </span>
+                  </td>
                   <td className="py-3 text-right">
                     <button
                       type="button"
-                      onClick={onSave}
+                      onClick={() => setSelectedAuditRecord(r)}
                       className="cursor-pointer text-xs sm:text-sm font-semibold text-[#0170FE] hover:underline"
                     >
                       Audit Log
@@ -1210,6 +1837,365 @@ function MarketingConsentTab({
           </table>
         </div>
       </div>
+
+      {/* 4. MODAL: Send Consent Request to a Client */}
+      {isSendModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="rounded-xl bg-blue-50 p-2 text-[#0170FE]">
+                  <Send className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-950">Send Client Consent Request</h3>
+                  <p className="text-xs text-slate-500">Dispatch digital consent form via SMS or Email</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSendModalOpen(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSendRequest} className="mt-4 space-y-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                  Client / Contact Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={sendName}
+                  onChange={(e) => setSendName(e.target.value)}
+                  placeholder="e.g. Thomas Miller"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                  Business / Company Name
+                </label>
+                <input
+                  type="text"
+                  value={sendCompany}
+                  onChange={(e) => setSendCompany(e.target.value)}
+                  placeholder="e.g. Cascade Manufacturing"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                    Dispatch Via
+                  </label>
+                  <select
+                    value={sendMethod}
+                    onChange={(e) => setSendMethod(e.target.value as any)}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm text-slate-900 outline-none focus:border-[#0170FE]"
+                  >
+                    <option value="SMS">SMS Text Message</option>
+                    <option value="Email">Email Delivery</option>
+                    <option value="Both">Both (SMS + Email)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                    Destination Phone / Email *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={sendContactValue}
+                    onChange={(e) => setSendContactValue(e.target.value)}
+                    placeholder={sendMethod === 'Email' ? 'client@company.com' : '(555) 000-0000'}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm text-slate-900 outline-none focus:border-[#0170FE]"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
+                  Requested Consent Permissions
+                </span>
+                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={sendRenewalAlerts}
+                    onChange={(e) => setSendRenewalAlerts(e.target.checked)}
+                    className="size-4 rounded text-[#0170FE]"
+                  />
+                  <span>Automated Renewal Reminders &amp; Policy Expiration Alerts</span>
+                </label>
+                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={sendQuoteMarketing}
+                    onChange={(e) => setSendQuoteMarketing(e.target.checked)}
+                    className="size-4 rounded text-[#0170FE]"
+                  />
+                  <span>Electronic Policy Quotes &amp; Commercial Insurance Advisory</span>
+                </label>
+              </div>
+
+              <div className="rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
+                <p className="font-semibold text-slate-900 mb-0.5">Pre-Formatted Invitation Message:</p>
+                <p className="font-mono text-[11px] text-slate-500">
+                  &ldquo;Hello {sendName || 'Client'}, please review and authorize your communication preferences with {formSettings.agencyName} at {consentLink}&rdquo;
+                </p>
+              </div>
+
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsSendModalOpen(false)}
+                  className="flex-1 rounded-xl border border-slate-200 bg-white py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 rounded-xl bg-[#0170FE] py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-[#0060db] shadow-sm cursor-pointer"
+                >
+                  Dispatch Request Link
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 5. MODAL: Full Public Client View Preview Modal */}
+      {isPreviewModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
+          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="size-8 rounded-lg bg-blue-50 text-[#0170FE] flex items-center justify-center">
+                  <Eye className="size-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-950">Public Client Consent Portal Preview</h3>
+                  <p className="text-xs text-slate-500">How your clients view this form on their browser</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex items-center rounded-lg border border-slate-200 p-0.5 bg-slate-50 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDevice('desktop')}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-medium cursor-pointer ${previewDevice === 'desktop' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500'
+                      }`}
+                  >
+                    <Laptop className="size-3.5" />
+                    <span>Desktop</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDevice('mobile')}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-medium cursor-pointer ${previewDevice === 'mobile' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500'
+                      }`}
+                  >
+                    <Smartphone className="size-3.5" />
+                    <span>Mobile</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsPreviewModalOpen(false)}
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 bg-slate-100/50 flex justify-center">
+              <div className={`w-full ${previewDevice === 'mobile' ? 'max-w-sm border-4 border-slate-800 rounded-3xl p-3 bg-white shadow-xl' : 'max-w-2xl bg-white rounded-2xl p-6 shadow-sm border border-slate-200'}`}>
+                <div className="text-center pb-4 border-b border-slate-100">
+                  <span className="inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#0170FE] border border-blue-200 mb-2">
+                    Official Agency Consent Portal
+                  </span>
+                  <h4 className="text-lg font-bold text-slate-950">{formSettings.agencyName}</h4>
+                  <p className="text-xs text-slate-500 mt-0.5">Insurance License: {formSettings.licenseNumber}</p>
+                </div>
+
+                <div className="mt-4 space-y-4 text-xs">
+                  <div className="rounded-xl bg-slate-50 p-3 border border-slate-200 text-slate-700 leading-relaxed">
+                    Under the Federal Telephone Consumer Protection Act (TCPA) and GLBA Privacy rules, {formSettings.agencyName} requires
+                    your authorization to communicate via electronic text messages and digital proposals.
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="font-bold text-slate-900 block">Your Contact Details</label>
+                    <div className="h-9 rounded-lg border border-slate-200 bg-white px-3 flex items-center text-slate-800 font-medium">
+                      {clientName} · {clientBusiness}
+                    </div>
+                    <div className="h-9 rounded-lg border border-slate-200 bg-white px-3 flex items-center text-slate-800 font-mono text-xs">
+                      {clientPhone} · {clientEmail}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                    <label className="font-bold text-slate-900 block">Authorized Communication Channels</label>
+                    <div className="space-y-1.5 text-xs text-slate-700">
+                      <div className="flex items-center gap-2">
+                        <Check className="size-4 text-emerald-600" />
+                        <span>Automated Renewal Reminders &amp; Policy Expiration Alerts</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Check className="size-4 text-emerald-600" />
+                        <span>Electronic Insurance Disclosures &amp; Bound Quotes</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Check className="size-4 text-emerald-600" />
+                        <span>Direct Broker Voice Calls &amp; Claim Consultation</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-amber-900 text-[11px] leading-relaxed">
+                    {formSettings.disclaimerText}
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      className="w-full rounded-xl bg-[#0170FE] py-2.5 text-center font-bold text-white shadow-xs pointer-events-none"
+                    >
+                      Authorize &amp; Sign Consent
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="border-t border-slate-200 bg-white px-6 py-3 flex items-center justify-between text-xs text-slate-500">
+              <span>Public intake link: <span className="font-mono">{consentLink}</span></span>
+              <button
+                type="button"
+                onClick={() => onCopy(consentLink, 'previewModal')}
+                className="cursor-pointer font-bold text-[#0170FE] hover:underline"
+              >
+                {copiedKey === 'previewModal' ? 'Copied Link!' : 'Copy Link'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 6. MODAL: Audit Verification Hash Details */}
+      {selectedAuditRecord && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="rounded-xl bg-emerald-50 p-2 text-emerald-600">
+                  <ShieldCheck className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-950">Cryptographic Audit Certificate</h3>
+                  <p className="text-xs text-slate-500">TCPA &amp; ESIGN Act Digital Compliance Record</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedAuditRecord(null)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3.5 text-xs">
+              <div className="rounded-xl bg-slate-50 p-3.5 border border-slate-200 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-medium">Registry ID:</span>
+                  <span className="font-mono font-bold text-slate-900">{selectedAuditRecord.id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-medium">Client / Insured:</span>
+                  <span className="font-semibold text-slate-900">{selectedAuditRecord.client}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-medium">Authorized Contact:</span>
+                  <span className="text-slate-800">{selectedAuditRecord.contact}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-medium">Consent Status:</span>
+                  <span className="font-bold text-emerald-700">{selectedAuditRecord.status}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-medium">Timestamp:</span>
+                  <span className="text-slate-800">{selectedAuditRecord.date}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-medium">IP Address / Geo:</span>
+                  <span className="font-mono text-slate-700">{selectedAuditRecord.ip}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                  SHA-256 Checksum Signature
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={selectedAuditRecord.hash}
+                    className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 font-mono text-xs text-slate-800 outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => onCopy(selectedAuditRecord.hash, 'auditHash')}
+                    className="h-9 px-3 rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 hover:border-[#0170FE] cursor-pointer"
+                  >
+                    {copiedKey === 'auditHash' ? 'Copied' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
+                  Authorized Scope of Consent
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedAuditRecord.scope.map((s) => (
+                    <span key={s} className="rounded-lg bg-blue-50 border border-blue-200 px-2.5 py-1 text-xs font-semibold text-[#0170FE]">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-emerald-950 text-[11px] leading-relaxed">
+                This record provides admissible proof of express written consent under 47 U.S.C. § 227 (TCPA) and federal ESIGN Act.
+              </div>
+
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedAuditRecord(null)}
+                  className="w-full rounded-xl bg-slate-900 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 cursor-pointer"
+                >
+                  Close Audit Record
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

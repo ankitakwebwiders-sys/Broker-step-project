@@ -304,7 +304,7 @@ export default function BrokerDashboardPage() {
           </Link>
 
           <Link
-            href="/broker/analytics"
+            href="/"
             className="group rounded-xl border border-blue-200/80 bg-blue-50/40 p-4 transition hover:border-blue-300 hover:bg-blue-50/60"
           >
             <p className="text-xs sm:text-sm font-medium text-blue-700">Total Production</p>
@@ -399,12 +399,7 @@ export default function BrokerDashboardPage() {
                   Line-of-Business Production
                 </h3>
               </div>
-              <Link
-                href="/broker/analytics"
-                className="text-xs font-semibold text-blue-600 hover:underline"
-              >
-                View breakdown
-              </Link>
+
             </div>
             <div className="mt-3.5 space-y-3">
               {lobProductionData.map((lob) => (

@@ -104,10 +104,7 @@ export const brokerNavSections: NavSectionDef[] = [
       {
         label: 'Book of Business',
         icon: BookOpen,
-        href: '/broker/book-of-business',
-        subItems: [
-          { label: 'Active Book', href: '/broker/book-of-business?tab=active' },
-        ],
+        href: '/broker/book-of-business?tab=active',
       },
     ],
   },

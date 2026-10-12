@@ -87,7 +87,7 @@ interface ImportRow {
 export default function BookOfBusinessPage() {
   // ── Master State ──
   const [policies, setPolicies] = useState<PolicyRecord[]>(initialPolicies)
-  const [activeTab, setActiveTab] = useState<BookTabType>('overview')
+  const [activeTab, setActiveTab] = useState<BookTabType>('active')
 
   // Sync URL query params with active tab
   useEffect(() => {
@@ -98,8 +98,8 @@ export default function BookOfBusinessPage() {
       const tab = params.get('tab') as BookTabType | null
       if (tab) {
         setActiveTab(tab)
-      } else if (!params.toString()) {
-        setActiveTab('overview')
+      } else {
+        setActiveTab('active')
       }
     }
 

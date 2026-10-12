@@ -124,10 +124,7 @@ const navSections: NavSectionDef[] = [
       {
         label: 'Book of Business',
         icon: BookOpen,
-        href: '/broker/book-of-business',
-        subItems: [
-          { label: 'Active Book', href: '/broker/book-of-business?tab=active' },
-        ],
+        href: '/broker/book-of-business?tab=active',
       },
     ],
   },
@@ -320,12 +317,13 @@ function NavItem({
     }
     onClick()
 
-    if (pathname === item.href) {
+    const [itemPath, itemQuery] = item.href.split('?')
+    if (pathname === itemPath) {
       e.preventDefault()
       window.history.pushState(null, '', item.href)
       window.dispatchEvent(
         new CustomEvent('broker-nav-change', {
-          detail: { href: item.href, search: '', pathname: item.href },
+          detail: { href: item.href, search: itemQuery ? `?${itemQuery}` : '', pathname: itemPath },
         })
       )
     }
@@ -491,13 +489,16 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
   useEffect(() => {
     for (const section of navSections) {
       for (const item of section.items) {
+        const itemBasePath = item.href.split('?')[0]
         if (
-          pathname === item.href ||
-          pathname.startsWith(item.href + '/') ||
+          pathname === itemBasePath ||
+          pathname.startsWith(itemBasePath + '/') ||
           (item.href === '/broker/settings' &&
             ['/broker/carriers', '/broker/membership', '/broker/commission-settings', '/broker/marketing-consent', '/broker/qr-lead-capture'].includes(pathname))
         ) {
-          setExpandedMenus((prev) => ({ ...prev, [item.label]: true }))
+          if (item.subItems?.length) {
+            setExpandedMenus((prev) => ({ ...prev, [item.label]: true }))
+          }
         }
       }
     }
@@ -517,7 +518,8 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
         ['/broker/carriers', '/broker/membership', '/broker/commission-settings', '/broker/marketing-consent', '/broker/qr-lead-capture'].includes(pathname)
       )
     }
-    return pathname === href || pathname.startsWith(href + '/')
+    const basePath = href.split('?')[0]
+    return pathname === basePath || pathname.startsWith(basePath + '/')
   }
 
   return (

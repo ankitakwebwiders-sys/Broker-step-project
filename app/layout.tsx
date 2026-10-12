@@ -14,21 +14,8 @@ export const metadata: Metadata = {
   description: 'Manage your book, commissions, renewals and growth from one intelligent insurance platform.',
 
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/images/logos/favicon.png',
+    apple: '/images/logos/favicon.png',
   },
 }
 

@@ -30,8 +30,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className={`${inter.className} font-sans antialiased`}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <body className={`${inter.className} font-sans antialiased`} suppressHydrationWarning>
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

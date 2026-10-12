@@ -272,13 +272,7 @@ export default function BrokerDashboardPage() {
             </p>
           </div>
 
-          {/* Drill-down link */}
-          <Link
-            href="/broker/analytics"
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline underline-offset-4"
-          >
-            Detailed Analytics <ArrowRight className="size-3.5" />
-          </Link>
+
         </div>
 
         {/* Top Summary Metrics Row */}

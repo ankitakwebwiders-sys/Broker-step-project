@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, Check, ChevronRight, FileCheck2, Sparkles, TrendingUp, Users, WalletCards, Zap, Target, BarChart3, Award, Clock, Globe, Rocket, Database, Shield, Layers, Star, LayoutGrid, DatabaseBackup, ChartNetwork, HelpCircle, ChevronDown, MessageCircle, Mail, CreditCard, ShieldAlert } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { Navbar } from '@/components/landing/Navbar'
@@ -234,9 +235,9 @@ export default function LandingPage() {
       <Navbar />
 
       {/* ═══════════ HERO ═══════════ */}
-      <section className="relative z-10 px-6 pt-30 pb-24 lg:px-10 lg:pt-40">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid items-center gap-16 lg:grid-cols-[1.05fr_0.95fr]">
+      <section className="relative z-10 px-6 pt-30 pb-24 lg:px-10 lg:pt-36">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid items-center gap-12 lg:grid-cols-[1.04fr_0.96fr] xl:gap-14">
 
             {/* LEFT */}
             <div>
@@ -252,7 +253,7 @@ export default function LandingPage() {
               </Reveal>
 
               <Reveal delay={80}>
-                <h1 className="mt-8 text-[clamp(2.5rem,6.5vw,5rem)] font-semibold leading-[1.02] tracking-[-0.045em] text-slate-950">
+                <h1 className="mt-8 text-[clamp(2.5rem,6.5vw,4.75rem)] font-semibold leading-[1.03] tracking-[-0.045em] text-slate-950">
                   The clear next step
                   for your{' '}
                   <span className="relative inline-block">
@@ -288,85 +289,48 @@ export default function LandingPage() {
                   </Link>
                 </div>
               </Reveal>
-
-
             </div>
 
-            {/* RIGHT — Product mock */}
+            {/* RIGHT — Product Hero Image */}
             <Reveal delay={200} y={40}>
-              <div className="relative">
+              <div className="relative w-full max-w-[570px] xl:max-w-[600px] mx-auto lg:ml-auto">
                 <div className="absolute -inset-10 rounded-full bg-gradient-to-r from-blue-300/50 via-violet-300/50 to-cyan-200/60 blur-3xl" />
 
-                <div className="relative rounded-2xl border border-slate-200 bg-white/90 p-2 shadow-[0_20px_80px_-20px_rgba(59,130,246,0.35)] backdrop-blur-xl">
-                  <div className="rounded-xl bg-gradient-to-br from-slate-50 to-white p-5">
-                    {/* chrome */}
-                    <div className="mb-4 flex items-center gap-1.5">
-                      <div className="size-2.5 rounded-full bg-red-400" />
-                      <div className="size-2.5 rounded-full bg-yellow-400" />
-                      <div className="size-2.5 rounded-full bg-green-400" />
-                      <div className="ml-3 flex-1 rounded-md border border-slate-200 bg-white px-3 py-1 text-[10px] text-slate-400">
-                        brokerstep.app/dashboard
-                      </div>
-                    </div>
-
-                    {/* header row */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-slate-500">Portfolio overview</p>
-                        <p className="mt-1 text-2xl font-semibold text-slate-950">$2.84M</p>
-                      </div>
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600 border border-emerald-100">+18.6%</span>
-                    </div>
-
-                    {/* chart */}
-                    <div className="flex h-32 items-end gap-1.5 mb-4">
-                      {[42, 55, 48, 68, 61, 82, 96].map((h, i) => (
-                        <div key={i} className="flex-1">
-                          <div
-                            className="w-full rounded-t bg-gradient-to-t from-blue-600 via-blue-500 to-cyan-400 shadow-[0_4px_12px_rgba(59,130,246,0.35)] transition-all duration-500 hover:from-cyan-500 hover:to-cyan-300"
-                            style={{ height: `${h}%`, animation: `growBar 900ms cubic-bezier(0.16,1,0.3,1) ${i * 70}ms both`, transformOrigin: 'bottom' }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* mini KPIs */}
-                    <div className="grid grid-cols-3 gap-2">
-                      {[
-                        { label: 'Clients', value: '248', color: 'from-blue-50 to-blue-100/50', border: 'border-blue-100' },
-                        { label: 'Policies', value: '1,204', color: 'from-violet-50 to-violet-100/50', border: 'border-violet-100' },
-                        { label: 'Renewals', value: '42', color: 'from-emerald-50 to-emerald-100/50', border: 'border-emerald-100' },
-                      ].map((k, i) => (
-                        <div key={i} className={`rounded-lg border ${k.border} bg-gradient-to-br ${k.color} p-3 text-center transition-transform hover:scale-105`}>
-                          <p className="text-[10px] text-slate-500">{k.label}</p>
-                          <p className="mt-0.5 text-sm font-semibold text-slate-950">{k.value}</p>
-                        </div>
-                      ))}
-                    </div>
+                <div className="relative rounded-2xl border border-slate-200/90 bg-white/95 p-2 sm:p-2.5 shadow-[0_22px_80px_-20px_rgba(59,130,246,0.35)] backdrop-blur-xl">
+                  {/* Real Hero Image from public/images/hero-section.png */}
+                  <div className="overflow-hidden rounded-xl ">
+                    <Image
+                      src="/images/hero-section.png"
+                      alt="BrokerStep Insurance Brokerage Platform"
+                      width={1300}
+                      height={880}
+                      priority
+                      className="w-full h-auto object-cover rounded-xl transition-transform duration-700 hover:scale-[1.01]"
+                    />
                   </div>
                 </div>
 
-                {/* floating chips */}
-                <div className="absolute -left-6 top-1/3 hidden animate-[float_5s_ease-in-out_infinite] rounded-xl border border-slate-200 bg-white/95 px-4 py-3 shadow-xl backdrop-blur-xl lg:block">
-                  <div className="flex items-center gap-2">
-                    <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500">
+                {/* floating chips (PRESERVED) */}
+                <div className="absolute -left-6 lg:-left-8 top-1/3 z-20 hidden animate-[float_5s_ease-in-out_infinite] rounded-xl border border-slate-200 bg-white/95 px-4 py-3 shadow-xl backdrop-blur-xl lg:block">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex size-8.5 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 shadow-xs">
                       <TrendingUp className="size-4 text-white" />
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-500">Commission</p>
-                      <p className="text-xs font-semibold text-slate-950">+$12,480</p>
+                      <p className="text-[10px] font-medium text-slate-500">Commission</p>
+                      <p className="text-xs font-bold text-slate-950">+$12,480</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="absolute -right-4 bottom-1/4 hidden animate-[float_6s_ease-in-out_infinite_1s] rounded-xl border border-slate-200 bg-white/95 px-4 py-3 shadow-xl backdrop-blur-xl lg:block">
-                  <div className="flex items-center gap-2">
-                    <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-500">
+                <div className="absolute -right-4 lg:-right-6 bottom-1/4 z-20 hidden animate-[float_6s_ease-in-out_infinite_1s] rounded-xl border border-slate-200 bg-white/95 px-4 py-3 shadow-xl backdrop-blur-xl lg:block">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex size-8.5 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-500 shadow-xs">
                       <Users className="size-4 text-white" />
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-500">New clients</p>
-                      <p className="text-xs font-semibold text-slate-950">+24 this month</p>
+                      <p className="text-[10px] font-medium text-slate-500">New clients</p>
+                      <p className="text-xs font-bold text-slate-950">+24 this month</p>
                     </div>
                   </div>
                 </div>
@@ -476,28 +440,17 @@ export default function LandingPage() {
           </Reveal>
 
           <Reveal delay={200} y={40}>
-            <div className="relative">
+            <div className="relative w-full">
               <div className="absolute -inset-8 rounded-3xl bg-gradient-to-r from-violet-200/60 to-blue-200/60 blur-3xl" />
-              <div className="relative rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-xl shadow-slate-200/50 backdrop-blur-xl">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider text-slate-500">Portfolio health</p>
-                    <p className="mt-1 text-3xl font-semibold text-slate-950">$2.84M</p>
-                  </div>
-                  <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600 border border-emerald-100">+18.6%</span>
-                </div>
-                <div className="mt-8 flex h-36 items-end gap-3">
-                  {[42, 55, 48, 68, 61, 82, 96].map((h, i) => (
-                    <div key={i} className="flex flex-1 flex-col justify-end gap-2">
-                      <div
-                        className="w-full rounded-t bg-gradient-to-t from-blue-600 via-blue-500 to-cyan-400 shadow-[0_4px_12px_rgba(59,130,246,0.35)] transition-all duration-500 hover:from-cyan-500 hover:to-cyan-300"
-                        style={{ height: `${h}%`, animation: `growBar 900ms cubic-bezier(0.16,1,0.3,1) ${i * 70}ms both`, transformOrigin: 'bottom' }}
-                      />
-                      <span className="text-center text-[10px] text-slate-500">
-                        {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'][i]}
-                      </span>
-                    </div>
-                  ))}
+              <div className="relative rounded-2xl border border-slate-200/90 bg-white/95 p-2 sm:p-2.5 shadow-xl shadow-slate-200/50 backdrop-blur-xl">
+                <div className="overflow-hidden rounded-xl">
+                  <Image
+                    src="/images/why-choose-brokerStep.png"
+                    alt="Why Choose BrokerStep - Operating Workspace"
+                    width={1366}
+                    height={641}
+                    className="w-full h-auto object-cover rounded-xl transition-transform duration-700 hover:scale-[1.01]"
+                  />
                 </div>
               </div>
             </div>

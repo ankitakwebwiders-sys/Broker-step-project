@@ -681,7 +681,7 @@ function BrokersManagementContent() {
                 <th className="py-3.5 px-4">Subscription Status</th>
                 <th className="py-3.5 px-4">Billing Frequency</th>
                 <th className="py-3.5 px-4">Trial / Renewal</th>
-                <th className="py-3.5 pl-4 pr-6 text-right">Actions</th>
+                <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
@@ -797,7 +797,7 @@ function BrokersManagementContent() {
                       </td>
 
                       {/* 9. Actions (View, Activate/Deactivate, View Subscription) */}
-                      <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right">
+                      <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                         <div className="flex items-center justify-end gap-1.5">
                           {/* View Button */}
                           <button

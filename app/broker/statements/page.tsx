@@ -593,17 +593,15 @@ export default function StatementsPage() {
               <button
                 key={tab.id}
                 onClick={() => handleTabSelect(tab.id)}
-                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                  isActive
+                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isActive
                     ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
+                  }`}
               >
                 <span>{tab.label}</span>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-                  }`}
+                  className={`rounded-full px-2 py-0.5 text-xs font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}
                 >
                   {tab.badge}
                 </span>
@@ -699,18 +697,16 @@ export default function StatementsPage() {
                 <div className="ml-auto flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-100/90 p-1 text-[11.5px]">
                   <button
                     onClick={() => setViewMode('table')}
-                    className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 font-semibold transition cursor-pointer ${
-                      viewMode === 'table' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-                    }`}
+                    className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 font-semibold transition cursor-pointer ${viewMode === 'table' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                      }`}
                   >
                     <List className="size-3.5" />
                     <span className="hidden sm:inline">Table</span>
                   </button>
                   <button
                     onClick={() => setViewMode('cards')}
-                    className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 font-semibold transition cursor-pointer ${
-                      viewMode === 'cards' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-                    }`}
+                    className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 font-semibold transition cursor-pointer ${viewMode === 'cards' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                      }`}
                   >
                     <LayoutGrid className="size-3.5" />
                     <span className="hidden sm:inline">Cards</span>
@@ -874,7 +870,7 @@ export default function StatementsPage() {
                               <div className="flex items-center justify-end gap-1.5">
                                 <button
                                   onClick={() => handleTabSelect('details', stmt.id)}
-                                  className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-blue-600 transition cursor-pointer"
+                                  className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
                                   title="View full statement details & line items"
                                 >
                                   <Eye className="size-3.5" />
@@ -1220,24 +1216,22 @@ export default function StatementsPage() {
                 return (
                   <div
                     key={step.title}
-                    className={`relative rounded-xl border p-4 transition-all ${
-                      isCompleted
+                    className={`relative rounded-xl border p-4 transition-all ${isCompleted
                         ? 'border-emerald-200 bg-emerald-50/30'
                         : isCurrent
-                        ? 'border-blue-400 bg-blue-50/40 ring-2 ring-blue-500/20 shadow-xs'
-                        : 'border-slate-200/70 bg-slate-50/50 opacity-60'
-                    }`}
+                          ? 'border-blue-400 bg-blue-50/40 ring-2 ring-blue-500/20 shadow-xs'
+                          : 'border-slate-200/70 bg-slate-50/50 opacity-60'
+                      }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`flex size-6 items-center justify-center rounded-full text-[11px] font-bold ${
-                            isCompleted
+                          className={`flex size-6 items-center justify-center rounded-full text-[11px] font-bold ${isCompleted
                               ? 'bg-emerald-600 text-white'
                               : isCurrent
-                              ? 'bg-blue-600 text-white animate-pulse'
-                              : 'bg-slate-200 text-slate-600'
-                          }`}
+                                ? 'bg-blue-600 text-white animate-pulse'
+                                : 'bg-slate-200 text-slate-600'
+                            }`}
                         >
                           {isCompleted ? <Check className="size-3.5" /> : stepNum}
                         </span>
@@ -1335,11 +1329,10 @@ export default function StatementsPage() {
             {/* 1. High Confidence */}
             <button
               onClick={() => setMatchingConfidenceFilter(matchingConfidenceFilter === 'High Confidence' ? 'All' : 'High Confidence')}
-              className={`rounded-2xl border p-4 text-left transition-all cursor-pointer ${
-                matchingConfidenceFilter === 'High Confidence'
+              className={`rounded-2xl border p-4 text-left transition-all cursor-pointer ${matchingConfidenceFilter === 'High Confidence'
                   ? 'border-emerald-500 bg-emerald-50/30 ring-2 ring-emerald-500/20 shadow-md'
                   : 'border-slate-200/80 bg-white hover:border-emerald-300'
-              }`}
+                }`}
             >
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-200">
@@ -1361,11 +1354,10 @@ export default function StatementsPage() {
             {/* 2. Possible Match */}
             <button
               onClick={() => setMatchingConfidenceFilter(matchingConfidenceFilter === 'Possible Match' ? 'All' : 'Possible Match')}
-              className={`rounded-2xl border p-4 text-left transition-all cursor-pointer ${
-                matchingConfidenceFilter === 'Possible Match'
+              className={`rounded-2xl border p-4 text-left transition-all cursor-pointer ${matchingConfidenceFilter === 'Possible Match'
                   ? 'border-amber-500 bg-amber-50/30 ring-2 ring-amber-500/20 shadow-md'
                   : 'border-slate-200/80 bg-white hover:border-amber-300'
-              }`}
+                }`}
             >
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-800 ring-1 ring-amber-200">
@@ -1387,11 +1379,10 @@ export default function StatementsPage() {
             {/* 3. Unmatched / Action Required */}
             <button
               onClick={() => setMatchingConfidenceFilter(matchingConfidenceFilter === 'Unmatched' ? 'All' : 'Unmatched')}
-              className={`rounded-2xl border p-4 text-left transition-all cursor-pointer ${
-                matchingConfidenceFilter === 'Unmatched'
+              className={`rounded-2xl border p-4 text-left transition-all cursor-pointer ${matchingConfidenceFilter === 'Unmatched'
                   ? 'border-rose-500 bg-rose-50/30 ring-2 ring-rose-500/20 shadow-md'
                   : 'border-slate-200/80 bg-white hover:border-rose-300'
-              }`}
+                }`}
             >
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 rounded-md bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-800 ring-1 ring-rose-200">
@@ -1438,7 +1429,7 @@ export default function StatementsPage() {
                     <th className="px-3.5 py-3.5 min-w-[120px] text-right">Expected</th>
                     <th className="px-3.5 py-3.5 min-w-[180px]">Matching Tier &amp; Score</th>
                     <th className="px-3.5 py-3.5 min-w-[220px]">Rule Triggered</th>
-                    <th className="px-4 py-3.5 text-right min-w-[140px]">Actions</th>
+                    <th className="px-4 py-3.5 text-right min-w-[140px] w-[140px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-[12.5px]">
@@ -1455,7 +1446,7 @@ export default function StatementsPage() {
                       const isUnmatched = txn.matchConfidence === 'Unmatched'
 
                       return (
-                        <tr key={txn.id} className="hover:bg-slate-50/80 transition-colors">
+                        <tr key={txn.id} className="group hover:bg-slate-50/80 transition-colors">
                           <td className="px-4 py-3 font-semibold text-slate-900">
                             {txn.policyNumber}
                           </td>
@@ -1498,7 +1489,7 @@ export default function StatementsPage() {
                           <td className="px-3.5 py-3 text-[11.5px] text-slate-500 font-mono">
                             {txn.ruleMatched}
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-4 py-3 text-right whitespace-nowrap min-w-[140px] w-[140px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                             {isHigh ? (
                               <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700">
                                 <Check className="size-3.5" /> Auto-Applied
@@ -1668,13 +1659,12 @@ export default function StatementsPage() {
                         </td>
                         <td className="px-3.5 py-3">
                           <span
-                            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10.5px] font-semibold ${
-                              txn.matchConfidence === 'High Confidence'
+                            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10.5px] font-semibold ${txn.matchConfidence === 'High Confidence'
                                 ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
                                 : txn.matchConfidence === 'Possible Match'
-                                ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
-                                : 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
-                            }`}
+                                  ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
+                                  : 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
+                              }`}
                           >
                             {txn.matchConfidence}
                           </span>

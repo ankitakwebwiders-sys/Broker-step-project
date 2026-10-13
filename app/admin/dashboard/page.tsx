@@ -368,7 +368,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* 6 KPI Cards Grid */}
-        <div className="grid gap-3.5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid gap-3.5 grid-cols-2 sm:grid-cols-4 lg:grid-cols-4">
           {filteredKpis.map((stat) => (
             <StatCard key={stat.id} stat={stat} />
           ))}
@@ -437,75 +437,75 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Directory Table */}
-        <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm">
+        <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-xs">
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="w-full min-w-[1150px] text-left text-xs sm:text-sm">
               <thead className="bg-slate-50/80 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
                 <tr>
-                  <th className="py-2.5 px-3">Broker &amp; Agency</th>
-                  <th className="py-2.5 px-3">Account Code</th>
-                  <th className="py-2.5 px-3">Membership Tier</th>
-                  <th className="py-2.5 px-3">Managed Policies</th>
-                  <th className="py-2.5 px-3">Gross Commission</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-3">Last Active</th>
-                  <th className="py-2.5 px-3 text-right">Actions</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[260px]">Broker &amp; Agency</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[130px]">Account Code</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[160px]">Membership Tier</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[140px]">Managed Policies</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[160px]">Gross Commission</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[160px]">Status</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[130px]">Last Active</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[130px] w-[130px] text-right sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredBrokers.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-slate-400">
+                    <td colSpan={8} className="py-8 text-center text-slate-400 whitespace-nowrap">
                       No broker accounts match the current filter.
                     </td>
                   </tr>
                 ) : (
                   filteredBrokers.map((broker) => (
-                    <tr key={broker.id} className="hover:bg-slate-50/60 transition-colors">
+                    <tr key={broker.id} className="group hover:bg-slate-50/60 transition-colors">
                       {/* Name & Agency */}
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white text-xs font-bold">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white text-xs font-bold shadow-xs">
                             {broker.name.split(' ').map((n) => n[0]).join('')}
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <button
                               onClick={() => setSelectedBroker(broker)}
-                              className="font-bold text-slate-900 hover:text-blue-600 transition text-left cursor-pointer"
+                              className="font-bold text-slate-900 hover:text-blue-600 transition text-left cursor-pointer block whitespace-nowrap"
                             >
                               {broker.name}
                             </button>
-                            <span className="text-xs text-slate-500 block">{broker.agencyName}</span>
-                            <span className="text-xs text-slate-400 block">{broker.cityState}</span>
+                            <span className="text-xs text-slate-500 block whitespace-nowrap">{broker.agencyName}</span>
+                            <span className="text-xs text-slate-400 block whitespace-nowrap">{broker.cityState}</span>
                           </div>
                         </div>
                       </td>
 
                       {/* Broker Code */}
-                      <td className="py-3 px-3 font-mono text-xs text-slate-600 whitespace-nowrap">
+                      <td className="py-3.5 px-4 font-mono text-xs text-slate-600 whitespace-nowrap">
                         {broker.brokerCode}
                       </td>
 
                       {/* Tier & Billing */}
-                      <td className="py-3 px-3 whitespace-nowrap">
-                        <span className="font-semibold text-slate-800 block">{broker.membershipTier}</span>
-                        <span className="text-xs text-slate-400 block">Cycle: {broker.billingCycle}</span>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <span className="font-semibold text-slate-800 block whitespace-nowrap">{broker.membershipTier}</span>
+                        <span className="text-xs text-slate-400 block whitespace-nowrap">Cycle: {broker.billingCycle}</span>
                       </td>
 
                       {/* Policies */}
-                      <td className="py-3 px-3 whitespace-nowrap font-mono font-medium text-slate-700">
+                      <td className="py-3.5 px-4 whitespace-nowrap font-mono font-medium text-slate-700">
                         {broker.policiesCount} policies
                       </td>
 
                       {/* Gross Commission */}
-                      <td className="py-3 px-3 whitespace-nowrap font-mono font-bold text-slate-900">
+                      <td className="py-3.5 px-4 whitespace-nowrap font-mono font-bold text-slate-900">
                         {fmt(broker.grossCommissionVolume)}
                       </td>
 
                       {/* Status */}
-                      <td className="py-3 px-3 whitespace-nowrap">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold ${broker.status === 'Active'
+                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap ${broker.status === 'Active'
                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                             : broker.status === 'Inactive'
                               ? 'bg-slate-100 text-slate-600 border border-slate-200'
@@ -515,7 +515,7 @@ export default function AdminDashboardPage() {
                             }`}
                         >
                           <span
-                            className={`size-1.5 rounded-full ${broker.status === 'Active'
+                            className={`size-1.5 rounded-full shrink-0 ${broker.status === 'Active'
                               ? 'bg-emerald-500'
                               : broker.status === 'Inactive'
                                 ? 'bg-slate-400'
@@ -524,21 +524,21 @@ export default function AdminDashboardPage() {
                                   : 'bg-rose-500'
                               }`}
                           />
-                          {broker.status}
+                          <span>{broker.status}</span>
                         </span>
                       </td>
 
                       {/* Last Active */}
-                      <td className="py-3 px-3 whitespace-nowrap text-xs text-slate-500">
+                      <td className="py-3.5 px-4 whitespace-nowrap text-xs text-slate-500">
                         {broker.lastActive}
                       </td>
 
                       {/* Actions */}
-                      <td className="py-3 px-3 text-right whitespace-nowrap">
-                        <div className="inline-flex items-center gap-1.5">
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap min-w-[130px] w-[130px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                        <div className="inline-flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => setSelectedBroker(broker)}
-                            className="inline-flex items-center gap-1 rounded-lg bg-slate-950 px-2.5 py-1 text-xs font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer"
+                            className="inline-flex items-center gap-1 rounded-lg bg-slate-950 px-2.5 py-1 text-xs font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
                           >
                             <span>View</span>
                           </button>
@@ -781,12 +781,12 @@ export default function AdminDashboardPage() {
                   <th className="py-2.5 px-3">Days Remaining</th>
                   <th className="py-2.5 px-3">Auto-Renew Status</th>
                   <th className="py-2.5 px-3">Churn Risk</th>
-                  <th className="py-2.5 px-3 text-right">Actions</th>
+                  <th className="py-2.5 px-3 text-right min-w-[140px] w-[140px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredExpiries.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
+                  <tr key={item.id} className="group hover:bg-slate-50/60 transition-colors">
                     <td className="py-3 px-3">
                       <span className="font-bold text-slate-900 block">{item.brokerName}</span>
                       <span className="text-xs text-slate-500 block">{item.agencyName}</span>
@@ -837,7 +837,7 @@ export default function AdminDashboardPage() {
                         {item.churnRisk} Risk
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-right whitespace-nowrap">
+                    <td className="py-3 px-3 text-right whitespace-nowrap min-w-[140px] w-[140px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                       <div className="inline-flex items-center gap-1.5">
                         <button
                           onClick={() => showToast(`Renewal reminder and incentive email dispatched to ${item.brokerName}.`)}
@@ -931,26 +931,26 @@ export default function AdminDashboardPage() {
 
         {/* Failed Payments Table */}
         <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm">
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="w-full min-w-[950px] text-left text-xs sm:text-sm">
               <thead className="bg-slate-50/80 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
                 <tr>
-                  <th className="py-3 px-4">Broker / Agency</th>
-                  <th className="py-3 px-4">Plan &amp; Amount</th>
-                  <th className="py-3 px-4">Failure Reason</th>
-                  <th className="py-3 px-4">Retries &amp; Overdue</th>
-                  <th className="py-3 px-4">Grace Deadline</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[220px]">Broker / Agency</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[150px]">Plan &amp; Amount</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[180px]">Failure Reason</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[170px]">Retries &amp; Overdue</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[140px]">Grace Deadline</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[200px] w-[200px] text-right sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {failedPayments.map((item) => (
-                  <tr key={item.id} className="hover:bg-rose-50/30 transition-colors">
-                    <td className="py-3.5 px-4">
+                  <tr key={item.id} className="group hover:bg-rose-50/30 transition-colors">
+                    <td className="py-3.5 px-4 whitespace-nowrap">
                       <div>
-                        <span className="font-bold text-slate-900 block">{item.brokerName}</span>
-                        <span className="text-xs text-slate-500 block">{item.agencyName}</span>
-                        <span className="font-mono text-xs text-slate-400">{item.email}</span>
+                        <span className="font-bold text-slate-900 block whitespace-nowrap">{item.brokerName}</span>
+                        <span className="text-xs text-slate-500 block whitespace-nowrap">{item.agencyName}</span>
+                        <span className="font-mono text-xs text-slate-400 whitespace-nowrap">{item.email}</span>
                       </div>
                     </td>
 
@@ -990,7 +990,7 @@ export default function AdminDashboardPage() {
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap min-w-[200px] w-[200px] sticky right-0 bg-white group-hover:bg-rose-50/50 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                       <div className="inline-flex items-center gap-1.5">
                         <button
                           onClick={() => handleRetryPayment(item.id, item.brokerName)}

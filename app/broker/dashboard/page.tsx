@@ -738,7 +738,7 @@ export default function BrokerDashboardPage() {
                     <th className="px-3 py-2.5">Renewal Date</th>
                     <th className="px-3 py-2.5">Premium</th>
                     <th className="px-3 py-2.5">Status</th>
-                    <th className="px-5 py-2.5 text-right">Action</th>
+                    <th className="px-5 py-2.5 text-right min-w-[120px] w-[120px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100/80">
@@ -810,7 +810,7 @@ export default function BrokerDashboardPage() {
                           {row.status}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-right whitespace-nowrap">
+                      <td className="px-5 py-3 text-right whitespace-nowrap min-w-[120px] w-[120px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                         <Link
                           href="/broker/renewals"
                           className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-blue-500 hover:bg-blue-50/50 hover:text-blue-600 shadow-xs transition"
@@ -1009,7 +1009,7 @@ export default function BrokerDashboardPage() {
                   <th className="px-3 py-2.5">Line of Business</th>
                   <th className="px-3 py-2.5">Status</th>
                   <th className="px-3 py-2.5">Last Contact</th>
-                  <th className="px-3 py-2.5 text-right">Drill-Down</th>
+                  <th className="px-3 py-2.5 text-right min-w-[110px] w-[110px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Drill-Down</th>
                 </tr>
               </thead>
               <tbody>
@@ -1041,7 +1041,7 @@ export default function BrokerDashboardPage() {
                 ].map((lead) => (
                   <tr
                     key={lead.name}
-                    className="border-b border-slate-50 transition last:border-0 hover:bg-slate-50/70"
+                    className="group border-b border-slate-50 transition last:border-0 hover:bg-slate-50/70"
                   >
                     <td className="px-3 py-3">
                       <p className="text-sm font-semibold text-slate-900">
@@ -1067,7 +1067,7 @@ export default function BrokerDashboardPage() {
                     <td className="px-3 py-3 text-xs text-slate-500 font-medium">
                       {lead.days}
                     </td>
-                    <td className="px-3 py-3 text-right">
+                    <td className="px-3 py-3 text-right whitespace-nowrap min-w-[110px] w-[110px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                       <Link
                         href="/broker/leads"
                         className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"

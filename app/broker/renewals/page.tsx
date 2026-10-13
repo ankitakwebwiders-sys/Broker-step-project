@@ -761,7 +761,7 @@ export default function RenewalsPage() {
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[130px] text-right">Premium</th>
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[140px]">Policy Status</th>
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[150px]">Renewal Status</th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[350px] text-center">Actions</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[360px] w-[360px] text-center sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
@@ -780,7 +780,7 @@ export default function RenewalsPage() {
               ) : (
                 horizonFilteredRecords.map((policy) => {
                   return (
-                    <tr key={policy.id} className="hover:bg-slate-50/70 transition-colors">
+                    <tr key={policy.id} className="group hover:bg-slate-50/70 transition-colors">
                       {/* 1. Client */}
                       <td className="px-4 py-3.5 whitespace-nowrap">
                         <p className="font-semibold text-slate-900 leading-snug">{policy.client}</p>
@@ -857,15 +857,15 @@ export default function RenewalsPage() {
                       </td>
 
                       {/* Actions: Review; Renew; Rewrite; Non-Renew; Mark Lost Business */}
-                      <td className="px-4 py-3.5 whitespace-nowrap text-center">
+                      <td className="px-4 py-3.5 whitespace-nowrap text-center min-w-[360px] w-[360px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                         <div className="flex items-center justify-center gap-1.5 flex-nowrap">
                           {/* Review Action */}
                           <button
                             onClick={() => handleOpenAction('review', policy)}
-                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
                             title="Review Policy (Step 41)"
                           >
-                            <Eye className="size-3.5 text-slate-400" />
+                            <Eye className="size-3.5" />
                             <span>Review</span>
                           </button>
 

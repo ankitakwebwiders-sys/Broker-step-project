@@ -2,36 +2,25 @@
 
 import { useState, useEffect } from 'react'
 import {
-  Award,
   BarChart3,
-  Bell,
   BookOpen,
-  Building2,
   CalendarDays,
   ChevronDown,
-  CircleHelp,
   ClipboardList,
   FileCheck2,
   FileSpreadsheet,
   LayoutDashboard,
   LogOut,
   Menu,
-  Plus,
-  QrCode,
-  Search,
   Settings,
-  ShieldCheck,
-  Sliders,
   Users,
   WalletCards,
   X,
   Zap,
-  ArrowRight,
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { HeaderNotificationCenter } from '@/components/broker/HeaderNotificationCenter'
 
 
 interface SubNavItemDef {
@@ -445,7 +434,6 @@ function NavItem({
 
 export default function BrokerLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [showPaymentBanner, setShowPaymentBanner] = useState(true)
   const pathname = usePathname()
   const [currentSearch, setCurrentSearch] = useState('')
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>(() => {
@@ -603,8 +591,8 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
       <div className="lg:pl-[280px]">
         {/* Top Header */}
         <header className="sticky top-0 z-20 flex h-[70px] items-center justify-between gap-4 border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur-md sm:px-8">
-          {/* Left: Mobile trigger & Search */}
-          <div className="flex flex-1 items-center gap-3">
+          {/* Left: Mobile trigger */}
+          <div className="flex items-center gap-3">
             <button
               className="rounded-xl p-2 text-slate-500 hover:bg-slate-100 lg:hidden transition-colors"
               onClick={() => setMobileOpen(true)}
@@ -612,36 +600,10 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
             >
               <Menu className="size-5" />
             </button>
-
-            {/* Global Search Bar */}
-            <div className="relative w-full max-w-[280px] sm:max-w-[380px] md:max-w-[420px]">
-              <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400 transition-colors pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search clients, policies, statements..."
-                className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/80 pl-10 pr-12 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100/60"
-              />
-
-            </div>
           </div>
 
-          {/* Right: Quick Action, Help, Notifications & User Profile */}
+          {/* Right: User Profile */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-
-            {/* Help Button */}
-            <button
-              type="button"
-              className="relative hidden sm:flex size-9 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
-              aria-label="Help and documentation"
-              title="Help & Support"
-            >
-              <CircleHelp className="size-[18px]" />
-            </button>
-
-            {/* Notifications Center with Failed Payment & Expiry alerts */}
-            <HeaderNotificationCenter />
-
-            <div className="h-6 w-px bg-slate-200/90 mx-0.5" />
 
             {/* User Profile Pill */}
             <Link
@@ -664,35 +626,6 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
             </Link>
           </div>
         </header>
-
-        {/* Failed Membership Payment Notification Banner (Linkable to affected membership page) */}
-        {showPaymentBanner && (
-          <div className="bg-rose-50 border-b border-rose-200/90 px-4 py-2.5 text-sm text-rose-900 flex items-center justify-between gap-3 sm:px-8 animate-in fade-in">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="flex size-2 rounded-full bg-rose-600 animate-pulse shrink-0" />
-              <p className="font-medium text-sm truncate sm:whitespace-normal">
-                <strong className="font-bold text-rose-950">Action Required:</strong> Recurring Professional Plan payment ($79.00) on Visa ending in 4242 failed to process.
-              </p>
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <Link
-                href="/broker/settings?tab=membership"
-                className="font-bold text-rose-700 hover:text-rose-950 hover:underline flex items-center gap-1 text-xs"
-              >
-                <span>Update Method</span>
-                <ArrowRight className="size-3" />
-              </Link>
-              <button
-                type="button"
-                onClick={() => setShowPaymentBanner(false)}
-                className="text-rose-400 hover:text-rose-700 p-0.5 rounded cursor-pointer"
-                aria-label="Dismiss banner"
-              >
-                <X className="size-3.5" />
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Page Content */}
         <main>{children}</main>

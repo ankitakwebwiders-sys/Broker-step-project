@@ -737,7 +737,7 @@ export default function ReconciliationPage() {
                 <th className="py-3.5 px-4">Status</th>
                 <th className="py-3.5 px-4">Statement Source</th>
                 <th className="py-3.5 px-4">Transaction Date</th>
-                <th className="py-3.5 px-4 text-center">Actions</th>
+                <th className="py-3.5 px-4 text-center min-w-[280px] w-[280px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
@@ -755,7 +755,7 @@ export default function ReconciliationPage() {
                 filteredData.map((item) => (
                   <tr
                     key={item.id}
-                    className="hover:bg-slate-50/70 transition-colors"
+                    className="group hover:bg-slate-50/70 transition-colors"
                   >
                     {/* 1. Client */}
                     <td className="py-3.5 px-4">
@@ -835,15 +835,15 @@ export default function ReconciliationPage() {
                     <td className="py-3.5 px-4 font-mono text-xs text-slate-600 whitespace-nowrap">{item.transactionDate}</td>
 
                     {/* 11. Actions: View; Review; Match/Resolve where applicable; Update status where allowed */}
-                    <td className="py-3.5 px-4 text-center">
+                    <td className="py-3.5 px-4 text-center whitespace-nowrap min-w-[280px] w-[280px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                       <div className="inline-flex items-center gap-1.5 whitespace-nowrap">
                         {/* View */}
                         <button
                           onClick={() => setViewRecord(item)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
                           title="View Details"
                         >
-                          <Eye className="size-3.5 text-slate-500" />
+                          <Eye className="size-3.5" />
                           <span>View</span>
                         </button>
 
@@ -959,13 +959,12 @@ export default function ReconciliationPage() {
                 <div>
                   <span className="text-[11px] font-medium text-slate-500">Difference / Outstanding</span>
                   <p
-                    className={`text-[17px] font-bold mt-0.5 ${
-                      viewRecord.differenceOutstanding === 0
-                        ? 'text-slate-500'
-                        : viewRecord.differenceOutstanding > 0
+                    className={`text-[17px] font-bold mt-0.5 ${viewRecord.differenceOutstanding === 0
+                      ? 'text-slate-500'
+                      : viewRecord.differenceOutstanding > 0
                         ? 'text-amber-600'
                         : 'text-teal-600'
-                    }`}
+                      }`}
                   >
                     {fmt(viewRecord.differenceOutstanding)}
                   </p>
@@ -1173,11 +1172,10 @@ export default function ReconciliationPage() {
                   Select Resolution Method
                 </label>
                 <div className="space-y-2">
-                  <label className={`flex items-start gap-2.5 rounded-xl border p-2.5 sm:p-3 transition cursor-pointer ${
-                    resolveMethod === 'accept_carrier'
-                      ? 'border-indigo-500 bg-indigo-50/40 ring-1 ring-indigo-500/30'
-                      : 'border-slate-200 hover:bg-slate-50'
-                  }`}>
+                  <label className={`flex items-start gap-2.5 rounded-xl border p-2.5 sm:p-3 transition cursor-pointer ${resolveMethod === 'accept_carrier'
+                    ? 'border-indigo-500 bg-indigo-50/40 ring-1 ring-indigo-500/30'
+                    : 'border-slate-200 hover:bg-slate-50'
+                    }`}>
                     <input
                       type="radio"
                       name="resolveMethod"
@@ -1196,11 +1194,10 @@ export default function ReconciliationPage() {
                     </div>
                   </label>
 
-                  <label className={`flex items-start gap-2.5 rounded-xl border p-2.5 sm:p-3 transition cursor-pointer ${
-                    resolveMethod === 'dispute_variance'
-                      ? 'border-indigo-500 bg-indigo-50/40 ring-1 ring-indigo-500/30'
-                      : 'border-slate-200 hover:bg-slate-50'
-                  }`}>
+                  <label className={`flex items-start gap-2.5 rounded-xl border p-2.5 sm:p-3 transition cursor-pointer ${resolveMethod === 'dispute_variance'
+                    ? 'border-indigo-500 bg-indigo-50/40 ring-1 ring-indigo-500/30'
+                    : 'border-slate-200 hover:bg-slate-50'
+                    }`}>
                     <input
                       type="radio"
                       name="resolveMethod"
@@ -1219,11 +1216,10 @@ export default function ReconciliationPage() {
                     </div>
                   </label>
 
-                  <label className={`flex items-start gap-2.5 rounded-xl border p-2.5 sm:p-3 transition cursor-pointer ${
-                    resolveMethod === 'link_statement'
-                      ? 'border-indigo-500 bg-indigo-50/40 ring-1 ring-indigo-500/30'
-                      : 'border-slate-200 hover:bg-slate-50'
-                  }`}>
+                  <label className={`flex items-start gap-2.5 rounded-xl border p-2.5 sm:p-3 transition cursor-pointer ${resolveMethod === 'link_statement'
+                    ? 'border-indigo-500 bg-indigo-50/40 ring-1 ring-indigo-500/30'
+                    : 'border-slate-200 hover:bg-slate-50'
+                    }`}>
                     <input
                       type="radio"
                       name="resolveMethod"

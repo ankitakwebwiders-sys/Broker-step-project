@@ -968,7 +968,7 @@ function ReportsContent() {
                     <th className="py-4 px-4">Main Content / Filters</th>
                     <th className="py-4 px-4">Applicable SOW Filters</th>
                     <th className="py-4 px-4">Export Formats</th>
-                    <th className="py-4 pl-4 pr-6 text-right">Actions</th>
+                    <th className="py-4 pl-4 pr-6 text-right min-w-[210px] w-[210px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">
@@ -1026,12 +1026,12 @@ function ReportsContent() {
                         </td>
 
                         {/* Actions */}
-                        <td className="py-4 pl-4 pr-6 align-top text-right">
+                        <td className="py-4 pl-4 pr-6 align-top text-right whitespace-nowrap min-w-[210px] w-[210px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               type="button"
                               onClick={() => handleSelectReport(rep.key)}
-                              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-950 hover:text-white transition"
+                              className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
                             >
                               <Eye className="size-3.5" />
                               <span>View </span>

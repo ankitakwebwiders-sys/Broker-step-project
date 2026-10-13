@@ -938,7 +938,7 @@ export default function LeadsPage() {
                   <th className="px-3 py-3.5 min-w-[130px] whitespace-nowrap">Lead Status</th>
                   <th className="px-3 py-3.5 min-w-[115px] whitespace-nowrap">Marketing Consent</th>
                   <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Created Date</th>
-                  <th className="px-4 py-3.5 text-right min-w-[240px] w-[240px] whitespace-nowrap">Actions</th>
+                  <th className="px-4 py-3.5 text-right min-w-[240px] w-[240px] whitespace-nowrap sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -1069,7 +1069,7 @@ export default function LeadsPage() {
                         </td>
 
                         {/* 10. Actions */}
-                        <td className="px-4 py-3.5 text-right whitespace-nowrap min-w-[240px] w-[240px]">
+                        <td className="px-4 py-3.5 text-right whitespace-nowrap min-w-[240px] w-[240px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                           <div className="inline-flex items-center justify-end gap-1.5 whitespace-nowrap">
                             {/* View */}
                             <button
@@ -1077,7 +1077,7 @@ export default function LeadsPage() {
                                 setSelectedLeadForView(lead)
                                 setLeadDetailTab('overview')
                               }}
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-600 whitespace-nowrap shrink-0 cursor-pointer"
+                              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
                             >
                               <Eye className="size-3.5 text-slate-400 shrink-0" />
                               <span>View</span>

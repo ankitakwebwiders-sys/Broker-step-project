@@ -832,7 +832,7 @@ export default function ClientsPage() {
                   <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Policies</th>
                   <th className="px-3 py-3.5 min-w-[125px] whitespace-nowrap">Marketing Consent</th>
                   <th className="px-4 py-3.5 min-w-[175px]">Last Activity</th>
-                  <th className="px-4 py-3.5 text-right min-w-[210px] w-[210px] whitespace-nowrap">Actions</th>
+                  <th className="px-4 py-3.5 text-right min-w-[210px] w-[210px] whitespace-nowrap sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -970,14 +970,14 @@ export default function ClientsPage() {
                         </td>
 
                         {/* 9. Actions */}
-                        <td className="px-4 py-3.5 text-right whitespace-nowrap min-w-[210px] w-[210px]">
+                        <td className="px-4 py-3.5 text-right whitespace-nowrap min-w-[210px] w-[210px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                           <div className="inline-flex items-center justify-end gap-1.5 whitespace-nowrap">
                             <button
                               onClick={() => {
                                 setSelectedClientForView(client)
                                 setClientDetailTab('overview')
                               }}
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-600 whitespace-nowrap shrink-0 cursor-pointer"
+                              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
                             >
                               <Eye className="size-3.5 text-slate-400 shrink-0" />
                               <span>View</span>
@@ -1297,12 +1297,12 @@ export default function ClientsPage() {
                               <th className="px-3 py-3">Premium</th>
                               <th className="px-3 py-3">Term Dates</th>
                               <th className="px-3 py-3">Status</th>
-                              <th className="px-4 py-3 text-right">Action</th>
+                              <th className="px-4 py-3 text-right sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Action</th>
                             </tr>
                           </thead>
                           <tbody>
                             {selectedClientForView.policies.map((policy) => (
-                              <tr key={policy.id} className="border-b border-slate-50 text-[12px] hover:bg-slate-50/60 last:border-0">
+                              <tr key={policy.id} className="group border-b border-slate-50 text-[12px] hover:bg-slate-50/60 last:border-0">
                                 <td className="px-4 py-3 font-semibold text-slate-900 font-mono text-[11px]">
                                   {policy.policyNumber}
                                 </td>
@@ -1322,7 +1322,7 @@ export default function ClientsPage() {
                                     {policy.status}
                                   </span>
                                 </td>
-                                <td className="px-4 py-3 text-right">
+                                <td className="px-4 py-3 text-right sticky right-0 bg-white group-hover:bg-slate-50/60 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                                   <button
                                     onClick={() => setPreviewPolicy({ clientName: selectedClientForView.name, policy })}
                                     className="text-[11px] font-medium text-blue-600 hover:underline cursor-pointer"

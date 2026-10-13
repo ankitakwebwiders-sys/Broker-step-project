@@ -46,6 +46,7 @@ import {
   Fingerprint,
   Clock,
   Sparkles,
+  Trash2,
 } from 'lucide-react'
 
 // Tabs definition
@@ -130,23 +131,6 @@ function SettingsContent() {
           <p className="mt-1 text-sm text-slate-500">
             Manage your broker profile, subscriptions, carrier relationships, commission splits, and lead engine.
           </p>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          {saveSuccess && (
-            <div className="flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 border border-emerald-200 animate-in fade-in duration-200">
-              <Check className="size-3.5" />
-              Settings saved!
-            </div>
-          )}
-          <button
-            type="button"
-            onClick={triggerSaveToast}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#0170FE] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db]"
-          >
-            <Save className="size-4" />
-            <span>Save Changes</span>
-          </button>
         </div>
       </div>
 
@@ -236,9 +220,7 @@ function MyProfileTab({
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-2xl font-bold tracking-tight text-slate-950">{profile.name}</h2>
-              <span className="rounded-full bg-blue-50 px-3 py-0.5 text-xs font-semibold text-[#0170FE] border border-[#0170FE]/20">
-                Principal Broker
-              </span>
+
             </div>
             <p className="mt-1 text-sm sm:text-base font-semibold text-slate-700">{profile.businessName}</p>
             <p className="mt-0.5 text-xs sm:text-sm text-slate-500">BrokerStep ID: <span className="font-mono font-medium text-slate-700">{profile.brokerCode}</span> · Licensed in NY, NJ, CT</p>
@@ -488,58 +470,8 @@ function AccountTab({ onSave }: { onSave: () => void }) {
           </div>
         </div>
 
-        {/* Two Factor Toggle */}
-        <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
-          <div>
-            <p className="text-sm font-bold text-slate-900">Two-Factor Authentication (2FA)</p>
-            <p className="text-xs text-slate-500 mt-0.5">Secure broker login using an authenticator app (TOTP)</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setTwoFactor(!twoFactor)}
-            className={`cursor-pointer relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors duration-200 ease-in-out ${twoFactor ? 'bg-[#0170FE]' : 'bg-slate-300'
-              }`}
-          >
-            <span
-              className={`inline-block size-5 transform rounded-full bg-white shadow-md transition duration-200 ease-in-out mt-0.5 ml-0.5 ${twoFactor ? 'translate-x-5' : 'translate-x-0'
-                }`}
-            />
-          </button>
-        </div>
 
-        {/* Active Sessions */}
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">Active Security Sessions</p>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between rounded-xl border border-slate-200 p-3.5 text-xs sm:text-sm">
-              <div className="flex items-center gap-2.5">
-                <Laptop className="size-4.5 text-blue-600" />
-                <div>
-                  <p className="font-semibold text-slate-900">Chrome on macOS · New York, USA</p>
-                  <p className="text-xs text-emerald-600 font-medium">Active Now · Current Session</p>
-                </div>
-              </div>
-              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">IP: 72.229.xx</span>
-            </div>
 
-            <div className="flex items-center justify-between rounded-xl border border-slate-200 p-3.5 text-xs sm:text-sm">
-              <div className="flex items-center gap-2.5">
-                <Smartphone className="size-4.5 text-slate-500" />
-                <div>
-                  <p className="font-semibold text-slate-900">Safari on iPhone 15 Pro</p>
-                  <p className="text-xs text-slate-400 font-medium">Last active 2 hours ago</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={onSave}
-                className="cursor-pointer text-xs sm:text-sm font-semibold text-rose-600 hover:underline"
-              >
-                Revoke
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Password Management */}
@@ -797,6 +729,17 @@ function MembershipTab({ onSave }: { onSave: () => void }) {
    ========================================================================= */
 function CarriersTab({ onSave }: { onSave: () => void }) {
   const [searchTerm, setSearchTerm] = useState('')
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    id: '',
+    code: '',
+    status: 'Active',
+    rep: '',
+    phone: '',
+    payout: 'Bi-weekly Direct Deposit',
+    appointmentId: '',
+  })
 
   const [carriers, setCarriers] = useState([
     {
@@ -806,7 +749,6 @@ function CarriersTab({ onSave }: { onSave: () => void }) {
       status: 'Active',
       rep: 'Sarah Jenkins',
       phone: '+1 (800) 252-4633',
-      portal: 'travelers.com/broker-portal',
       payout: 'Bi-weekly Direct Deposit',
       appointmentId: 'APT-99410',
       connected: true,
@@ -818,7 +760,6 @@ function CarriersTab({ onSave }: { onSave: () => void }) {
       status: 'Active',
       rep: 'Michael Rossi',
       phone: '+1 (800) 447-7649',
-      portal: 'thehartford.com/agency-ebiz',
       payout: 'Monthly Direct Deposit',
       appointmentId: 'APT-30119',
       connected: true,
@@ -830,7 +771,6 @@ function CarriersTab({ onSave }: { onSave: () => void }) {
       status: 'Active',
       rep: 'Jessica Wu',
       phone: '+1 (800) 362-0000',
-      portal: 'libertymutual.com/agents',
       payout: 'Bi-weekly Direct Deposit',
       appointmentId: 'APT-14920',
       connected: true,
@@ -842,7 +782,6 @@ function CarriersTab({ onSave }: { onSave: () => void }) {
       status: 'Active',
       rep: 'Daniel Kim',
       phone: '+1 (800) 876-5581',
-      portal: 'foragentsonly.com',
       payout: 'Weekly Direct Deposit',
       appointmentId: 'APT-58190',
       connected: true,
@@ -854,7 +793,6 @@ function CarriersTab({ onSave }: { onSave: () => void }) {
       status: 'Active',
       rep: 'Elena Vance',
       phone: '+1 (800) 699-9916',
-      portal: 'chubb.com/brokers',
       payout: 'Monthly Direct Deposit',
       appointmentId: 'APT-84012',
       connected: true,
@@ -866,7 +804,6 @@ function CarriersTab({ onSave }: { onSave: () => void }) {
       status: 'Active',
       rep: 'Marcus Clark',
       phone: '+1 (800) 542-9080',
-      portal: 'nationwide.com/producers',
       payout: 'Monthly ACH',
       appointmentId: 'APT-60291',
       connected: true,
@@ -878,12 +815,55 @@ function CarriersTab({ onSave }: { onSave: () => void }) {
       status: 'Pending Appointment',
       rep: 'Underwriting Review',
       phone: '+1 (800) 488-2930',
-      portal: 'bhhc.com',
       payout: 'Awaiting Activation',
       appointmentId: 'SUBMITTED-OCT26',
       connected: false,
     },
   ])
+
+  function handleAddCarrier(e: React.FormEvent) {
+    e.preventDefault()
+    if (!formData.name.trim()) return
+
+    const shortId = formData.id.trim()
+      ? formData.id.trim().toUpperCase().slice(0, 4)
+      : formData.name
+        .trim()
+        .split(' ')
+        .map((w) => w[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 3) || 'NEW'
+
+    const carrierCode = formData.code.trim() || `${shortId}-${Math.floor(10000 + Math.random() * 90000)}`
+    const aptId = formData.appointmentId.trim() || `APT-${Math.floor(10000 + Math.random() * 90000)}`
+
+    const newCarrier = {
+      id: shortId,
+      name: formData.name.trim(),
+      code: carrierCode,
+      status: formData.status,
+      rep: formData.rep.trim() || 'Assigned Specialist',
+      phone: formData.phone.trim() || '+1 (800) 555-0100',
+      payout: formData.payout,
+      appointmentId: aptId,
+      connected: formData.status === 'Active',
+    }
+
+    setCarriers([newCarrier, ...carriers])
+    setIsAddModalOpen(false)
+    setFormData({
+      name: '',
+      id: '',
+      code: '',
+      status: 'Active',
+      rep: '',
+      phone: '',
+      payout: 'Bi-weekly Direct Deposit',
+      appointmentId: '',
+    })
+    onSave()
+  }
 
   const filtered = carriers.filter((c) =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -904,14 +884,166 @@ function CarriersTab({ onSave }: { onSave: () => void }) {
           />
         </div>
 
-
+        <button
+          type="button"
+          onClick={() => setIsAddModalOpen(true)}
+          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#0170FE] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db]"
+        >
+          <Plus className="size-4" />
+          <span>Add Carrier</span>
+        </button>
       </div>
+
+      {/* Add Carrier Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-[#0170FE]/10 text-[#0170FE]">
+                  <Building2 className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-950">Add New Carrier</h3>
+                  <p className="text-xs text-slate-500">Connect a new insurance carrier to your brokerage</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                className="cursor-pointer rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddCarrier} className="mt-5 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Carrier Name <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g. Hanover Insurance Group"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Carrier Code
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.code}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                    placeholder="e.g. HVR-77401"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Appointment ID
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.appointmentId}
+                    onChange={(e) => setFormData({ ...formData, appointmentId: e.target.value })}
+                    placeholder="e.g. APT-40192"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Representative Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.rep}
+                    onChange={(e) => setFormData({ ...formData, rep: e.target.value })}
+                    placeholder="e.g. John Anderson"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="e.g. +1 (800) 555-0199"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Payout Schedule
+                  </label>
+                  <select
+                    value={formData.payout}
+                    onChange={(e) => setFormData({ ...formData, payout: e.target.value })}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  >
+                    <option value="Bi-weekly Direct Deposit">Bi-weekly Direct Deposit</option>
+                    <option value="Monthly Direct Deposit">Monthly Direct Deposit</option>
+                    <option value="Weekly Direct Deposit">Weekly Direct Deposit</option>
+                    <option value="Monthly ACH">Monthly ACH</option>
+                    <option value="Awaiting Activation">Awaiting Activation</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Status
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Pending Appointment">Pending Appointment</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#0170FE] px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db]"
+                >
+                  <Plus className="size-4" />
+                  <span>Add Carrier</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Carriers Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((carrier) => (
           <div
-            key={carrier.id}
+            key={`${carrier.id}-${carrier.code}-${carrier.appointmentId}`}
             className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition hover:border-[#0170FE]/40 hover:shadow-md"
           >
             <div>
@@ -951,8 +1083,6 @@ function CarriersTab({ onSave }: { onSave: () => void }) {
                 </div>
               </div>
             </div>
-
-
           </div>
         ))}
       </div>
@@ -963,8 +1093,16 @@ function CarriersTab({ onSave }: { onSave: () => void }) {
 /* =========================================================================
    5. TAB: COMMISSION SETTINGS
    ========================================================================= */
+interface SplitRule {
+  carrier: string
+  defaultComm: number
+  brokerSplit: number
+  houseSplit: number
+  renewalRate: number
+}
+
 function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
-  const [splits, setSplits] = useState([
+  const [splits, setSplits] = useState<SplitRule[]>([
     { carrier: 'Travelers Insurance', defaultComm: 15.0, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
     { carrier: 'The Hartford', defaultComm: 14.5, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
     { carrier: 'Liberty Mutual', defaultComm: 15.0, brokerSplit: 85, houseSplit: 15, renewalRate: 13.0 },
@@ -972,6 +1110,92 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
     { carrier: 'Chubb Commercial', defaultComm: 16.0, brokerSplit: 85, houseSplit: 15, renewalRate: 14.0 },
     { carrier: 'Nationwide Mutual', defaultComm: 14.0, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
   ])
+
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | null>(null)
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [formData, setFormData] = useState<SplitRule>({
+    carrier: '',
+    defaultComm: 15.0,
+    brokerSplit: 80,
+    houseSplit: 20,
+    renewalRate: 12.0,
+  })
+
+  function handleOpenAdd() {
+    setModalMode('add')
+    setEditingIndex(null)
+    setFormData({
+      carrier: '',
+      defaultComm: 15.0,
+      brokerSplit: 80,
+      houseSplit: 20,
+      renewalRate: 12.0,
+    })
+  }
+
+  function handleOpenEdit(index: number) {
+    setModalMode('edit')
+    setEditingIndex(index)
+    setFormData({ ...splits[index] })
+  }
+
+  function handleCloseModal() {
+    setModalMode(null)
+    setEditingIndex(null)
+  }
+
+  function handleBrokerSplitChange(val: number) {
+    const broker = isNaN(val) ? 0 : Math.max(0, Math.min(100, val))
+    setFormData((prev) => ({
+      ...prev,
+      brokerSplit: broker,
+      houseSplit: Math.max(0, 100 - broker),
+    }))
+  }
+
+  function handleHouseSplitChange(val: number) {
+    const house = isNaN(val) ? 0 : Math.max(0, Math.min(100, val))
+    setFormData((prev) => ({
+      ...prev,
+      houseSplit: house,
+      brokerSplit: Math.max(0, 100 - house),
+    }))
+  }
+
+  function handleSaveRule(e: React.FormEvent) {
+    e.preventDefault()
+    if (!formData.carrier.trim()) return
+
+    if (modalMode === 'edit' && editingIndex !== null) {
+      setSplits((prev) => {
+        const next = [...prev]
+        next[editingIndex] = {
+          ...formData,
+          carrier: formData.carrier.trim(),
+        }
+        return next
+      })
+    } else {
+      setSplits((prev) => [
+        {
+          ...formData,
+          carrier: formData.carrier.trim(),
+        },
+        ...prev,
+      ])
+    }
+
+    handleCloseModal()
+    onSave()
+  }
+
+  function handleDeleteRule() {
+    if (editingIndex !== null) {
+      setSplits((prev) => prev.filter((_, i) => i !== editingIndex))
+      handleCloseModal()
+      onSave()
+    }
+  }
 
   const lobRules = [
     { lob: 'Commercial Property', baseComm: '15.0%', split: '80 / 20', note: 'Standard commercial schedule' },
@@ -998,11 +1222,11 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
 
           <button
             type="button"
-            onClick={onSave}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-xs hover:border-[#0170FE] hover:text-[#0170FE]"
+            onClick={handleOpenAdd}
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#0170FE] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db]"
           >
             <Plus className="size-4" />
-            Add Override
+            <span>Add Override</span>
           </button>
         </div>
 
@@ -1015,12 +1239,12 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                 <th className="pb-3">Broker Share %</th>
                 <th className="pb-3">Brokerage (House) %</th>
                 <th className="pb-3">Renewal Commission %</th>
-                <th className="pb-3 text-right">Actions</th>
+                <th className="pb-3 text-right min-w-[120px] w-[120px] sticky right-0 bg-white shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {splits.map((row, idx) => (
-                <tr key={row.carrier} className="hover:bg-slate-50/50">
+                <tr key={`${row.carrier}-${idx}`} className="group hover:bg-slate-50/50">
                   <td className="py-3 font-semibold text-slate-900">{row.carrier}</td>
                   <td className="py-3">
                     <span className="rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-mono font-bold text-[#0170FE]">
@@ -1030,10 +1254,10 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                   <td className="py-3 font-mono font-bold text-slate-900">{row.brokerSplit}%</td>
                   <td className="py-3 font-mono font-medium text-slate-500">{row.houseSplit}%</td>
                   <td className="py-3 font-mono font-semibold text-slate-700">{row.renewalRate}%</td>
-                  <td className="py-3 text-right">
+                  <td className="py-3 text-right whitespace-nowrap min-w-[120px] w-[120px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                     <button
                       type="button"
-                      onClick={onSave}
+                      onClick={() => handleOpenEdit(idx)}
                       className="cursor-pointer text-xs sm:text-sm font-semibold text-[#0170FE] hover:underline"
                     >
                       Edit Rule
@@ -1045,6 +1269,201 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
           </table>
         </div>
       </div>
+
+      {/* Add / Edit Override Modal */}
+      {modalMode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-[#0170FE]/10 text-[#0170FE]">
+                  <Percent className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-950">
+                    {modalMode === 'add' ? 'Add Commission Override' : 'Edit Commission Rule'}
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    {modalMode === 'add'
+                      ? 'Set custom commission contract percentages for a carrier'
+                      : `Update commission and split structure for ${formData.carrier}`}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleCloseModal}
+                className="cursor-pointer rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveRule} className="mt-5 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Carrier Name <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.carrier}
+                  onChange={(e) => setFormData({ ...formData, carrier: e.target.value })}
+                  placeholder="e.g. Hanover Insurance / AIG Commercial"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Default Commission (%)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      required
+                      value={formData.defaultComm}
+                      onChange={(e) =>
+                        setFormData({ ...formData, defaultComm: parseFloat(e.target.value) || 0 })
+                      }
+                      className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-3.5 pr-8 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                      %
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Renewal Commission (%)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      required
+                      value={formData.renewalRate}
+                      onChange={(e) =>
+                        setFormData({ ...formData, renewalRate: parseFloat(e.target.value) || 0 })
+                      }
+                      className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-3.5 pr-8 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                      %
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Commission Split Allocation */}
+              <div className="rounded-xl border border-slate-200/90 bg-slate-50/60 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                    Split Allocation (Total 100%)
+                  </label>
+                  <span className="text-xs font-semibold text-slate-500">
+                    {formData.brokerSplit}% / {formData.houseSplit}%
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">
+                      Broker Share (%)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.brokerSplit}
+                      onChange={(e) => handleBrokerSplitChange(parseInt(e.target.value) || 0)}
+                      className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#0170FE]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">
+                      Brokerage (House) %
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.houseSplit}
+                      onChange={(e) => handleHouseSplitChange(parseInt(e.target.value) || 0)}
+                      className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#0170FE]"
+                    />
+                  </div>
+                </div>
+
+                {/* Visual Ratio Bar */}
+                <div className="space-y-1">
+                  <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
+                    <div
+                      style={{ width: `${formData.brokerSplit}%` }}
+                      className="bg-[#0170FE] transition-all duration-200"
+                      title={`Broker: ${formData.brokerSplit}%`}
+                    />
+                    <div
+                      style={{ width: `${formData.houseSplit}%` }}
+                      className="bg-slate-400 transition-all duration-200"
+                      title={`House: ${formData.houseSplit}%`}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[11px] text-slate-500 font-medium">
+                    <span className="flex items-center gap-1">
+                      <span className="inline-block size-2 rounded-full bg-[#0170FE]" />
+                      Broker: {formData.brokerSplit}%
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="inline-block size-2 rounded-full bg-slate-400" />
+                      House: {formData.houseSplit}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+                {modalMode === 'edit' ? (
+                  <button
+                    type="button"
+                    onClick={handleDeleteRule}
+                    className="inline-flex cursor-pointer items-center gap-1 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-rose-600 hover:bg-rose-50 transition"
+                  >
+                    <Trash2 className="size-4" />
+                    <span>Delete Rule</span>
+                  </button>
+                ) : (
+                  <div />
+                )}
+
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleCloseModal}
+                    className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#0170FE] px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db]"
+                  >
+                    <Check className="size-4" />
+                    <span>{modalMode === 'add' ? 'Save Override' : 'Update Rule'}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Policy / Transaction-Specific Commission Information */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
@@ -1787,12 +2206,12 @@ function MarketingConsentTab({
                 <th className="pb-3">Date</th>
                 <th className="pb-3">Status</th>
                 <th className="pb-3">Audit Verification Hash</th>
-                <th className="pb-3 text-right">Actions</th>
+                <th className="pb-3 text-right min-w-[120px] w-[120px] sticky right-0 bg-white shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredRecords.map((r) => (
-                <tr key={r.id} className="hover:bg-slate-50/60 transition">
+                <tr key={r.id} className="group hover:bg-slate-50/60 transition">
                   <td className="py-3 font-semibold text-slate-900">
                     <div>{r.client}</div>
                     <span className="text-[11px] font-mono text-slate-400 font-normal">{r.id}</span>
@@ -1822,7 +2241,7 @@ function MarketingConsentTab({
                       {r.hash}
                     </span>
                   </td>
-                  <td className="py-3 text-right">
+                  <td className="py-3 text-right whitespace-nowrap min-w-[120px] w-[120px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                     <button
                       type="button"
                       onClick={() => setSelectedAuditRecord(r)}
@@ -2212,68 +2631,193 @@ function QrLeadSettingsTab({
   onCopy: (t: string, k: string) => void
   copiedKey: string | null
 }) {
-  const leadUrl = 'https://brokerstep.app/lead/apex-horizon'
-  const iframeSnippet = `<iframe src="${leadUrl}" width="100%" height="650" frameborder="0"></iframe>`
+  const [previewDevice, setPreviewDevice] = useState<'mobile' | 'desktop'>('mobile')
+  const brokerCode = 'BRK-NY-90214'
+  const brokerName = 'Jordan Davis'
+  const businessName = 'Apex Horizon Brokerage LLC'
+  const leadUrl = `https://brokerstep.app/lead/${brokerCode}`
+  const iframeSnippet = `<iframe src="${leadUrl}" width="100%" height="750" frameborder="0" style="border:0;border-radius:16px;"></iframe>`
+
+  function handleDownloadSvg() {
+    const svgData = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="600" height="600">
+      <rect width="200" height="200" fill="#ffffff" rx="16"/>
+      <rect x="18" y="18" width="48" height="48" rx="6" fill="none" stroke="#0f172a" stroke-width="8"/>
+      <rect x="32" y="32" width="20" height="20" rx="4" fill="#0170FE"/>
+      <rect x="134" y="18" width="48" height="48" rx="6" fill="none" stroke="#0f172a" stroke-width="8"/>
+      <rect x="148" y="32" width="20" height="20" rx="4" fill="#0170FE"/>
+      <rect x="18" y="134" width="48" height="48" rx="6" fill="none" stroke="#0f172a" stroke-width="8"/>
+      <rect x="32" y="148" width="20" height="20" rx="4" fill="#0170FE"/>
+      <rect x="80" y="20" width="12" height="12" fill="#0f172a" rx="2"/>
+      <rect x="104" y="20" width="16" height="12" fill="#0170FE" rx="2"/>
+      <rect x="76" y="44" width="44" height="12" fill="#0f172a" rx="2"/>
+      <rect x="20" y="80" width="44" height="14" fill="#0f172a" rx="2"/>
+      <rect x="36" y="104" width="28" height="14" fill="#0170FE" rx="2"/>
+      <rect x="74" y="74" width="52" height="52" rx="10" fill="#0170FE"/>
+      <text x="100" y="104" font-family="Arial,sans-serif" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">BS</text>
+      <rect x="138" y="80" width="14" height="38" fill="#0f172a" rx="2"/>
+      <rect x="162" y="90" width="20" height="16" fill="#0170FE" rx="2"/>
+      <rect x="78" y="136" width="20" height="16" fill="#0f172a" rx="2"/>
+      <rect x="108" y="136" width="30" height="20" fill="#0170FE" rx="2"/>
+      <rect x="148" y="146" width="34" height="36" fill="#0f172a" rx="2"/>
+      <rect x="78" y="166" width="56" height="16" fill="#0170FE" rx="2"/>
+    </svg>`
+    const blob = new Blob([svgData], { type: 'image/svg+xml' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `brokerstep-qr-${brokerCode}.svg`
+    a.click()
+    URL.revokeObjectURL(url)
+    onSave()
+  }
+
+  function handleDownloadPng() {
+    const canvas = document.createElement('canvas')
+    canvas.width = 600
+    canvas.height = 600
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, 600, 600)
+
+    const drawRect = (x: number, y: number, w: number, h: number, fill: string) => {
+      ctx.fillStyle = fill
+      ctx.fillRect(x * 3, y * 3, w * 3, h * 3)
+    }
+
+    // Corner Finder 1
+    drawRect(18, 18, 48, 48, '#0f172a')
+    drawRect(26, 26, 32, 32, '#ffffff')
+    drawRect(32, 32, 20, 20, '#0170FE')
+
+    // Corner Finder 2
+    drawRect(134, 18, 48, 48, '#0f172a')
+    drawRect(142, 26, 32, 32, '#ffffff')
+    drawRect(148, 32, 20, 20, '#0170FE')
+
+    // Corner Finder 3
+    drawRect(18, 134, 48, 48, '#0f172a')
+    drawRect(26, 142, 32, 32, '#ffffff')
+    drawRect(32, 148, 20, 20, '#0170FE')
+
+    // Central & side patterns
+    drawRect(80, 20, 12, 12, '#0f172a')
+    drawRect(104, 20, 16, 12, '#0170FE')
+    drawRect(76, 44, 44, 12, '#0f172a')
+    drawRect(20, 80, 44, 14, '#0f172a')
+    drawRect(36, 104, 28, 14, '#0170FE')
+    drawRect(74, 74, 52, 52, '#0170FE')
+    drawRect(138, 80, 14, 38, '#0f172a')
+    drawRect(162, 90, 20, 16, '#0170FE')
+    drawRect(78, 136, 20, 16, '#0f172a')
+    drawRect(108, 136, 30, 20, '#0170FE')
+    drawRect(148, 146, 34, 36, '#0f172a')
+    drawRect(78, 166, 56, 16, '#0170FE')
+
+    ctx.fillStyle = '#ffffff'
+    ctx.font = 'bold 36px Arial, sans-serif'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('BS', 300, 300)
+
+    const a = document.createElement('a')
+    a.href = canvas.toDataURL('image/png')
+    a.download = `brokerstep-qr-${brokerCode}.png`
+    a.click()
+    onSave()
+  }
 
   return (
     <div className="grid gap-6 lg:grid-cols-12">
       {/* Left: Broker QR Code Card */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5 lg:col-span-5">
-        <div className="border-b border-slate-100 pb-3">
-          <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
-            <QrCode className="size-5 text-[#0170FE]" />
-            Broker Dynamic QR Code
-          </h3>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Clients scan this QR code on physical business cards, office flyers, or signs to open your lead form.
-          </p>
+        <div className="border-b border-slate-100 pb-3 flex items-start justify-between gap-2">
+          <div>
+            <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
+              <QrCode className="size-5 text-[#0170FE]" />
+              Broker Dynamic QR Code
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Unique QR code permanently associated with your Broker account.
+            </p>
+          </div>
+          <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200 whitespace-nowrap">
+            Active Pro
+          </span>
         </div>
 
-        {/* QR Code Mockup Canvas */}
+        {/* QR Code Canvas */}
         <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
-          <div className="rounded-2xl border-4 border-[#0170FE] bg-white p-4 shadow-md">
-            {/* High visual QR placeholder */}
-            <div className="size-44 flex flex-col justify-between p-1 bg-white">
-              <div className="flex justify-between">
-                <div className="size-11 border-4 border-slate-950 flex items-center justify-center">
-                  <div className="size-5 bg-[#0170FE]" />
-                </div>
-                <div className="size-11 border-4 border-slate-950 flex items-center justify-center">
-                  <div className="size-5 bg-[#0170FE]" />
-                </div>
-              </div>
-              <div className="flex items-center justify-center">
-                <div className="rounded-lg bg-[#0170FE] px-2 py-1 text-xs font-extrabold text-white">
-                  BROKERSTEP
-                </div>
-              </div>
-              <div className="flex justify-between items-end">
-                <div className="size-11 border-4 border-slate-950 flex items-center justify-center">
-                  <div className="size-5 bg-[#0170FE]" />
-                </div>
-                <div className="grid grid-cols-3 gap-1 size-9">
-                  <div className="bg-slate-950" />
-                  <div className="bg-[#0170FE]" />
-                  <div className="bg-slate-950" />
-                  <div className="bg-[#0170FE]" />
-                  <div className="bg-slate-950" />
-                  <div className="bg-[#0170FE]" />
-                </div>
-              </div>
-            </div>
+          <div className="rounded-2xl border-4 border-[#0170FE] bg-white p-4 shadow-md transition hover:shadow-lg">
+            {/* Ultra-Crisp Scalable Vector QR Code */}
+            <svg
+              className="size-48"
+              viewBox="0 0 200 200"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect width="200" height="200" fill="white" rx="12" />
+              {/* Corner 1 (Top Left) */}
+              <rect x="18" y="18" width="48" height="48" rx="6" stroke="#0f172a" strokeWidth="8" />
+              <rect x="32" y="32" width="20" height="20" rx="4" fill="#0170FE" />
+
+              {/* Corner 2 (Top Right) */}
+              <rect x="134" y="18" width="48" height="48" rx="6" stroke="#0f172a" strokeWidth="8" />
+              <rect x="148" y="32" width="20" height="20" rx="4" fill="#0170FE" />
+
+              {/* Corner 3 (Bottom Left) */}
+              <rect x="18" y="134" width="48" height="48" rx="6" stroke="#0f172a" strokeWidth="8" />
+              <rect x="32" y="148" width="20" height="20" rx="4" fill="#0170FE" />
+
+              {/* Data matrix dots */}
+              <rect x="80" y="20" width="12" height="12" fill="#0f172a" rx="2" />
+              <rect x="104" y="20" width="16" height="12" fill="#0170FE" rx="2" />
+              <rect x="76" y="44" width="44" height="12" fill="#0f172a" rx="2" />
+
+              <rect x="20" y="80" width="44" height="14" fill="#0f172a" rx="2" />
+              <rect x="36" y="104" width="28" height="14" fill="#0170FE" rx="2" />
+
+              {/* Center BrokerStep branding pill */}
+              <rect x="74" y="74" width="52" height="52" rx="10" fill="#0170FE" />
+              <text x="100" y="104" fontFamily="Arial,sans-serif" fontSize="12" fontWeight="900" fill="#ffffff" textAnchor="middle">BS</text>
+
+              {/* Bottom right data blocks */}
+              <rect x="138" y="80" width="14" height="38" fill="#0f172a" rx="2" />
+              <rect x="162" y="90" width="20" height="16" fill="#0170FE" rx="2" />
+              <rect x="78" y="136" width="20" height="16" fill="#0f172a" rx="2" />
+              <rect x="108" y="136" width="30" height="20" fill="#0170FE" rx="2" />
+              <rect x="148" y="146" width="34" height="36" fill="#0f172a" rx="2" />
+              <rect x="78" y="166" width="56" height="16" fill="#0170FE" rx="2" />
+            </svg>
           </div>
 
-          <p className="mt-4 text-sm font-bold text-slate-900">Apex Horizon Brokerage Intake</p>
-          <p className="text-xs text-slate-500 font-mono mt-0.5">Scan to Submit Quote Request</p>
+          <div className="mt-4 space-y-1">
+            <p className="text-sm font-bold text-slate-900">{businessName}</p>
+            <p className="text-xs text-slate-500">
+              Assigned Broker: <span className="font-semibold text-slate-700">{brokerName}</span>
+            </p>
+            <span className="inline-block rounded-md bg-slate-200/80 px-2 py-0.5 text-[11px] font-mono font-semibold text-slate-800">
+              Account ID: {brokerCode}
+            </span>
+          </div>
 
-          <div className="mt-4 flex gap-2 w-full">
+          <div className="mt-4 grid grid-cols-3 gap-2 w-full">
             <button
               type="button"
-              onClick={onSave}
-              className="flex-1 inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs sm:text-sm font-semibold text-slate-800 shadow-xs hover:border-[#0170FE]"
+              onClick={handleDownloadPng}
+              className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-800 shadow-xs hover:border-[#0170FE] hover:text-[#0170FE] transition"
             >
-              <Download className="size-4" />
-              Download PNG
+              <Download className="size-3.5" />
+              <span>PNG</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleDownloadSvg}
+              className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-800 shadow-xs hover:border-[#0170FE] hover:text-[#0170FE] transition"
+            >
+              <Download className="size-3.5" />
+              <span>SVG</span>
             </button>
             <button
               type="button"
@@ -2281,8 +2825,8 @@ function QrLeadSettingsTab({
                 if (typeof navigator !== 'undefined' && navigator.share) {
                   navigator
                     .share({
-                      title: 'Apex Horizon Brokerage Intake',
-                      text: 'Submit your insurance quote request directly through our intake portal:',
+                      title: `${brokerName} - Insurance Intake Form`,
+                      text: `Submit your insurance quote request directly to ${brokerName} (${businessName}):`,
                       url: leadUrl,
                     })
                     .catch(() => {
@@ -2292,16 +2836,16 @@ function QrLeadSettingsTab({
                   onCopy(leadUrl, 'qrshare')
                 }
               }}
-              className="flex-1 inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs sm:text-sm font-semibold text-slate-800 shadow-xs hover:border-[#0170FE] transition"
+              className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-800 shadow-xs hover:border-[#0170FE] hover:text-[#0170FE] transition"
             >
               {copiedKey === 'qrshare' ? (
                 <>
-                  <Check className="size-4 text-emerald-600" />
-                  <span>Link Copied!</span>
+                  <Check className="size-3.5 text-emerald-600" />
+                  <span className="text-emerald-700">Copied</span>
                 </>
               ) : (
                 <>
-                  <Share2 className="size-4" />
+                  <Share2 className="size-3.5" />
                   <span>Share</span>
                 </>
               )}
@@ -2309,69 +2853,215 @@ function QrLeadSettingsTab({
           </div>
         </div>
 
-        {/* Lead Capture Link */}
-        <div>
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1.5">Direct Lead Capture URL</label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              readOnly
-              value={leadUrl}
-              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-xs sm:text-sm font-mono text-slate-800 outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => onCopy(leadUrl, 'leadurl')}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs sm:text-sm font-semibold hover:border-[#0170FE] hover:text-[#0170FE]"
-            >
-              {copiedKey === 'leadurl' ? <Check className="size-4 text-emerald-600" /> : <Copy className="size-4 text-slate-500" />}
-            </button>
+
+        {/* Requirement 10.1 Compliance Safeguards Notice */}
+        <div className="rounded-xl border border-blue-200/80 bg-blue-50/60 p-4 space-y-2.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-blue-950">
+            <ShieldCheck className="size-4.5 text-[#0170FE]" />
+            <span>Broker Attribution &amp; Privacy Safeguards</span>
           </div>
+          <ul className="text-xs text-blue-900/80 space-y-1.5">
+            <li className="flex items-start gap-2">
+              <Check className="size-3.5 text-emerald-600 shrink-0 mt-0.5" />
+              <span>
+                <strong>100% Attribution:</strong> Every inquiry submitted through this QR code is permanently assigned to {brokerName} ({brokerCode}).
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="size-3.5 text-emerald-600 shrink-0 mt-0.5" />
+              <span>
+                <strong>Zero Private Data Exposure:</strong> No private SSN, EIN, commissions, or bank records are contained in the QR payload or URL.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="size-3.5 text-emerald-600 shrink-0 mt-0.5" />
+              <span>
+                <strong>Instant Alert:</strong> Real-time lead notifications are delivered into your BrokerStep CRM dashboard.
+              </span>
+            </li>
+          </ul>
         </div>
       </div>
 
       {/* Right: Public Form Preview & Embed Code */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5 lg:col-span-7">
-        <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+        <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h3 className="text-lg font-bold text-slate-950">Public Form Preview &amp; Embed</h3>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Live preview of your branded lead generation form</p>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Live prospective client view when scanning your Broker-specific QR code
+            </p>
           </div>
 
-
+          {/* Device Switcher */}
+          <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={() => setPreviewDevice('mobile')}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${previewDevice === 'mobile'
+                ? 'bg-white text-[#0170FE] shadow-xs'
+                : 'text-slate-500 hover:text-slate-900'
+                }`}
+            >
+              <Smartphone className="size-3.5" />
+              <span>Mobile View</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPreviewDevice('desktop')}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${previewDevice === 'desktop'
+                ? 'bg-white text-[#0170FE] shadow-xs'
+                : 'text-slate-500 hover:text-slate-900'
+                }`}
+            >
+              <Laptop className="size-3.5" />
+              <span>Desktop View</span>
+            </button>
+          </div>
         </div>
 
-        {/* Interactive Form Preview Box */}
-        <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-5 space-y-3.5">
-          <div className="flex items-center gap-2 border-b border-slate-200 pb-2 text-xs sm:text-sm font-bold text-slate-800">
-            <span className="size-2 rounded-full bg-emerald-500" />
-            Apex Horizon Client Intake Form
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm">
-            <div>
-              <span className="text-slate-500 block text-xs font-medium mb-1">Client Name</span>
-              <div className="h-9 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-slate-400">Jane Smith</div>
-            </div>
-            <div>
-              <span className="text-slate-500 block text-xs font-medium mb-1">Phone</span>
-              <div className="h-9 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-slate-400">(555) 000-0000</div>
-            </div>
-          </div>
-
-          <div className="text-xs sm:text-sm">
-            <span className="text-slate-500 block text-xs font-medium mb-1">Coverage Requested</span>
-            <div className="h-9 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-slate-700 font-medium">
-              Commercial Property &amp; General Liability
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="w-full rounded-xl bg-[#0170FE] py-2.5 text-center text-xs sm:text-sm font-semibold text-white pointer-events-none"
+        {/* Dynamic Frame Preview Box */}
+        <div className="rounded-2xl border border-slate-200 bg-slate-100/60 p-4 sm:p-6 overflow-hidden">
+          <div
+            className={`mx-auto bg-white transition-all duration-300 ${previewDevice === 'mobile'
+              ? 'max-w-[390px] rounded-[32px] border-[5px] border-slate-900 shadow-2xl p-4 sm:p-5'
+              : 'w-full rounded-2xl border border-slate-200 shadow-md p-6'
+              }`}
           >
-            Submit Quote Request (Apex Horizon LLC)
-          </button>
+            {/* Mobile Notch Bar if in Mobile Mode */}
+            {previewDevice === 'mobile' && (
+              <div className="flex items-center justify-between pb-3 px-2 border-b border-slate-100 mb-3 text-[10px] font-semibold text-slate-500">
+                <span>9:41 AM</span>
+                <div className="h-3.5 w-20 rounded-full bg-slate-900 mx-auto" />
+                <span>5G · 100%</span>
+              </div>
+            )}
+
+            {/* Desktop Mock Browser Bar if in Desktop Mode */}
+            {previewDevice === 'desktop' && (
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4 text-xs">
+                <div className="flex gap-1.5">
+                  <div className="size-2.5 rounded-full bg-rose-400" />
+                  <div className="size-2.5 rounded-full bg-amber-400" />
+                  <div className="size-2.5 rounded-full bg-emerald-400" />
+                </div>
+                <div className="flex-1 rounded-lg bg-slate-100 px-3 py-1 text-[11px] font-mono text-slate-600 truncate">
+                  {leadUrl}
+                </div>
+              </div>
+            )}
+
+            {/* Branded Form Header (Direct Broker Association) */}
+            <div className="space-y-3 border-b border-slate-100 pb-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-sm font-bold text-white shadow-xs">
+                    JD
+                  </div>
+                  <div>
+                    <h4 className="text-sm sm:text-base font-bold text-slate-950 leading-tight">
+                      {businessName}
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      Assigned Broker: <span className="font-semibold text-slate-800">{brokerName}</span>
+                    </p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-[#0170FE] border border-blue-200 shrink-0">
+                  Verified Broker
+                </span>
+              </div>
+
+              {/* Attribution Banner */}
+              <div className="rounded-lg bg-emerald-50/80 px-3 py-1.5 text-[11px] font-medium text-emerald-800 border border-emerald-200/70 flex items-center gap-1.5">
+                <Check className="size-3.5 text-emerald-600 shrink-0" />
+                <span>
+                  Quote request is directly routed to <strong>{brokerName}</strong> ({brokerCode}).
+                </span>
+              </div>
+            </div>
+
+            {/* Form Fields: Client Lead Information */}
+            <div className="mt-4 space-y-3.5 text-xs sm:text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
+                    Contact Full Name <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs">
+                    Jane Smith
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
+                    Company / Business Name
+                  </label>
+                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs">
+                    Smith Logistics LLC
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
+                    Email Address <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs">
+                    jane@smithlogistics.com
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
+                    Phone Number <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs">
+                    +1 (555) 234-8890
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">
+                  Coverage Requested <span className="text-rose-500">*</span>
+                </label>
+                <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs">
+                  Commercial Property &amp; General Liability
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">
+                  Message / Inquiries
+                </label>
+                <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-2.5 text-xs text-slate-700 leading-relaxed">
+                  Looking to review existing warehouse coverage and request quote options.
+                </div>
+              </div>
+
+              {/* Express Consent & Client Privacy Shield */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3 space-y-2">
+                <div className="flex items-start gap-2">
+                  <CheckSquare className="size-4 text-[#0170FE] shrink-0 mt-0.5" />
+                  <p className="text-[11px] text-slate-600 leading-tight">
+                    I authorize <strong>{brokerName} ({businessName})</strong> to review my insurance request and contact me with competitive quotes. Client information is encrypted and never shared.
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 border-t border-slate-200/80 pt-1.5">
+                  <Lock className="size-3 text-emerald-600" />
+                  <span>256-bit Encrypted SSL · TCPA &amp; ESIGN Compliant · Attribution token: {brokerCode}</span>
+                </div>
+              </div>
+
+              {/* Submit CTA */}
+              <button
+                type="button"
+                className="w-full rounded-xl bg-[#0170FE] py-3 text-center text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 pointer-events-none"
+              >
+                Submit Quote Request → Routes to {brokerName}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Website Embed Code */}
@@ -2391,22 +3081,13 @@ function QrLeadSettingsTab({
               onClick={() => onCopy(iframeSnippet, 'iframe')}
               className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-xs sm:text-sm font-semibold hover:border-[#0170FE] hover:text-[#0170FE]"
             >
-              {copiedKey === 'iframe' ? <Check className="size-4 text-emerald-600" /> : <Copy className="size-4 text-slate-500" />}
+              {copiedKey === 'iframe' ? (
+                <Check className="size-4 text-emerald-600" />
+              ) : (
+                <Copy className="size-4 text-slate-500" />
+              )}
               <span>{copiedKey === 'iframe' ? 'Copied' : 'Copy'}</span>
             </button>
-          </div>
-        </div>
-
-        {/* Notification Settings */}
-        <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-2 text-xs sm:text-sm">
-          <p className="font-bold text-slate-900">Lead Alert Notifications</p>
-          <div className="flex items-center justify-between text-slate-600">
-            <span>Instant SMS notification on lead capture:</span>
-            <span className="font-semibold text-emerald-600">Enabled (+1 555-234-5678)</span>
-          </div>
-          <div className="flex items-center justify-between text-slate-600">
-            <span>Instant Email alert:</span>
-            <span className="font-semibold text-slate-800">jordan.davis@apexhorizon.com</span>
           </div>
         </div>
       </div>

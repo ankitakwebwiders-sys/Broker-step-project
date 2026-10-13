@@ -6,32 +6,21 @@ import Link from 'next/link'
 import {
   CreditCard,
   DollarSign,
-  Calendar,
   Clock,
   AlertCircle,
   CheckCircle2,
-  XCircle,
   Search,
   Filter,
   Eye,
-  RotateCcw,
   RefreshCw,
   Bell,
   Mail,
-  ArrowRight,
   ShieldCheck,
-  FileSpreadsheet,
   Download,
   X,
-  ExternalLink,
-  ChevronRight,
   Info,
-  Building2,
-  Users,
   Check,
-  AlertTriangle,
   Receipt,
-  Layers,
   Send,
   SlidersHorizontal,
 } from 'lucide-react'
@@ -730,7 +719,7 @@ function SubscriptionsBillingContent() {
                   {activeTab === 'expiring' && (
                     <th className="py-3.5 px-4">Auto-Renew Policy</th>
                   )}
-                  <th className="py-3.5 pl-4 pr-6 text-right whitespace-nowrap">Admin Actions</th>
+                  <th className="py-3.5 pl-4 pr-6 text-right whitespace-nowrap min-w-[280px] w-[280px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Admin Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
@@ -869,7 +858,7 @@ function SubscriptionsBillingContent() {
                         )}
 
                         {/* 19.1 Admin Actions (View, Review Payment, Review Failed Notif, Review Expiry) */}
-                        <td className="py-4 pl-4 pr-6 whitespace-nowrap text-right">
+                        <td className="py-4 pl-4 pr-6 whitespace-nowrap text-right min-w-[280px] w-[280px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                           <div className="flex items-center justify-end gap-1.5 flex-nowrap">
                             {/* Action 1: View subscription */}
                             <button
@@ -973,12 +962,12 @@ function SubscriptionsBillingContent() {
                   <th className="py-3 px-4">Amount</th>
                   <th className="py-3 px-4">Payment Method</th>
                   <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 text-right min-w-[120px] w-[120px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
                 {allInvoices.map((inv, idx) => (
-                  <tr key={`${inv.invoiceNo}-${inv.brokerId}-${idx}`} className="hover:bg-slate-50/80 transition">
+                  <tr key={`${inv.invoiceNo}-${inv.brokerId}-${idx}`} className="group hover:bg-slate-50/80 transition">
                     <td className="py-3 px-4 font-mono font-bold text-slate-900">{inv.invoiceNo}</td>
                     <td className="py-3 px-4">
                       <p className="font-bold text-slate-900">{inv.brokerName}</p>
@@ -1003,7 +992,7 @@ function SubscriptionsBillingContent() {
                         {inv.status}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-3 px-4 text-right whitespace-nowrap min-w-[120px] w-[120px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                       <button
                         type="button"
                         onClick={() => showToast(`Receipt generated for ${inv.invoiceNo}`)}

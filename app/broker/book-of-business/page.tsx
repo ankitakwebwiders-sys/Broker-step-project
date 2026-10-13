@@ -661,7 +661,7 @@ export default function BookOfBusinessPage() {
                     <th className="min-w-[140px] whitespace-nowrap px-4 py-3.5 text-right">Actual Paid</th>
                     <th className="min-w-[140px] whitespace-nowrap px-4 py-3.5 text-right">Outstanding</th>
                     <th className="min-w-[180px] whitespace-nowrap px-4 py-3.5">Reconciliation / Status</th>
-                    <th className="min-w-[150px] whitespace-nowrap px-4 py-3.5 text-center">Actions</th>
+                    <th className="min-w-[150px] w-[150px] whitespace-nowrap px-4 py-3.5 text-center sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -677,7 +677,14 @@ export default function BookOfBusinessPage() {
                     filteredActivePolicies.map((p) => {
                       const isShortPaid = p.actualPaidCommission > 0 && p.actualPaidCommission < p.expectedCommission
                       return (
-                        <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                        <tr
+                          key={p.id}
+                          onClick={() => {
+                            setSelectedPolicyForDrawer(p)
+                            setDrawerTab('overview')
+                          }}
+                          className="group hover:bg-slate-50/80 transition-colors cursor-pointer"
+                        >
                           <td className="whitespace-nowrap px-4 py-3.5 font-bold text-slate-900 font-mono text-sm">
                             {p.policyNumber}
                           </td>
@@ -725,11 +732,15 @@ export default function BookOfBusinessPage() {
                               </span>
                             )}
                           </td>
-                          <td className="whitespace-nowrap px-4 py-3.5 text-center">
+                          <td className="whitespace-nowrap px-4 py-3.5 text-center sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                             <div className="flex items-center justify-center gap-2">
                               <button
-                                onClick={() => setSelectedPolicyForDrawer(p)}
-                                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-xs"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSelectedPolicyForDrawer(p)
+                                  setDrawerTab('overview')
+                                }}
+                                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
                               >
                                 <Eye className="size-3.5 text-slate-400" />
                                 View
@@ -874,6 +885,393 @@ export default function BookOfBusinessPage() {
 
 
 
+      {/* ─────────────────────────────────────────────────────────────
+          7.7 POLICY DETAILS RIGHT-SIDE CANVAS / DRAWER (Matching Client Page)
+      ───────────────────────────────────────────────────────────── */}
+      {selectedPolicyForDrawer && (
+        <div
+          className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-xs transition-opacity"
+          onClick={() => setSelectedPolicyForDrawer(null)}
+        >
+          <div
+            className="flex h-full w-full max-w-3xl sm:max-w-4xl flex-col bg-white shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drawer Header */}
+            <div className="border-b border-slate-200 bg-slate-50/50 px-4 sm:px-6 py-4 sm:py-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="flex size-10 sm:size-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-[13px] sm:text-[14px] font-bold text-white shadow-md">
+                    <Shield className="size-5 sm:size-6 text-white" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                      <h2 className="text-[16px] sm:text-[18px] font-bold tracking-tight text-slate-900 truncate font-mono">
+                        {selectedPolicyForDrawer.policyNumber}
+                      </h2>
+                      <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 bg-emerald-50 text-emerald-700 ring-emerald-200">
+                        {selectedPolicyForDrawer.policyStatus}
+                      </span>
+                      <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 bg-blue-50 text-blue-700 ring-blue-200">
+                        {selectedPolicyForDrawer.transactionType}
+                      </span>
+                      {selectedPolicyForDrawer.reconciliationStatus === 'Reconciled' ? (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                          <CheckCircle2 className="size-3 text-emerald-600" />
+                          Reconciled
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-200">
+                          <Clock className="size-3 text-amber-600" />
+                          {selectedPolicyForDrawer.reconciliationStatus}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[10.5px] sm:text-[11px] text-slate-500 mt-1">
+                      <span className="font-medium text-slate-700 flex items-center gap-1">
+                        <User className="size-3 text-slate-400" />
+                        {selectedPolicyForDrawer.clientName}
+                      </span>
+                      {selectedPolicyForDrawer.businessName !== '—' && (
+                        <span className="text-slate-600 flex items-center gap-1">
+                          <Building2 className="size-3 text-slate-400" />
+                          {selectedPolicyForDrawer.businessName}
+                        </span>
+                      )}
+                      <span>Carrier: <strong className="text-slate-800">{selectedPolicyForDrawer.carrier}</strong></span>
+                      <span>LOB: <strong className="text-slate-800">{selectedPolicyForDrawer.lineOfBusiness}</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Link
+                    href="/broker/policies"
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 shadow-xs hover:border-blue-300 hover:text-blue-600 transition"
+                  >
+                    <ExternalLink className="size-3 text-slate-400" />
+                    <span className="hidden sm:inline">Policies</span>
+                  </Link>
+                  <button
+                    onClick={() => setSelectedPolicyForDrawer(null)}
+                    className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition shrink-0 cursor-pointer"
+                    aria-label="Close Drawer"
+                  >
+                    <X className="size-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation Tabs */}
+            <div className="flex border-b border-slate-200 px-3 sm:px-6 gap-2 sm:gap-6 bg-white overflow-x-auto scrollbar-thin">
+              {[
+                { id: 'overview', label: 'Overview' },
+                { id: 'commission', label: 'Commission & Splits' },
+                { id: 'transactions', label: `Transactions (${selectedPolicyForDrawer.transactions?.length || 0})` },
+                { id: 'timeline', label: 'Timeline' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setDrawerTab(tab.id as typeof drawerTab)}
+                  className={`py-2.5 sm:py-3 text-[11.5px] sm:text-[12px] font-medium border-b-2 transition whitespace-nowrap px-1.5 sm:px-0 cursor-pointer ${
+                    drawerTab === tab.id
+                      ? 'border-blue-600 text-blue-600 font-semibold'
+                      : 'border-transparent text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Drawer Body */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 scrollbar-thin">
+              {/* 1. OVERVIEW TAB */}
+              {drawerTab === 'overview' && (
+                <div className="space-y-6">
+                  {/* Financial Summary Cards */}
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+                      <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Premium</p>
+                      <p className="mt-1 text-xl font-bold text-slate-900 font-mono">
+                        ${selectedPolicyForDrawer.premium.toLocaleString()}
+                      </p>
+                      <p className="text-[10.5px] text-slate-400">Annualized</p>
+                    </div>
+
+                    <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3.5">
+                      <p className="text-[11px] font-medium text-blue-600 uppercase tracking-wider">Expected Comm.</p>
+                      <p className="mt-1 text-xl font-bold text-blue-600 font-mono">
+                        ${selectedPolicyForDrawer.expectedCommission.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-[10.5px] text-blue-500">
+                        {selectedPolicyForDrawer.commissionRate}% rate @ {selectedPolicyForDrawer.brokerSplit}% split
+                      </p>
+                    </div>
+
+                    <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-3.5">
+                      <p className="text-[11px] font-medium text-emerald-600 uppercase tracking-wider">Actual Paid</p>
+                      <p className="mt-1 text-xl font-bold text-emerald-600 font-mono">
+                        ${selectedPolicyForDrawer.actualPaidCommission.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-[10.5px] text-emerald-500">Received MTD</p>
+                    </div>
+
+                    <div className="rounded-xl border border-amber-100 bg-amber-50/50 p-3.5">
+                      <p className="text-[11px] font-medium text-amber-600 uppercase tracking-wider">Outstanding</p>
+                      <p className="mt-1 text-xl font-bold text-amber-600 font-mono">
+                        ${selectedPolicyForDrawer.outstandingCommission.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-[10.5px] text-amber-500">Unsettled delta</p>
+                    </div>
+                  </div>
+
+                  {/* Policy Information Grid */}
+                  <div className="rounded-xl border border-slate-200/80 p-4 space-y-4">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                      Policy Information
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4 text-xs sm:grid-cols-3">
+                      <div>
+                        <span className="text-slate-400">Carrier:</span>
+                        <p className="font-semibold text-slate-800 mt-0.5">{selectedPolicyForDrawer.carrier}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Line of Business:</span>
+                        <p className="font-semibold text-slate-800 mt-0.5">{selectedPolicyForDrawer.lineOfBusiness}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Transaction Type:</span>
+                        <p className="font-semibold text-slate-800 mt-0.5">{selectedPolicyForDrawer.transactionType}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Effective Date:</span>
+                        <p className="font-semibold text-slate-800 mt-0.5 font-mono">{selectedPolicyForDrawer.effectiveDate}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Expiration Date:</span>
+                        <p className="font-semibold text-slate-800 mt-0.5 font-mono">{selectedPolicyForDrawer.expiryDate}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Reconciliation:</span>
+                        <p className="font-semibold text-slate-800 mt-0.5">{selectedPolicyForDrawer.reconciliationStatus}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Client / Business Information */}
+                  <div className="rounded-xl border border-slate-200/80 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                        Client / Business Information
+                      </h3>
+                      <Link
+                        href="/broker/clients"
+                        className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-blue-600 hover:underline"
+                      >
+                        View in Clients Module <ArrowUpRight className="size-3" />
+                      </Link>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-xs sm:grid-cols-4">
+                      <div>
+                        <span className="text-slate-400">Client Name:</span>
+                        <p className="font-semibold text-slate-800 mt-0.5">{selectedPolicyForDrawer.clientName}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Business / Entity:</span>
+                        <p className="font-semibold text-slate-800 mt-0.5">{selectedPolicyForDrawer.businessName}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Email:</span>
+                        <p className="font-semibold text-slate-800 mt-0.5 truncate">{selectedPolicyForDrawer.clientEmail}</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Phone:</span>
+                        <p className="font-semibold text-slate-800 mt-0.5">{selectedPolicyForDrawer.clientPhone}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 2. COMMISSION TAB */}
+              {drawerTab === 'commission' && (
+                <div className="space-y-5">
+                  <div className="rounded-xl border border-slate-200/80 p-5 space-y-4 bg-slate-50/50">
+                    <h3 className="text-sm font-bold text-slate-900">
+                      Commission Breakdown & Split Math
+                    </h3>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                      <div className="rounded-xl border border-slate-200 bg-white p-4">
+                        <span className="text-[11px] font-medium text-slate-500">Premium Base</span>
+                        <p className="mt-1 text-2xl font-bold text-slate-900 font-mono">
+                          ${selectedPolicyForDrawer.premium.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-slate-200 bg-white p-4">
+                        <span className="text-[11px] font-medium text-slate-500">Carrier Commission Rate</span>
+                        <p className="mt-1 text-2xl font-bold text-indigo-600 font-mono">
+                          {selectedPolicyForDrawer.commissionRate}%
+                        </p>
+                        <p className="text-[10.5px] text-slate-400">
+                          Gross: ${((selectedPolicyForDrawer.premium * selectedPolicyForDrawer.commissionRate) / 100).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-slate-200 bg-white p-4">
+                        <span className="text-[11px] font-medium text-slate-500">Broker Split Share</span>
+                        <p className="mt-1 text-2xl font-bold text-blue-600 font-mono">
+                          {selectedPolicyForDrawer.brokerSplit}%
+                        </p>
+                        <p className="text-[10.5px] text-slate-400">
+                          Net: ${selectedPolicyForDrawer.expectedCommission.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200/80 p-5 space-y-3">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                      Reconciliation State
+                    </h4>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800">
+                        Status: {selectedPolicyForDrawer.reconciliationStatus}
+                      </span>
+                      <span className="text-xs text-slate-600">
+                        {selectedPolicyForDrawer.reconciliationStatus === 'Reconciled' &&
+                          'Carrier statement matches expected commission 100%.'}
+                        {selectedPolicyForDrawer.reconciliationStatus === 'Discrepancy' &&
+                          `Variance detected: $${selectedPolicyForDrawer.outstandingCommission.toLocaleString(undefined, { minimumFractionDigits: 2 })} remaining.`}
+                        {selectedPolicyForDrawer.reconciliationStatus === 'Pending' &&
+                          'Awaiting carrier statement submission for reconciliation.'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 3. TRANSACTIONS TAB */}
+              {drawerTab === 'transactions' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-slate-900">
+                      Transaction-Level History
+                    </h3>
+                    <span className="text-xs text-slate-500">
+                      {selectedPolicyForDrawer.transactions?.length || 0} record(s)
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto rounded-xl border border-slate-200">
+                    <table className="w-full text-left text-[12px]">
+                      <thead className="border-b border-slate-200 bg-slate-50 text-[10.5px] font-bold uppercase text-slate-500">
+                        <tr>
+                          <th className="px-3.5 py-2.5">Date</th>
+                          <th className="px-3.5 py-2.5">Type</th>
+                          <th className="px-3.5 py-2.5">Description</th>
+                          <th className="px-3.5 py-2.5">Statement #</th>
+                          <th className="px-3.5 py-2.5 text-right">Premium Δ</th>
+                          <th className="px-3.5 py-2.5 text-right">Expected</th>
+                          <th className="px-3.5 py-2.5 text-right">Actual Paid</th>
+                          <th className="px-3.5 py-2.5 text-right">Outstanding</th>
+                          <th className="px-3.5 py-2.5">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {selectedPolicyForDrawer.transactions && selectedPolicyForDrawer.transactions.length > 0 ? (
+                          selectedPolicyForDrawer.transactions.map((tx) => (
+                            <tr key={tx.id} className="hover:bg-slate-50/50">
+                              <td className="px-3.5 py-2.5 font-mono text-slate-600 whitespace-nowrap">{tx.date}</td>
+                              <td className="px-3.5 py-2.5 whitespace-nowrap">
+                                <span className="rounded bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                                  {tx.type}
+                                </span>
+                              </td>
+                              <td className="px-3.5 py-2.5 text-slate-800">{tx.description}</td>
+                              <td className="px-3.5 py-2.5 font-mono text-slate-600 whitespace-nowrap">
+                                {tx.statementNumber || '—'}
+                              </td>
+                              <td className="px-3.5 py-2.5 text-right font-mono font-semibold text-slate-900 whitespace-nowrap">
+                                ${tx.premiumChange.toLocaleString()}
+                              </td>
+                              <td className="px-3.5 py-2.5 text-right font-mono text-blue-600 whitespace-nowrap">
+                                ${tx.expectedCommission.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              </td>
+                              <td className="px-3.5 py-2.5 text-right font-mono text-emerald-600 whitespace-nowrap">
+                                ${tx.actualPaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              </td>
+                              <td className="px-3.5 py-2.5 text-right font-mono font-semibold text-slate-900 whitespace-nowrap">
+                                ${tx.outstanding.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              </td>
+                              <td className="px-3.5 py-2.5 whitespace-nowrap">
+                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                  tx.reconciliationStatus === 'Reconciled'
+                                    ? 'bg-emerald-50 text-emerald-700'
+                                    : 'bg-amber-50 text-amber-700'
+                                }`}>
+                                  {tx.reconciliationStatus}
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={9} className="py-8 text-center text-slate-400">
+                              No transaction line items recorded yet.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* 4. TIMELINE TAB */}
+              {drawerTab === 'timeline' && (
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-slate-900">Policy Lifecycle & Audit Trail</h3>
+                  {selectedPolicyForDrawer.timeline && selectedPolicyForDrawer.timeline.length > 0 ? (
+                    <div className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                      {selectedPolicyForDrawer.timeline.map((event) => (
+                        <div key={event.id} className="relative">
+                          <span className="absolute -left-[22px] top-1.5 size-2.5 rounded-full bg-blue-600 ring-4 ring-white" />
+                          <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-xs font-bold text-slate-900">{event.title}</h4>
+                              <span className="text-[11px] font-mono text-slate-400">{event.date}</span>
+                            </div>
+                            <p className="text-xs text-slate-600 mt-1">{event.detail}</p>
+                            <p className="text-[10px] text-slate-400 mt-1">Actor: {event.actor}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-6 text-center text-slate-400 text-xs">
+                      No lifecycle events recorded for this policy yet.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Drawer Footer */}
+            <div className="border-t border-slate-200 bg-slate-50/70 px-4 sm:px-6 py-3.5 flex items-center justify-between">
+              <span className="text-xs text-slate-400">
+                Policy ID: <strong className="font-mono text-slate-600">{selectedPolicyForDrawer.id}</strong>
+              </span>
+              <button
+                onClick={() => setSelectedPolicyForDrawer(null)}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition cursor-pointer shadow-xs"
+              >
+                Close Drawer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

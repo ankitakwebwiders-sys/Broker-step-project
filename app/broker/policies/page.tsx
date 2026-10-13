@@ -664,17 +664,15 @@ export default function PoliciesPage() {
               <button
                 key={tab.id}
                 onClick={() => handleTabSelect(tab.id as TabType)}
-                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-slate-950 text-white shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
+                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isActive
+                  ? 'bg-slate-950 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
               >
                 <span>{tab.label}</span>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-                  }`}
+                  className={`rounded-full px-2 py-0.5 text-xs font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}
                 >
                   {tab.count}
                 </span>
@@ -793,7 +791,7 @@ export default function PoliciesPage() {
                 <th className="px-4 py-3.5 text-right">Actual/Paid</th>
                 <th className="px-4 py-3.5 text-right">Outstanding</th>
                 <th className="px-4 py-3.5">Reconciliation</th>
-                <th className="px-4 py-3.5 text-center">Actions</th>
+                <th className="px-4 py-3.5 text-center min-w-[140px] w-[140px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
@@ -887,9 +885,8 @@ export default function PoliciesPage() {
                       {/* Outstanding */}
                       <td className="px-4 py-3.5 text-right whitespace-nowrap font-mono">
                         <span
-                          className={`font-bold ${
-                            p.outstandingCommission > 0 ? 'text-amber-600' : 'text-slate-400'
-                          }`}
+                          className={`font-bold ${p.outstandingCommission > 0 ? 'text-amber-600' : 'text-slate-400'
+                            }`}
                         >
                           ${p.outstandingCommission.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </span>
@@ -902,7 +899,7 @@ export default function PoliciesPage() {
 
                       {/* Actions */}
                       <td
-                        className="px-4 py-3.5 text-center whitespace-nowrap"
+                        className="px-4 py-3.5 text-center whitespace-nowrap sticky right-0 bg-white group-hover:bg-blue-50/60 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="flex items-center justify-center gap-1.5">
@@ -912,9 +909,10 @@ export default function PoliciesPage() {
                               setSelectedPolicyForView(p)
                               setDetailTab('overview')
                             }}
-                            className="flex size-7.5 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition"
+                            className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
                           >
                             <Eye className="size-4" />
+                            View
                           </button>
                           <button
                             title="Edit Policy (6.3)"
@@ -993,11 +991,10 @@ export default function PoliciesPage() {
                 <button
                   key={tab.id}
                   onClick={() => setDetailTab(tab.id as typeof detailTab)}
-                  className={`border-b-2 px-4 py-3 text-[12.5px] font-semibold transition-all ${
-                    detailTab === tab.id
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-slate-500 hover:text-slate-800'
-                  }`}
+                  className={`border-b-2 px-4 py-3 text-[12.5px] font-semibold transition-all ${detailTab === tab.id
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -1672,9 +1669,8 @@ export default function PoliciesPage() {
               <div className="mt-5 flex items-center justify-between text-xs font-semibold text-slate-400">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`flex size-6 items-center justify-center rounded-full text-[11px] ${
-                      quickEntryStep >= 1 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'
-                    }`}
+                    className={`flex size-6 items-center justify-center rounded-full text-[11px] ${quickEntryStep >= 1 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'
+                      }`}
                   >
                     1
                   </span>
@@ -1683,9 +1679,8 @@ export default function PoliciesPage() {
                 <div className="h-0.5 flex-1 mx-3 bg-slate-200" />
                 <div className="flex items-center gap-2">
                   <span
-                    className={`flex size-6 items-center justify-center rounded-full text-[11px] ${
-                      quickEntryStep >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'
-                    }`}
+                    className={`flex size-6 items-center justify-center rounded-full text-[11px] ${quickEntryStep >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'
+                      }`}
                   >
                     2
                   </span>
@@ -1694,9 +1689,8 @@ export default function PoliciesPage() {
                 <div className="h-0.5 flex-1 mx-3 bg-slate-200" />
                 <div className="flex items-center gap-2">
                   <span
-                    className={`flex size-6 items-center justify-center rounded-full text-[11px] ${
-                      quickEntryStep >= 3 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'
-                    }`}
+                    className={`flex size-6 items-center justify-center rounded-full text-[11px] ${quickEntryStep >= 3 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'
+                      }`}
                   >
                     3
                   </span>
@@ -2033,9 +2027,8 @@ function TransactionBadge({ type }: { type: TransactionType }) {
 
   return (
     <span
-      className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ${
-        styles[type] || 'bg-slate-100 text-slate-700 ring-slate-200'
-      }`}
+      className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ${styles[type] || 'bg-slate-100 text-slate-700 ring-slate-200'
+        }`}
     >
       {type}
     </span>

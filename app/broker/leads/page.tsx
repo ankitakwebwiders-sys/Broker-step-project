@@ -745,7 +745,7 @@ export default function LeadsPage() {
         </div>
 
         {/* ───── Stat Cards ───── */}
-        <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
             <div className="flex items-start justify-between">
               <p className="text-sm font-medium text-slate-600">Total Leads</p>

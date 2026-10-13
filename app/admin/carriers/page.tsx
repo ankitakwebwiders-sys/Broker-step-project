@@ -596,7 +596,7 @@ function CarriersManagementContent() {
         <div>
           <div className="flex items-center gap-2.5">
 
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-950">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
               Carriers Master
             </h1>
 

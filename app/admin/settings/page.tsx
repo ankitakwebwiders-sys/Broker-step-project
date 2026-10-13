@@ -227,13 +227,10 @@ function SettingsContent() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex size-11 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-md shadow-slate-950/20">
-              <Cog className="size-5 text-blue-400" />
-            </div>
+
             <div>
               <div className="flex items-center gap-2.5">
-                <h1 className="text-2xl font-bold tracking-tight text-slate-950">Platform Settings</h1>
-
+                <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Platform Settings</h1>
               </div>
               <p className="mt-0.5 text-xs sm:text-sm text-slate-500">
                 Basic platform configuration, membership &amp; carrier policies, and administrative RBAC.
@@ -296,8 +293,8 @@ function SettingsContent() {
                 type="button"
                 onClick={() => handleTabChange(tab.id as SettingsTabId)}
                 className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isActive
-                    ? 'bg-slate-950 text-white shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-slate-950 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                   }`}
               >
                 <span>{tab.label}</span>
@@ -656,12 +653,12 @@ function SettingsContent() {
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <span
                           className={`rounded-lg px-2.5 py-1 text-xs font-bold inline-block ${user.role === 'Super Admin'
-                              ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                              : user.role === 'Operations Admin'
-                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                                : user.role === 'Billing Admin'
-                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                  : 'bg-amber-50 text-amber-700 border border-amber-200'
+                            ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                            : user.role === 'Operations Admin'
+                              ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                              : user.role === 'Billing Admin'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-amber-50 text-amber-700 border border-amber-200'
                             }`}
                         >
                           {user.role}
@@ -671,8 +668,8 @@ function SettingsContent() {
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <span
                           className={`rounded-full px-2.5 py-0.5 text-xs font-bold inline-flex items-center gap-1.5 ${user.status === 'Active'
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-slate-100 text-slate-600 border border-slate-200'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-slate-100 text-slate-600 border border-slate-200'
                             }`}
                         >
                           <span

@@ -865,9 +865,6 @@ export default function AdminDashboardPage() {
               <h2 className="text-base font-medium font-bold text-slate-900">
                 Upcoming Membership Expiries &amp; Non-Renewals
               </h2>
-              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">
-                {filteredExpiries.length} Accounts
-              </span>
             </div>
             <p className="mt-1 text-xs sm:text-sm text-slate-500">
               Proactive churn monitoring for brokers nearing trial expiry or with auto-renewal disabled
@@ -883,7 +880,7 @@ export default function AdminDashboardPage() {
                 : 'hover:text-slate-900'
                 }`}
             >
-              All Expiries ({upcomingExpiriesData.length})
+              All Expiries
             </button>
             <button
               onClick={() => setExpiryHorizonFilter('7days')}
@@ -892,7 +889,7 @@ export default function AdminDashboardPage() {
                 : 'hover:text-slate-900'
                 }`}
             >
-              Next 7 Days (3)
+              Next 7 Days
             </button>
             <button
               onClick={() => setExpiryHorizonFilter('14days')}
@@ -901,7 +898,7 @@ export default function AdminDashboardPage() {
                 : 'hover:text-slate-900'
                 }`}
             >
-              Next 14 Days (7)
+              Next 14 Days
             </button>
             <button
               onClick={() => setExpiryHorizonFilter('trials')}
@@ -910,7 +907,7 @@ export default function AdminDashboardPage() {
                 : 'hover:text-slate-900'
                 }`}
             >
-              14-Day Trials (2)
+              14-Day Trials
             </button>
           </div>
         </div>

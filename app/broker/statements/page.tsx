@@ -501,7 +501,7 @@ export default function StatementsPage() {
       </div>
 
       {/* ───── Top KPI Stat Cards ───── */}
-      <div className="grid gap-2.5 sm:gap-3.5 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+      <div className="grid gap-2.5 sm:gap-3.5 grid-cols-2 md:grid-cols-4 lg:grid-cols-4">
         {/* 1. Total Statements */}
         <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
           <div className="flex items-start justify-between">
@@ -594,8 +594,8 @@ export default function StatementsPage() {
                 key={tab.id}
                 onClick={() => handleTabSelect(tab.id)}
                 className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isActive
-                    ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                   }`}
               >
                 <span>{tab.label}</span>
@@ -1217,20 +1217,20 @@ export default function StatementsPage() {
                   <div
                     key={step.title}
                     className={`relative rounded-xl border p-4 transition-all ${isCompleted
-                        ? 'border-emerald-200 bg-emerald-50/30'
-                        : isCurrent
-                          ? 'border-blue-400 bg-blue-50/40 ring-2 ring-blue-500/20 shadow-xs'
-                          : 'border-slate-200/70 bg-slate-50/50 opacity-60'
+                      ? 'border-emerald-200 bg-emerald-50/30'
+                      : isCurrent
+                        ? 'border-blue-400 bg-blue-50/40 ring-2 ring-blue-500/20 shadow-xs'
+                        : 'border-slate-200/70 bg-slate-50/50 opacity-60'
                       }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
                         <span
                           className={`flex size-6 items-center justify-center rounded-full text-[11px] font-bold ${isCompleted
-                              ? 'bg-emerald-600 text-white'
-                              : isCurrent
-                                ? 'bg-blue-600 text-white animate-pulse'
-                                : 'bg-slate-200 text-slate-600'
+                            ? 'bg-emerald-600 text-white'
+                            : isCurrent
+                              ? 'bg-blue-600 text-white animate-pulse'
+                              : 'bg-slate-200 text-slate-600'
                             }`}
                         >
                           {isCompleted ? <Check className="size-3.5" /> : stepNum}
@@ -1330,8 +1330,8 @@ export default function StatementsPage() {
             <button
               onClick={() => setMatchingConfidenceFilter(matchingConfidenceFilter === 'High Confidence' ? 'All' : 'High Confidence')}
               className={`rounded-2xl border p-4 text-left transition-all cursor-pointer ${matchingConfidenceFilter === 'High Confidence'
-                  ? 'border-emerald-500 bg-emerald-50/30 ring-2 ring-emerald-500/20 shadow-md'
-                  : 'border-slate-200/80 bg-white hover:border-emerald-300'
+                ? 'border-emerald-500 bg-emerald-50/30 ring-2 ring-emerald-500/20 shadow-md'
+                : 'border-slate-200/80 bg-white hover:border-emerald-300'
                 }`}
             >
               <div className="flex items-center justify-between">
@@ -1355,8 +1355,8 @@ export default function StatementsPage() {
             <button
               onClick={() => setMatchingConfidenceFilter(matchingConfidenceFilter === 'Possible Match' ? 'All' : 'Possible Match')}
               className={`rounded-2xl border p-4 text-left transition-all cursor-pointer ${matchingConfidenceFilter === 'Possible Match'
-                  ? 'border-amber-500 bg-amber-50/30 ring-2 ring-amber-500/20 shadow-md'
-                  : 'border-slate-200/80 bg-white hover:border-amber-300'
+                ? 'border-amber-500 bg-amber-50/30 ring-2 ring-amber-500/20 shadow-md'
+                : 'border-slate-200/80 bg-white hover:border-amber-300'
                 }`}
             >
               <div className="flex items-center justify-between">
@@ -1380,8 +1380,8 @@ export default function StatementsPage() {
             <button
               onClick={() => setMatchingConfidenceFilter(matchingConfidenceFilter === 'Unmatched' ? 'All' : 'Unmatched')}
               className={`rounded-2xl border p-4 text-left transition-all cursor-pointer ${matchingConfidenceFilter === 'Unmatched'
-                  ? 'border-rose-500 bg-rose-50/30 ring-2 ring-rose-500/20 shadow-md'
-                  : 'border-slate-200/80 bg-white hover:border-rose-300'
+                ? 'border-rose-500 bg-rose-50/30 ring-2 ring-rose-500/20 shadow-md'
+                : 'border-slate-200/80 bg-white hover:border-rose-300'
                 }`}
             >
               <div className="flex items-center justify-between">
@@ -1660,10 +1660,10 @@ export default function StatementsPage() {
                         <td className="px-3.5 py-3">
                           <span
                             className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10.5px] font-semibold ${txn.matchConfidence === 'High Confidence'
-                                ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
-                                : txn.matchConfidence === 'Possible Match'
-                                  ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
-                                  : 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
+                              ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                              : txn.matchConfidence === 'Possible Match'
+                                ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
+                                : 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
                               }`}
                           >
                             {txn.matchConfidence}

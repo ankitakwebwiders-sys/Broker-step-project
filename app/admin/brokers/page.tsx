@@ -300,12 +300,51 @@ function BrokersManagementContent() {
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
-  // Sync tab with URL
+  // Sync tab, search params, and details drawer with URL & sidebar events
   useEffect(() => {
-    if (tabParam && ['all', 'active', 'inactive', 'pending'].includes(tabParam)) {
-      setActiveTab(tabParam)
+    const applyUrlParams = (searchStr?: string) => {
+      const query = searchStr !== undefined ? searchStr : (typeof window !== 'undefined' ? window.location.search : '')
+      const params = new URLSearchParams(query)
+      const tab = params.get('tab') as BrokerTabId | null
+      const view = params.get('view')
+      const id = params.get('id')
+
+      if (tab && ['all', 'active', 'inactive', 'pending'].includes(tab)) {
+        setActiveTab(tab)
+      } else if (!tab && !view && !id) {
+        setActiveTab('all')
+      }
+
+      if (view === 'details' || id) {
+        if (id) {
+          const target = brokersList.find((b) => b.id === id) || brokersList[0]
+          if (target) {
+            setSelectedBroker(target)
+            setDetailsDrawerTab('profile')
+          }
+        } else if (brokersList.length > 0) {
+          setSelectedBroker((prev) => prev || brokersList[0])
+          setDetailsDrawerTab('profile')
+        }
+      } else {
+        setSelectedBroker(null)
+      }
     }
-  }, [tabParam])
+
+    applyUrlParams()
+
+    const handleNavChange = (e: any) => {
+      const search = e?.detail?.search !== undefined ? e.detail.search : undefined
+      applyUrlParams(search)
+    }
+
+    window.addEventListener('popstate', () => applyUrlParams())
+    window.addEventListener('broker-nav-change', handleNavChange)
+    return () => {
+      window.removeEventListener('popstate', () => applyUrlParams())
+      window.removeEventListener('broker-nav-change', handleNavChange)
+    }
+  }, [brokersList])
 
   function showToast(msg: string) {
     setToastMessage(msg)
@@ -315,16 +354,50 @@ function BrokersManagementContent() {
   function handleTabChange(tab: BrokerTabId) {
     setActiveTab(tab)
     const targetUrl = tab === 'all' ? '/admin/brokers' : `/admin/brokers?tab=${tab}`
-    router.replace(targetUrl, { scroll: false })
+    const targetSearch = tab === 'all' ? '' : `?tab=${tab}`
+    window.history.pushState(null, '', targetUrl)
+    window.dispatchEvent(
+      new CustomEvent('broker-nav-change', {
+        detail: { href: targetUrl, search: targetSearch, pathname: '/admin/brokers' },
+      })
+    )
   }
 
   function handleOpenDetails(broker: BrokerRecord, initialDrawerTab: 'profile' | 'account' | 'subscription' | 'platform' | 'templates' = 'profile') {
     setSelectedBroker(broker)
     setDetailsDrawerTab(initialDrawerTab)
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      url.searchParams.set('view', 'details')
+      url.searchParams.set('id', broker.id)
+      const newSearch = `?${url.searchParams.toString()}`
+      const newUrl = `${url.pathname}${newSearch}`
+      window.history.pushState(null, '', newUrl)
+      window.dispatchEvent(
+        new CustomEvent('broker-nav-change', {
+          detail: { href: newUrl, search: newSearch, pathname: url.pathname },
+        })
+      )
+    }
   }
 
   function handleCloseDetails() {
     setSelectedBroker(null)
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      if (url.searchParams.has('view') || url.searchParams.has('id')) {
+        url.searchParams.delete('view')
+        url.searchParams.delete('id')
+        const newSearch = url.searchParams.toString() ? `?${url.searchParams.toString()}` : ''
+        const newUrl = `${url.pathname}${newSearch}`
+        window.history.pushState(null, '', newUrl)
+        window.dispatchEvent(
+          new CustomEvent('broker-nav-change', {
+            detail: { href: newUrl, search: newSearch, pathname: url.pathname },
+          })
+        )
+      }
+    }
   }
 
   function handleToggleAccountStatus(brokerId: string) {
@@ -452,51 +525,17 @@ function BrokersManagementContent() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
               Brokers Management
             </h1>
-            <span className="rounded-full bg-slate-950 px-2.5 py-0.5 text-xs font-semibold text-white ring-1 ring-slate-800">
-              Admin Portal
-            </span>
+
           </div>
           <p className="mt-1 text-sm text-slate-500">
-            Section 17.1 Broker directory, subscription statuses, account controls, and statement template assignments.
+            Section Broker directory, subscription statuses, account controls, and statement template assignments.
           </p>
         </div>
 
-        {/* Global Action */}
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => showToast('New Broker Onboarding invitation generated')}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#0170FE] px-4 py-2 text-xs font-semibold text-white shadow-md shadow-[#0170FE]/25 hover:bg-[#0060db] transition"
-          >
-            <Plus className="size-4" />
-            <span>Onboard New Broker</span>
-          </button>
-        </div>
+
       </div>
 
-      {/* KPI Stats Bar */}
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:gap-4">
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
-          <p className="text-xs font-medium text-slate-500">Total Enrolled Brokers</p>
-          <p className="mt-1 text-2xl font-bold text-slate-950">{tabCounts.all}</p>
-          <p className="mt-1 text-xs text-slate-400">All registered agencies</p>
-        </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
-          <p className="text-xs font-medium text-slate-500">Active Accounts</p>
-          <p className="mt-1 text-2xl font-bold text-emerald-600">{tabCounts.active}</p>
-          <p className="mt-1 text-xs text-emerald-600 font-medium">In good standing</p>
-        </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
-          <p className="text-xs font-medium text-slate-500">Inactive / Deactivated</p>
-          <p className="mt-1 text-2xl font-bold text-slate-700">{tabCounts.inactive}</p>
-          <p className="mt-1 text-xs text-slate-400">Suspended / non-renewed</p>
-        </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
-          <p className="text-xs font-medium text-slate-500">Pending Review</p>
-          <p className="mt-1 text-2xl font-bold text-amber-600">{tabCounts.pending}</p>
-          <p className="mt-1 text-xs text-amber-600 font-medium">Action required</p>
-        </div>
-      </div>
+
 
       {/* 17.1 Status Tabs - Styled in black (bg-slate-950) like all dashboard tabs */}
       <div className="mt-6 rounded-2xl border border-slate-200/80 bg-white p-2.5 shadow-xs">
@@ -504,17 +543,15 @@ function BrokersManagementContent() {
           <button
             type="button"
             onClick={() => handleTabChange('all')}
-            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'all'
-                ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
+            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${activeTab === 'all'
+              ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
           >
             <span>All Brokers</span>
             <span
-              className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                activeTab === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-              }`}
+              className={`rounded-full px-2 py-0.5 text-xs font-bold ${activeTab === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                }`}
             >
               {tabCounts.all}
             </span>
@@ -523,18 +560,16 @@ function BrokersManagementContent() {
           <button
             type="button"
             onClick={() => handleTabChange('active')}
-            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'active'
-                ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
+            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${activeTab === 'active'
+              ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
           >
             <CheckCircle2 className={`size-3.5 ${activeTab === 'active' ? 'text-emerald-400' : 'text-slate-400'}`} />
             <span>Active</span>
             <span
-              className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                activeTab === 'active' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-              }`}
+              className={`rounded-full px-2 py-0.5 text-xs font-bold ${activeTab === 'active' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                }`}
             >
               {tabCounts.active}
             </span>
@@ -543,18 +578,16 @@ function BrokersManagementContent() {
           <button
             type="button"
             onClick={() => handleTabChange('inactive')}
-            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'inactive'
-                ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
+            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${activeTab === 'inactive'
+              ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
           >
             <XCircle className={`size-3.5 ${activeTab === 'inactive' ? 'text-rose-400' : 'text-slate-400'}`} />
             <span>Inactive</span>
             <span
-              className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                activeTab === 'inactive' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-              }`}
+              className={`rounded-full px-2 py-0.5 text-xs font-bold ${activeTab === 'inactive' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                }`}
             >
               {tabCounts.inactive}
             </span>
@@ -563,18 +596,16 @@ function BrokersManagementContent() {
           <button
             type="button"
             onClick={() => handleTabChange('pending')}
-            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'pending'
-                ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
+            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${activeTab === 'pending'
+              ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
           >
             <Clock className={`size-3.5 ${activeTab === 'pending' ? 'text-amber-400' : 'text-slate-400'}`} />
             <span>Pending / Relevant Status</span>
             <span
-              className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                activeTab === 'pending' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-              }`}
+              className={`rounded-full px-2 py-0.5 text-xs font-bold ${activeTab === 'pending' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                }`}
             >
               {tabCounts.pending}
             </span>
@@ -734,18 +765,16 @@ function BrokersManagementContent() {
                       {/* 4. Account Status */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <span
-                          className={`rounded-full px-2.5 py-0.5 text-xs font-bold inline-flex items-center gap-1.5 ${
-                            isAccountActive
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : isAccountPending
+                          className={`rounded-full px-2.5 py-0.5 text-xs font-bold inline-flex items-center gap-1.5 ${isAccountActive
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : isAccountPending
                               ? 'bg-amber-50 text-amber-700 border border-amber-200'
                               : 'bg-slate-100 text-slate-600 border border-slate-200'
-                          }`}
+                            }`}
                         >
                           <span
-                            className={`size-1.5 rounded-full ${
-                              isAccountActive ? 'bg-emerald-500' : isAccountPending ? 'bg-amber-500' : 'bg-slate-400'
-                            }`}
+                            className={`size-1.5 rounded-full ${isAccountActive ? 'bg-emerald-500' : isAccountPending ? 'bg-amber-500' : 'bg-slate-400'
+                              }`}
                           />
                           {broker.accountStatus}
                         </span>
@@ -754,13 +783,12 @@ function BrokersManagementContent() {
                       {/* 5. Membership Plan */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <span
-                          className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
-                            broker.membershipPlan === 'Enterprise'
-                              ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                              : broker.membershipPlan === 'Professional'
+                          className={`rounded-lg px-2.5 py-1 text-xs font-bold ${broker.membershipPlan === 'Enterprise'
+                            ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                            : broker.membershipPlan === 'Professional'
                               ? 'bg-blue-50 text-blue-700 border border-blue-200'
                               : 'bg-slate-100 text-slate-700 border border-slate-200'
-                          }`}
+                            }`}
                         >
                           {broker.membershipPlan}
                         </span>
@@ -769,15 +797,14 @@ function BrokersManagementContent() {
                       {/* 6. Subscription Status */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <span
-                          className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                            broker.subscriptionStatus === 'Active'
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : broker.subscriptionStatus === 'Trial'
+                          className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${broker.subscriptionStatus === 'Active'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : broker.subscriptionStatus === 'Trial'
                               ? 'bg-blue-50 text-blue-700 border border-blue-200'
                               : broker.subscriptionStatus === 'Payment Failed'
-                              ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                              : 'bg-slate-100 text-slate-600 border border-slate-200'
-                          }`}
+                                ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                : 'bg-slate-100 text-slate-600 border border-slate-200'
+                            }`}
                         >
                           {broker.subscriptionStatus}
                         </span>
@@ -804,7 +831,7 @@ function BrokersManagementContent() {
                             type="button"
                             onClick={() => handleOpenDetails(broker, 'profile')}
                             title="View Broker Details"
-                            className="inline-flex cursor-pointer items-center gap-1 rounded-xl bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-950 hover:text-white transition"
+                            className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
                           >
                             <Eye className="size-3.5" />
                             <span>View</span>
@@ -815,11 +842,10 @@ function BrokersManagementContent() {
                             type="button"
                             onClick={() => handleToggleAccountStatus(broker.id)}
                             title={isAccountActive ? 'Deactivate Broker' : 'Activate Broker'}
-                            className={`rounded-xl px-2.5 py-1.5 text-xs font-semibold transition cursor-pointer border ${
-                              isAccountActive
-                                ? 'border-slate-200 text-slate-700 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700'
-                                : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                            }`}
+                            className={`rounded-xl px-2.5 py-1.5 text-xs font-semibold transition cursor-pointer border ${isAccountActive
+                              ? 'border-slate-200 text-slate-700 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700'
+                              : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                              }`}
                           >
                             {isAccountActive ? 'Deactivate' : 'Activate'}
                           </button>
@@ -855,7 +881,12 @@ function BrokersManagementContent() {
          ========================================================================= */}
       {selectedBroker && (
         <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/60 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+          <div
+            className="fixed inset-0"
+            onClick={handleCloseDetails}
+            aria-hidden="true"
+          />
+          <div className="relative z-10 w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
             {/* Drawer Header */}
             <div className="p-6 border-b border-slate-200 bg-slate-50/80 flex items-start justify-between">
               <div className="flex items-center gap-3">
@@ -866,11 +897,10 @@ function BrokersManagementContent() {
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-bold text-slate-950">{selectedBroker.name}</h3>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                        selectedBroker.accountStatus === 'Active'
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : 'bg-slate-100 text-slate-600 border border-slate-200'
-                      }`}
+                      className={`rounded-full px-2 py-0.5 text-xs font-bold ${selectedBroker.accountStatus === 'Active'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : 'bg-slate-100 text-slate-600 border border-slate-200'
+                        }`}
                     >
                       {selectedBroker.accountStatus}
                     </span>
@@ -902,11 +932,10 @@ function BrokersManagementContent() {
                     key={t.id}
                     type="button"
                     onClick={() => setDetailsDrawerTab(t.id as any)}
-                    className={`py-3.5 border-b-2 transition-colors cursor-pointer whitespace-nowrap ${
-                      detailsDrawerTab === t.id
-                        ? 'border-slate-950 text-slate-950 font-bold'
-                        : 'border-transparent text-slate-500 hover:text-slate-800'
-                    }`}
+                    className={`py-3.5 border-b-2 transition-colors cursor-pointer whitespace-nowrap ${detailsDrawerTab === t.id
+                      ? 'border-slate-950 text-slate-950 font-bold'
+                      : 'border-transparent text-slate-500 hover:text-slate-800'
+                      }`}
                   >
                     {t.label}
                   </button>
@@ -990,11 +1019,10 @@ function BrokersManagementContent() {
                       <button
                         type="button"
                         onClick={() => handleToggleAccountStatus(selectedBroker.id)}
-                        className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
-                          selectedBroker.accountStatus === 'Active'
-                            ? 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'
-                            : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                        }`}
+                        className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${selectedBroker.accountStatus === 'Active'
+                          ? 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'
+                          : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                          }`}
                       >
                         {selectedBroker.accountStatus === 'Active' ? 'Deactivate Account' : 'Activate Account'}
                       </button>
@@ -1023,11 +1051,10 @@ function BrokersManagementContent() {
                           </p>
                         </div>
                         <span
-                          className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                            selectedBroker.twoFactorEnabled
-                              ? 'bg-emerald-50 text-emerald-700'
-                              : 'bg-amber-50 text-amber-700'
-                          }`}
+                          className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${selectedBroker.twoFactorEnabled
+                            ? 'bg-emerald-50 text-emerald-700'
+                            : 'bg-amber-50 text-amber-700'
+                            }`}
                         >
                           {selectedBroker.twoFactorEnabled ? 'Enforced' : 'Optional'}
                         </span>
@@ -1063,13 +1090,12 @@ function BrokersManagementContent() {
                         Membership &amp; Subscription Status
                       </h4>
                       <span
-                        className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                          selectedBroker.subscriptionStatus === 'Active'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : selectedBroker.subscriptionStatus === 'Payment Failed'
+                        className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${selectedBroker.subscriptionStatus === 'Active'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : selectedBroker.subscriptionStatus === 'Payment Failed'
                             ? 'bg-rose-50 text-rose-700 border border-rose-200'
                             : 'bg-blue-50 text-blue-700 border border-blue-200'
-                        }`}
+                          }`}
                       >
                         {selectedBroker.subscriptionStatus}
                       </span>
@@ -1105,11 +1131,10 @@ function BrokersManagementContent() {
                             key={tier}
                             type="button"
                             onClick={() => handleUpdatePlan(selectedBroker.id, tier)}
-                            className={`rounded-xl border p-2.5 text-center transition cursor-pointer ${
-                              selectedBroker.membershipPlan === tier
-                                ? 'border-slate-950 bg-slate-950 text-white font-bold'
-                                : 'border-slate-200 text-slate-700 hover:border-slate-300'
-                            }`}
+                            className={`rounded-xl border p-2.5 text-center transition cursor-pointer ${selectedBroker.membershipPlan === tier
+                              ? 'border-slate-950 bg-slate-950 text-white font-bold'
+                              : 'border-slate-200 text-slate-700 hover:border-slate-300'
+                              }`}
                           >
                             <p className="text-xs">{tier}</p>
                             <p className="text-xs opacity-75 mt-0.5">

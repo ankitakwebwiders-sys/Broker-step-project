@@ -236,7 +236,7 @@ export default function LandingPage() {
 
       {/* ═══════════ HERO ═══════════ */}
       <section className="relative z-10 px-6 pt-30 pb-24 lg:px-10 lg:pt-36">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-6xl">
           <div className="grid items-center gap-12 lg:grid-cols-[1.04fr_0.96fr] xl:gap-14">
 
             {/* LEFT */}
@@ -300,7 +300,7 @@ export default function LandingPage() {
                   {/* Real Hero Image from public/images/hero-section.png */}
                   <div className="overflow-hidden rounded-xl ">
                     <Image
-                      src="/images/hero-section.png"
+                      src="/images/hero-section12.png"
                       alt="BrokerStep Insurance Brokerage Platform"
                       width={1300}
                       height={880}

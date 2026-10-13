@@ -12,7 +12,6 @@ import {
   Search,
   Filter,
   Eye,
-  RefreshCw,
   Bell,
   Mail,
   ShieldCheck,
@@ -472,24 +471,11 @@ function SubscriptionsBillingContent() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
               Subscriptions &amp; Billing
             </h1>
-            <span className="rounded-full bg-slate-950 px-2.5 py-0.5 text-xs font-semibold text-white ring-1 ring-slate-800">
-              Admin Billing Center
-            </span>
+
           </div>
           <p className="mt-1 text-sm text-slate-500">
             Monitor broker subscriptions, failed payments, dunning notification workflows, and expiring memberships.
           </p>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => showToast('Dispatched recurring statement reconciliation audit')}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:border-slate-300 transition"
-          >
-            <RefreshCw className="size-3.5" />
-            <span>Audit Gateway Status</span>
-          </button>
         </div>
       </div>
 
@@ -865,7 +851,7 @@ function SubscriptionsBillingContent() {
                               type="button"
                               onClick={() => setSelectedSubForDetails(sub)}
                               title="View Subscription Details"
-                              className="inline-flex shrink-0 whitespace-nowrap cursor-pointer items-center gap-1 rounded-xl bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-950 hover:text-white transition"
+                              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
                             >
                               <Eye className="size-3.5" />
                               <span>View</span>

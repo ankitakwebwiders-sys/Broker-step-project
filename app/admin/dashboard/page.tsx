@@ -4,39 +4,28 @@ import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Users,
-  Building2,
-  DollarSign,
   CreditCard,
   AlertTriangle,
   Clock,
   CheckCircle2,
   XCircle,
-  AlertCircle,
-  TrendingUp,
   Search,
   Filter,
-  Download,
   ExternalLink,
   ChevronRight,
-  ShieldCheck,
   RefreshCw,
   Mail,
   Phone,
   FileSpreadsheet,
   Activity,
-  Layers,
   Sparkles,
   ArrowRight,
   CalendarDays,
   X,
-  FileText,
   Send,
-  ChevronDown,
   Plus,
-  Scale,
-  WalletCards,
-  FileCheck2,
   Check,
+  Eye,
 } from 'lucide-react'
 import {
   platformKPIsData,
@@ -308,11 +297,7 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <button className="hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 sm:flex cursor-pointer">
-            <CalendarDays className="size-4 text-slate-400" />
-            <span>2026 Fiscal Year</span>
-            <ChevronDown className="size-3.5 text-slate-400" />
-          </button>
+
           <Link
             href="/admin/brokers"
             className="group flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600"
@@ -540,6 +525,7 @@ export default function AdminDashboardPage() {
                             onClick={() => setSelectedBroker(broker)}
                             className="inline-flex items-center gap-1 rounded-lg bg-slate-950 px-2.5 py-1 text-xs font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
                           >
+                            <Eye className="size-3" />
                             <span>View</span>
                           </button>
                           <Link
@@ -709,6 +695,166 @@ export default function AdminDashboardPage() {
       </section>
 
       {/* ───── 4. Upcoming Membership Expiries & Non-Renewals ───── */}
+      <section id="failed-payments-section" className="rounded-2xl border border-rose-200/90 bg-white p-5 sm:p-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-rose-100/80 pb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-rose-50 text-rose-600 ring-1 ring-rose-200">
+                <AlertTriangle className="size-4" />
+              </span>
+              <h2 className="text-base font-medium font-bold text-slate-900">
+                Failed Membership Payments Requiring Attention
+              </h2>
+              <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-700">
+                {failedPayments.length} Active Overdue
+              </span>
+            </div>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              Immediate admin intervention required for recurring payment failures, bank declines, and expired cards
+            </p>
+          </div>
+
+
+        </div>
+
+        {/* Failed Payments Summary Row */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-xl border border-rose-200/70 bg-rose-50/40 p-3.5">
+            <p className="text-xs font-semibold text-rose-800 uppercase tracking-wide">Total Overdue Amount</p>
+            <p className="mt-1 text-lg font-bold font-bold text-rose-700 font-mono">
+              {fmt(platformKPIsData.failedPaymentsAmount)}
+            </p>
+            <span className="text-xs text-rose-600">Across 5 broker agencies</span>
+          </div>
+
+          <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5">
+            <p className="text-xs font-medium text-slate-500">Dunning Recovery Rate</p>
+            <p className="mt-1 text-lg font-bold font-bold text-slate-900 font-mono">
+              92.4%
+            </p>
+            <span className="text-xs text-emerald-600 font-semibold">+3.2% vs last month</span>
+          </div>
+
+          <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5">
+            <p className="text-xs font-medium text-slate-500">Max Retry Limit</p>
+            <p className="mt-1 text-lg font-bold font-bold text-slate-900 font-mono">
+              3 Attempts
+            </p>
+            <span className="text-xs text-slate-500">48-hour retry interval</span>
+          </div>
+
+          <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5">
+            <p className="text-xs font-medium text-slate-500">Default Grace Period</p>
+            <p className="mt-1 text-lg font-bold font-bold text-slate-900 font-mono">
+              7 Days
+            </p>
+            <span className="text-xs text-slate-500">Before account suspension</span>
+          </div>
+        </div>
+
+        {/* Failed Payments Table */}
+        <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white">
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="w-full min-w-[950px] text-left text-xs sm:text-sm">
+              <thead className="bg-slate-50/80 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
+                <tr>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[220px]">Broker / Agency</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[150px]">Plan &amp; Amount</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[180px]">Failure Reason</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[170px]">Retries &amp; Overdue</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[140px]">Grace Deadline</th>
+                  <th className="px-3.5 sm:px-4 py-3.5 text-right min-w-[170px] w-[170px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {failedPayments.map((item) => (
+                  <tr key={item.id} className="group hover:bg-rose-50/30 transition-colors">
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <div>
+                        <span className="font-bold text-slate-900 block whitespace-nowrap">{item.brokerName}</span>
+                        <span className="text-xs text-slate-500 block whitespace-nowrap">{item.agencyName}</span>
+                        <span className="font-mono text-xs text-slate-400 whitespace-nowrap">{item.email}</span>
+                      </div>
+                    </td>
+
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <span className="font-semibold text-slate-800 block">{item.planTier}</span>
+                      <span className="text-sm font-bold text-rose-600 font-mono">{fmt(item.amountDue)} due</span>
+                    </td>
+
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-xs font-bold text-rose-700 ring-1 ring-rose-200">
+                        <XCircle className="size-3" />
+                        {item.failureReason}
+                      </span>
+                      <span className="text-xs text-slate-400 block mt-0.5">{item.failedDate}</span>
+                    </td>
+
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono font-semibold text-slate-800">
+                          {item.retryCount}/{item.maxRetries} Retries
+                        </span>
+                        <span className="rounded bg-slate-100 px-1.5 py-0.2 text-xs font-bold text-slate-600">
+                          {item.daysOverdue}d overdue
+                        </span>
+                      </div>
+                      <div className="w-24 bg-slate-100 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                        <div
+                          className="bg-rose-500 h-full rounded-full"
+                          style={{ width: `${(item.retryCount / item.maxRetries) * 100}%` }}
+                        />
+                      </div>
+                    </td>
+
+                    <td className="py-3.5 px-4 whitespace-nowrap text-xs">
+                      <span className="font-medium text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md inline-block">
+                        {item.gracePeriodEnds}
+                      </span>
+                    </td>
+
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap min-w-[200px] w-[200px] sticky right-0 bg-white group-hover:bg-rose-50/50 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                      <div className="inline-flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleRetryPayment(item.id, item.brokerName)}
+                          className="inline-flex items-center gap-1 rounded-xl bg-slate-950 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer"
+                          title="Trigger instant retry charge via payment gateway"
+                        >
+                          <RefreshCw className="size-3" />
+                          <span>Retry</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleSendPaymentLink(item.brokerName, item.email)}
+                          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                          title="Send direct self-service invoice link"
+                        >
+                          <Send className="size-3 text-slate-400" />
+                          <span>Send Link</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleExtendGrace(item.id, item.brokerName)}
+                          className="inline-flex items-center gap-1 rounded-xl border border-amber-200 bg-amber-50/60 px-2.5 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-100/70 transition cursor-pointer"
+                          title="Extend grace period by 7 days to prevent account lock"
+                        >
+                          <Clock className="size-3 text-amber-600" />
+                          <span>+7d Grace</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+
+      {/* ───── 5. Failed Membership Payments Requiring Attention (Alert Section) ───── */}
+
+
       <section id="upcoming-expiries-section" className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
           <div>
@@ -853,170 +999,6 @@ export default function AdminDashboardPage() {
                           title="Manually renew plan"
                         >
                           <span>Renew</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-
-      {/* ───── 5. Failed Membership Payments Requiring Attention (Alert Section) ───── */}
-      <section id="failed-payments-section" className="rounded-2xl border border-rose-200/90 bg-white p-5 sm:p-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-rose-100/80 pb-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-lg bg-rose-50 text-rose-600 ring-1 ring-rose-200">
-                <AlertTriangle className="size-4" />
-              </span>
-              <h2 className="text-base font-medium font-bold text-slate-900">
-                Failed Membership Payments Requiring Attention
-              </h2>
-              <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-700">
-                {failedPayments.length} Active Overdue
-              </span>
-            </div>
-            <p className="mt-1 text-xs sm:text-sm text-slate-500">
-              Immediate admin intervention required for recurring payment failures, bank declines, and expired cards
-            </p>
-          </div>
-
-          <button
-            onClick={() => showToast('Batch dunning retry dispatched to Stripe for all eligible failed invoices.')}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-rose-700 hover:bg-rose-50 transition cursor-pointer self-start sm:self-auto shrink-0 shadow-xs"
-          >
-            <RefreshCw className="size-3.5 text-rose-600" />
-            <span>Retry All Invoices ({failedPayments.length})</span>
-          </button>
-        </div>
-
-        {/* Failed Payments Summary Row */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-rose-200/70 bg-rose-50/40 p-3.5">
-            <p className="text-xs font-semibold text-rose-800 uppercase tracking-wide">Total Overdue Amount</p>
-            <p className="mt-1 text-lg font-bold font-bold text-rose-700 font-mono">
-              {fmt(platformKPIsData.failedPaymentsAmount)}
-            </p>
-            <span className="text-xs text-rose-600">Across 5 broker agencies</span>
-          </div>
-
-          <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5">
-            <p className="text-xs font-medium text-slate-500">Dunning Recovery Rate</p>
-            <p className="mt-1 text-lg font-bold font-bold text-slate-900 font-mono">
-              92.4%
-            </p>
-            <span className="text-xs text-emerald-600 font-semibold">+3.2% vs last month</span>
-          </div>
-
-          <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5">
-            <p className="text-xs font-medium text-slate-500">Max Retry Limit</p>
-            <p className="mt-1 text-lg font-bold font-bold text-slate-900 font-mono">
-              3 Attempts
-            </p>
-            <span className="text-xs text-slate-500">48-hour retry interval</span>
-          </div>
-
-          <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5">
-            <p className="text-xs font-medium text-slate-500">Default Grace Period</p>
-            <p className="mt-1 text-lg font-bold font-bold text-slate-900 font-mono">
-              7 Days
-            </p>
-            <span className="text-xs text-slate-500">Before account suspension</span>
-          </div>
-        </div>
-
-        {/* Failed Payments Table */}
-        <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white">
-          <div className="overflow-x-auto scrollbar-thin">
-            <table className="w-full min-w-[950px] text-left text-xs sm:text-sm">
-              <thead className="bg-slate-50/80 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
-                <tr>
-                  <th className="py-3 px-4 whitespace-nowrap min-w-[220px]">Broker / Agency</th>
-                  <th className="py-3 px-4 whitespace-nowrap min-w-[150px]">Plan &amp; Amount</th>
-                  <th className="py-3 px-4 whitespace-nowrap min-w-[180px]">Failure Reason</th>
-                  <th className="py-3 px-4 whitespace-nowrap min-w-[170px]">Retries &amp; Overdue</th>
-                  <th className="py-3 px-4 whitespace-nowrap min-w-[140px]">Grace Deadline</th>
-                  <th className="py-3 px-4 whitespace-nowrap min-w-[200px] w-[200px] text-right sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {failedPayments.map((item) => (
-                  <tr key={item.id} className="group hover:bg-rose-50/30 transition-colors">
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <div>
-                        <span className="font-bold text-slate-900 block whitespace-nowrap">{item.brokerName}</span>
-                        <span className="text-xs text-slate-500 block whitespace-nowrap">{item.agencyName}</span>
-                        <span className="font-mono text-xs text-slate-400 whitespace-nowrap">{item.email}</span>
-                      </div>
-                    </td>
-
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span className="font-semibold text-slate-800 block">{item.planTier}</span>
-                      <span className="text-sm font-bold text-rose-600 font-mono">{fmt(item.amountDue)} due</span>
-                    </td>
-
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-xs font-bold text-rose-700 ring-1 ring-rose-200">
-                        <XCircle className="size-3" />
-                        {item.failureReason}
-                      </span>
-                      <span className="text-xs text-slate-400 block mt-0.5">{item.failedDate}</span>
-                    </td>
-
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-semibold text-slate-800">
-                          {item.retryCount}/{item.maxRetries} Retries
-                        </span>
-                        <span className="rounded bg-slate-100 px-1.5 py-0.2 text-xs font-bold text-slate-600">
-                          {item.daysOverdue}d overdue
-                        </span>
-                      </div>
-                      <div className="w-24 bg-slate-100 h-1.5 rounded-full mt-1.5 overflow-hidden">
-                        <div
-                          className="bg-rose-500 h-full rounded-full"
-                          style={{ width: `${(item.retryCount / item.maxRetries) * 100}%` }}
-                        />
-                      </div>
-                    </td>
-
-                    <td className="py-3.5 px-4 whitespace-nowrap text-xs">
-                      <span className="font-medium text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md inline-block">
-                        {item.gracePeriodEnds}
-                      </span>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right whitespace-nowrap min-w-[200px] w-[200px] sticky right-0 bg-white group-hover:bg-rose-50/50 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
-                      <div className="inline-flex items-center gap-1.5">
-                        <button
-                          onClick={() => handleRetryPayment(item.id, item.brokerName)}
-                          className="inline-flex items-center gap-1 rounded-xl bg-slate-950 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer"
-                          title="Trigger instant retry charge via payment gateway"
-                        >
-                          <RefreshCw className="size-3" />
-                          <span>Retry</span>
-                        </button>
-
-                        <button
-                          onClick={() => handleSendPaymentLink(item.brokerName, item.email)}
-                          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-                          title="Send direct self-service invoice link"
-                        >
-                          <Send className="size-3 text-slate-400" />
-                          <span>Send Link</span>
-                        </button>
-
-                        <button
-                          onClick={() => handleExtendGrace(item.id, item.brokerName)}
-                          className="inline-flex items-center gap-1 rounded-xl border border-amber-200 bg-amber-50/60 px-2.5 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-100/70 transition cursor-pointer"
-                          title="Extend grace period by 7 days to prevent account lock"
-                        >
-                          <Clock className="size-3 text-amber-600" />
-                          <span>+7d Grace</span>
                         </button>
                       </div>
                     </td>

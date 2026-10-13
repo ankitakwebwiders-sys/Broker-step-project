@@ -146,6 +146,8 @@ export const adminNavSections: AdminNavSectionDef[] = [
         href: '/admin/settings',
         subItems: [
           { label: 'Basic Platform Configuration', href: '/admin/settings' },
+          { label: 'Membership, Carriers & Templates', href: '/admin/settings?tab=modules' },
+          { label: 'Controlled Access & RBAC', href: '/admin/settings?tab=rbac' },
         ],
       },
     ],
@@ -322,7 +324,7 @@ function NavItem({
                     : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
                   }`}
               >
-                <span className="truncate">{sub.label}</span>
+                <span className="truncate" suppressHydrationWarning>{sub.label}</span>
                 {sub.count && (
                   <span className="rounded px-1.5 py-0.5 text-xs font-semibold bg-slate-800/80 text-slate-400">
                     {sub.count}

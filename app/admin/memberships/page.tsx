@@ -351,9 +351,7 @@ function MembershipPlansContent() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
               Membership Plans
             </h1>
-            <span className="rounded-full bg-slate-950 px-2.5 py-0.5 text-xs font-semibold text-white ring-1 ring-slate-800">
-              SOW 18.1 &amp; 18.2 Compliant
-            </span>
+
           </div>
           <p className="mt-1 text-sm text-slate-500">
             Configure commercial plan tiers, monthly/annual pricing, promotional discounts, trial periods, and feature matrices.
@@ -397,13 +395,6 @@ function MembershipPlansContent() {
         </div>
       </div>
 
-      {/* SOW Scope Disclosure Notice Box */}
-      <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50/60 p-4 text-xs text-blue-900 flex items-start gap-3">
-        <Info className="size-4 text-[#0170FE] shrink-0 mt-0.5" />
-        <p className="leading-relaxed">
-          <strong className="font-bold text-blue-950">SOW Scope Guidance:</strong> The SOW supports configurable plans, monthly/yearly pricing, trial periods, discounts/promotions and feature configuration. Exact commercial plan names and feature limits are business decisions and are not specified by the SOW.
-        </p>
-      </div>
 
       {/* Complete Submenus Navigation Bar - Styled in BLACK (bg-slate-950) matching the Admin Sidebar */}
       <div className="mt-6 rounded-2xl border border-slate-200/80 bg-white p-2.5 shadow-xs">
@@ -412,18 +403,16 @@ function MembershipPlansContent() {
           <button
             type="button"
             onClick={() => handleTabSelect('all')}
-            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'all'
-                ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
+            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${activeTab === 'all'
+              ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
           >
             <ShieldCheck className={`size-4 ${activeTab === 'all' ? 'text-white' : 'text-slate-500'}`} />
-            <span>All Plans (18.1)</span>
+            <span>All Plans</span>
             <span
-              className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                activeTab === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-              }`}
+              className={`rounded-full px-2 py-0.5 text-xs font-bold ${activeTab === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                }`}
             >
               {plans.length}
             </span>
@@ -433,11 +422,10 @@ function MembershipPlansContent() {
           <button
             type="button"
             onClick={() => handleTabSelect('pricing')}
-            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'pricing'
-                ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
+            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${activeTab === 'pricing'
+              ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
           >
             <DollarSign className={`size-4 ${activeTab === 'pricing' ? 'text-white' : 'text-slate-500'}`} />
             <span>Pricing</span>
@@ -447,11 +435,10 @@ function MembershipPlansContent() {
           <button
             type="button"
             onClick={() => handleTabSelect('billing-frequency')}
-            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'billing-frequency'
-                ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
+            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${activeTab === 'billing-frequency'
+              ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
           >
             <Repeat className={`size-4 ${activeTab === 'billing-frequency' ? 'text-white' : 'text-slate-500'}`} />
             <span>Billing Frequency</span>
@@ -461,11 +448,10 @@ function MembershipPlansContent() {
           <button
             type="button"
             onClick={() => handleTabSelect('trial')}
-            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'trial'
-                ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
+            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${activeTab === 'trial'
+              ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
           >
             <Clock className={`size-4 ${activeTab === 'trial' ? 'text-white' : 'text-slate-500'}`} />
             <span>Trial Configuration</span>
@@ -475,11 +461,10 @@ function MembershipPlansContent() {
           <button
             type="button"
             onClick={() => handleTabSelect('promotions')}
-            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'promotions'
-                ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
+            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${activeTab === 'promotions'
+              ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
           >
             <Gift className={`size-4 ${activeTab === 'promotions' ? 'text-white' : 'text-slate-500'}`} />
             <span>Discounts / Promotions</span>
@@ -489,11 +474,10 @@ function MembershipPlansContent() {
           <button
             type="button"
             onClick={() => handleTabSelect('features')}
-            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'features'
-                ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
+            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${activeTab === 'features'
+              ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
           >
             <ListChecks className={`size-4 ${activeTab === 'features' ? 'text-white' : 'text-slate-500'}`} />
             <span>Plan Features Matrix</span>
@@ -646,11 +630,10 @@ function MembershipPlansContent() {
                           {/* 6. Status */}
                           <td className="py-4 px-4 whitespace-nowrap">
                             <span
-                              className={`rounded-full px-2.5 py-0.5 text-xs font-bold inline-flex items-center gap-1.5 ${
-                                isActive
-                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                  : 'bg-slate-100 text-slate-600 border border-slate-200'
-                              }`}
+                              className={`rounded-full px-2.5 py-0.5 text-xs font-bold inline-flex items-center gap-1.5 ${isActive
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-slate-100 text-slate-600 border border-slate-200'
+                                }`}
                             >
                               <span className={`size-1.5 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-slate-400'}`} />
                               {plan.status}
@@ -684,18 +667,17 @@ function MembershipPlansContent() {
                                 className="inline-flex cursor-pointer items-center gap-1 rounded-xl bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-950 hover:text-white transition"
                               >
                                 <Edit3 className="size-3.5" />
-                                <span>Edit</span>
+
                               </button>
 
                               <button
                                 type="button"
                                 onClick={() => handleToggleStatus(plan.id)}
                                 title={isActive ? 'Deactivate Plan' : 'Activate Plan'}
-                                className={`rounded-xl px-2.5 py-1.5 text-xs font-semibold transition cursor-pointer border ${
-                                  isActive
-                                    ? 'border-slate-200 text-slate-700 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700'
-                                    : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                                }`}
+                                className={`rounded-xl px-2.5 py-1.5 text-xs font-semibold transition cursor-pointer border ${isActive
+                                  ? 'border-slate-200 text-slate-700 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700'
+                                  : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                  }`}
                               >
                                 {isActive ? 'Deactivate' : 'Activate'}
                               </button>
@@ -749,7 +731,7 @@ function MembershipPlansContent() {
                       <span className="text-xs text-slate-600">Yearly Billing:</span>
                       <div>
                         <span className="text-base font-bold text-slate-950">${p.yearlyPrice.toFixed(2)}<span className="text-xs font-normal text-slate-400">/yr</span></span>
-                        <p className="text-xs text-emerald-600 font-semibold text-right">(${ (p.yearlyPrice / 12).toFixed(2) }/mo effective)</p>
+                        <p className="text-xs text-emerald-600 font-semibold text-right">(${(p.yearlyPrice / 12).toFixed(2)}/mo effective)</p>
                       </div>
                     </div>
                   </div>
@@ -1249,11 +1231,10 @@ function PlanFormModal({
                   key={t.days}
                   type="button"
                   onClick={() => setTrialDays(t.days)}
-                  className={`rounded-xl border p-2 text-center font-semibold transition cursor-pointer ${
-                    trialDays === t.days
-                      ? 'border-slate-950 bg-slate-950 text-white'
-                      : 'border-slate-200 text-slate-700 hover:border-slate-300'
-                  }`}
+                  className={`rounded-xl border p-2 text-center font-semibold transition cursor-pointer ${trialDays === t.days
+                    ? 'border-slate-950 bg-slate-950 text-white'
+                    : 'border-slate-200 text-slate-700 hover:border-slate-300'
+                    }`}
                 >
                   {t.label}
                 </button>
@@ -1330,18 +1311,16 @@ function PlanFormModal({
                     key={feat}
                     type="button"
                     onClick={() => handleToggleFeature(feat)}
-                    className={`flex items-start gap-2 rounded-xl border p-2 text-left text-xs transition cursor-pointer ${
-                      isSelected
-                        ? 'border-[#0170FE] bg-blue-50/50 text-slate-900'
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                    }`}
+                    className={`flex items-start gap-2 rounded-xl border p-2 text-left text-xs transition cursor-pointer ${isSelected
+                      ? 'border-[#0170FE] bg-blue-50/50 text-slate-900'
+                      : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                      }`}
                   >
                     <div
-                      className={`size-4 rounded flex items-center justify-center shrink-0 mt-0.5 border ${
-                        isSelected
-                          ? 'bg-[#0170FE] border-[#0170FE] text-white'
-                          : 'border-slate-300 bg-white'
-                      }`}
+                      className={`size-4 rounded flex items-center justify-center shrink-0 mt-0.5 border ${isSelected
+                        ? 'bg-[#0170FE] border-[#0170FE] text-white'
+                        : 'border-slate-300 bg-white'
+                        }`}
                     >
                       {isSelected && <Check className="size-3" />}
                     </div>

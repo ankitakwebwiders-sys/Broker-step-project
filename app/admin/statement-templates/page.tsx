@@ -930,7 +930,7 @@ function StatementTemplatesContent() {
                   <th className="py-3.5 px-4 min-w-[240px]">Carrier / Structure</th>
                   <th className="py-3.5 px-4 min-w-[130px]">Status</th>
                   <th className="py-3.5 px-4 min-w-[280px]">Mapped Fields</th>
-                  <th className="py-3.5 pl-4 pr-6 text-right min-w-[220px] w-[220px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">
+                  <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">
                     Actions
                   </th>
                 </tr>
@@ -1025,7 +1025,7 @@ function StatementTemplatesContent() {
                         </td>
 
                         {/* 5. Actions (View / Edit / Deactivate) - Sticky Fixed */}
-                        <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[220px] w-[220px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors select-none">
+                        <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
                           <div className="flex items-center justify-end gap-1.5">
                             {/* View Button */}
                             <button

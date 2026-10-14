@@ -315,9 +315,7 @@ export default function AdminDashboardPage() {
             <h2 className="text-base font-semibold font-bold tracking-tight text-slate-900">
               Platform-Level Broker Account Summary
             </h2>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
-              {adminKpisList.length} KPIs
-            </span>
+
           </div>
 
           {/* KPI category filter tabs */}
@@ -359,7 +357,7 @@ export default function AdminDashboardPage() {
           ))}
         </div>
       </section>
-      {/* ───── 5. Active & Inactive Broker Accounts Directory ───── */}
+      {/* ───── 5. Inactive Broker Accounts Directory ───── */}
       <section id="broker-directory-section" className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
           <div>
@@ -370,9 +368,7 @@ export default function AdminDashboardPage() {
               <h2 className="text-base font-medium font-bold text-slate-900">
                 Active &amp; Inactive Broker Accounts
               </h2>
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
-                {filteredBrokers.length} Accounts
-              </span>
+
             </div>
             <p className="mt-1 text-xs sm:text-sm text-slate-500">
               Platform directory of broker accounts, verification states, policy counts, and commission volume
@@ -705,9 +701,7 @@ export default function AdminDashboardPage() {
               <h2 className="text-base font-medium font-bold text-slate-900">
                 Failed Membership Payments Requiring Attention
               </h2>
-              <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-700">
-                {failedPayments.length} Active Overdue
-              </span>
+
             </div>
             <p className="mt-1 text-xs sm:text-sm text-slate-500">
               Immediate admin intervention required for recurring payment failures, bank declines, and expired cards
@@ -755,20 +749,20 @@ export default function AdminDashboardPage() {
         {/* Failed Payments Table */}
         <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white">
           <div className="overflow-x-auto scrollbar-thin">
-            <table className="w-full min-w-[950px] text-left text-xs sm:text-sm">
-              <thead className="bg-slate-50/80 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
+            <table className="w-full min-w-[1060px] text-left text-xs sm:text-sm">
+              <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
                 <tr>
                   <th className="py-3 px-4 whitespace-nowrap min-w-[220px]">Broker / Agency</th>
                   <th className="py-3 px-4 whitespace-nowrap min-w-[150px]">Plan &amp; Amount</th>
                   <th className="py-3 px-4 whitespace-nowrap min-w-[180px]">Failure Reason</th>
                   <th className="py-3 px-4 whitespace-nowrap min-w-[170px]">Retries &amp; Overdue</th>
                   <th className="py-3 px-4 whitespace-nowrap min-w-[140px]">Grace Deadline</th>
-                  <th className="px-3.5 sm:px-4 py-3.5 text-right min-w-[170px] w-[170px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
+                  <th className="px-4 py-3.5 text-right min-w-[280px] w-[280px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {failedPayments.map((item) => (
-                  <tr key={item.id} className="group hover:bg-rose-50/30 transition-colors">
+                  <tr key={item.id} className="group hover:bg-[#fff1f2] transition-colors">
                     <td className="py-3.5 px-4 whitespace-nowrap">
                       <div>
                         <span className="font-bold text-slate-900 block whitespace-nowrap">{item.brokerName}</span>
@@ -813,7 +807,7 @@ export default function AdminDashboardPage() {
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 text-right whitespace-nowrap min-w-[200px] w-[200px] sticky right-0 bg-white group-hover:bg-rose-50/50 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap min-w-[280px] w-[280px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#fff1f2] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
                       <div className="inline-flex items-center gap-1.5">
                         <button
                           onClick={() => handleRetryPayment(item.id, item.brokerName)}
@@ -924,12 +918,12 @@ export default function AdminDashboardPage() {
                   <th className="py-2.5 px-3">Days Remaining</th>
                   <th className="py-2.5 px-3">Auto-Renew Status</th>
                   <th className="py-2.5 px-3">Churn Risk</th>
-                  <th className="py-2.5 px-3 text-right min-w-[140px] w-[140px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
+                  <th className="py-2.5 px-3 text-right min-w-[170px] w-[170px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredExpiries.map((item) => (
-                  <tr key={item.id} className="group hover:bg-slate-50/60 transition-colors">
+                  <tr key={item.id} className="group hover:bg-[#f8fafc] transition-colors">
                     <td className="py-3 px-3">
                       <span className="font-bold text-slate-900 block">{item.brokerName}</span>
                       <span className="text-xs text-slate-500 block">{item.agencyName}</span>
@@ -980,7 +974,7 @@ export default function AdminDashboardPage() {
                         {item.churnRisk} Risk
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-right whitespace-nowrap min-w-[140px] w-[140px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                    <td className="py-3 px-3 text-right whitespace-nowrap min-w-[170px] w-[170px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
                       <div className="inline-flex items-center gap-1.5">
                         <button
                           onClick={() => showToast(`Renewal reminder and incentive email dispatched to ${item.brokerName}.`)}

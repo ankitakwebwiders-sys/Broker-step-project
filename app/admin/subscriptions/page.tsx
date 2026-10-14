@@ -22,6 +22,7 @@ import {
   Receipt,
   Send,
   SlidersHorizontal,
+  RotateCcw,
 } from 'lucide-react'
 
 // Tab definitions for Subscriptions / Billing
@@ -367,13 +368,13 @@ function SubscriptionsBillingContent() {
   // 19.1 Action: Apply plan/status changes only through agreed administrative controls
   function handleApplyAdminControl(
     subId: string,
-    targetPlan: string,
+    targetPlan: SubscriptionRecord['planName'],
     targetStatus: SubscriptionRecord['subscriptionStatus'],
     reason: string,
     refId: string,
     proration: string
   ) {
-    const planPrices: Record<string, number> = {
+    const planPrices: Record<SubscriptionRecord['planName'], number> = {
       Starter: 29,
       Professional: 79,
       Enterprise: 199,
@@ -435,11 +436,12 @@ function SubscriptionsBillingContent() {
 
   // Payments Ledger Items
   const allInvoices = useMemo(() => {
-    const list: Array<InvoiceRecord & { brokerName: string; businessName: string; planName: string }> = []
+    const list: Array<InvoiceRecord & { brokerId: string; brokerName: string; businessName: string; planName: string }> = []
     subscriptions.forEach((sub) => {
       sub.invoiceHistory.forEach((inv) => {
         list.push({
           ...inv,
+          brokerId: sub.brokerId,
           brokerName: sub.brokerName,
           businessName: sub.businessName,
           planName: sub.planName,
@@ -630,56 +632,93 @@ function SubscriptionsBillingContent() {
       </div>
 
       {/* Search & Filter Toolbar */}
-      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-1 items-center gap-2.5">
-            <div className="relative min-w-[240px] flex-1 sm:max-w-xs">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:flex-wrap flex-1">
+            {/* Search Input */}
+            <div className="relative w-full sm:w-auto sm:min-w-[220px] sm:max-w-xs flex-1">
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search broker, business, or email..."
-                className="h-9.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#0170FE] focus:bg-white focus:ring-2 focus:ring-[#0170FE]/20"
+                className="h-9.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-8 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#0170FE] focus:bg-white focus:ring-2 focus:ring-[#0170FE]/20"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  aria-label="Clear search"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
                 >
                   <X className="size-3.5" />
                 </button>
               )}
             </div>
 
-            <select
-              value={planFilter}
-              onChange={(e) => setPlanFilter(e.target.value)}
-              className="h-9.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-[#0170FE]"
-            >
-              <option value="All">All Plans</option>
-              <option value="Starter">Starter ($29)</option>
-              <option value="Professional">Professional ($79)</option>
-              <option value="Enterprise">Enterprise ($199)</option>
-            </select>
+            {/* Filter Dropdowns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:items-center gap-2 w-full sm:w-auto">
+              <select
+                value={planFilter}
+                onChange={(e) => setPlanFilter(e.target.value)}
+                className="h-9.5 w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-[#0170FE]"
+              >
+                <option value="All">All Plans</option>
+                <option value="Starter">Starter ($29)</option>
+                <option value="Professional">Professional ($79)</option>
+                <option value="Enterprise">Enterprise ($199)</option>
+              </select>
 
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-9.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-[#0170FE]"
-            >
-              <option value="All">All Subscription Status</option>
-              <option value="Active">Active</option>
-              <option value="In Trial">In Trial</option>
-              <option value="Past Due">Past Due</option>
-              <option value="Expired">Expired</option>
-              <option value="Non-Renewed">Non-Renewed</option>
-            </select>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="h-9.5 w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-[#0170FE]"
+              >
+                <option value="All">All Subscription Status</option>
+                <option value="Active">Active</option>
+                <option value="In Trial">In Trial</option>
+                <option value="Past Due">Past Due</option>
+                <option value="Expired">Expired</option>
+                <option value="Non-Renewed">Non-Renewed</option>
+              </select>
+
+              {(planFilter !== 'All' || statusFilter !== 'All' || searchQuery) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery('')
+                    setPlanFilter('All')
+                    setStatusFilter('All')
+                  }}
+                  className="hidden lg:inline-flex items-center gap-1.5 h-9.5 px-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-600 transition"
+                  title="Reset all filters"
+                >
+                  <RotateCcw className="size-3" />
+                  <span>Reset</span>
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="text-xs text-slate-400 font-medium">
-            Showing <strong className="text-slate-800">{activeTab === 'payments' ? allInvoices.length : filteredSubscriptions.length}</strong> records
+          <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-slate-400 font-medium pt-2 sm:pt-0 border-t border-slate-100 sm:border-0">
+            <span>
+              Showing <strong className="text-slate-800">{activeTab === 'payments' ? allInvoices.length : filteredSubscriptions.length}</strong> records
+            </span>
+            {(planFilter !== 'All' || statusFilter !== 'All' || searchQuery) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('')
+                  setPlanFilter('All')
+                  setStatusFilter('All')
+                }}
+                className="lg:hidden inline-flex items-center gap-1 text-xs font-semibold text-[#0170FE] hover:underline"
+              >
+                <RotateCcw className="size-3" />
+                <span>Reset</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -705,7 +744,7 @@ function SubscriptionsBillingContent() {
                   {activeTab === 'expiring' && (
                     <th className="py-3.5 px-4">Auto-Renew Policy</th>
                   )}
-                  <th className="py-3.5 pl-4 pr-6 text-right whitespace-nowrap min-w-[280px] w-[280px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Admin Actions</th>
+                  <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">Admin Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
@@ -844,7 +883,7 @@ function SubscriptionsBillingContent() {
                         )}
 
                         {/* 19.1 Admin Actions (View, Review Payment, Review Failed Notif, Review Expiry) */}
-                        <td className="py-4 pl-4 pr-6 whitespace-nowrap text-right min-w-[280px] w-[280px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                        <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
                           <div className="flex items-center justify-end gap-1.5 flex-nowrap">
                             {/* Action 1: View subscription */}
                             <button
@@ -948,7 +987,7 @@ function SubscriptionsBillingContent() {
                   <th className="py-3 px-4">Amount</th>
                   <th className="py-3 px-4">Payment Method</th>
                   <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right min-w-[120px] w-[120px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
+                  <th className="py-3 px-4 text-right min-w-[120px] w-[120px] md:sticky md:right-0 bg-slate-50/95 backdrop-blur-xs md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
@@ -978,7 +1017,7 @@ function SubscriptionsBillingContent() {
                         {inv.status}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right whitespace-nowrap min-w-[120px] w-[120px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                    <td className="py-3 px-4 text-right whitespace-nowrap min-w-[120px] w-[120px] md:sticky md:right-0 bg-white group-hover:bg-slate-50/95 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
                       <button
                         type="button"
                         onClick={() => showToast(`Receipt generated for ${inv.invoiceNo}`)}
@@ -1432,14 +1471,14 @@ function AdminControlModal({
   onClose: () => void
   onApply: (
     subId: string,
-    targetPlan: string,
+    targetPlan: SubscriptionRecord['planName'],
     targetStatus: SubscriptionRecord['subscriptionStatus'],
     reason: string,
     refId: string,
     proration: string
   ) => void
 }) {
-  const [targetPlan, setTargetPlan] = useState(sub.planName)
+  const [targetPlan, setTargetPlan] = useState<SubscriptionRecord['planName']>(sub.planName)
   const [targetStatus, setTargetStatus] = useState<SubscriptionRecord['subscriptionStatus']>(
     sub.subscriptionStatus
   )
@@ -1455,7 +1494,11 @@ function AdminControlModal({
     onApply(sub.id, targetPlan, targetStatus, reason, refId, proration)
   }
 
-  const planOptions = [
+  const planOptions: Array<{
+    name: SubscriptionRecord['planName']
+    price: string
+    desc: string
+  }> = [
     { name: 'Starter', price: '$29/mo', desc: 'Up to 3 carriers, basic reporting, standard support' },
     { name: 'Professional', price: '$79/mo', desc: 'Up to 15 carriers, full reporting & exports, QR tools' },
     { name: 'Enterprise', price: '$199/mo', desc: 'Unlimited carriers, custom templates, dedicated manager' },

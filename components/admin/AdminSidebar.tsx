@@ -134,11 +134,7 @@ export const adminNavSections: AdminNavSectionDef[] = [
         icon: BellRing,
         count: '5',
         href: '/admin/notifications',
-        subItems: [
-          { label: 'Payment Failure', href: '/admin/notifications?type=payment-failure' },
-          { label: 'Expiry / Non-Renewal', href: '/admin/notifications?type=expiry' },
-          { label: 'Notification Configuration where agreed', href: '/admin/notifications?tab=config' },
-        ],
+
       },
       {
         label: 'Platform Settings',

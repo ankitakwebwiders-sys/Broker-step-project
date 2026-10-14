@@ -938,7 +938,7 @@ export default function LeadsPage() {
                   <th className="px-3 py-3.5 min-w-[130px] whitespace-nowrap">Lead Status</th>
                   <th className="px-3 py-3.5 min-w-[115px] whitespace-nowrap">Marketing Consent</th>
                   <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Created Date</th>
-                  <th className="px-4 py-3.5 text-right min-w-[240px] w-[240px] whitespace-nowrap sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
+                  <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -1069,7 +1069,7 @@ export default function LeadsPage() {
                         </td>
 
                         {/* 10. Actions */}
-                        <td className="px-4 py-3.5 text-right whitespace-nowrap min-w-[240px] w-[240px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                        <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
                           <div className="inline-flex items-center justify-end gap-1.5 whitespace-nowrap">
                             {/* View */}
                             <button

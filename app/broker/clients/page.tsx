@@ -832,7 +832,7 @@ export default function ClientsPage() {
                   <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Policies</th>
                   <th className="px-3 py-3.5 min-w-[125px] whitespace-nowrap">Marketing Consent</th>
                   <th className="px-4 py-3.5 min-w-[175px]">Last Activity</th>
-                  <th className="px-4 py-3.5 text-right min-w-[210px] w-[210px] whitespace-nowrap sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
+                  <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -970,7 +970,7 @@ export default function ClientsPage() {
                         </td>
 
                         {/* 9. Actions */}
-                        <td className="px-4 py-3.5 text-right whitespace-nowrap min-w-[210px] w-[210px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                        <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
                           <div className="inline-flex items-center justify-end gap-1.5 whitespace-nowrap">
                             <button
                               onClick={() => {

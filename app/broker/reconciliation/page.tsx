@@ -737,7 +737,7 @@ export default function ReconciliationPage() {
                 <th className="py-3.5 px-4">Status</th>
                 <th className="py-3.5 px-4">Statement Source</th>
                 <th className="py-3.5 px-4">Transaction Date</th>
-                <th className="py-3.5 px-4 text-center min-w-[280px] w-[280px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
+                <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
@@ -835,7 +835,7 @@ export default function ReconciliationPage() {
                     <td className="py-3.5 px-4 font-mono text-xs text-slate-600 whitespace-nowrap">{item.transactionDate}</td>
 
                     {/* 11. Actions: View; Review; Match/Resolve where applicable; Update status where allowed */}
-                    <td className="py-3.5 px-4 text-center whitespace-nowrap min-w-[280px] w-[280px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                    <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
                       <div className="inline-flex items-center gap-1.5 whitespace-nowrap">
                         {/* View */}
                         <button

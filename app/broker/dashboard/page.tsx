@@ -139,8 +139,29 @@ function StatCard({ stat }: { stat: KpiStat }) {
   )
 }
 
+const MONTHLY_TREND_DATA = [
+  { month: 'Jan', prodPct: 43, commPct: 25, prodVal: '$172,000', commVal: '$25,800' },
+  { month: 'Feb', prodPct: 52, commPct: 33, prodVal: '$208,000', commVal: '$31,200' },
+  { month: 'Mar', prodPct: 63, commPct: 38, prodVal: '$252,000', commVal: '$37,800' },
+  { month: 'Apr', prodPct: 58, commPct: 40, prodVal: '$232,000', commVal: '$34,800' },
+  { month: 'May', prodPct: 77, commPct: 50, prodVal: '$308,000', commVal: '$46,200' },
+  { month: 'Jun', prodPct: 83, commPct: 54, prodVal: '$332,000', commVal: '$49,800' },
+  { month: 'Jul', prodPct: 88, commPct: 58, prodVal: '$352,000', commVal: '$55,200' },
+  { month: 'Aug', prodPct: 92, commPct: 60, prodVal: '$368,000', commVal: '$57,000' },
+  { month: 'Sep', prodPct: 85, commPct: 64, prodVal: '$340,000', commVal: '$61,800' },
+  { month: 'Oct', prodPct: 90, commPct: 71, prodVal: '$360,000', commVal: '$65,400' },
+  { month: 'Nov', prodPct: 82, commPct: 68, prodVal: '$328,000', commVal: '$70,200' },
+  { month: 'Dec', prodPct: 95, commPct: 74, prodVal: '$380,000', commVal: '$75,000' },
+]
+
 export default function BrokerDashboardPage() {
   const [range, setRange] = useState('Last 12 months')
+
+  const displayedTrendData = useMemo(() => {
+    if (range === 'Last 6 months') return MONTHLY_TREND_DATA.slice(-6)
+    if (range === 'This year') return MONTHLY_TREND_DATA.slice(0, 10)
+    return MONTHLY_TREND_DATA
+  }, [range])
   const [kpiCategory, setKpiCategory] = useState<'all' | 'production' | 'commission'>('all')
   const [renewalDaysFilter, setRenewalDaysFilter] = useState<number>(30)
 
@@ -427,7 +448,7 @@ export default function BrokerDashboardPage() {
         </div>
 
         {/* Production & Commission Trend Bar Chart */}
-        <div className="rounded-xl border border-slate-200/70 p-4 sm:p-5 pt-5">
+        <div className="rounded-xl border border-slate-200/70 bg-white p-4 sm:p-5 pt-5 shadow-xs overflow-hidden">
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
             <div>
               <h3 className="text-sm sm:text-base font-semibold text-slate-900">
@@ -437,62 +458,80 @@ export default function BrokerDashboardPage() {
                 Historical growth and commission collection across all lines
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
-                <span className="size-2 rounded-full bg-blue-600" /> Production
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
-                <span className="size-2 rounded-full bg-violet-400" /> Commission
+            <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2.5 sm:gap-3">
+              <div className="flex items-center gap-2.5 text-xs text-slate-600 font-medium">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="size-2 rounded-full bg-blue-600 shadow-2xs" /> Production
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="size-2 rounded-full bg-violet-400 shadow-2xs" /> Commission
+                </span>
               </div>
               <select
                 value={range}
                 onChange={(e) => setRange(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 outline-none transition hover:border-slate-300 focus:border-blue-400"
+                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 outline-none transition hover:border-slate-300 focus:border-[#0170FE]"
               >
-                <option>Last 12 months</option>
-                <option>Last 6 months</option>
-                <option>This year</option>
+                <option value="Last 12 months">Last 12 months</option>
+                <option value="Last 6 months">Last 6 months</option>
+                <option value="This year">This year</option>
               </select>
             </div>
           </div>
 
-          <div className="mt-6 flex h-[210px] items-end gap-2 border-b border-l border-slate-100 px-2 pb-0 pt-3 sm:gap-4 sm:px-4">
-            <div className="flex h-full flex-col justify-between pb-1 pr-2 text-xs text-slate-400 font-mono">
-              <span>$400k</span>
-              <span>$300k</span>
-              <span>$200k</span>
-              <span>$100k</span>
-              <span>$0</span>
-            </div>
-            <div className="flex h-full flex-1 items-end justify-between gap-1 sm:gap-3">
-              {[
-                'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-              ].map((month, i) => (
-                <div
-                  key={month}
-                  className="group/bar flex h-full flex-1 flex-col items-center justify-end gap-1.5"
-                >
-                  <div className="flex h-full w-full items-end justify-center gap-0.5">
-                    <div
-                      className="w-1/2 rounded-t-[3px] bg-blue-600/90 transition-all duration-300 group-hover/bar:bg-blue-600"
-                      style={{
-                        height: `${35 + [8, 17, 28, 23, 42, 48, 57, 60, 68, 74, 82, 90][i]
-                          }%`,
-                      }}
-                    />
-                    <div
-                      className="w-1/2 rounded-t-[3px] bg-violet-400/90 transition-all duration-300 group-hover/bar:bg-violet-500"
-                      style={{
-                        height: `${20 + [5, 13, 18, 20, 30, 34, 38, 40, 44, 51, 57, 64][i]
-                          }%`,
-                      }}
-                    />
-                  </div>
-                  <span className="text-[11px] font-medium text-slate-400 transition group-hover/bar:text-slate-700">
-                    {month}
-                  </span>
+          {/* Scrollable Container with Sticky Y-Axis on Mobile */}
+          <div className="relative mt-5 sm:mt-6">
+            <div className="overflow-x-auto pb-1 scrollbar-thin">
+              <div className="flex h-[220px] min-w-[540px] sm:min-w-0 items-end gap-1.5 border-b border-l border-slate-100 pb-0 pt-3 sm:gap-3">
+                {/* Sticky Y-Axis */}
+                <div className="sticky left-0 z-10 flex h-full flex-col justify-between pb-1 pr-2.5 pl-0.5 text-xs font-mono text-slate-400 bg-white/95 backdrop-blur-xs select-none border-r border-slate-100 sm:border-r-0">
+                  <span>$400k</span>
+                  <span>$300k</span>
+                  <span>$200k</span>
+                  <span>$100k</span>
+                  <span>$0</span>
                 </div>
-              ))}
+
+                {/* Bars Area */}
+                <div className="flex h-full flex-1 items-end justify-between gap-1 sm:gap-2.5 px-1 sm:px-2">
+                  {displayedTrendData.map((item) => (
+                    <div
+                      key={item.month}
+                      className="group/bar relative flex h-full flex-1 flex-col items-center justify-end gap-1.5 min-w-[28px] sm:min-w-0 cursor-pointer"
+                    >
+                      {/* Floating Tooltip on Hover */}
+                      <div className="pointer-events-none absolute -top-12 z-20 hidden -translate-x-1/2 flex-col items-center rounded-lg bg-slate-950 px-2 py-1 text-[10.5px] font-semibold text-white shadow-lg group-hover/bar:flex left-1/2 whitespace-nowrap">
+                        <span className="text-blue-300">Prod: {item.prodVal}</span>
+                        <span className="text-violet-300">Comm: {item.commVal}</span>
+                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-950" />
+                      </div>
+
+                      {/* Bar Pair */}
+                      <div className="flex h-full w-full items-end justify-center gap-0.5 sm:gap-1">
+                        <div
+                          className="w-1/2 max-w-[14px] rounded-t-[3px] bg-blue-600/90 transition-all duration-300 group-hover/bar:bg-blue-600"
+                          style={{ height: `${item.prodPct}%` }}
+                        />
+                        <div
+                          className="w-1/2 max-w-[14px] rounded-t-[3px] bg-violet-400/90 transition-all duration-300 group-hover/bar:bg-violet-500"
+                          style={{ height: `${item.commPct}%` }}
+                        />
+                      </div>
+
+                      {/* Month Label */}
+                      <span className="text-[11px] font-medium text-slate-400 transition group-hover/bar:text-slate-900 group-hover/bar:font-bold">
+                        {item.month}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Swipe Hint */}
+            <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 sm:hidden px-1">
+              <span>← Swipe chart horizontally to view months →</span>
+              <span className="font-semibold text-slate-600">{displayedTrendData.length} Months</span>
             </div>
           </div>
         </div>

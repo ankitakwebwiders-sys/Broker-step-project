@@ -761,7 +761,7 @@ export default function RenewalsPage() {
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[130px] text-right">Premium</th>
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[140px]">Policy Status</th>
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[150px]">Renewal Status</th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[360px] w-[360px] text-center sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
+                <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
@@ -857,7 +857,7 @@ export default function RenewalsPage() {
                       </td>
 
                       {/* Actions: Review; Renew; Rewrite; Non-Renew; Mark Lost Business */}
-                      <td className="px-4 py-3.5 whitespace-nowrap text-center min-w-[360px] w-[360px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                      <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
                         <div className="flex items-center justify-center gap-1.5 flex-nowrap">
                           {/* Review Action */}
                           <button

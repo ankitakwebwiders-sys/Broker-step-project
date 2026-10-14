@@ -307,9 +307,6 @@ function NotificationsContent() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
               Notifications
             </h1>
-            <span className="rounded-full bg-blue-50 border border-blue-200/80 px-2.5 py-0.5 text-xs font-bold text-blue-700">
-              SOW 19.2 Scope
-            </span>
           </div>
           <p className="mt-1 text-xs sm:text-sm text-slate-500">
             Platform notification center, routing matrix, and automated delivery logs for broker accounts.
@@ -408,14 +405,14 @@ function NotificationsContent() {
 
         {/* The Matrix Table (Exact mapping as requested) */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="min-w-[1240px] w-full text-left text-xs">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/70 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th className="py-3.5 pl-6 pr-4 min-w-[240px]">Notification</th>
-                <th className="py-3.5 px-4 min-w-[200px]">Recipient</th>
-                <th className="py-3.5 px-4 min-w-[300px]">Page / information</th>
-                <th className="py-3.5 px-4 min-w-[200px]">Delivery Channels</th>
-                <th className="py-3.5 pl-4 pr-6 text-right min-w-[140px] w-[140px] md:sticky md:right-0 bg-slate-50/95 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">
+                <th className="py-3.5 pl-6 pr-4 min-w-[360px] w-[30%]">Notification</th>
+                <th className="py-3.5 px-4 min-w-[280px] w-[22%]">Recipient</th>
+                <th className="py-3.5 px-4 min-w-[360px] w-[28%]">Page / information</th>
+                <th className="py-3.5 px-4 min-w-[280px] w-[20%]">Delivery Channels</th>
+                <th className="py-3.5 pl-4 pr-6 text-right min-w-[170px] w-[170px] md:sticky md:right-0 bg-slate-50/95 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">
                   Status
                 </th>
               </tr>
@@ -436,20 +433,20 @@ function NotificationsContent() {
                         >
                           {isFailedPayment ? <AlertCircle className="size-4" /> : <Clock className="size-4" />}
                         </div>
-                        <div>
-                          <p className="font-bold text-slate-900 text-xs sm:text-sm">
+                        <div className="flex-1">
+                          <p className="font-bold text-slate-900 text-sm whitespace-nowrap">
                             {wf.title}
                           </p>
-                          <p className="text-xs text-slate-500 mt-0.5 max-w-sm leading-relaxed">
+                          <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                             {wf.description}
                           </p>
-                          <div className="mt-1.5 flex items-center gap-2">
+                          <div className="mt-2 flex items-center gap-2">
                             <span className="font-mono text-[10.5px] text-slate-400 font-semibold">
                               {wf.id}
                             </span>
                             <span className="text-slate-300">·</span>
                             <span
-                              className={`rounded-full px-2 py-0.2 text-[10.5px] font-bold ${wf.priority === 'Critical'
+                              className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${wf.priority === 'Critical'
                                 ? 'bg-rose-100/70 text-rose-800'
                                 : 'bg-amber-100/70 text-amber-800'
                                 }`}
@@ -463,19 +460,19 @@ function NotificationsContent() {
 
                     {/* 2. Recipient */}
                     <td className="py-4 px-4 align-top">
-                      <div className="space-y-1.5">
-                        <div className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-2.5 py-1 text-xs font-bold text-white shadow-2xs">
+                      <div className="space-y-2">
+                        <div className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-2.5 py-1 text-xs font-bold text-white shadow-2xs whitespace-nowrap">
                           <UserCheck className="size-3 text-blue-400" />
                           <span>{wf.recipients}</span>
                         </div>
-                        <div className="flex flex-col gap-1 text-[11px] text-slate-500 pl-0.5">
-                          <span className="flex items-center gap-1">
-                            <Check className="size-3 text-emerald-500 shrink-0" />
-                            <span>Broker (Header Banner + Billing Email)</span>
+                        <div className="flex flex-col gap-1.5 pl-0.5">
+                          <span className="flex items-center gap-1.5 whitespace-nowrap">
+                            <Check className="size-3.5 text-emerald-500 shrink-0" />
+                            <span className="text-xs text-slate-600 font-medium">Broker (Header Banner + Billing Email)</span>
                           </span>
-                          <span className="flex items-center gap-1">
-                            <Check className="size-3 text-emerald-500 shrink-0" />
-                            <span>Super Admin (Queue &amp; Security Alert)</span>
+                          <span className="flex items-center gap-1.5 whitespace-nowrap">
+                            <Check className="size-3.5 text-emerald-500 shrink-0" />
+                            <span className="text-xs text-slate-600 font-medium">Super Admin (Queue &amp; Security Alert)</span>
                           </span>
                         </div>
                       </div>
@@ -484,19 +481,19 @@ function NotificationsContent() {
                     {/* 3. Page / information */}
                     <td className="py-4 px-4 align-top">
                       <div>
-                        <p className="font-bold text-slate-900 text-xs sm:text-sm">
+                        <p className="font-bold text-slate-900 text-sm leading-snug">
                           {wf.pageInformation}
                         </p>
-                        <p className="text-xs text-slate-500 mt-0.5">
+                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                           Directly connects into the administrative subscriptions management views:
                         </p>
-                        <div className="mt-2">
+                        <div className="mt-2.5">
                           <Link
                             href={wf.pageHref}
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50/80 px-2.5 py-1 text-xs font-bold text-[#0170FE] hover:bg-blue-100 hover:border-blue-300 transition"
+                            className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/90 px-3 py-1.5 text-xs font-bold text-[#0170FE] hover:bg-blue-100 hover:border-blue-300 transition whitespace-nowrap shadow-2xs"
                           >
                             <span>{wf.pageLabel}</span>
-                            <ArrowRight className="size-3" />
+                            <ArrowRight className="size-3.5" />
                           </Link>
                         </div>
                       </div>
@@ -504,25 +501,25 @@ function NotificationsContent() {
 
                     {/* 4. Delivery Channels */}
                     <td className="py-4 px-4 align-top">
-                      <div className="flex flex-wrap gap-1.5 max-w-xs">
+                      <div className="flex flex-wrap gap-1.5">
                         {wf.deliveryChannels.map((channel, i) => (
                           <span
                             key={i}
-                            className="inline-flex items-center gap-1 rounded-lg bg-slate-100 border border-slate-200/70 px-2 py-0.5 text-[11px] font-semibold text-slate-700"
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 border border-slate-200/80 px-2.5 py-1 text-xs font-semibold text-slate-700 whitespace-nowrap"
                           >
-                            <span className="size-1.5 rounded-full bg-blue-500" />
+                            <span className="size-1.5 rounded-full bg-blue-500 shrink-0" />
                             {channel}
                           </span>
                         ))}
                       </div>
-                      <p className="text-[11px] text-slate-400 mt-1.5">
+                      <p className="text-xs text-slate-400 mt-2 font-medium">
                         Triggered: {wf.lastTriggered}
                       </p>
                     </td>
 
                     {/* 5. Status */}
-                    <td className="py-4 pl-4 pr-6 text-right align-top whitespace-nowrap min-w-[140px] w-[140px] md:sticky md:right-0 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                    <td className="py-4 pl-4 pr-6 text-right align-top whitespace-nowrap min-w-[170px] w-[170px] md:sticky md:right-0 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-3 py-1 text-xs font-bold text-emerald-700 whitespace-nowrap">
                         <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         {wf.status}
                       </span>
@@ -699,14 +696,14 @@ function NotificationsContent() {
       {/* Dispatch Logs Table */}
       <div className="mt-4 rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="min-w-[1200px] w-full text-left text-xs">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/70 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th className="py-3.5 pl-6 pr-4 min-w-[220px]">Event &amp; Timestamp</th>
-                <th className="py-3.5 px-4 min-w-[200px]">Affected Broker</th>
-                <th className="py-3.5 px-4 min-w-[180px]">Recipient Routing</th>
-                <th className="py-3.5 px-4 min-w-[240px]">Delivered Information</th>
-                <th className="py-3.5 px-4 min-w-[120px]">Status</th>
+                <th className="py-3.5 pl-6 pr-4 min-w-[240px]">Event &amp; Timestamp</th>
+                <th className="py-3.5 px-4 min-w-[240px]">Affected Broker</th>
+                <th className="py-3.5 px-4 min-w-[220px]">Recipient Routing</th>
+                <th className="py-3.5 px-4 min-w-[280px]">Delivered Information</th>
+                <th className="py-3.5 px-4 min-w-[140px]">Status</th>
                 <th className="py-3.5 pl-4 pr-6 text-right min-w-[180px] w-[180px] md:sticky md:right-0 bg-slate-50/95 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">
                   Actions
                 </th>

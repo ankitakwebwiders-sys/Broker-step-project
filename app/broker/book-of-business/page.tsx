@@ -661,7 +661,7 @@ export default function BookOfBusinessPage() {
                     <th className="min-w-[140px] whitespace-nowrap px-4 py-3.5 text-right">Actual Paid</th>
                     <th className="min-w-[140px] whitespace-nowrap px-4 py-3.5 text-right">Outstanding</th>
                     <th className="min-w-[180px] whitespace-nowrap px-4 py-3.5">Reconciliation / Status</th>
-                    <th className="min-w-[150px] w-[150px] whitespace-nowrap px-4 py-3.5 text-center sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
+                    <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -732,7 +732,7 @@ export default function BookOfBusinessPage() {
                               </span>
                             )}
                           </td>
-                          <td className="whitespace-nowrap px-4 py-3.5 text-center sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                          <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
                             <div className="flex items-center justify-center gap-2">
                               <button
                                 onClick={(e) => {
@@ -974,11 +974,10 @@ export default function BookOfBusinessPage() {
                 <button
                   key={tab.id}
                   onClick={() => setDrawerTab(tab.id as typeof drawerTab)}
-                  className={`py-2.5 sm:py-3 text-[11.5px] sm:text-[12px] font-medium border-b-2 transition whitespace-nowrap px-1.5 sm:px-0 cursor-pointer ${
-                    drawerTab === tab.id
-                      ? 'border-blue-600 text-blue-600 font-semibold'
-                      : 'border-transparent text-slate-500 hover:text-slate-900'
-                  }`}
+                  className={`py-2.5 sm:py-3 text-[11.5px] sm:text-[12px] font-medium border-b-2 transition whitespace-nowrap px-1.5 sm:px-0 cursor-pointer ${drawerTab === tab.id
+                    ? 'border-blue-600 text-blue-600 font-semibold'
+                    : 'border-transparent text-slate-500 hover:text-slate-900'
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -1205,11 +1204,10 @@ export default function BookOfBusinessPage() {
                                 ${tx.outstanding.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                               </td>
                               <td className="px-3.5 py-2.5 whitespace-nowrap">
-                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                                  tx.reconciliationStatus === 'Reconciled'
-                                    ? 'bg-emerald-50 text-emerald-700'
-                                    : 'bg-amber-50 text-amber-700'
-                                }`}>
+                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${tx.reconciliationStatus === 'Reconciled'
+                                  ? 'bg-emerald-50 text-emerald-700'
+                                  : 'bg-amber-50 text-amber-700'
+                                  }`}>
                                   {tx.reconciliationStatus}
                                 </span>
                               </td>

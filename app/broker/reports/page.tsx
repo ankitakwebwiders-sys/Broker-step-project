@@ -937,7 +937,7 @@ function ReportsContent() {
              VIEW 1: CLIENT-REQUESTED ALL 15 REPORTS DIRECTORY MATRIX
              ========================================================================= */
           <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gradient-to-r from-slate-50/70 to-white">
+            <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gradient-to-r from-slate-50/70 to-white">
               <div>
                 <h2 className="text-lg sm:text-xl font-bold text-slate-950 flex items-center gap-2">
                   <FileText className="size-5 text-[#0170FE]" />
@@ -961,14 +961,14 @@ function ReportsContent() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+              <table className="w-full min-w-[1160px] text-left text-sm">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/70 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                    <th className="py-4 pl-6 pr-4">Report</th>
-                    <th className="py-4 px-4">Main Content / Filters</th>
-                    <th className="py-4 px-4">Applicable SOW Filters</th>
-                    <th className="py-4 px-4">Export Formats</th>
-                    <th className="py-4 pl-4 pr-6 text-right min-w-[210px] w-[210px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
+                    <th className="py-4 pl-6 pr-4 whitespace-nowrap min-w-[300px]">Report</th>
+                    <th className="py-4 px-4 whitespace-nowrap min-w-[240px]">Main Content / Filters</th>
+                    <th className="py-4 px-4 whitespace-nowrap min-w-[360px]">Applicable SOW Filters</th>
+                    <th className="py-4 px-4 whitespace-nowrap min-w-[140px]">Export Formats</th>
+                    <th className="py-3.5 pl-4 pr-6 text-right min-w-[140px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">
@@ -977,47 +977,56 @@ function ReportsContent() {
                     return (
                       <tr key={rep.key} className="hover:bg-slate-50/80 transition group">
                         {/* Report Name & Description */}
-                        <td className="py-4 pl-6 pr-4 align-top">
+                        <td className="py-4 pl-6 pr-4 align-top min-w-[300px]">
                           <div className="flex items-start gap-3">
                             <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 group-hover:bg-[#0170FE] group-hover:text-white transition-colors">
                               <Icon className="size-5" />
                             </div>
-                            <div>
-                              <p className="text-sm font-semibold text-slate-900 group-hover:text-[#0170FE] transition-colors">
-                                {rep.title}
-                              </p>
-                              <p className="text-xs text-slate-500 mt-1 line-clamp-1">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="text-sm font-bold text-slate-900 group-hover:text-[#0170FE] transition-colors whitespace-nowrap">
+                                  {rep.title}
+                                </p>
+                                <span className="inline-block rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 whitespace-nowrap">
+                                  {rep.category}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-500 mt-1 line-clamp-2 max-w-sm">
                                 {rep.description}
                               </p>
-                              <span className="mt-1.5 inline-block rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
-                                {rep.category}
-                              </span>
                             </div>
                           </div>
                         </td>
 
                         {/* Main Content / Filters */}
-                        <td className="py-4 px-4 align-top">
-                          <p className="text-sm font-semibold text-slate-800">{rep.mainContent}</p>
-                          <p className="text-xs text-slate-400 mt-1">
+                        <td className="py-4 px-4 align-top min-w-[240px]">
+                          <p className="text-sm font-semibold text-slate-800 whitespace-nowrap">{rep.mainContent}</p>
+                          <p className="text-xs text-slate-400 mt-1 whitespace-nowrap">
                             Standard Scope of Work (SOW) specification
                           </p>
                         </td>
 
                         {/* Applicable SOW Filters */}
-                        <td className="py-4 px-4 align-top max-w-xs">
-                          <p className="text-xs text-slate-600 leading-relaxed font-mono">
-                            {rep.sowFilters}
-                          </p>
+                        <td className="py-4 px-4 align-top min-w-[360px]">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {rep.sowFilters.split(', ').map((filter) => (
+                              <span
+                                key={filter}
+                                className="inline-flex items-center rounded-md bg-slate-100/90 px-2 py-0.5 text-[11px] font-medium text-slate-700 border border-slate-200/60 whitespace-nowrap"
+                              >
+                                {filter}
+                              </span>
+                            ))}
+                          </div>
                         </td>
 
                         {/* Export */}
-                        <td className="py-4 px-4 align-top">
-                          <div className="flex items-center gap-1.5 flex-wrap">
+                        <td className="py-4 px-4 align-top min-w-[140px]">
+                          <div className="flex items-center gap-1.5 whitespace-nowrap">
                             {rep.exportFormats.map((fmt) => (
                               <span
                                 key={fmt}
-                                className="rounded-lg bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200/60"
+                                className="rounded-lg bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200/60 whitespace-nowrap"
                               >
                                 {fmt}
                               </span>
@@ -1026,21 +1035,21 @@ function ReportsContent() {
                         </td>
 
                         {/* Actions */}
-                        <td className="py-4 pl-4 pr-6 align-top text-right whitespace-nowrap min-w-[210px] w-[210px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                        <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[140px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors align-top">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               type="button"
                               onClick={() => handleSelectReport(rep.key)}
-                              className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
+                              className="inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg bg-slate-950 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[#0170FE] transition"
                             >
                               <Eye className="size-3.5" />
-                              <span>View </span>
+                              <span>View</span>
                             </button>
                             <button
                               type="button"
                               onClick={() => triggerExport('Excel', rep.title)}
                               title="Quick Export Excel"
-                              className="rounded-xl border border-slate-200 p-2 text-slate-600 hover:border-[#0170FE] hover:text-[#0170FE] transition"
+                              className="cursor-pointer rounded-lg border border-slate-200 p-1.5 text-slate-600 hover:border-[#0170FE] hover:text-[#0170FE] hover:bg-slate-50 transition"
                             >
                               <Download className="size-3.5" />
                             </button>

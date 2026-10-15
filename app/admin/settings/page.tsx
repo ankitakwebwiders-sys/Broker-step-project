@@ -606,7 +606,7 @@ function SettingsContent() {
       {activeTab === 'rbac' && (
         <div className="mt-6 space-y-6">
           {/* Admin Directory */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-base font-bold text-slate-950">Administrative Users</h3>
@@ -616,7 +616,7 @@ function SettingsContent() {
               <button
                 type="button"
                 onClick={() => setIsInviteModalOpen(true)}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-950 px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-blue-600 transition"
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-950 px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-blue-600 transition w-full sm:w-auto"
               >
                 <Plus className="size-3.5" />
                 <span>Invite Admin</span>
@@ -624,15 +624,15 @@ function SettingsContent() {
             </div>
 
             {/* Admin Users Table */}
-            <div className="overflow-hidden rounded-xl border border-slate-200">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <table className="w-full min-w-[720px] text-left text-xs">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[11px]">
-                    <th className="py-3 px-4">Admin User</th>
-                    <th className="py-3 px-4">Role</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4">Last Activity</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
+                    <th className="py-3 px-4 whitespace-nowrap">Admin User</th>
+                    <th className="py-3 px-4 whitespace-nowrap">Role</th>
+                    <th className="py-3 px-4 whitespace-nowrap">Status</th>
+                    <th className="py-3 px-4 whitespace-nowrap">Last Activity</th>
+                    <th className="py-3 pl-4 pr-6 text-right whitespace-nowrap min-w-[120px]">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">
@@ -684,7 +684,7 @@ function SettingsContent() {
                         {user.lastActive}
                       </td>
 
-                      <td className="py-3.5 px-4 whitespace-nowrap text-right">
+                      <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[120px]">
                         <button
                           type="button"
                           onClick={() => handleToggleAdminStatus(user.id)}
@@ -701,19 +701,19 @@ function SettingsContent() {
           </div>
 
           {/* Role-Based Permissions Matrix */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-4">
             <h3 className="text-base font-bold text-slate-950">Role-Based Access Control (RBAC) Permissions Matrix</h3>
             <p className="text-xs text-slate-500">Defines exact administrative authority across platform operational modules.</p>
 
             <div className="overflow-x-auto rounded-xl border border-slate-200">
-              <table className="w-full text-left text-xs">
+              <table className="w-full min-w-[640px] text-left text-xs">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[11px]">
-                    <th className="py-3 px-4">Platform Module</th>
-                    <th className="py-3 px-3 text-center">Super Admin</th>
-                    <th className="py-3 px-3 text-center">Operations Admin</th>
-                    <th className="py-3 px-3 text-center">Billing Admin</th>
-                    <th className="py-3 px-3 text-center">Auditor</th>
+                    <th className="py-3 px-4 whitespace-nowrap">Platform Module</th>
+                    <th className="py-3 px-3 text-center whitespace-nowrap">Super Admin</th>
+                    <th className="py-3 px-3 text-center whitespace-nowrap">Operations Admin</th>
+                    <th className="py-3 px-3 text-center whitespace-nowrap">Billing Admin</th>
+                    <th className="py-3 px-3 text-center whitespace-nowrap">Auditor</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -725,24 +725,24 @@ function SettingsContent() {
                     { module: 'Audit & Access Logs', sa: 'Full Access', oa: 'View Only', ba: 'View Only', ca: 'Full Export' },
                   ].map((row) => (
                     <tr key={row.module} className="hover:bg-slate-50/60">
-                      <td className="py-3 px-4 font-bold text-slate-900">{row.module}</td>
-                      <td className="py-3 px-3 text-center">
-                        <span className="rounded bg-purple-50 text-purple-700 px-2 py-0.5 font-bold text-[11px]">
+                      <td className="py-3 px-4 font-bold text-slate-900 whitespace-nowrap">{row.module}</td>
+                      <td className="py-3 px-3 text-center whitespace-nowrap">
+                        <span className="rounded bg-purple-50 text-purple-700 px-2 py-0.5 font-bold text-[11px] whitespace-nowrap">
                           {row.sa}
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-center">
-                        <span className="rounded bg-blue-50 text-blue-700 px-2 py-0.5 font-bold text-[11px]">
+                      <td className="py-3 px-3 text-center whitespace-nowrap">
+                        <span className="rounded bg-blue-50 text-blue-700 px-2 py-0.5 font-bold text-[11px] whitespace-nowrap">
                           {row.oa}
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-center">
-                        <span className="rounded bg-emerald-50 text-emerald-700 px-2 py-0.5 font-bold text-[11px]">
+                      <td className="py-3 px-3 text-center whitespace-nowrap">
+                        <span className="rounded bg-emerald-50 text-emerald-700 px-2 py-0.5 font-bold text-[11px] whitespace-nowrap">
                           {row.ba}
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-center">
-                        <span className="rounded bg-amber-50 text-amber-700 px-2 py-0.5 font-bold text-[11px]">
+                      <td className="py-3 px-3 text-center whitespace-nowrap">
+                        <span className="rounded bg-amber-50 text-amber-700 px-2 py-0.5 font-bold text-[11px] whitespace-nowrap">
                           {row.ca}
                         </span>
                       </td>

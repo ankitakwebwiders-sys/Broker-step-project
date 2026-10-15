@@ -1523,29 +1523,30 @@ export default function StatementsPage() {
       {activeTab === 'details' && (
         <div className="space-y-6">
           {/* Statement Header Card (9.5 Requirements) */}
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-7 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-6">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-7 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-5 sm:space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-slate-100 pb-5">
-              <div className="flex items-start gap-3">
-                <div className="flex size-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 ring-1 ring-slate-200">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 ring-1 ring-slate-200">
                   {getFileIcon(currentStatement.fileType)}
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-[18px] font-bold text-slate-900">{currentStatement.statementIdentifier}</h2>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-base sm:text-[18px] font-bold text-slate-900 break-words">{currentStatement.statementIdentifier}</h2>
                     {getStatusBadge(currentStatement.processingStatus)}
                   </div>
-                  <p className="mt-1 text-[12.5px] text-slate-500">
-                    Original Source: <span className="font-medium text-slate-700">{currentStatement.fileName}</span> ({currentStatement.fileSize})
+                  <p className="mt-1 text-[12px] sm:text-[12.5px] text-slate-500 break-words">
+                    Original Source: <span className="font-medium text-slate-700 break-all">{currentStatement.fileName}</span>{' '}
+                    <span className="whitespace-nowrap">({currentStatement.fileSize})</span>
                   </p>
                 </div>
               </div>
 
-              {/* Statement switch dropdown */}
-              <div className="flex items-center gap-2">
+              {/* Statement switch dropdown & actions */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
                 <select
                   value={selectedStatementId}
                   onChange={(e) => handleTabSelect('details', e.target.value)}
-                  className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-[12px] font-medium text-slate-700 focus:outline-none cursor-pointer"
+                  className="h-9 w-full sm:w-auto rounded-xl border border-slate-200 bg-slate-50 px-3 text-[12px] font-medium text-slate-700 focus:outline-none cursor-pointer"
                 >
                   {statements.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -1556,7 +1557,7 @@ export default function StatementsPage() {
 
                 <button
                   onClick={() => setReprocessModalTarget(currentStatement)}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 cursor-pointer"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 cursor-pointer whitespace-nowrap"
                 >
                   <RefreshCw className="size-3.5" />
                   <span>Reprocess Statement</span>
@@ -1565,34 +1566,35 @@ export default function StatementsPage() {
             </div>
 
             {/* Metadata Grid (9.5 Requirements) */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-[12.5px]">
-              <div className="rounded-xl bg-slate-50 p-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-[12.5px]">
+              <div className="rounded-xl bg-slate-50 p-3 min-w-0">
                 <span className="text-[11px] font-medium text-slate-400">Carrier &amp; Period</span>
-                <p className="font-bold text-slate-900 mt-0.5">{currentStatement.carrier}</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">{currentStatement.statementPeriod} · {currentStatement.paymentMethod}</p>
+                <p className="font-bold text-slate-900 mt-0.5 truncate">{currentStatement.carrier}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5 truncate">{currentStatement.statementPeriod} · {currentStatement.paymentMethod}</p>
               </div>
 
-              <div className="rounded-xl bg-slate-50 p-3">
+              <div className="rounded-xl bg-slate-50 p-3 min-w-0">
                 <span className="text-[11px] font-medium text-slate-400">Total Remittance Payout</span>
-                <p className="font-bold text-emerald-600 text-[14px] mt-0.5">{fmtCurrency(currentStatement.totalRemittance)}</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Ref: {currentStatement.batchReference}</p>
+                <p className="font-bold text-emerald-600 text-[14px] mt-0.5 truncate">{fmtCurrency(currentStatement.totalRemittance)}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5 truncate">Ref: {currentStatement.batchReference}</p>
               </div>
 
-              <div className="rounded-xl bg-slate-50 p-3">
+              <div className="rounded-xl bg-slate-50 p-3 min-w-0">
                 <span className="text-[11px] font-medium text-slate-400">Matched / Unmatched Counts</span>
-                <p className="font-bold text-slate-900 mt-0.5">
-                  <span className="text-emerald-600">{currentStatement.matchedCount} Matched</span> ·{' '}
+                <p className="font-bold text-slate-900 mt-0.5 flex flex-wrap items-center gap-1">
+                  <span className="text-emerald-600">{currentStatement.matchedCount} Matched</span>
+                  <span>·</span>
                   <span className="text-rose-600">{currentStatement.unmatchedCount} Unmatched</span>
                 </p>
                 <p className="text-[11px] text-slate-500 mt-0.5">High Confidence: {currentStatement.highConfidenceCount}</p>
               </div>
 
-              <div className="rounded-xl bg-slate-50 p-3">
+              <div className="rounded-xl bg-slate-50 p-3 min-w-0">
                 <span className="text-[11px] font-medium text-slate-400">Reprocessing / Correction Status</span>
-                <p className="font-bold text-slate-900 mt-0.5">
+                <p className="font-bold text-slate-900 mt-0.5 truncate">
                   {currentStatement.reprocessedCount > 0 ? `Reprocessed ${currentStatement.reprocessedCount}x` : 'Original Ingestion'}
                 </p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Template: {currentStatement.mappingTemplate.slice(0, 24)}...</p>
+                <p className="text-[11px] text-slate-500 mt-0.5 truncate">Template: {currentStatement.mappingTemplate}</p>
               </div>
             </div>
           </div>
@@ -1612,18 +1614,18 @@ export default function StatementsPage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1100px] text-left border-collapse text-[12.5px]">
+              <table className="w-full min-w-[1180px] text-left border-collapse text-[12.5px]">
                 <thead>
-                  <tr className="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                    <th className="px-3.5 py-3">Source Row</th>
-                    <th className="px-3.5 py-3 min-w-[160px]">Policy Number</th>
-                    <th className="px-3.5 py-3 min-w-[180px]">Insured Client</th>
-                    <th className="px-3.5 py-3 text-right">Gross Premium</th>
-                    <th className="px-3.5 py-3 text-right">Commission Rate</th>
-                    <th className="px-3.5 py-3 text-right">Paid Remittance</th>
-                    <th className="px-3.5 py-3 text-right">Expected Revenue</th>
-                    <th className="px-3.5 py-3">Matching Tier</th>
-                    <th className="px-3.5 py-3 text-right">Traceability</th>
+                  <tr className="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">
+                    <th className="px-3.5 py-3 whitespace-nowrap min-w-[110px]">Source Row</th>
+                    <th className="px-3.5 py-3 whitespace-nowrap min-w-[160px]">Policy Number</th>
+                    <th className="px-3.5 py-3 whitespace-nowrap min-w-[180px]">Insured Client</th>
+                    <th className="px-3.5 py-3 whitespace-nowrap text-right min-w-[130px]">Gross Premium</th>
+                    <th className="px-3.5 py-3 whitespace-nowrap text-right min-w-[140px]">Commission Rate</th>
+                    <th className="px-3.5 py-3 whitespace-nowrap text-right min-w-[140px]">Paid Remittance</th>
+                    <th className="px-3.5 py-3 whitespace-nowrap text-right min-w-[140px]">Expected Revenue</th>
+                    <th className="px-3.5 py-3 whitespace-nowrap min-w-[130px]">Matching Tier</th>
+                    <th className="px-3.5 py-3 whitespace-nowrap text-right min-w-[110px]">Traceability</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">

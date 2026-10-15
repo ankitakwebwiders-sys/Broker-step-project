@@ -474,29 +474,29 @@ export default function RenewalsPage() {
             Renewals
           </h1>
           <p className="mt-1 text-sm sm:text-[15px] text-slate-500 leading-relaxed">
-            Policy expiration horizon tracking, broker reviews, renewal/rewrite actions, and preserved historical policy records.
+            Policy expiration horizon tracking, broker reviews, renewal/rewrite<br /> actions, and preserved historical policy records.
           </p>
         </div>
 
         {/* Header Summary KPI */}
-        <div className="flex items-center gap-2.5 shrink-0 flex-nowrap overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-          <div className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-right shadow-sm">
-            <span className="text-xs font-medium text-slate-400 block">Total Horizon Premium</span>
-            <span className="text-base sm:text-lg font-bold text-slate-900 font-mono">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+          <div className="rounded-xl border border-slate-200 bg-white p-2.5 sm:px-3.5 sm:py-2 text-left sm:text-right shadow-xs">
+            <span className="text-[11px] sm:text-xs font-medium text-slate-400 block truncate">Total Horizon Premium</span>
+            <span className="text-sm sm:text-lg font-bold text-slate-900 font-mono block">
               ${totalHorizonPremium.toLocaleString()}
             </span>
           </div>
 
-          <div className="rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-2 text-right shadow-sm">
-            <span className="text-xs font-medium text-blue-600 block">Listed Policies</span>
-            <span className="text-base sm:text-lg font-bold text-blue-700">
+          <div className="rounded-xl border border-blue-200 bg-blue-50/80 p-2.5 sm:px-3.5 sm:py-2 text-left sm:text-right shadow-xs">
+            <span className="text-[11px] sm:text-xs font-medium text-blue-600 block truncate">Listed Policies</span>
+            <span className="text-sm sm:text-lg font-bold text-blue-700 block">
               {horizonFilteredRecords.length} Policies
             </span>
           </div>
 
           <Link
             href="/broker/book-of-business"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+            className="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50"
           >
             <Archive className="size-4 text-slate-400" />
             <span>Book of Business</span>
@@ -979,7 +979,6 @@ export default function RenewalsPage() {
             </div>
 
             <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-              <span className="text-[11px] text-slate-400">Step 41 complete &rarr; Proceed to Step 42 decisions</span>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setActiveModalAction(null)}

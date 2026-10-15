@@ -1093,7 +1093,7 @@ function StatementTemplatesContent() {
                   <th className="py-3.5 px-4 min-w-[260px]">Template Name</th>
                   <th className="py-3.5 px-4 min-w-[240px]">Override</th>
                   <th className="py-3.5 px-4 min-w-[120px]">Status</th>
-                  <th className="py-3.5 pl-4 pr-6 text-right min-w-[230px] w-[230px] sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">
+                  <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">
                     Actions
                   </th>
                 </tr>
@@ -1174,7 +1174,7 @@ function StatementTemplatesContent() {
                         </td>
 
                         {/* 6. Actions (Edit / Assign / Deactivate) - Sticky Fixed */}
-                        <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[230px] w-[230px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors select-none">
+                        <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
                           <div className="flex items-center justify-end gap-1.5">
                             {/* Edit Action */}
                             <button
@@ -1290,7 +1290,7 @@ function StatementTemplatesContent() {
          TAB 4: TEMPLATE ASSIGNMENT MATRIX VIEW
          ========================================================================= */}
       {activeTab === 'assignment' && (
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
               <h3 className="text-base font-bold text-slate-950">Broker Template Assignment Matrix</h3>
@@ -1301,13 +1301,13 @@ function StatementTemplatesContent() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full min-w-[850px] text-left text-xs">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/80 text-xs font-bold text-slate-500 uppercase">
-                  <th className="py-3 px-4">Broker / Agency</th>
-                  <th className="py-3 px-4">Assigned Standard Parsers</th>
-                  <th className="py-3 px-4">Active Custom Overrides</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3.5 pl-4 pr-4 whitespace-nowrap min-w-[220px]">Broker / Agency</th>
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[280px]">Assigned Standard Parsers</th>
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[220px]">Active Custom Overrides</th>
+                  <th className="py-3.5 pl-4 pr-6 text-right whitespace-nowrap min-w-[150px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -1316,21 +1316,21 @@ function StatementTemplatesContent() {
 
                   return (
                     <tr key={b.id} className="hover:bg-slate-50/70">
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 pl-4 pr-4 whitespace-nowrap min-w-[220px]">
                         <span className="font-bold text-slate-900 block">{b.name}</span>
                         <span className="text-xs text-slate-500 block">{b.agency} · {b.id}</span>
                       </td>
-                      <td className="py-3.5 px-4">
-                        <span className="font-semibold text-slate-700">All 8 Core Standard Carrier Parsers</span>
+                      <td className="py-3.5 px-4 whitespace-nowrap min-w-[280px]">
+                        <span className="font-semibold text-slate-700 block">All 8 Core Standard Carrier Parsers</span>
                         <span className="text-slate-400 text-xs block mt-0.5">Auto-detected upon statement drop</span>
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4 whitespace-nowrap min-w-[220px]">
                         {assignedOverrides.length > 0 ? (
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex items-center gap-1.5 flex-wrap">
                             {assignedOverrides.map((ov) => (
                               <span
                                 key={ov.id}
-                                className="rounded-lg bg-amber-50 px-2 py-0.5 text-xs font-bold text-amber-800 border border-amber-200"
+                                className="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800 border border-amber-200 whitespace-nowrap"
                               >
                                 {ov.templateName}
                               </span>
@@ -1340,14 +1340,14 @@ function StatementTemplatesContent() {
                           <span className="text-xs text-slate-400 italic">No custom overrides (Using standard catalog)</span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-right">
+                      <td className="py-3.5 pl-4 pr-6 text-right whitespace-nowrap min-w-[150px]">
                         <button
                           type="button"
                           onClick={() => {
                             setFormSelectedBrokerId(b.id)
                             openCreateFormModal(true)
                           }}
-                          className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600 transition cursor-pointer"
+                          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600 transition cursor-pointer whitespace-nowrap"
                         >
                           + Assign Override
                         </button>

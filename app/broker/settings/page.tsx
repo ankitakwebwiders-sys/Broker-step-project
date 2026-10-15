@@ -1208,7 +1208,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
   return (
     <div className="space-y-6">
       {/* Commission Splits by Carrier */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-2">
           <div>
             <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
@@ -1223,7 +1223,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
           <button
             type="button"
             onClick={handleOpenAdd}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#0170FE] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db]"
+            className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#0170FE] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db] w-full sm:w-auto"
           >
             <Plus className="size-4" />
             <span>Add Override</span>
@@ -1231,30 +1231,30 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[840px] text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
-                <th className="pb-3">Carrier Name</th>
-                <th className="pb-3">Default Commission %</th>
-                <th className="pb-3">Broker Share %</th>
-                <th className="pb-3">Brokerage (House) %</th>
-                <th className="pb-3">Renewal Commission %</th>
-                <th className="pb-3 text-right min-w-[120px] w-[120px] sticky right-0 bg-white shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
+                <th className="py-3.5 pr-6 whitespace-nowrap">Carrier Name</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Default Commission %</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Broker Share %</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Brokerage (House) %</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Renewal Commission %</th>
+                <th className="py-3.5 pl-4 pr-6 text-right min-w-[120px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {splits.map((row, idx) => (
                 <tr key={`${row.carrier}-${idx}`} className="group hover:bg-slate-50/50">
-                  <td className="py-3 font-semibold text-slate-900">{row.carrier}</td>
-                  <td className="py-3">
+                  <td className="py-3.5 pr-6 font-semibold text-slate-900 whitespace-nowrap">{row.carrier}</td>
+                  <td className="py-3.5 px-4 whitespace-nowrap">
                     <span className="rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-mono font-bold text-[#0170FE]">
                       {row.defaultComm}%
                     </span>
                   </td>
-                  <td className="py-3 font-mono font-bold text-slate-900">{row.brokerSplit}%</td>
-                  <td className="py-3 font-mono font-medium text-slate-500">{row.houseSplit}%</td>
-                  <td className="py-3 font-mono font-semibold text-slate-700">{row.renewalRate}%</td>
-                  <td className="py-3 text-right whitespace-nowrap min-w-[120px] w-[120px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                  <td className="py-3.5 px-4 font-mono font-bold text-slate-900 whitespace-nowrap">{row.brokerSplit}%</td>
+                  <td className="py-3.5 px-4 font-mono font-medium text-slate-500 whitespace-nowrap">{row.houseSplit}%</td>
+                  <td className="py-3.5 px-4 font-mono font-semibold text-slate-700 whitespace-nowrap">{row.renewalRate}%</td>
+                  <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[120px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
                     <button
                       type="button"
                       onClick={() => handleOpenEdit(idx)}
@@ -1273,7 +1273,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
       {/* Add / Edit Override Modal */}
       {modalMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
                 <div className="flex size-10 items-center justify-center rounded-xl bg-[#0170FE]/10 text-[#0170FE]">
@@ -1429,31 +1429,31 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+              <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100 pt-4">
                 {modalMode === 'edit' ? (
                   <button
                     type="button"
                     onClick={handleDeleteRule}
-                    className="inline-flex cursor-pointer items-center gap-1 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-rose-600 hover:bg-rose-50 transition"
+                    className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-rose-600 hover:bg-rose-50 transition w-full sm:w-auto"
                   >
                     <Trash2 className="size-4" />
                     <span>Delete Rule</span>
                   </button>
                 ) : (
-                  <div />
+                  <div className="hidden sm:block" />
                 )}
 
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+                    className="flex-1 sm:flex-none cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition text-center"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#0170FE] px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db]"
+                    className="flex-1 sm:flex-none inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#0170FE] px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db] whitespace-nowrap"
                   >
                     <Check className="size-4" />
                     <span>{modalMode === 'add' ? 'Save Override' : 'Update Rule'}</span>
@@ -2162,7 +2162,7 @@ function MarketingConsentTab({
       </div>
 
       {/* 3. Consent History Table & Registry */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3">
           <div>
             <h3 className="text-lg font-bold text-slate-950">Consent History &amp; Client Registry</h3>
@@ -2172,21 +2172,21 @@ function MarketingConsentTab({
           </div>
 
           {/* Filter pills & search */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
             <input
               type="text"
               placeholder="Search client or contact..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8.5 rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none focus:border-[#0170FE]"
+              className="h-8.5 w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none focus:border-[#0170FE]"
             />
-            <div className="flex items-center rounded-lg border border-slate-200 p-0.5 bg-slate-50">
+            <div className="flex items-center overflow-x-auto rounded-lg border border-slate-200 p-0.5 bg-slate-50 shrink-0">
               {['All', 'Consented', 'Pending', 'Withdrawn'].map((st) => (
                 <button
                   key={st}
                   type="button"
                   onClick={() => setFilterStatus(st)}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded-md transition cursor-pointer ${filterStatus === st ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-md transition cursor-pointer whitespace-nowrap ${filterStatus === st ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
                     }`}
                 >
                   {st}
@@ -2197,31 +2197,31 @@ function MarketingConsentTab({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[960px] text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
-                <th className="pb-3">Client / Business</th>
-                <th className="pb-3">Contact</th>
-                <th className="pb-3">Channel Authorized</th>
-                <th className="pb-3">Date</th>
-                <th className="pb-3">Status</th>
-                <th className="pb-3">Audit Verification Hash</th>
-                <th className="pb-3 text-right min-w-[120px] w-[120px] sticky right-0 bg-white shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Actions</th>
+                <th className="py-3.5 pl-4 pr-4 whitespace-nowrap min-w-[200px]">Client / Business</th>
+                <th className="py-3.5 px-4 whitespace-nowrap min-w-[150px]">Contact</th>
+                <th className="py-3.5 px-4 whitespace-nowrap min-w-[160px]">Channel Authorized</th>
+                <th className="py-3.5 px-4 whitespace-nowrap min-w-[120px]">Date</th>
+                <th className="py-3.5 px-4 whitespace-nowrap min-w-[120px]">Status</th>
+                <th className="py-3.5 px-4 whitespace-nowrap min-w-[200px]">Audit Verification Hash</th>
+                <th className="py-3.5 pl-4 pr-6 text-right min-w-[120px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredRecords.map((r) => (
                 <tr key={r.id} className="group hover:bg-slate-50/60 transition">
-                  <td className="py-3 font-semibold text-slate-900">
+                  <td className="py-3.5 pl-4 pr-4 whitespace-nowrap font-semibold text-slate-900">
                     <div>{r.client}</div>
                     <span className="text-[11px] font-mono text-slate-400 font-normal">{r.id}</span>
                   </td>
-                  <td className="py-3 text-slate-700">{r.contact}</td>
-                  <td className="py-3 text-slate-600 text-xs font-medium">
+                  <td className="py-3.5 px-4 whitespace-nowrap text-slate-700">{r.contact}</td>
+                  <td className="py-3.5 px-4 whitespace-nowrap text-slate-600 text-xs font-medium">
                     <span className="rounded-md bg-slate-100 px-2 py-0.5 text-slate-700">{r.channel}</span>
                   </td>
-                  <td className="py-3 text-slate-500 text-xs">{r.date}</td>
-                  <td className="py-3">
+                  <td className="py-3.5 px-4 whitespace-nowrap text-slate-500 text-xs">{r.date}</td>
+                  <td className="py-3.5 px-4 whitespace-nowrap">
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${r.status === 'Consented'
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
@@ -2235,13 +2235,13 @@ function MarketingConsentTab({
                       {r.status}
                     </span>
                   </td>
-                  <td className="py-3 font-mono text-xs text-slate-400">
+                  <td className="py-3.5 px-4 whitespace-nowrap font-mono text-xs text-slate-400">
                     <span className="inline-flex items-center gap-1">
                       <Lock className="size-3 text-slate-400" />
                       {r.hash}
                     </span>
                   </td>
-                  <td className="py-3 text-right whitespace-nowrap min-w-[120px] w-[120px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                  <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[120px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
                     <button
                       type="button"
                       onClick={() => setSelectedAuditRecord(r)}
@@ -2731,7 +2731,7 @@ function QrLeadSettingsTab({
   return (
     <div className="grid gap-6 lg:grid-cols-12">
       {/* Left: Broker QR Code Card */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5 lg:col-span-5">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-5 lg:col-span-5">
         <div className="border-b border-slate-100 pb-3 flex items-start justify-between gap-2">
           <div>
             <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
@@ -2884,7 +2884,7 @@ function QrLeadSettingsTab({
       </div>
 
       {/* Right: Public Form Preview & Embed Code */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5 lg:col-span-7">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-5 lg:col-span-7">
         <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h3 className="text-lg font-bold text-slate-950">Public Form Preview &amp; Embed</h3>
@@ -2898,34 +2898,34 @@ function QrLeadSettingsTab({
             <button
               type="button"
               onClick={() => setPreviewDevice('mobile')}
-              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${previewDevice === 'mobile'
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${previewDevice === 'mobile'
                 ? 'bg-white text-[#0170FE] shadow-xs'
                 : 'text-slate-500 hover:text-slate-900'
                 }`}
             >
               <Smartphone className="size-3.5" />
-              <span>Mobile View</span>
+              <span>Mobile</span>
             </button>
             <button
               type="button"
               onClick={() => setPreviewDevice('desktop')}
-              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${previewDevice === 'desktop'
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${previewDevice === 'desktop'
                 ? 'bg-white text-[#0170FE] shadow-xs'
                 : 'text-slate-500 hover:text-slate-900'
                 }`}
             >
               <Laptop className="size-3.5" />
-              <span>Desktop View</span>
+              <span>Desktop</span>
             </button>
           </div>
         </div>
 
         {/* Dynamic Frame Preview Box */}
-        <div className="rounded-2xl border border-slate-200 bg-slate-100/60 p-4 sm:p-6 overflow-hidden">
+        <div className="rounded-2xl border border-slate-200 bg-slate-100/60 p-2.5 sm:p-6 overflow-hidden">
           <div
             className={`mx-auto bg-white transition-all duration-300 ${previewDevice === 'mobile'
               ? 'max-w-[390px] rounded-[32px] border-[5px] border-slate-900 shadow-2xl p-4 sm:p-5'
-              : 'w-full rounded-2xl border border-slate-200 shadow-md p-6'
+              : 'w-full rounded-2xl border border-slate-200 shadow-md p-4 sm:p-6'
               }`}
           >
             {/* Mobile Notch Bar if in Mobile Mode */}
@@ -2939,13 +2939,13 @@ function QrLeadSettingsTab({
 
             {/* Desktop Mock Browser Bar if in Desktop Mode */}
             {previewDevice === 'desktop' && (
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4 text-xs">
-                <div className="flex gap-1.5">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4 text-xs min-w-0">
+                <div className="flex gap-1.5 shrink-0">
                   <div className="size-2.5 rounded-full bg-rose-400" />
                   <div className="size-2.5 rounded-full bg-amber-400" />
                   <div className="size-2.5 rounded-full bg-emerald-400" />
                 </div>
-                <div className="flex-1 rounded-lg bg-slate-100 px-3 py-1 text-[11px] font-mono text-slate-600 truncate">
+                <div className="flex-1 min-w-0 rounded-lg bg-slate-100 px-2.5 py-1 text-[10.5px] sm:text-[11px] font-mono text-slate-600 truncate">
                   {leadUrl}
                 </div>
               </div>
@@ -2954,83 +2954,83 @@ function QrLeadSettingsTab({
             {/* Branded Form Header (Direct Broker Association) */}
             <div className="space-y-3 border-b border-slate-100 pb-4">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-sm font-bold text-white shadow-xs">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className="flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-xs sm:text-sm font-bold text-white shadow-xs">
                     JD
                   </div>
-                  <div>
-                    <h4 className="text-sm sm:text-base font-bold text-slate-950 leading-tight">
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-950 leading-tight truncate">
                       {businessName}
                     </h4>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-[11px] sm:text-xs text-slate-500 truncate">
                       Assigned Broker: <span className="font-semibold text-slate-800">{brokerName}</span>
                     </p>
                   </div>
                 </div>
-                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-[#0170FE] border border-blue-200 shrink-0">
+                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9.5px] sm:text-[10px] font-bold text-[#0170FE] border border-blue-200 shrink-0">
                   Verified Broker
                 </span>
               </div>
 
               {/* Attribution Banner */}
-              <div className="rounded-lg bg-emerald-50/80 px-3 py-1.5 text-[11px] font-medium text-emerald-800 border border-emerald-200/70 flex items-center gap-1.5">
+              <div className="rounded-lg bg-emerald-50/80 px-2.5 sm:px-3 py-1.5 text-[10.5px] sm:text-[11px] font-medium text-emerald-800 border border-emerald-200/70 flex items-center gap-1.5">
                 <Check className="size-3.5 text-emerald-600 shrink-0" />
-                <span>
+                <span className="break-words leading-tight">
                   Quote request is directly routed to <strong>{brokerName}</strong> ({brokerCode}).
                 </span>
               </div>
             </div>
 
             {/* Form Fields: Client Lead Information */}
-            <div className="mt-4 space-y-3.5 text-xs sm:text-sm">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">
+            <div className="mt-4 space-y-3 sm:space-y-3.5 text-xs sm:text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+                <div className="min-w-0">
+                  <label className="block text-xs font-medium text-slate-600 mb-1 truncate">
                     Contact Full Name <span className="text-rose-500">*</span>
                   </label>
-                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs">
+                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs truncate">
                     Jane Smith
                   </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">
+                <div className="min-w-0">
+                  <label className="block text-xs font-medium text-slate-600 mb-1 truncate">
                     Company / Business Name
                   </label>
-                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs">
+                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs truncate">
                     Smith Logistics LLC
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+                <div className="min-w-0">
+                  <label className="block text-xs font-medium text-slate-600 mb-1 truncate">
                     Email Address <span className="text-rose-500">*</span>
                   </label>
-                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs">
+                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs truncate">
                     jane@smithlogistics.com
                   </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">
+                <div className="min-w-0">
+                  <label className="block text-xs font-medium text-slate-600 mb-1 truncate">
                     Phone Number <span className="text-rose-500">*</span>
                   </label>
-                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs">
+                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs truncate">
                     +1 (555) 234-8890
                   </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">
+              <div className="min-w-0">
+                <label className="block text-xs font-medium text-slate-600 mb-1 truncate">
                   Coverage Requested <span className="text-rose-500">*</span>
                 </label>
-                <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs">
+                <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs truncate">
                   Commercial Property &amp; General Liability
                 </div>
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label className="block text-xs font-medium text-slate-600 mb-1">
                   Message / Inquiries
                 </label>
@@ -3047,16 +3047,16 @@ function QrLeadSettingsTab({
                     I authorize <strong>{brokerName} ({businessName})</strong> to review my insurance request and contact me with competitive quotes. Client information is encrypted and never shared.
                   </p>
                 </div>
-                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 border-t border-slate-200/80 pt-1.5">
-                  <Lock className="size-3 text-emerald-600" />
-                  <span>256-bit Encrypted SSL · TCPA &amp; ESIGN Compliant · Attribution token: {brokerCode}</span>
+                <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-slate-400 border-t border-slate-200/80 pt-1.5 leading-snug">
+                  <Lock className="size-3 text-emerald-600 shrink-0" />
+                  <span className="break-words">256-bit Encrypted SSL · TCPA &amp; ESIGN Compliant · Attribution token: {brokerCode}</span>
                 </div>
               </div>
 
               {/* Submit CTA */}
               <button
                 type="button"
-                className="w-full rounded-xl bg-[#0170FE] py-3 text-center text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 pointer-events-none"
+                className="w-full rounded-xl bg-[#0170FE] py-2.5 sm:py-3 px-3 text-center text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 pointer-events-none break-words leading-tight"
               >
                 Submit Quote Request → Routes to {brokerName}
               </button>
@@ -3065,21 +3065,21 @@ function QrLeadSettingsTab({
         </div>
 
         {/* Website Embed Code */}
-        <div>
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1.5">
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
             Embed Code for Your Brokerage Website (HTML iFrame)
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
               readOnly
               value={iframeSnippet}
-              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-xs sm:text-sm font-mono text-slate-600 outline-none"
+              className="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-xs font-mono text-slate-600 outline-none truncate"
             />
             <button
               type="button"
               onClick={() => onCopy(iframeSnippet, 'iframe')}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-xs sm:text-sm font-semibold hover:border-[#0170FE] hover:text-[#0170FE]"
+              className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 sm:py-0 text-xs sm:text-sm font-semibold hover:border-[#0170FE] hover:text-[#0170FE] shrink-0"
             >
               {copiedKey === 'iframe' ? (
                 <Check className="size-4 text-emerald-600" />

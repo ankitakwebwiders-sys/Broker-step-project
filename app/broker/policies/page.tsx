@@ -775,23 +775,23 @@ export default function PoliciesPage() {
       {/* ───── 6.1 Common Policy Listing Table ───── */}
       <div className="rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[1450px] text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold uppercase tracking-wider text-slate-500">
-                <th className="px-4 py-3.5">Policy Number</th>
-                <th className="px-4 py-3.5">Client / Business</th>
-                <th className="px-4 py-3.5">Carrier</th>
-                <th className="px-4 py-3.5">Policy Status</th>
-                <th className="px-4 py-3.5">Line of Business</th>
-                <th className="px-4 py-3.5">Transaction Type</th>
-                <th className="px-4 py-3.5">Effective</th>
-                <th className="px-4 py-3.5">Expiry</th>
-                <th className="px-4 py-3.5 text-right">Premium</th>
-                <th className="px-4 py-3.5 text-right">Expected Comm.</th>
-                <th className="px-4 py-3.5 text-right">Actual/Paid</th>
-                <th className="px-4 py-3.5 text-right">Outstanding</th>
-                <th className="px-4 py-3.5">Reconciliation</th>
-                <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">Actions</th>
+              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[160px]">Policy Number</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[200px]">Client / Business</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[150px]">Carrier</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[130px]">Policy Status</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[160px]">Line of Business</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[150px]">Transaction Type</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[110px]">Effective</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[110px]">Expiry</th>
+                <th className="px-4 py-3.5 whitespace-nowrap text-right min-w-[120px]">Premium</th>
+                <th className="px-4 py-3.5 whitespace-nowrap text-right min-w-[140px]">Expected Comm.</th>
+                <th className="px-4 py-3.5 whitespace-nowrap text-right min-w-[130px]">Actual/Paid</th>
+                <th className="px-4 py-3.5 whitespace-nowrap text-right min-w-[130px]">Outstanding</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[140px]">Reconciliation</th>
+                <th className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
@@ -934,7 +934,6 @@ export default function PoliciesPage() {
         {/* Table Footer info */}
         <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-4 py-3 text-xs text-slate-500">
           <span>Showing {filteredPolicies.length} of {policies.length} total policies</span>
-          <span>Click any policy row to inspect financial details & transaction timeline</span>
         </div>
       </div>
 
@@ -1190,18 +1189,18 @@ export default function PoliciesPage() {
                   </div>
 
                   <div className="overflow-x-auto rounded-xl border border-slate-200">
-                    <table className="w-full text-left text-[12px]">
-                      <thead className="border-b border-slate-200 bg-slate-50 text-[10.5px] font-bold uppercase text-slate-500">
-                        <tr>
-                          <th className="px-3.5 py-2.5">Date</th>
-                          <th className="px-3.5 py-2.5">Type</th>
-                          <th className="px-3.5 py-2.5">Description</th>
-                          <th className="px-3.5 py-2.5">Statement #</th>
-                          <th className="px-3.5 py-2.5 text-right">Premium Δ</th>
-                          <th className="px-3.5 py-2.5 text-right">Expected</th>
-                          <th className="px-3.5 py-2.5 text-right">Actual Paid</th>
-                          <th className="px-3.5 py-2.5 text-right">Outstanding</th>
-                          <th className="px-3.5 py-2.5">Status</th>
+                    <table className="w-full min-w-[880px] text-left text-[12px]">
+                      <thead className="border-b border-slate-200 bg-slate-50 text-[10.5px] font-bold uppercase text-slate-500 whitespace-nowrap">
+                        <tr className="whitespace-nowrap">
+                          <th className="px-3.5 py-2.5 whitespace-nowrap min-w-[90px]">Date</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap min-w-[110px]">Type</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap min-w-[180px]">Description</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap min-w-[110px]">Statement #</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap text-right min-w-[100px]">Premium Δ</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap text-right min-w-[100px]">Expected</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap text-right min-w-[110px]">Actual Paid</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap text-right min-w-[110px]">Outstanding</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap min-w-[110px]">Status</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">

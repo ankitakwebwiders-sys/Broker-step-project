@@ -469,9 +469,6 @@ function AccountTab({ onSave }: { onSave: () => void }) {
             <span className="font-semibold text-slate-800">January 12, 2025</span>
           </div>
         </div>
-
-
-
       </div>
 
       {/* Password Management */}

@@ -1540,16 +1540,14 @@ function ClientsContent() {
 
                             {/* 5. Client Status (Static display badge - non-clickable) */}
                             <td className="px-3 py-3.5 whitespace-nowrap">
-                              <button
-                                onClick={() => handleToggleStatus(client)}
-                                title={`Status: ${client.status}. Click to toggle Active/Inactive.`}
-                                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold ring-1 transition cursor-pointer whitespace-nowrap ${client.status === 'Active' || client.status === 'Active / Submitted'
-                                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100'
+                              <span
+                                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 whitespace-nowrap select-none ${client.status === 'Active' || client.status === 'Active / Submitted'
+                                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
                                   : client.status === 'Pending'
-                                    ? 'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100'
+                                    ? 'bg-amber-50 text-amber-700 ring-amber-200'
                                     : client.status === 'Lead'
-                                      ? 'bg-indigo-50 text-indigo-700 ring-indigo-200 hover:bg-indigo-100'
-                                      : 'bg-slate-100 text-slate-600 ring-slate-200 hover:bg-slate-200'
+                                      ? 'bg-indigo-50 text-indigo-700 ring-indigo-200'
+                                      : 'bg-slate-100 text-slate-600 ring-slate-200'
                                   }`}
                               >
                                 <span
@@ -1560,18 +1558,6 @@ function ClientsContent() {
                                       : client.status === 'Lead'
                                         ? 'bg-indigo-500'
                                         : 'bg-slate-400'
-                                    }`}
-                                />
-                                {client.status}
-                              </button>
-                              <span
-                                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 whitespace-nowrap select-none ${client.status === 'Active'
-                                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                  : 'bg-slate-100 text-slate-600 ring-slate-200'
-                                  }`}
-                              >
-                                <span
-                                  className={`size-1.5 rounded-full shrink-0 ${client.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-400'
                                     }`}
                                 />
                                 {client.status}

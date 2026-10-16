@@ -39,6 +39,8 @@ import {
   Check,
   Sparkles,
   ArrowUpRight,
+  BookmarkPlus,
+  ShieldAlert,
 } from 'lucide-react'
 import {
   initialClients,
@@ -50,6 +52,80 @@ import {
   type ClientTimelineEvent,
 } from '@/data/broker/clients'
 
+const QUICK_EMAIL_DOMAINS = ['@gmail.com', '@hotmail.com', '@outlook.com', '@yahoo.com', '@icloud.com']
+
+const SAMPLE_CANADIAN_ADDRESSES = [
+  { street: '100 King Street West, Suite 5600', city: 'Toronto', province: 'ON', postalCode: 'M5X 1C9' },
+  { street: '200 Bay Street, Suite 1200', city: 'Toronto', province: 'ON', postalCode: 'M5J 2J2' },
+  { street: '1055 West Georgia Street, Suite 1500', city: 'Vancouver', province: 'BC', postalCode: 'V6E 3P3' },
+  { street: '666 Burrard Street', city: 'Vancouver', province: 'BC', postalCode: 'V6C 2X8' },
+  { street: '1000 Rue de la Gauchetière Ouest', city: 'Montreal', province: 'QC', postalCode: 'H3B 4W5' },
+  { street: '855 2nd Street SW, 8th Floor', city: 'Calgary', province: 'AB', postalCode: 'T2P 4J8' },
+  { street: '50 O\'Connor Street, Suite 300', city: 'Ottawa', province: 'ON', postalCode: 'K1P 6L2' },
+  { street: '10020 100 Street NW', city: 'Edmonton', province: 'AB', postalCode: 'T5J 0N3' },
+  { street: '201 Portage Avenue', city: 'Winnipeg', province: 'MB', postalCode: 'R3B 3K6' },
+  { street: '1959 Upper Water Street', city: 'Halifax', province: 'NS', postalCode: 'B3J 3N2' },
+  { street: '44 Chipman Hill, Suite 1000', city: 'Saint John', province: 'NB', postalCode: 'E2L 2A9' },
+  { street: '134 Kent Street', city: 'Charlottetown', province: 'PE', postalCode: 'C1A 8R8' },
+]
+
+const CANADIAN_PROVINCES = [
+  { code: 'AB', name: 'Alberta' },
+  { code: 'BC', name: 'British Columbia' },
+  { code: 'MB', name: 'Manitoba' },
+  { code: 'NB', name: 'New Brunswick' },
+  { code: 'NL', name: 'Newfoundland and Labrador' },
+  { code: 'NS', name: 'Nova Scotia' },
+  { code: 'NT', name: 'Northwest Territories' },
+  { code: 'NU', name: 'Nunavut' },
+  { code: 'ON', name: 'Ontario' },
+  { code: 'PE', name: 'Prince Edward Island' },
+  { code: 'QC', name: 'Quebec' },
+  { code: 'SK', name: 'Saskatchewan' },
+  { code: 'YT', name: 'Yukon' },
+]
+
+const LOB_OPTIONS = [
+  'Auto',
+  'Home',
+  'Commercial',
+  'Travel',
+  'Life',
+  'Commercial Auto',
+  'Cyber Liability',
+  'Commercial Property',
+]
+
+const INSURER_SUGGESTIONS = [
+  'Travelers Canada',
+  'Intact Insurance',
+  'Aviva Canada',
+  'Wawanesa Mutual Insurance',
+  'Chubb Insurance Company of Canada',
+  'The Hartford',
+  'Economical / Definity Insurance',
+  'Northbridge Financial',
+  'Gore Mutual Insurance',
+  'Desjardins Insurance',
+  'Liberty Mutual Canada',
+  'AIG Canada',
+  'Lloyd\'s of London',
+  'RSA Canada',
+  'SGI CANADA',
+]
+
+function getExpiryFromEffective(effDate: string): string {
+  if (!effDate) return ''
+  const parts = effDate.split('-')
+  if (parts.length === 3) {
+    const y = parseInt(parts[0], 10)
+    if (!isNaN(y)) {
+      return `${y + 1}-${parts[1]}-${parts[2]}`
+    }
+  }
+  return ''
+}
+
 export default function ClientsPage() {
   // Clients state (interactive client data)
   const [clients, setClients] = useState<ClientItem[]>(initialClients)
@@ -57,7 +133,7 @@ export default function ClientsPage() {
   // Status Filter Tabs
   const [activeTab, setActiveTab] = useState<string>('All')
   const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'All' | 'Active' | 'Inactive'>('All')
+  const [statusFilter, setStatusFilter] = useState<string>('All')
   const [policyLineFilter, setPolicyLineFilter] = useState('All')
   const [consentFilter, setConsentFilter] = useState<'All' | 'Granted' | 'Pending' | 'Declined' | 'Revoked'>('All')
 
@@ -79,6 +155,10 @@ export default function ClientsPage() {
   // View Statement Preview Modal
   const [previewStatement, setPreviewStatement] = useState<CommissionTransaction | null>(null)
 
+  // Address search state for modal
+  const [addressSearchQuery, setAddressSearchQuery] = useState('')
+  const [isAddressDropdownOpen, setIsAddressDropdownOpen] = useState(false)
+
   // Form State for Add/Edit Client
   const [clientForm, setClientForm] = useState({
     firstName: '',
@@ -89,13 +169,16 @@ export default function ClientsPage() {
     email: '',
     street: '',
     city: '',
-    state: '',
-    zip: '',
-    brokerCode: 'BRK-8902',
-    otherIdentifier: '',
-    status: 'Active' as 'Active' | 'Inactive',
-    marketingConsentStatus: 'Granted' as 'Granted' | 'Pending' | 'Declined' | 'Revoked',
-    marketingChannels: ['Email'] as string[],
+    province: 'ON',
+    postalCode: '',
+    status: 'Active / Submitted',
+    effectiveDate: '2026-10-16',
+    expirationDate: '2027-10-16',
+    policyNumber: '',
+    isPendingPolicyNumber: false,
+    linesOfBusiness: ['Auto'] as string[],
+    yearlyPremium: '',
+    insurerName: 'Travelers Canada',
     notes: '',
   })
 
@@ -173,7 +256,7 @@ export default function ClientsPage() {
 
   // Summary Metrics
   const totalClientsCount = clients.length
-  const activeClientsCount = useMemo(() => clients.filter(c => c.status === 'Active').length, [clients])
+  const activeClientsCount = useMemo(() => clients.filter(c => c.status === 'Active' || c.status === 'Active / Submitted').length, [clients])
   const inactiveClientsCount = useMemo(() => clients.filter(c => c.status === 'Inactive').length, [clients])
   const totalPoliciesCount = useMemo(() => clients.reduce((acc, c) => acc + c.policies.filter(p => p.status === 'Active').length, 0), [clients])
   const consentGrantedCount = useMemo(() => clients.filter(c => c.marketingConsent.status === 'Granted').length, [clients])
@@ -183,7 +266,7 @@ export default function ClientsPage() {
   const statusCounts = useMemo(() => {
     return {
       All: clients.length,
-      Active: clients.filter(c => c.status === 'Active').length,
+      Active: clients.filter(c => c.status === 'Active' || c.status === 'Active / Submitted').length,
       Inactive: clients.filter(c => c.status === 'Inactive').length,
       'Pending Renewal': clients.filter(c => c.policies.some(p => p.status === 'Pending Renewal')).length,
       'Consent Granted': clients.filter(c => c.marketingConsent.status === 'Granted').length,
@@ -196,7 +279,7 @@ export default function ClientsPage() {
   const filteredClients = useMemo(() => {
     return clients.filter(client => {
       // Tab filter
-      if (activeTab === 'Active' && client.status !== 'Active') return false
+      if (activeTab === 'Active' && client.status !== 'Active' && client.status !== 'Active / Submitted') return false
       if (activeTab === 'Inactive' && client.status !== 'Inactive') return false
       if (activeTab === 'Pending Renewal' && !client.policies.some(p => p.status === 'Pending Renewal')) return false
       if (activeTab === 'Consent Granted' && client.marketingConsent.status !== 'Granted') return false
@@ -204,7 +287,13 @@ export default function ClientsPage() {
       if (activeTab === 'Consent Declined' && client.marketingConsent.status !== 'Declined' && client.marketingConsent.status !== 'Revoked') return false
 
       // Dropdown status filter
-      if (statusFilter !== 'All' && client.status !== statusFilter) return false
+      if (statusFilter !== 'All') {
+        if (statusFilter === 'Active' && client.status !== 'Active' && client.status !== 'Active / Submitted') return false
+        else if (statusFilter === 'Inactive' && client.status !== 'Inactive') return false
+        else if (statusFilter === 'Pending' && client.status !== 'Pending') return false
+        else if (statusFilter === 'Lead' && client.status !== 'Lead') return false
+        else if (statusFilter === 'Active / Submitted' && client.status !== 'Active / Submitted' && client.status !== 'Active') return false
+      }
 
       // Policy Line filter
       if (policyLineFilter !== 'All' && !client.policies.some(p => p.type.toLowerCase().includes(policyLineFilter.toLowerCase()))) return false
@@ -288,65 +377,170 @@ export default function ClientsPage() {
     setTimeout(checkTableScroll, 350)
   }
 
-  // Handlers for Add/Edit Client
+
+  // Handlers & Helpers for Add/Edit Client
+  const handleEffectiveDateChange = (effDate: string) => {
+    const exp = getExpiryFromEffective(effDate)
+    setClientForm(prev => ({
+      ...prev,
+      effectiveDate: effDate,
+      expirationDate: exp,
+    }))
+  }
+
+  const toggleLineOfBusiness = (line: string) => {
+    setClientForm(prev => {
+      const exists = prev.linesOfBusiness.includes(line)
+      let updated: string[]
+      if (exists) {
+        updated = prev.linesOfBusiness.filter(l => l !== line)
+      } else {
+        updated = [...prev.linesOfBusiness, line]
+      }
+      return {
+        ...prev,
+        linesOfBusiness: updated.length > 0 ? updated : [line],
+      }
+    })
+  }
+
+  const handleApplyEmailDomain = (domain: string) => {
+    const current = clientForm.email.trim()
+    if (!current) {
+      setClientForm(prev => ({ ...prev, email: domain }))
+      return
+    }
+    if (current.includes('@')) {
+      const username = current.split('@')[0]
+      setClientForm(prev => ({ ...prev, email: `${username}${domain}` }))
+    } else {
+      setClientForm(prev => ({ ...prev, email: `${current}${domain}` }))
+    }
+  }
+
+  const filteredAddressRecommendations = useMemo(() => {
+    if (!addressSearchQuery.trim()) return SAMPLE_CANADIAN_ADDRESSES.slice(0, 5)
+    const q = addressSearchQuery.toLowerCase()
+    const matches = SAMPLE_CANADIAN_ADDRESSES.filter(
+      a => a.street.toLowerCase().includes(q) ||
+           a.city.toLowerCase().includes(q) ||
+           a.province.toLowerCase().includes(q) ||
+           a.postalCode.toLowerCase().includes(q)
+    )
+    if (matches.length > 0) return matches
+    return [
+      { street: addressSearchQuery, city: 'Toronto', province: 'ON', postalCode: 'M5H 2N2' },
+      ...SAMPLE_CANADIAN_ADDRESSES.slice(0, 3)
+    ]
+  }, [addressSearchQuery])
+
+  const handleSelectAddress = (item: { street: string; city: string; province: string; postalCode: string }) => {
+    setClientForm(prev => ({
+      ...prev,
+      street: item.street,
+      city: item.city,
+      province: item.province,
+      postalCode: item.postalCode,
+    }))
+    setAddressSearchQuery(`${item.street}, ${item.city}, ${item.province}`)
+    setIsAddressDropdownOpen(false)
+  }
+
   function openAddClientModal() {
     setEditingClient(null)
+    const today = '2026-10-16'
     setClientForm({
       firstName: '',
       lastName: '',
       businessName: '',
-      dob: '1985-05-15',
+      dob: '',
       phone: '',
       email: '',
       street: '',
       city: '',
-      state: 'CA',
-      zip: '',
-      brokerCode: 'BRK-8902',
-      otherIdentifier: '',
-      status: 'Active',
-      marketingConsentStatus: 'Granted',
-      marketingChannels: ['Email'],
+      province: 'ON',
+      postalCode: '',
+      status: 'Active / Submitted',
+      effectiveDate: today,
+      expirationDate: getExpiryFromEffective(today),
+      policyNumber: '',
+      isPendingPolicyNumber: false,
+      linesOfBusiness: ['Auto'],
+      yearlyPremium: '',
+      insurerName: 'Travelers Canada',
       notes: '',
     })
+    setAddressSearchQuery('')
+    setIsAddressDropdownOpen(false)
     setIsClientModalOpen(true)
   }
 
   function openEditClientModal(client: ClientItem) {
     setEditingClient(client)
+    const primaryPolicy = client.policies[0]
+    const today = '2026-10-16'
+    const eff = primaryPolicy?.effectiveDate || today
     setClientForm({
       firstName: client.firstName,
       lastName: client.lastName,
       businessName: client.businessName === '—' ? '' : client.businessName,
-      dob: client.dob,
+      dob: client.dob || '',
       phone: client.phone,
       email: client.email,
       street: client.street,
       city: client.city,
-      state: client.state,
-      zip: client.zip,
-      brokerCode: client.brokerCode,
-      otherIdentifier: client.otherIdentifier,
-      status: client.status,
-      marketingConsentStatus: client.marketingConsent.status,
-      marketingChannels: client.marketingConsent.channels,
+      province: client.province || client.state || 'ON',
+      postalCode: client.postalCode || client.zip || '',
+      status: client.status || 'Active / Submitted',
+      effectiveDate: eff,
+      expirationDate: primaryPolicy?.expirationDate || getExpiryFromEffective(eff),
+      policyNumber: primaryPolicy?.policyNumber || '',
+      isPendingPolicyNumber: false,
+      linesOfBusiness: client.linesOfBusiness || (primaryPolicy ? [primaryPolicy.type] : ['Auto']),
+      yearlyPremium: primaryPolicy?.premium || client.yearlyPremium || '',
+      insurerName: primaryPolicy?.carrier || client.insurerName || 'Travelers Canada',
       notes: client.notes[0]?.text || '',
     })
+    setAddressSearchQuery(client.street ? `${client.street}, ${client.city}` : '')
+    setIsAddressDropdownOpen(false)
     setIsClientModalOpen(true)
   }
 
-  function handleSaveClient(e: React.FormEvent) {
-    e.preventDefault()
-    if (!clientForm.firstName.trim() || !clientForm.lastName.trim() || !clientForm.email.trim()) {
-      alert('Please fill in First Name, Last Name, and Email.')
-      return
+  function handleSaveClient(e?: React.FormEvent, isDraft = false) {
+    if (e) e.preventDefault()
+
+    if (!isDraft) {
+      if (!clientForm.firstName.trim() || !clientForm.lastName.trim() || !clientForm.email.trim()) {
+        alert('Please fill in First Name, Last Name, and Primary Email.')
+        return
+      }
+    } else {
+      if (!clientForm.firstName.trim() && !clientForm.businessName.trim() && !clientForm.email.trim()) {
+        alert('Please provide at least a First Name, Business Name, or Email to save a draft.')
+        return
+      }
     }
 
-    const fullName = `${clientForm.firstName.trim()} ${clientForm.lastName.trim()}`
+    const fullName = `${clientForm.firstName.trim()} ${clientForm.lastName.trim()}`.trim() || (clientForm.businessName.trim() || 'Draft Lead')
     const business = clientForm.businessName.trim() || '—'
+    const finalStatus = isDraft ? 'Lead' : clientForm.status
+
+    const policyNum = clientForm.isPendingPolicyNumber || !clientForm.policyNumber.trim()
+      ? `POL-PENDING-${Math.floor(1000 + Math.random() * 9000)}`
+      : clientForm.policyNumber.trim()
+
+    const attachedPolicy: ClientPolicy = {
+      id: `POL-${Date.now()}`,
+      policyNumber: policyNum,
+      type: clientForm.linesOfBusiness.join(' & ') || 'Auto',
+      carrier: clientForm.insurerName || 'Travelers Canada',
+      premium: clientForm.yearlyPremium ? (clientForm.yearlyPremium.startsWith('$') ? clientForm.yearlyPremium : `$${clientForm.yearlyPremium}`) : '$0',
+      effectiveDate: clientForm.effectiveDate,
+      expirationDate: clientForm.expirationDate || getExpiryFromEffective(clientForm.effectiveDate),
+      status: isDraft ? 'Pending Renewal' : 'Active',
+    }
 
     if (editingClient) {
-      // Update existing
       const updated: ClientItem = {
         ...editingClient,
         firstName: clientForm.firstName.trim(),
@@ -358,18 +552,16 @@ export default function ClientsPage() {
         email: clientForm.email.trim(),
         street: clientForm.street.trim(),
         city: clientForm.city.trim(),
-        state: clientForm.state.trim(),
-        zip: clientForm.zip.trim(),
-        brokerCode: clientForm.brokerCode.trim(),
-        otherIdentifier: clientForm.otherIdentifier.trim(),
-        status: clientForm.status,
-        marketingConsent: {
-          ...editingClient.marketingConsent,
-          status: clientForm.marketingConsentStatus,
-          channels: clientForm.marketingChannels,
-        },
+        province: clientForm.province.trim(),
+        state: clientForm.province.trim(),
+        postalCode: clientForm.postalCode.trim(),
+        zip: clientForm.postalCode.trim(),
+        status: finalStatus,
+        linesOfBusiness: clientForm.linesOfBusiness,
+        yearlyPremium: clientForm.yearlyPremium,
+        insurerName: clientForm.insurerName,
         lastActivity: {
-          description: 'Client Profile Updated',
+          description: isDraft ? 'Draft Client Saved' : 'Client Profile Updated',
           time: 'Just now',
         },
       }
@@ -379,7 +571,6 @@ export default function ClientsPage() {
         setSelectedClientForView(updated)
       }
     } else {
-      // Create new
       const newId = `CL-${Math.floor(1000 + Math.random() * 9000)}`
       const newClient: ClientItem = {
         id: newId,
@@ -392,39 +583,49 @@ export default function ClientsPage() {
         email: clientForm.email.trim(),
         street: clientForm.street.trim(),
         city: clientForm.city.trim(),
-        state: clientForm.state.trim(),
-        zip: clientForm.zip.trim(),
-        brokerCode: clientForm.brokerCode.trim() || 'BRK-8902',
-        otherIdentifier: clientForm.otherIdentifier.trim() || `ID-${Math.floor(100000 + Math.random() * 900000)}`,
-        status: clientForm.status,
+        province: clientForm.province.trim(),
+        state: clientForm.province.trim(),
+        postalCode: clientForm.postalCode.trim(),
+        zip: clientForm.postalCode.trim(),
+        brokerCode: 'BRK-8902',
+        otherIdentifier: `CAN-${Math.floor(100000 + Math.random() * 900000)}`,
+        status: finalStatus,
+        linesOfBusiness: clientForm.linesOfBusiness,
+        yearlyPremium: clientForm.yearlyPremium,
+        insurerName: clientForm.insurerName,
         marketingConsent: {
-          status: clientForm.marketingConsentStatus,
-          channels: clientForm.marketingChannels,
-          consentDate: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-          method: 'Broker Form Intake',
-          notes: 'Marketing consent preferences captured at onboarding.',
+          status: 'Pending',
+          channels: ['Email'],
+          consentDate: 'Oct 16, 2026',
+          method: 'Automated Broker Intake Link',
+          notes: 'Automated consent link dispatched to client email. Awaiting digital client sign-off.',
         },
         notes: clientForm.notes.trim() ? [
           {
             id: `N-${Date.now()}`,
-            date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+            date: 'Oct 16, 2026',
             author: 'Jordan Davis',
-            text: clientForm.notes.trim(),
+            text: (isDraft ? '[Draft Record] ' : '') + clientForm.notes.trim(),
           }
-        ] : [],
+        ] : (isDraft ? [{
+          id: `N-${Date.now()}`,
+          date: 'Oct 16, 2026',
+          author: 'Jordan Davis',
+          text: 'Draft intake saved. Underwriting review pending.',
+        }] : []),
         lastActivity: {
-          description: 'New Client Onboarded',
+          description: isDraft ? 'Draft Client Created' : 'New Client Onboarded',
           time: 'Just now',
         },
-        policies: [],
+        policies: [attachedPolicy],
         commissions: [],
         timeline: [
           {
             id: `T-${Date.now()}`,
-            title: 'Client Account Created',
+            title: isDraft ? 'Draft Client Saved' : 'Client Account Created',
             type: 'system',
             date: 'Today, Just now',
-            detail: `Initial record set up with status ${clientForm.status}.`,
+            detail: `Intake registered with status ${finalStatus} and attached policy ${attachedPolicy.policyNumber}.`,
             actor: 'Jordan Davis',
           }
         ],
@@ -749,7 +950,9 @@ export default function ClientsPage() {
                   className="h-9.5 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
                 >
                   <option value="All">All Statuses</option>
-                  <option value="Active">Active</option>
+                  <option value="Active / Submitted">Active / Submitted</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Lead">Lead</option>
                   <option value="Inactive">Inactive</option>
                 </select>
               </div>
@@ -919,23 +1122,29 @@ export default function ClientsPage() {
                         <td className="px-3 py-3.5 whitespace-nowrap">
                           <button
                             onClick={() => handleToggleStatus(client)}
-                            title={`Click to mark as ${client.status === 'Active' ? 'Inactive' : 'Active'}`}
-                            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 transition cursor-pointer whitespace-nowrap ${client.status === 'Active'
-                              ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100'
-                              : 'bg-slate-100 text-slate-600 ring-slate-200 hover:bg-slate-200'
-                              }`}
+                            title={`Status: ${client.status}. Click to toggle Active/Inactive.`}
+                            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold ring-1 transition cursor-pointer whitespace-nowrap ${
+                              client.status === 'Active' || client.status === 'Active / Submitted'
+                                ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100'
+                                : client.status === 'Pending'
+                                ? 'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100'
+                                : client.status === 'Lead'
+                                ? 'bg-indigo-50 text-indigo-700 ring-indigo-200 hover:bg-indigo-100'
+                                : 'bg-slate-100 text-slate-600 ring-slate-200 hover:bg-slate-200'
+                            }`}
                           >
-                            {client.status === 'Active' ? (
-                              <>
-                                <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
-                                Active
-                              </>
-                            ) : (
-                              <>
-                                <span className="size-1.5 rounded-full bg-slate-400 shrink-0" />
-                                Inactive
-                              </>
-                            )}
+                            <span
+                              className={`size-1.5 rounded-full shrink-0 ${
+                                client.status === 'Active' || client.status === 'Active / Submitted'
+                                  ? 'bg-emerald-500'
+                                  : client.status === 'Pending'
+                                  ? 'bg-amber-500'
+                                  : client.status === 'Lead'
+                                  ? 'bg-indigo-500'
+                                  : 'bg-slate-400'
+                              }`}
+                            />
+                            {client.status}
                           </button>
                         </td>
 
@@ -1592,230 +1801,478 @@ export default function ClientsPage() {
       ─────────────────────────────────────────────────────────────── */}
       {isClientModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+          <div className="w-full max-w-3xl rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col">
 
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50/50">
+            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50/70">
               <div>
-                <h2 className="text-[16px] font-bold text-slate-900">
+                <h2 className="text-[17px] font-bold text-slate-900 flex items-center gap-2">
+                  <Users className="size-4.5 text-blue-600" />
                   {editingClient ? 'Edit Client Profile' : 'Add New Client'}
                 </h2>
-                <p className="text-[11px] text-slate-500">
-                  {editingClient ? 'Update client records, identifiers, and compliance' : 'Create a new client record in your broker book'}
+                <p className="text-[12px] text-slate-500">
+                  {editingClient ? 'Update client records, policy coverage, and intake details' : 'Complete intake details, policy coverage, and automated compliance setup'}
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setIsClientModalOpen(false)}
-                className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
               >
                 <X className="size-5" />
               </button>
             </div>
 
             {/* Modal Form Body */}
-            <form onSubmit={handleSaveClient} className="flex-1 overflow-y-auto p-6 space-y-5">
+            <form id="add-client-form" onSubmit={(e) => handleSaveClient(e, false)} className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-6">
 
-              {/* Names */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">First Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={clientForm.firstName}
-                    onChange={(e) => setClientForm({ ...clientForm, firstName: e.target.value })}
-                    placeholder="e.g. Marcus"
-                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  />
+              {/* SECTION 1: Client Identity */}
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+                  <UserCheck className="size-3.5 text-blue-600" />
+                  Client Identity
                 </div>
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">Last Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={clientForm.lastName}
-                    onChange={(e) => setClientForm({ ...clientForm, lastName: e.target.value })}
-                    placeholder="e.g. Vance"
-                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  />
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">First Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={clientForm.firstName}
+                      onChange={(e) => setClientForm({ ...clientForm, firstName: e.target.value })}
+                      placeholder="e.g. Marcus"
+                      className="h-9.5 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">Last Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={clientForm.lastName}
+                      onChange={(e) => setClientForm({ ...clientForm, lastName: e.target.value })}
+                      placeholder="e.g. Vance"
+                      className="h-9.5 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">Business Name (optional)</label>
+                    <div className="relative">
+                      <Building2 className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={clientForm.businessName}
+                        onChange={(e) => setClientForm({ ...clientForm, businessName: e.target.value })}
+                        placeholder="e.g. Vance Logistics LLC"
+                        className="h-9.5 w-full rounded-xl border border-slate-200 bg-white pl-9.5 pr-3 text-[13px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                      Date of Birth <span className="text-slate-400 font-normal">(optional)</span>
+                    </label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <input
+                        type="date"
+                        value={clientForm.dob}
+                        onChange={(e) => setClientForm({ ...clientForm, dob: e.target.value })}
+                        className="h-9.5 w-full rounded-xl border border-slate-200 bg-white pl-9.5 pr-3 text-[13px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Business & DOB */}
-              <div className="grid gap-4 sm:grid-cols-2">
+              {/* SECTION 2: Contact Information & Email Helpers */}
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+                  <Phone className="size-3.5 text-blue-600" />
+                  Contact Information
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">Primary Phone</label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="tel"
+                        value={clientForm.phone}
+                        onChange={(e) => setClientForm({ ...clientForm, phone: e.target.value })}
+                        placeholder="(416) 555-0199"
+                        className="h-9.5 w-full rounded-xl border border-slate-200 bg-white pl-9.5 pr-3 text-[13px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">Primary Email *</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="email"
+                        required
+                        value={clientForm.email}
+                        onChange={(e) => setClientForm({ ...clientForm, email: e.target.value })}
+                        placeholder="client@domain.com"
+                        className="h-9.5 w-full rounded-xl border border-slate-200 bg-white pl-9.5 pr-3 text-[13px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+                    {/* Quick Email Domain Pill Helpers */}
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <span className="text-[10px] font-medium text-slate-400">Quick suffix:</span>
+                      {QUICK_EMAIL_DOMAINS.map(domain => (
+                        <button
+                          key={domain}
+                          type="button"
+                          onClick={() => handleApplyEmailDomain(domain)}
+                          className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10.5px] font-medium text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 transition cursor-pointer"
+                        >
+                          {domain}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 3: Address & Location (Searchable Autocomplete) */}
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+                    <MapPin className="size-3.5 text-blue-600" />
+                    Address & Location <span className="text-slate-400 font-normal lowercase">(optional & searchable)</span>
+                  </div>
+                  <span className="text-[11px] text-blue-600 font-medium">Auto-fill enabled</span>
+                </div>
+
+                {/* Searchable Address Bar */}
+                <div className="relative">
+                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                    Search Address (Type to see suggestions & auto-fill)
+                  </label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      value={addressSearchQuery}
+                      onChange={(e) => {
+                        setAddressSearchQuery(e.target.value)
+                        setIsAddressDropdownOpen(true)
+                      }}
+                      onFocus={() => setIsAddressDropdownOpen(true)}
+                      placeholder="Type street or city (e.g. 100 King St W, Toronto...)"
+                      className="h-10 w-full rounded-xl border border-blue-200 bg-white pl-9.5 pr-8 text-[13px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 shadow-xs"
+                    />
+                    {addressSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAddressSearchQuery('')
+                          setIsAddressDropdownOpen(false)
+                        }}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Address Dropdown Recommendations */}
+                  {isAddressDropdownOpen && (
+                    <div className="absolute left-0 right-0 top-full z-30 mt-1 max-h-52 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+                      <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Suggested Addresses (Click to Auto-fill)
+                      </div>
+                      {filteredAddressRecommendations.map((item, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSelectAddress(item)}
+                          className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2 text-left hover:bg-blue-50/80 transition cursor-pointer group"
+                        >
+                          <MapPin className="size-3.5 text-slate-400 group-hover:text-blue-600 shrink-0 mt-0.5" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[12px] font-semibold text-slate-800 group-hover:text-blue-700 truncate">
+                              {item.street}
+                            </p>
+                            <p className="text-[11px] text-slate-500">
+                              {item.city}, {item.province} {item.postalCode}
+                            </p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Subfields (Street, City, Province, Postal Code) */}
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">Business Name (optional)</label>
+                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">Street Address</label>
                   <input
                     type="text"
-                    value={clientForm.businessName}
-                    onChange={(e) => setClientForm({ ...clientForm, businessName: e.target.value })}
-                    placeholder="e.g. Vance Logistics LLC"
-                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                    value={clientForm.street}
+                    onChange={(e) => setClientForm({ ...clientForm, street: e.target.value })}
+                    placeholder="e.g. 100 King Street West, Suite 5600"
+                    className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-[12px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">Date of Birth</label>
-                  <input
-                    type="date"
-                    value={clientForm.dob}
-                    onChange={(e) => setClientForm({ ...clientForm, dob: e.target.value })}
-                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  />
+
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">City</label>
+                    <input
+                      type="text"
+                      value={clientForm.city}
+                      onChange={(e) => setClientForm({ ...clientForm, city: e.target.value })}
+                      placeholder="e.g. Toronto"
+                      className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-[12px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">Province</label>
+                    <select
+                      value={clientForm.province}
+                      onChange={(e) => setClientForm({ ...clientForm, province: e.target.value })}
+                      className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-[12px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer"
+                    >
+                      {CANADIAN_PROVINCES.map(p => (
+                        <option key={p.code} value={p.code}>
+                          {p.code} - {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">Postal Code</label>
+                    <input
+                      type="text"
+                      value={clientForm.postalCode}
+                      onChange={(e) => setClientForm({ ...clientForm, postalCode: e.target.value })}
+                      placeholder="e.g. M5X 1C9"
+                      className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-[12px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Contact Information */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">Primary Phone</label>
-                  <input
-                    type="tel"
-                    value={clientForm.phone}
-                    onChange={(e) => setClientForm({ ...clientForm, phone: e.target.value })}
-                    placeholder="(555) 000-0000"
-                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">Primary Email *</label>
-                  <input
-                    type="email"
-                    required
-                    value={clientForm.email}
-                    onChange={(e) => setClientForm({ ...clientForm, email: e.target.value })}
-                    placeholder="client@example.com"
-                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  />
+              {/* SECTION 4: Client Status & Automated Marketing Consent */}
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">Client Status</label>
+                    <select
+                      value={clientForm.status}
+                      onChange={(e) => setClientForm({ ...clientForm, status: e.target.value as any })}
+                      className="h-9.5 w-full rounded-xl border border-slate-200 bg-white px-3 text-[12.5px] font-medium outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer"
+                    >
+                      <option value="Active / Submitted">Active / Submitted</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Lead">Lead</option>
+                    </select>
+                    <p className="mt-1 text-[11px] text-slate-400">
+                      Primary intake status for broker book classification.
+                    </p>
+                  </div>
+
+                  {/* Automated Marketing Consent Notification Banner */}
+                  <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-3 flex items-start gap-2.5">
+                    <ShieldCheck className="size-4.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-[11.5px] font-bold text-emerald-900">
+                        Automated Consent Dispatch
+                      </p>
+                      <p className="text-[11px] text-emerald-700 leading-relaxed mt-0.5">
+                        A digital consent link will automatically be dispatched to the client upon saving. Once digitally authorized, their record automatically updates to <strong className="font-semibold text-emerald-900">Granted</strong> in the client file.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Address */}
+              {/* SECTION 5: Policy & Coverage Details */}
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+                    <FileText className="size-3.5 text-blue-600" />
+                    Policy & Coverage Details
+                  </div>
+                  <span className="text-[11px] text-slate-500">
+                    Expiry date automatically linked (+1 yr)
+                  </span>
+                </div>
+
+                {/* Line of Business Multi-Select Pills */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-[11px] font-semibold text-slate-700">
+                      Line of Business <span className="text-slate-400 font-normal">(Multiple selections supported, e.g. Auto & Home)</span>
+                    </label>
+                    <span className="text-[11px] font-medium text-blue-600">
+                      {clientForm.linesOfBusiness.length} selected
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {LOB_OPTIONS.map((line) => {
+                      const isSelected = clientForm.linesOfBusiness.includes(line)
+                      return (
+                        <button
+                          key={line}
+                          type="button"
+                          onClick={() => toggleLineOfBusiness(line)}
+                          className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11.5px] font-semibold transition cursor-pointer ${
+                            isSelected
+                              ? 'bg-slate-950 text-white shadow-xs hover:bg-slate-800'
+                              : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                          }`}
+                        >
+                          {isSelected && <Check className="size-3.5 text-emerald-400" />}
+                          {line}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Policy Number & Insurer */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11px] font-semibold text-slate-700">Policy Number</label>
+                      <label className="flex items-center gap-1.5 text-[10.5px] text-slate-500 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={clientForm.isPendingPolicyNumber}
+                          onChange={(e) => setClientForm({ ...clientForm, isPendingPolicyNumber: e.target.checked })}
+                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        Pending issuance
+                      </label>
+                    </div>
+                    <input
+                      type="text"
+                      disabled={clientForm.isPendingPolicyNumber}
+                      value={clientForm.isPendingPolicyNumber ? 'PENDING ISSUANCE (Auto-generated)' : clientForm.policyNumber}
+                      onChange={(e) => setClientForm({ ...clientForm, policyNumber: e.target.value })}
+                      placeholder="e.g. POL-8942-CAN"
+                      className={`h-9.5 w-full rounded-xl border border-slate-200 px-3 text-[12.5px] font-mono outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+                        clientForm.isPendingPolicyNumber ? 'bg-slate-100 text-slate-500 italic' : 'bg-white text-slate-900'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                      Insurer Name <span className="text-slate-400 font-normal">(with suggestions)</span>
+                    </label>
+                    <input
+                      type="text"
+                      list="insurer-list"
+                      value={clientForm.insurerName}
+                      onChange={(e) => setClientForm({ ...clientForm, insurerName: e.target.value })}
+                      placeholder="Select or type insurer..."
+                      className="h-9.5 w-full rounded-xl border border-slate-200 bg-white px-3 text-[12.5px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                    <datalist id="insurer-list">
+                      {INSURER_SUGGESTIONS.map((ins) => (
+                        <option key={ins} value={ins} />
+                      ))}
+                    </datalist>
+                  </div>
+                </div>
+
+                {/* Effective Date, Auto Expiry (+1 Year), and Yearly Premium */}
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">Effective Date</label>
+                    <input
+                      type="date"
+                      value={clientForm.effectiveDate}
+                      onChange={(e) => handleEffectiveDateChange(e.target.value)}
+                      className="h-9.5 w-full rounded-xl border border-slate-200 bg-white px-3 text-[12px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11px] font-semibold text-slate-700">Expiry Date</label>
+                      <span className="text-[9.5px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded ring-1 ring-emerald-200">
+                        +1 Yr Auto
+                      </span>
+                    </div>
+                    <input
+                      type="date"
+                      readOnly
+                      value={clientForm.expirationDate}
+                      title="Expiry date is automatically linked to exact one year after effective date."
+                      className="h-9.5 w-full rounded-xl border border-slate-200 bg-slate-100 px-3 text-[12px] text-slate-600 outline-none cursor-not-allowed"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">Yearly Premium</label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={clientForm.yearlyPremium}
+                        onChange={(e) => setClientForm({ ...clientForm, yearlyPremium: e.target.value })}
+                        placeholder="2,450.00"
+                        className="h-9.5 w-full rounded-xl border border-slate-200 bg-white pl-8 pr-3 text-[12.5px] font-semibold outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 6: Additional Notes */}
               <div>
-                <label className="text-[11px] font-semibold text-slate-700 block mb-1">Street Address</label>
-                <input
-                  type="text"
-                  value={clientForm.street}
-                  onChange={(e) => setClientForm({ ...clientForm, street: e.target.value })}
-                  placeholder="Street, Suite, Apt"
-                  className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">City</label>
-                  <input
-                    type="text"
-                    value={clientForm.city}
-                    onChange={(e) => setClientForm({ ...clientForm, city: e.target.value })}
-                    placeholder="City"
-                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">State</label>
-                  <input
-                    type="text"
-                    value={clientForm.state}
-                    onChange={(e) => setClientForm({ ...clientForm, state: e.target.value })}
-                    placeholder="WA"
-                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">ZIP Code</label>
-                  <input
-                    type="text"
-                    value={clientForm.zip}
-                    onChange={(e) => setClientForm({ ...clientForm, zip: e.target.value })}
-                    placeholder="98104"
-                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  />
-                </div>
-              </div>
-
-              {/* Identifiers */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">Broker Code / Identifier</label>
-                  <input
-                    type="text"
-                    value={clientForm.brokerCode}
-                    onChange={(e) => setClientForm({ ...clientForm, brokerCode: e.target.value })}
-                    placeholder="BRK-8902"
-                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">Other Agreed Identifier (Tax ID / SSN / EIN)</label>
-                  <input
-                    type="text"
-                    value={clientForm.otherIdentifier}
-                    onChange={(e) => setClientForm({ ...clientForm, otherIdentifier: e.target.value })}
-                    placeholder="EIN-94-3829102"
-                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  />
-                </div>
-              </div>
-
-              {/* Status & Marketing Consent */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">Client Status</label>
-                  <select
-                    value={clientForm.status}
-                    onChange={(e) => setClientForm({ ...clientForm, status: e.target.value as any })}
-                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 cursor-pointer"
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">Marketing Consent Status</label>
-                  <select
-                    value={clientForm.marketingConsentStatus}
-                    onChange={(e) => setClientForm({ ...clientForm, marketingConsentStatus: e.target.value as any })}
-                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 cursor-pointer"
-                  >
-                    <option value="Granted">Granted</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Declined">Declined</option>
-                    <option value="Revoked">Revoked</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="text-[11px] font-semibold text-slate-700 block mb-1">Client Notes</label>
+                <label className="text-[11px] font-semibold text-slate-700 block mb-1">Additional Notes</label>
                 <textarea
                   rows={2}
                   value={clientForm.notes}
                   onChange={(e) => setClientForm({ ...clientForm, notes: e.target.value })}
-                  placeholder="Optional internal remarks or background history..."
-                  className="w-full rounded-xl border border-slate-200 p-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                  placeholder="Optional internal remarks, background context, or intake notes..."
+                  className="w-full rounded-xl border border-slate-200 bg-white p-3 text-[12px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />
               </div>
 
-              {/* Submit Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+            </form>
+
+            {/* Modal Footer Actions: Cancel, Draft, Save Client (Always visible) */}
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-200 bg-slate-50/90 px-6 py-3.5">
+              <button
+                type="button"
+                onClick={() => setIsClientModalOpen(false)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-[12.5px] font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <div className="flex items-center gap-2.5">
                 <button
                   type="button"
-                  onClick={() => setIsClientModalOpen(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition"
+                  onClick={() => handleSaveClient(undefined, true)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2 text-[12.5px] font-semibold text-slate-700 hover:bg-slate-100 transition cursor-pointer shadow-xs"
                 >
-                  Cancel
+                  <BookmarkPlus className="size-4 text-slate-500" />
+                  Draft
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-slate-950 px-5 py-2 text-[12px] font-semibold text-white shadow-md hover:bg-blue-600 transition"
+                  form="add-client-form"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-5.5 py-2 text-[12.5px] font-semibold text-white shadow-md hover:bg-blue-600 transition cursor-pointer"
                 >
+                  <Check className="size-4 text-emerald-400" />
                   {editingClient ? 'Update Client' : 'Save Client'}
                 </button>
               </div>
-
-            </form>
+            </div>
           </div>
         </div>
       )}

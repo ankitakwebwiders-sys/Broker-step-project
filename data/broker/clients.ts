@@ -62,7 +62,12 @@ export interface ClientItem {
   zip: string
   brokerCode: string
   otherIdentifier: string
-  status: 'Active' | 'Inactive'
+  status: 'Active' | 'Inactive' | 'Active / Submitted' | 'Pending' | 'Lead' | string
+  province?: string
+  postalCode?: string
+  linesOfBusiness?: string[]
+  yearlyPremium?: string
+  insurerName?: string
   marketingConsent: ConsentRecord
   notes: ClientNote[]
   lastActivity: {

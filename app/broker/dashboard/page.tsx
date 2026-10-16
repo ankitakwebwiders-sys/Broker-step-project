@@ -26,6 +26,7 @@ import {
   ShieldCheck,
   Sparkles,
   TrendingUp,
+  UserPlus,
   Users,
   WalletCards,
   Zap,
@@ -215,11 +216,11 @@ export default function BrokerDashboardPage() {
             <ChevronDown className="size-3.5 text-slate-400" />
           </button>
           <Link
-            href="/broker/policies"
-            className="group flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600"
+            href="/broker/clients?action=add"
+            className="group flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 cursor-pointer"
           >
-            <Plus className="size-4 transition-transform group-hover:rotate-90" />
-            <span>Add New Policy</span>
+            <UserPlus className="size-4 transition-transform group-hover:scale-110" />
+            <span>Add Client</span>
           </Link>
         </div>
       </div>
@@ -275,6 +276,272 @@ export default function BrokerDashboardPage() {
           ))}
         </div>
       </section>
+
+      {/* ───── 3.2 Upcoming Renewals (7/30/60/90 Day Views) + Quick Actions ───── */}
+      <div className="grid gap-6 xl:grid-cols-[1.55fr_1fr] items-stretch">
+        {/* Upcoming Renewals Card */}
+        <section className="flex flex-col h-auto xl:h-[480px] overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
+          {/* Header Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 p-3.5 sm:px-5 sm:py-4 bg-white">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <span className="flex size-8.5 sm:size-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-1 ring-blue-100 shrink-0">
+                <CalendarDays className="size-4 sm:size-4.5" />
+              </span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-sm sm:text-lg font-bold text-slate-900 tracking-tight">
+                    Upcoming Renewals
+                  </h2>
+                  <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[11px] sm:text-xs font-bold text-blue-700 ring-1 ring-blue-100/80">
+                    {filteredRenewals.length} {filteredRenewals.length === 1 ? 'policy' : 'policies'}
+                  </span>
+                </div>
+                <p className="mt-0.5 text-xs text-slate-500 truncate sm:whitespace-normal">
+                  Active policy expirations requiring broker review &amp; outreach
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/broker/renewals"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-700 transition self-start sm:self-auto shrink-0"
+            >
+              <span>Renewals Hub</span>
+              <ArrowUpRight className="size-3.5" />
+            </Link>
+          </div>
+
+          {/* Timeframe Controls Bar */}
+          <div className="flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-2.5 border-b border-slate-100 bg-slate-50/70 px-3 sm:px-5 py-2.5">
+            <div className="overflow-x-auto scrollbar-none pb-0.5 xs:pb-0">
+              <div className="inline-flex rounded-xl border border-slate-200/80 bg-slate-200/60 p-0.5 text-xs font-semibold text-slate-600">
+                {[
+                  { label: '7 Days', days: 7 },
+                  { label: '30 Days', days: 30 },
+                  { label: '60 Days', days: 60 },
+                  { label: '90 Days', days: 90 },
+                  { label: 'All', days: 0 },
+                ].map((tab) => {
+                  const isActive = renewalDaysFilter === tab.days
+                  return (
+                    <button
+                      key={tab.label}
+                      onClick={() => setRenewalDaysFilter(tab.days)}
+                      className={`rounded-lg px-2 sm:px-3 py-1 transition-all text-xs font-semibold whitespace-nowrap ${isActive
+                        ? 'bg-slate-950 text-white shadow-sm'
+                        : 'text-slate-600 hover:text-slate-950 hover:bg-white/60'
+                        }`}
+                    >
+                      {tab.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between xs:justify-end gap-1.5 text-xs font-medium text-slate-600">
+              <span className="text-slate-500">Pipeline:</span>
+              <span className="font-mono font-bold text-slate-900 bg-white px-2 py-0.5 rounded-md border border-slate-200/80 shadow-xs">
+                {totalRenewalVolume}
+              </span>
+            </div>
+          </div>
+
+          {/* Renewals Table — fills remaining vertical space smoothly */}
+          <div className="flex-1 min-h-[260px] max-h-[380px] xl:max-h-none overflow-x-auto overflow-y-auto custom-scrollbar">
+            {filteredRenewals.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full py-12 px-4 text-center">
+                <div className="flex size-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 mb-2.5">
+                  <CalendarDays className="size-5" />
+                </div>
+                <p className="text-sm font-semibold text-slate-800">No renewals found in this timeframe</p>
+                <p className="text-xs text-slate-500 mt-0.5 max-w-xs">
+                  There are no policies expiring within {renewalDaysFilter} days.
+                </p>
+                <button
+                  onClick={() => setRenewalDaysFilter(0)}
+                  className="mt-3.5 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-sm transition"
+                >
+                  View All Expirations
+                </button>
+              </div>
+            ) : (
+              <table className="w-full min-w-[560px] text-left border-collapse">
+                <thead className="sticky top-0 bg-slate-50/95 backdrop-blur z-10 border-b border-slate-100">
+                  <tr className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    <th className="px-3 sm:px-5 py-2.5">Client &amp; Policy</th>
+                    <th className="px-2.5 sm:px-3 py-2.5">Renewal Date</th>
+                    <th className="px-2.5 sm:px-3 py-2.5">Premium</th>
+                    <th className="px-2.5 sm:px-3 py-2.5">Status</th>
+                    <th className="px-3 sm:px-5 py-2.5 text-right min-w-[100px] sm:min-w-[120px] md:sticky md:right-0 bg-slate-50/95 backdrop-blur-xs md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100/80">
+                  {filteredRenewals.map((row) => (
+                    <tr
+                      key={row.client}
+                      className="group transition-colors hover:bg-slate-50/80"
+                    >
+                      <td className="px-3 sm:px-5 py-3">
+                        <div className="flex items-center gap-2.5 sm:gap-3">
+                          <div
+                            className={`flex size-8 sm:size-8.5 shrink-0 items-center justify-center rounded-xl text-xs font-bold ring-1 ring-black/5 shadow-xs ${row.color}`}
+                          >
+                            {row.initials}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
+                              {row.client}
+                            </p>
+                            <p className="text-xs text-slate-500 truncate mt-0.5">
+                              {row.type} · <span className="font-medium text-slate-600">{row.carrier}</span>
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-2.5 sm:px-3 py-3 whitespace-nowrap">
+                        <p className="text-xs font-semibold text-slate-800">
+                          {row.date}
+                        </p>
+                        {row.daysUntil <= 7 ? (
+                          <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[10.5px] sm:text-[11px] font-bold text-rose-700 ring-1 ring-rose-200/80">
+                            <Clock className="size-2.5" /> in {row.daysUntil} {row.daysUntil === 1 ? 'day' : 'days'}
+                          </span>
+                        ) : row.daysUntil <= 30 ? (
+                          <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10.5px] sm:text-[11px] font-bold text-amber-700 ring-1 ring-amber-200/80">
+                            in {row.daysUntil} days
+                          </span>
+                        ) : (
+                          <span className="mt-0.5 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10.5px] sm:text-[11px] font-medium text-slate-600">
+                            in {row.daysUntil} days
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-2.5 sm:px-3 py-3 whitespace-nowrap">
+                        <p className="font-mono text-xs sm:text-sm font-bold text-slate-900">
+                          {row.premium}
+                        </p>
+                        <span className="block text-[10px] sm:text-[11px] text-slate-400">
+                          annualized
+                        </span>
+                      </td>
+                      <td className="px-2.5 sm:px-3 py-3 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full px-2 sm:px-2.5 py-0.5 text-[11px] sm:text-xs font-semibold ring-1 ${row.status === 'On track'
+                            ? 'bg-emerald-50 text-emerald-700 ring-emerald-200/80'
+                            : row.status === 'Needs attention'
+                              ? 'bg-amber-50 text-amber-700 ring-amber-200/80'
+                              : 'bg-rose-50 text-rose-700 ring-rose-200/80'
+                            }`}
+                        >
+                          <span
+                            className={`size-1.5 rounded-full ${row.status === 'On track'
+                              ? 'bg-emerald-500'
+                              : row.status === 'Needs attention'
+                                ? 'bg-amber-500'
+                                : 'bg-rose-500'
+                              }`}
+                          />
+                          {row.status}
+                        </span>
+                      </td>
+                      <td className="px-3 sm:px-5 py-3 text-right whitespace-nowrap min-w-[100px] sm:min-w-[120px] md:sticky md:right-0 bg-white group-hover:bg-slate-50/95 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                        <Link
+                          href="/broker/renewals"
+                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-blue-500 hover:bg-blue-50/50 hover:text-blue-600 shadow-xs transition"
+                        >
+                          <span>Review</span>
+                          <ArrowRight className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Footer Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/60 px-3.5 sm:px-5 py-2.5 text-xs">
+            <div className="flex items-center gap-2 text-slate-500 font-medium">
+              <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
+              <span>
+                Showing <strong className="text-slate-900 font-semibold">{filteredRenewals.length}</strong> of{' '}
+                <strong className="text-slate-900 font-semibold">{upcomingRenewals.length}</strong> accounts
+              </span>
+            </div>
+            <Link
+              href="/broker/renewals"
+              className="inline-flex items-center justify-center sm:justify-start gap-1 font-semibold text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 transition"
+            >
+              <span>Manage all renewals</span>
+              <ArrowRight className="size-3" />
+            </Link>
+          </div>
+        </section>
+
+        {/* Quick Actions Shortcuts Card */}
+        <section className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)] h-auto xl:h-[480px]">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Quick Actions</h2>
+              <p className="mt-0.5 text-xs text-slate-500">
+                Direct operations &amp; workflow shortcuts
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-1 rounded-full border border-blue-100 bg-blue-50/80 px-2.5 py-0.5 text-xs font-semibold text-blue-700 shrink-0">
+              <Sparkles className="size-3 text-blue-600" /> Shortcuts
+            </span>
+          </div>
+
+          {/* Action cards with consistent responsive spacing */}
+          <div className="my-auto flex flex-col gap-2.5 sm:gap-3 py-3 sm:py-0">
+            {quickActions.map((action) => {
+              const Icon = action.icon
+              return (
+                <Link
+                  key={action.title}
+                  href={action.href}
+                  className="group relative flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-white p-3 sm:p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:bg-slate-50/50 hover:shadow-md hover:shadow-blue-500/5"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={`flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-xl ring-1 transition-all duration-200 ${action.tone}`}
+                    >
+                      <Icon className="size-4.5 sm:size-5 transition-transform group-hover:scale-110" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                        <p className="text-xs sm:text-sm font-semibold text-slate-900 transition-colors group-hover:text-blue-600">
+                          {action.title}
+                        </p>
+                        <span className="rounded-full bg-slate-100 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-slate-600 shrink-0">
+                          {action.badge}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5 line-clamp-1 sm:truncate">
+                        {action.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex size-7 sm:size-7.5 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400 transition-all duration-200 group-hover:bg-blue-50 group-hover:text-blue-600 group-hover:translate-x-0.5">
+                    <ArrowUpRight className="size-3.5 sm:size-4" />
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+
+          <div className="pt-3 border-t border-slate-100">
+            <Link
+              href="/broker/policies"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600"
+            >
+              <Plus className="size-3.5" /> Bind New Policy
+            </Link>
+          </div>
+        </section>
+      </div>
 
       {/* ───── 3.2 Production Summary ───── */}
       <section className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-6">
@@ -683,271 +950,7 @@ export default function BrokerDashboardPage() {
         </div>
       </section>
 
-      {/* ───── 3.2 Upcoming Renewals (7/30/60/90 Day Views) + Quick Actions ───── */}
-      <div className="grid gap-6 xl:grid-cols-[1.55fr_1fr] items-stretch">
-        {/* Upcoming Renewals Card */}
-        <section className="flex flex-col h-auto xl:h-[480px] overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
-          {/* Header Bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 p-3.5 sm:px-5 sm:py-4 bg-white">
-            <div className="flex items-center gap-2.5 sm:gap-3">
-              <span className="flex size-8.5 sm:size-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-1 ring-blue-100 shrink-0">
-                <CalendarDays className="size-4 sm:size-4.5" />
-              </span>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-sm sm:text-lg font-bold text-slate-900 tracking-tight">
-                    Upcoming Renewals
-                  </h2>
-                  <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[11px] sm:text-xs font-bold text-blue-700 ring-1 ring-blue-100/80">
-                    {filteredRenewals.length} {filteredRenewals.length === 1 ? 'policy' : 'policies'}
-                  </span>
-                </div>
-                <p className="mt-0.5 text-xs text-slate-500 truncate sm:whitespace-normal">
-                  Active policy expirations requiring broker review &amp; outreach
-                </p>
-              </div>
-            </div>
 
-            <Link
-              href="/broker/renewals"
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-700 transition self-start sm:self-auto shrink-0"
-            >
-              <span>Renewals Hub</span>
-              <ArrowUpRight className="size-3.5" />
-            </Link>
-          </div>
-
-          {/* Timeframe Controls Bar */}
-          <div className="flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-2.5 border-b border-slate-100 bg-slate-50/70 px-3 sm:px-5 py-2.5">
-            <div className="overflow-x-auto scrollbar-none pb-0.5 xs:pb-0">
-              <div className="inline-flex rounded-xl border border-slate-200/80 bg-slate-200/60 p-0.5 text-xs font-semibold text-slate-600">
-                {[
-                  { label: '7 Days', days: 7 },
-                  { label: '30 Days', days: 30 },
-                  { label: '60 Days', days: 60 },
-                  { label: '90 Days', days: 90 },
-                  { label: 'All', days: 0 },
-                ].map((tab) => {
-                  const isActive = renewalDaysFilter === tab.days
-                  return (
-                    <button
-                      key={tab.label}
-                      onClick={() => setRenewalDaysFilter(tab.days)}
-                      className={`rounded-lg px-2 sm:px-3 py-1 transition-all text-xs font-semibold whitespace-nowrap ${isActive
-                        ? 'bg-slate-950 text-white shadow-sm'
-                        : 'text-slate-600 hover:text-slate-950 hover:bg-white/60'
-                        }`}
-                    >
-                      {tab.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between xs:justify-end gap-1.5 text-xs font-medium text-slate-600">
-              <span className="text-slate-500">Pipeline:</span>
-              <span className="font-mono font-bold text-slate-900 bg-white px-2 py-0.5 rounded-md border border-slate-200/80 shadow-xs">
-                {totalRenewalVolume}
-              </span>
-            </div>
-          </div>
-
-          {/* Renewals Table — fills remaining vertical space smoothly */}
-          <div className="flex-1 min-h-[260px] max-h-[380px] xl:max-h-none overflow-x-auto overflow-y-auto custom-scrollbar">
-            {filteredRenewals.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full py-12 px-4 text-center">
-                <div className="flex size-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 mb-2.5">
-                  <CalendarDays className="size-5" />
-                </div>
-                <p className="text-sm font-semibold text-slate-800">No renewals found in this timeframe</p>
-                <p className="text-xs text-slate-500 mt-0.5 max-w-xs">
-                  There are no policies expiring within {renewalDaysFilter} days.
-                </p>
-                <button
-                  onClick={() => setRenewalDaysFilter(0)}
-                  className="mt-3.5 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-sm transition"
-                >
-                  View All Expirations
-                </button>
-              </div>
-            ) : (
-              <table className="w-full min-w-[560px] text-left border-collapse">
-                <thead className="sticky top-0 bg-slate-50/95 backdrop-blur z-10 border-b border-slate-100">
-                  <tr className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                    <th className="px-3 sm:px-5 py-2.5">Client &amp; Policy</th>
-                    <th className="px-2.5 sm:px-3 py-2.5">Renewal Date</th>
-                    <th className="px-2.5 sm:px-3 py-2.5">Premium</th>
-                    <th className="px-2.5 sm:px-3 py-2.5">Status</th>
-                    <th className="px-3 sm:px-5 py-2.5 text-right min-w-[100px] sm:min-w-[120px] md:sticky md:right-0 bg-slate-50/95 backdrop-blur-xs md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100/80">
-                  {filteredRenewals.map((row) => (
-                    <tr
-                      key={row.client}
-                      className="group transition-colors hover:bg-slate-50/80"
-                    >
-                      <td className="px-3 sm:px-5 py-3">
-                        <div className="flex items-center gap-2.5 sm:gap-3">
-                          <div
-                            className={`flex size-8 sm:size-8.5 shrink-0 items-center justify-center rounded-xl text-xs font-bold ring-1 ring-black/5 shadow-xs ${row.color}`}
-                          >
-                            {row.initials}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
-                              {row.client}
-                            </p>
-                            <p className="text-xs text-slate-500 truncate mt-0.5">
-                              {row.type} · <span className="font-medium text-slate-600">{row.carrier}</span>
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-2.5 sm:px-3 py-3 whitespace-nowrap">
-                        <p className="text-xs font-semibold text-slate-800">
-                          {row.date}
-                        </p>
-                        {row.daysUntil <= 7 ? (
-                          <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[10.5px] sm:text-[11px] font-bold text-rose-700 ring-1 ring-rose-200/80">
-                            <Clock className="size-2.5" /> in {row.daysUntil} {row.daysUntil === 1 ? 'day' : 'days'}
-                          </span>
-                        ) : row.daysUntil <= 30 ? (
-                          <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10.5px] sm:text-[11px] font-bold text-amber-700 ring-1 ring-amber-200/80">
-                            in {row.daysUntil} days
-                          </span>
-                        ) : (
-                          <span className="mt-0.5 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10.5px] sm:text-[11px] font-medium text-slate-600">
-                            in {row.daysUntil} days
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-2.5 sm:px-3 py-3 whitespace-nowrap">
-                        <p className="font-mono text-xs sm:text-sm font-bold text-slate-900">
-                          {row.premium}
-                        </p>
-                        <span className="block text-[10px] sm:text-[11px] text-slate-400">
-                          annualized
-                        </span>
-                      </td>
-                      <td className="px-2.5 sm:px-3 py-3 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-full px-2 sm:px-2.5 py-0.5 text-[11px] sm:text-xs font-semibold ring-1 ${row.status === 'On track'
-                            ? 'bg-emerald-50 text-emerald-700 ring-emerald-200/80'
-                            : row.status === 'Needs attention'
-                              ? 'bg-amber-50 text-amber-700 ring-amber-200/80'
-                              : 'bg-rose-50 text-rose-700 ring-rose-200/80'
-                            }`}
-                        >
-                          <span
-                            className={`size-1.5 rounded-full ${row.status === 'On track'
-                              ? 'bg-emerald-500'
-                              : row.status === 'Needs attention'
-                                ? 'bg-amber-500'
-                                : 'bg-rose-500'
-                              }`}
-                          />
-                          {row.status}
-                        </span>
-                      </td>
-                      <td className="px-3 sm:px-5 py-3 text-right whitespace-nowrap min-w-[100px] sm:min-w-[120px] md:sticky md:right-0 bg-white group-hover:bg-slate-50/95 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
-                        <Link
-                          href="/broker/renewals"
-                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-blue-500 hover:bg-blue-50/50 hover:text-blue-600 shadow-xs transition"
-                        >
-                          <span>Review</span>
-                          <ArrowRight className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-
-          {/* Footer Bar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/60 px-3.5 sm:px-5 py-2.5 text-xs">
-            <div className="flex items-center gap-2 text-slate-500 font-medium">
-              <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
-              <span>
-                Showing <strong className="text-slate-900 font-semibold">{filteredRenewals.length}</strong> of{' '}
-                <strong className="text-slate-900 font-semibold">{upcomingRenewals.length}</strong> accounts
-              </span>
-            </div>
-            <Link
-              href="/broker/renewals"
-              className="inline-flex items-center justify-center sm:justify-start gap-1 font-semibold text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 transition"
-            >
-              <span>Manage all renewals</span>
-              <ArrowRight className="size-3" />
-            </Link>
-          </div>
-        </section>
-
-        {/* Quick Actions Shortcuts Card */}
-        <section className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)] h-auto xl:h-[480px]">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
-            <div>
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Quick Actions</h2>
-              <p className="mt-0.5 text-xs text-slate-500">
-                Direct operations &amp; workflow shortcuts
-              </p>
-            </div>
-            <span className="inline-flex items-center gap-1 rounded-full border border-blue-100 bg-blue-50/80 px-2.5 py-0.5 text-xs font-semibold text-blue-700 shrink-0">
-              <Sparkles className="size-3 text-blue-600" /> Shortcuts
-            </span>
-          </div>
-
-          {/* Action cards with consistent responsive spacing */}
-          <div className="my-auto flex flex-col gap-2.5 sm:gap-3 py-3 sm:py-0">
-            {quickActions.map((action) => {
-              const Icon = action.icon
-              return (
-                <Link
-                  key={action.title}
-                  href={action.href}
-                  className="group relative flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-white p-3 sm:p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:bg-slate-50/50 hover:shadow-md hover:shadow-blue-500/5"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className={`flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-xl ring-1 transition-all duration-200 ${action.tone}`}
-                    >
-                      <Icon className="size-4.5 sm:size-5 transition-transform group-hover:scale-110" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                        <p className="text-xs sm:text-sm font-semibold text-slate-900 transition-colors group-hover:text-blue-600">
-                          {action.title}
-                        </p>
-                        <span className="rounded-full bg-slate-100 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-slate-600 shrink-0">
-                          {action.badge}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-500 mt-0.5 line-clamp-1 sm:truncate">
-                        {action.description}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex size-7 sm:size-7.5 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400 transition-all duration-200 group-hover:bg-blue-50 group-hover:text-blue-600 group-hover:translate-x-0.5">
-                    <ArrowUpRight className="size-3.5 sm:size-4" />
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-
-          <div className="pt-3 border-t border-slate-100">
-            <Link
-              href="/broker/policies"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600"
-            >
-              <Plus className="size-3.5" /> Bind New Policy
-            </Link>
-          </div>
-        </section>
-      </div>
 
       {/* ───── 3.2 Leads Requiring Attention + Reconciliation Records ───── */}
       <div className="grid gap-6 lg:grid-cols-2">

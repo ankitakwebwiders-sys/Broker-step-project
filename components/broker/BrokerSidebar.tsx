@@ -28,7 +28,7 @@ export const brokerNavItems: NavItemDef[] = [
   {
     label: 'Add Client',
     icon: UserPlus,
-    href: '/broker/clients?action=add',
+    href: '/broker/clients',
   },
   {
     label: 'Leads & Marketing',

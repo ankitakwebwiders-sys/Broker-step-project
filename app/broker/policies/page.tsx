@@ -595,15 +595,6 @@ export default function PoliciesPage() {
             <Zap className="size-4 text-blue-600" />
             <span>Quick-Entry</span>
           </button>
-
-          {/* 6.3 Add Policy button styled like dashboard Add New Policy */}
-          <button
-            onClick={handleOpenCreate}
-            className="group inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 cursor-pointer"
-          >
-            <Plus className="size-4 transition-transform group-hover:rotate-90" />
-            <span>Add New Policy</span>
-          </button>
         </div>
       </div>
 

@@ -29,6 +29,7 @@ import {
   UserPlus,
   Users,
   WalletCards,
+  X,
   Zap,
 } from 'lucide-react'
 import {
@@ -39,6 +40,14 @@ import {
   KpiStat,
 } from '@/data/broker/stats'
 import { upcomingRenewals, RenewalPolicy } from '@/data/broker/renewals'
+import {
+  carrierOptions,
+  lineOfBusinessOptions,
+  transactionTypeOptions,
+  type PolicyStatus,
+  type TransactionType,
+} from '@/data/broker/policies'
+import { initialClients } from '@/data/broker/clients'
 
 const activities = [
   {
@@ -157,6 +166,51 @@ const MONTHLY_TREND_DATA = [
 
 export default function BrokerDashboardPage() {
   const [range, setRange] = useState('Last 12 months')
+  const [isAddPolicyModalOpen, setIsAddPolicyModalOpen] = useState(false)
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+
+  const defaultClient = initialClients[0]
+  const [policyForm, setPolicyForm] = useState({
+    clientId: defaultClient?.id || 'cli-1',
+    clientName: defaultClient?.name || 'Marcus Vance',
+    businessName: defaultClient?.businessName || 'Apex Logistics Corp',
+    clientEmail: defaultClient?.email || 'marcus@apexlogistics.com',
+    clientPhone: defaultClient?.phone || '+1 (555) 234-5678',
+    carrier: 'Travelers',
+    policyNumber: '',
+    isPendingNumber: false,
+    policyStatus: 'Active' as PolicyStatus,
+    lineOfBusiness: 'Commercial Property',
+    transactionType: 'New Business' as TransactionType,
+    effectiveDate: new Date().toISOString().split('T')[0],
+    expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    premium: 15000,
+    commissionRate: 15,
+    brokerSplit: 70,
+    actualPaidCommission: 0,
+    notes: '',
+  })
+
+  const calculatedExpectedCommission = useMemo(() => {
+    const gross = (policyForm.premium * (policyForm.commissionRate || 0)) / 100
+    const net = (gross * (policyForm.brokerSplit || 0)) / 100
+    return Math.round(net * 100) / 100
+  }, [policyForm.premium, policyForm.commissionRate, policyForm.brokerSplit])
+
+  const calculatedOutstanding = useMemo(() => {
+    const diff = calculatedExpectedCommission - (policyForm.actualPaidCommission || 0)
+    return Math.max(0, Math.round(diff * 100) / 100)
+  }, [calculatedExpectedCommission, policyForm.actualPaidCommission])
+
+  const handleSavePolicyForm = (e: React.FormEvent) => {
+    e.preventDefault()
+    const finalPolicyNum = policyForm.isPendingNumber
+      ? 'Pending'
+      : policyForm.policyNumber.trim() || `POL-${policyForm.carrier.substring(0, 3).toUpperCase()}-${Math.floor(10000 + Math.random() * 90000)}`
+    setIsAddPolicyModalOpen(false)
+    setToastMessage(`Policy ${finalPolicyNum} added to Book of Business.`)
+    setTimeout(() => setToastMessage(null), 3500)
+  }
 
   const displayedTrendData = useMemo(() => {
     if (range === 'Last 6 months') return MONTHLY_TREND_DATA.slice(-6)
@@ -217,11 +271,19 @@ export default function BrokerDashboardPage() {
           </button>
           <Link
             href="/broker/clients?action=add"
-            className="group flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 cursor-pointer"
+            className="group flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 cursor-pointer"
           >
-            <UserPlus className="size-4 transition-transform group-hover:scale-110" />
+            <UserPlus className="size-4 text-slate-500 transition-transform group-hover:scale-110" />
             <span>Add Client</span>
           </Link>
+          <button
+            type="button"
+            onClick={() => setIsAddPolicyModalOpen(true)}
+            className="group flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 cursor-pointer"
+          >
+            <Plus className="size-4 transition-transform group-hover:rotate-90" />
+            <span>Add New Policy</span>
+          </button>
         </div>
       </div>
 
@@ -534,7 +596,7 @@ export default function BrokerDashboardPage() {
 
           <div className="pt-3 border-t border-slate-100">
             <Link
-              href="/broker/policies"
+              href="/broker/dashboard/policy"
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600"
             >
               <Plus className="size-3.5" /> Bind New Policy
@@ -1348,6 +1410,330 @@ export default function BrokerDashboardPage() {
           })}
         </div>
       </section>
+
+      {/* ───── Add New Policy Modal Popup (Direct on Dashboard) ───── */}
+      {isAddPolicyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 sm:p-6 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative flex max-h-[92vh] w-full max-w-3xl flex-col rounded-2xl bg-white shadow-2xl ring-1 ring-slate-900/10">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6">
+              <div>
+                <h2 className="text-xl font-bold tracking-tight text-slate-900">
+                  Add New Policy
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Configure policy terms, carrier underwriting information, and commission splits.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddPolicyModalOpen(false)}
+                className="flex size-8 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {/* Form Body */}
+            <form onSubmit={handleSavePolicyForm} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
+              {/* Client & Carrier Row */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Select Client / Business *
+                  </label>
+                  <select
+                    value={policyForm.clientId}
+                    onChange={(e) => {
+                      const sel = initialClients.find((c) => c.id === e.target.value)
+                      if (sel) {
+                        setPolicyForm({
+                          ...policyForm,
+                          clientId: sel.id,
+                          clientName: sel.name,
+                          businessName: sel.businessName,
+                          clientEmail: sel.email,
+                          clientPhone: sel.phone,
+                        })
+                      }
+                    }}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none"
+                    required
+                  >
+                    {initialClients.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name} — {c.businessName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Insurance Company / Carrier *
+                  </label>
+                  <select
+                    value={policyForm.carrier}
+                    onChange={(e) => setPolicyForm({ ...policyForm, carrier: e.target.value })}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none"
+                    required
+                  >
+                    {carrierOptions.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Policy Number & Pending Checkbox */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Policy Number (Manual or Pending)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={policyForm.isPendingNumber ? 'Pending from carrier' : 'e.g., POL-TRV-89421'}
+                    disabled={policyForm.isPendingNumber}
+                    value={policyForm.policyNumber}
+                    onChange={(e) => setPolicyForm({ ...policyForm, policyNumber: e.target.value })}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm disabled:bg-slate-100 disabled:text-slate-400 focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex items-center pt-6">
+                  <label className="inline-flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={policyForm.isPendingNumber}
+                      onChange={(e) => setPolicyForm({ ...policyForm, isPendingNumber: e.target.checked })}
+                      className="size-4 rounded text-blue-600 focus:ring-blue-500"
+                    />
+                    <span>Mark as Pending / Blank</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Status, LOB & Transaction Type */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Policy Status *
+                  </label>
+                  <select
+                    value={policyForm.policyStatus}
+                    onChange={(e) => setPolicyForm({ ...policyForm, policyStatus: e.target.value as PolicyStatus })}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Under Review">Under Review</option>
+                    <option value="Historical">Historical</option>
+                    <option value="Expired">Expired</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Line of Business *
+                  </label>
+                  <select
+                    value={policyForm.lineOfBusiness}
+                    onChange={(e) => setPolicyForm({ ...policyForm, lineOfBusiness: e.target.value })}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none"
+                  >
+                    {lineOfBusinessOptions.map((lob) => (
+                      <option key={lob} value={lob}>
+                        {lob}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Transaction Type *
+                  </label>
+                  <select
+                    value={policyForm.transactionType}
+                    onChange={(e) => setPolicyForm({ ...policyForm, transactionType: e.target.value as TransactionType })}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none"
+                  >
+                    {transactionTypeOptions.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Effective and Expiry Dates */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Effective Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={policyForm.effectiveDate}
+                    onChange={(e) => setPolicyForm({ ...policyForm, effectiveDate: e.target.value })}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Expiry Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={policyForm.expiryDate}
+                    onChange={(e) => setPolicyForm({ ...policyForm, expiryDate: e.target.value })}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Financial Section: Premium, Rate %, Split % */}
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-4 space-y-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Financial Terms &amp; Commission Calculation
+                </h3>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      Premium ($) *
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      min="0"
+                      value={policyForm.premium}
+                      onChange={(e) => setPolicyForm({ ...policyForm, premium: parseFloat(e.target.value) || 0 })}
+                      className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      Carrier Commission Rate (%) *
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      min="0"
+                      max="100"
+                      value={policyForm.commissionRate}
+                      onChange={(e) => setPolicyForm({ ...policyForm, commissionRate: parseFloat(e.target.value) || 0 })}
+                      className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      Broker / Brokerage Split (%) *
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      min="0"
+                      max="100"
+                      value={policyForm.brokerSplit}
+                      onChange={(e) => setPolicyForm({ ...policyForm, brokerSplit: parseFloat(e.target.value) || 0 })}
+                      className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Live Calculated Row */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 border-t border-slate-200 pt-3">
+                  <div className="rounded-lg bg-blue-50/70 p-3">
+                    <span className="text-[11px] font-medium text-blue-700">Expected Commission (Calculated)</span>
+                    <p className="mt-1 text-lg font-bold text-blue-700 font-mono">
+                      ${calculatedExpectedCommission.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Actual / Paid Commission ($)
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      min="0"
+                      value={policyForm.actualPaidCommission}
+                      onChange={(e) =>
+                        setPolicyForm({
+                          ...policyForm,
+                          actualPaidCommission: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="h-9.5 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="rounded-lg bg-amber-50/70 p-3">
+                    <span className="text-[11px] font-medium text-amber-700">Outstanding (Calculated)</span>
+                    <p className="mt-1 text-lg font-bold text-amber-700 font-mono">
+                      ${calculatedOutstanding.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Notes
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Underwriting remarks, special endorsements, or renewal reminders..."
+                  value={policyForm.notes}
+                  onChange={(e) => setPolicyForm({ ...policyForm, notes: e.target.value })}
+                  className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+
+              {/* Modal Actions */}
+              <div className="flex items-center justify-end gap-2.5 border-t border-slate-100 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsAddPolicyModalOpen(false)}
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-slate-950/15 hover:bg-blue-600 transition cursor-pointer"
+                >
+                  Save &amp; Add Policy
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-xl animate-in slide-in-from-bottom-2">
+          <CheckCircle2 className="size-4 text-emerald-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   )
 }

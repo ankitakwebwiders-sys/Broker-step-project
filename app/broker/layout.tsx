@@ -34,7 +34,7 @@ const navItems: NavItemDef[] = [
   {
     label: 'Add Client',
     icon: UserPlus,
-    href: '/broker/clients?action=add',
+    href: '/broker/clients',
   },
   {
     label: 'Leads & Marketing',
@@ -154,7 +154,11 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
     if (item.href === '/login') return false
 
     if (item.label === 'Dashboard') {
-      return pathname === '/broker/dashboard' || pathname === '/broker'
+      return (
+        pathname === '/broker/dashboard' ||
+        pathname === '/broker' ||
+        pathname.startsWith('/broker/dashboard/')
+      )
     }
     if (item.label === 'Add Client') {
       return pathname === '/broker/clients'

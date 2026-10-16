@@ -22,7 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900">
-      {/* ───── Admin Sidebar (Broker-Style Dark Aesthetic) ───── */}
+      {/* ───── Admin Sidebar (Soft Blue-Grey #F1F5F9 Aesthetic) ───── */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
           }`}

@@ -152,9 +152,9 @@ export const adminNavSections: AdminNavSectionDef[] = [
 
 export function AdminLogo() {
   return (
-    <Link href="/" className="inline-flex items-center transition-opacity hover:opacity-90">
+    <Link href="/admin/dashboard" className="inline-flex items-center transition-opacity hover:opacity-90">
       <Image
-        src="/images/logos/broker-dark-theme.png"
+        src="/images/logos/broker-logo-removebg-preview.png"
         alt="BrokerStep Logo"
         width={360}
         height={100}
@@ -245,9 +245,9 @@ function NavItem({
   return (
     <div className="flex flex-col">
       <div
-        className={`group relative flex w-full items-center rounded-xl transition-all duration-200 ${active
-          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold shadow-md shadow-blue-500/25'
-          : 'text-slate-300 hover:bg-white/[0.07] hover:text-white font-medium'
+        className={`group relative flex w-full items-center rounded-xl transition-all duration-200 cursor-pointer ${active
+          ? 'bg-[#DBEAFE] text-[#246BFD] font-semibold shadow-xs'
+          : 'text-[#334155] hover:bg-slate-200/70 hover:text-[#0F172A] font-medium'
           }`}
       >
         <Link
@@ -256,15 +256,15 @@ function NavItem({
           className="flex flex-1 items-center gap-3 px-3 py-2.5 text-sm"
         >
           <Icon
-            className={`size-[18px] shrink-0 transition-colors ${active ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'
+            className={`size-[18px] shrink-0 transition-colors ${active ? 'text-[#246BFD]' : 'text-[#64748B] group-hover:text-[#334155]'
               }`}
           />
           <span className="flex-1 truncate">{item.label}</span>
           {item.count && (
             <span
               className={`rounded-full px-2 py-0.5 text-xs font-semibold transition-colors ${active
-                ? 'bg-white/20 text-white font-semibold'
-                : 'bg-slate-800 text-slate-300 border border-slate-700/60 group-hover:bg-slate-700/80 group-hover:text-white'
+                ? 'bg-[#246BFD]/15 text-[#246BFD] font-semibold'
+                : 'bg-slate-200/80 text-slate-600 group-hover:bg-slate-300/80 group-hover:text-slate-900'
                 }`}
             >
               {item.count}
@@ -273,8 +273,8 @@ function NavItem({
           {item.badge && (
             <span
               className={`rounded-md px-1.5 py-0.5 text-xs font-bold tracking-wide uppercase ${active
-                ? 'bg-white/25 text-white'
-                : 'bg-blue-500/15 text-blue-400 border border-blue-400/30'
+                ? 'bg-[#246BFD]/20 text-[#246BFD]'
+                : 'bg-blue-50 text-blue-600 border border-blue-200'
                 }`}
             >
               {item.badge}
@@ -291,8 +291,8 @@ function NavItem({
               onToggleExpand()
             }}
             className={`p-2 mr-1 rounded-lg transition-colors cursor-pointer ${active
-              ? 'text-white/80 hover:text-white hover:bg-white/10'
-              : 'text-slate-400 hover:text-white hover:bg-white/10'
+              ? 'text-[#246BFD] hover:bg-blue-200/50'
+              : 'text-[#64748B] hover:text-[#334155] hover:bg-slate-200/70'
               }`}
             aria-label={`Toggle ${item.label} submenus`}
           >
@@ -306,7 +306,7 @@ function NavItem({
 
       {/* Submenu Accordion */}
       {hasSubItems && expanded && (
-        <div className="ml-5 mt-2.5 mb-1.5 border-l border-slate-800/90 pl-2.5 flex flex-col space-y-1 pt-1 animate-in fade-in duration-150">
+        <div className="ml-5 mt-2.5 mb-1.5 border-l border-slate-300 pl-2.5 flex flex-col space-y-1 pt-1 animate-in fade-in duration-150">
           {item.subItems!.map((sub, subIdx) => {
             const isSubActive = isSubItemActive(sub.href)
             return (
@@ -316,13 +316,13 @@ function NavItem({
                 onClick={(e) => handleSubClick(e, sub.href)}
                 className={`group relative flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs sm:text-[13px] font-medium transition-all cursor-pointer ${subIdx === 0 ? 'mt-1.5' : ''
                   } ${isSubActive
-                    ? 'bg-blue-500/15 text-blue-400 font-semibold -ml-[11px] pl-[9px] border-l-2 border-blue-500'
-                    : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
+                    ? 'bg-[#DBEAFE] text-[#246BFD] font-semibold -ml-[11px] pl-[9px] border-l-2 border-[#246BFD]'
+                    : 'text-[#64748B] hover:bg-slate-200/60 hover:text-[#0F172A]'
                   }`}
               >
                 <span className="truncate" suppressHydrationWarning>{sub.label}</span>
                 {sub.count && (
-                  <span className="rounded px-1.5 py-0.5 text-xs font-semibold bg-slate-800/80 text-slate-400">
+                  <span className="rounded px-1.5 py-0.5 text-xs font-semibold bg-slate-200/80 text-slate-600">
                     {sub.count}
                   </span>
                 )}
@@ -425,7 +425,7 @@ export function AdminSidebar({
 
   return (
     <div
-      className={`flex h-full w-[280px] flex-col border-r border-slate-800/80 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 px-3.5 py-4 ${className}`}
+      className={`flex h-full w-[280px] flex-col border-r border-slate-200/90 bg-[#F1F5F9] px-3.5 py-4 ${className}`}
     >
       {/* Brand Header */}
       {showHeader && (
@@ -433,7 +433,7 @@ export function AdminSidebar({
           <AdminLogo />
           {onCloseMobile && (
             <button
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden transition-colors cursor-pointer"
+              className="rounded-lg p-1.5 text-[#64748B] hover:bg-slate-200/70 hover:text-[#334155] lg:hidden transition-colors cursor-pointer"
               onClick={onCloseMobile}
               aria-label="Close navigation"
             >
@@ -444,10 +444,10 @@ export function AdminSidebar({
       )}
 
       {/* Navigation Sections */}
-      <div className="flex flex-1 flex-col space-y-4 overflow-y-auto pr-1 scrollbar-thin">
+      <div className="flex flex-1 flex-col space-y-4 overflow-y-auto pr-1 custom-scrollbar">
         {adminNavSections.map((section) => (
           <div key={section.label}>
-            <p className="mb-2 px-3 text-xs font-bold tracking-wider text-slate-400 uppercase">
+            <p className="mb-2 px-3 text-xs font-bold tracking-wider text-[#64748B] uppercase">
               {section.label}
             </p>
             <div className="flex flex-col gap-1">
@@ -470,21 +470,21 @@ export function AdminSidebar({
       </div>
 
       {/* Sidebar Footer User Card */}
-      <div className="mt-3 pt-3 border-t border-slate-800/80">
-        <div className="flex items-center justify-between rounded-xl p-2 text-left transition hover:bg-white/[0.05]">
+      <div className="mt-3 pt-3 border-t border-slate-200/90">
+        <div className="flex items-center justify-between rounded-xl p-2 text-left transition hover:bg-slate-200/60">
           <Link
             href="/admin/settings"
             onClick={onCloseMobile}
             className="flex items-center gap-2.5 min-w-0 flex-1"
           >
-            <div className="flex size-8.5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-sm">
+            <div className="flex size-8.5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-xs">
               AD
             </div>
             <div className="truncate">
-              <p className="truncate text-sm font-semibold text-slate-200 leading-tight">
+              <p className="truncate text-sm font-semibold text-[#334155] leading-tight">
                 Admin User
               </p>
-              <p className="truncate text-xs text-slate-400 leading-tight mt-0.5">
+              <p className="truncate text-xs text-[#64748B] leading-tight mt-0.5">
                 System Administrator
               </p>
             </div>
@@ -492,7 +492,7 @@ export function AdminSidebar({
           <Link
             href="/admin/login"
             title="Sign out"
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+            className="rounded-lg p-1.5 text-[#64748B] hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
           >
             <LogOut className="size-4" />
           </Link>

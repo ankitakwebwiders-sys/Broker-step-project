@@ -91,19 +91,19 @@ export function BrokerSidebar({
             <Link
               href={item.href}
               onClick={handleClick}
-              className={`group flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${isItemActive
-                ? 'bg-blue-600 text-white font-semibold shadow-md shadow-blue-500/20'
+              className={`group flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer ${isItemActive
+                ? 'bg-[#DBEAFE] text-[#246BFD] font-semibold shadow-xs'
                 : isLogout
-                  ? 'text-slate-500 hover:bg-rose-50 hover:text-rose-600'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'text-[#64748B] hover:bg-rose-50 hover:text-rose-600'
+                  : 'text-[#334155] hover:bg-slate-200/70 hover:text-[#0F172A]'
                 }`}
             >
               <Icon
-                className={`size-[18px] shrink-0 ${isItemActive
-                  ? 'text-white'
+                className={`size-[18px] shrink-0 transition-colors ${isItemActive
+                  ? 'text-[#246BFD]'
                   : isLogout
-                    ? 'text-slate-400 group-hover:text-rose-500'
-                    : 'text-slate-400 group-hover:text-blue-600'
+                    ? 'text-[#64748B] group-hover:text-rose-600'
+                    : 'text-[#64748B] group-hover:text-[#334155]'
                   }`}
               />
               <span className="flex-1 truncate tracking-wide">{item.label}</span>

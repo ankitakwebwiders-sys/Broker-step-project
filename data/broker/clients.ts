@@ -6,7 +6,18 @@ export interface ClientPolicy {
   premium: string
   effectiveDate: string
   expirationDate: string
-  status: 'Active' | 'Historical' | 'Pending Renewal' | 'Cancelled'
+  status: 'Active' | 'Historical' | 'Pending Renewal' | 'Cancelled' | 'Rewritten'
+  tag?: string
+  isHistory?: boolean
+  policyNumberPending?: boolean
+  policyNumberSubtext?: string
+  rateSplit?: string
+  expectedCommission?: string
+  paidCommission?: string
+  netCommission?: string
+  commissionStatus?: 'Paid' | 'Unpaid' | 'Pending'
+  chainNote?: string
+  brokerNote?: string
 }
 
 export interface CommissionTransaction {
@@ -53,6 +64,8 @@ export interface ClientItem {
   lastName: string
   name: string
   businessName: string
+  clientType?: 'Individual' | 'Commercial'
+  clientSince?: string
   dob: string
   phone: string
   email: string
@@ -72,9 +85,195 @@ export interface ClientItem {
   policies: ClientPolicy[]
   commissions: CommissionTransaction[]
   timeline: ClientTimelineEvent[]
+  originalExpected?: string
+  additionalCommission?: string
+  chargebacks?: string
+  otherAdjustments?: string
+  netCommission?: string
+  totalPaid?: string
+  outstanding?: string
 }
 
 export const initialClients: ClientItem[] = [
+  {
+    id: 'CL-1000',
+    firstName: 'Daniel',
+    lastName: 'Okafor',
+    name: 'Daniel Okafor',
+    businessName: '—',
+    clientType: 'Individual',
+    clientSince: '2 Sep 2024',
+    dob: '1988-03-22',
+    phone: '(416) 555-0110',
+    email: 'daniel.okafor@example.ca',
+    street: '450 City Centre Dr',
+    city: 'Mississauga',
+    state: 'ON',
+    zip: 'L5B 1M3',
+    brokerCode: 'BRK-8902',
+    otherIdentifier: 'DL-ON-9821034-A',
+    status: 'Active',
+    originalExpected: '$430.50',
+    additionalCommission: '$0.00',
+    chargebacks: '$0.00',
+    otherAdjustments: '$0.00',
+    netCommission: '$430.50',
+    totalPaid: '$253.00',
+    outstanding: '$177.50',
+    marketingConsent: {
+      status: 'Granted',
+      channels: ['Email', 'SMS', 'Phone'],
+      consentDate: '2 Sep 2024',
+      method: 'Electronic Signature',
+      ipAddress: '142.214.19.82',
+      notes: 'Consent granted during initial home insurance intake.',
+    },
+    notes: [
+      {
+        id: 'N-DO-1',
+        date: '15 Sep 2026',
+        author: 'Jordan Davis',
+        text: 'Rewrote coverage from ABC Insurance to XYZ Insurance to provide enhanced water-damage coverage at competitive premium.',
+      },
+      {
+        id: 'N-DO-2',
+        date: '2 Sep 2024',
+        author: 'Jordan Davis',
+        text: 'Initial new business bound with ABC Insurance on Home policy ABC-A123.',
+      },
+    ],
+    lastActivity: {
+      description: 'Rewritten with XYZ Insurance Pending',
+      time: '15 Sep 2026',
+    },
+    policies: [
+      {
+        id: 'pol-do-1',
+        policyNumber: 'XYZ-PENDING',
+        type: 'Home',
+        carrier: 'XYZ Insurance',
+        premium: '$2,840.00',
+        effectiveDate: '15 Sep 2026',
+        expirationDate: '15 Sep 2027',
+        status: 'Active',
+        tag: 'Rewrite',
+        isHistory: false,
+        policyNumberPending: true,
+        policyNumberSubtext: 'will fill from a matched statement',
+        rateSplit: '12.5% × 50%',
+        expectedCommission: '$177.50',
+        paidCommission: '$0.00',
+        netCommission: '$177.50',
+        commissionStatus: 'Unpaid',
+        chainNote: 'Rewritten from ABC Insurance ABC-B456 (2025)',
+        brokerNote: 'Moved to XYZ for better water-damage coverage. Policy number not yet issued.',
+      },
+      {
+        id: 'pol-do-2',
+        policyNumber: 'ABC-B456',
+        type: 'Home',
+        carrier: 'ABC Insurance',
+        premium: '$2,610.00',
+        effectiveDate: '15 Sep 2025',
+        expirationDate: '15 Sep 2026',
+        status: 'Rewritten',
+        tag: 'Renewal',
+        isHistory: true,
+        policyNumberPending: false,
+        policyNumberSubtext: 'Entered at binding',
+        rateSplit: '10% × 50%',
+        expectedCommission: '$130.50',
+        paidCommission: '$130.50',
+        netCommission: '$130.50',
+        commissionStatus: 'Paid',
+        chainNote: 'Renewal of ABC Insurance ABC-A123 (2024) · Rewritten as XYZ Insurance Pending',
+      },
+      {
+        id: 'pol-do-3',
+        policyNumber: 'ABC-A123',
+        type: 'Home',
+        carrier: 'ABC Insurance',
+        premium: '$2,450.00',
+        effectiveDate: '15 Sep 2024',
+        expirationDate: '15 Sep 2025',
+        status: 'Rewritten',
+        tag: 'New Business',
+        isHistory: true,
+        policyNumberPending: false,
+        policyNumberSubtext: 'Initial binding',
+        rateSplit: '10% × 50%',
+        expectedCommission: '$122.50',
+        paidCommission: '$122.50',
+        netCommission: '$122.50',
+        commissionStatus: 'Paid',
+        chainNote: 'Initial binding for Daniel Okafor · Renewed as ABC-B456',
+      },
+    ],
+    commissions: [
+      {
+        id: 'COMM-DO-1',
+        date: '2026-09-15',
+        statementNumber: 'STM-2026-09-XYZ',
+        carrier: 'XYZ Insurance',
+        policyNumber: 'Pending (XYZ)',
+        premium: '$2,840.00',
+        rate: '12.5% × 50%',
+        amount: '$177.50',
+        status: 'Outstanding',
+        sourceStatementUrl: '/broker/statements',
+      },
+      {
+        id: 'COMM-DO-2',
+        date: '2025-09-15',
+        statementNumber: 'STM-2025-09-ABC',
+        carrier: 'ABC Insurance',
+        policyNumber: 'ABC-B456',
+        premium: '$2,610.00',
+        rate: '10% × 50%',
+        amount: '$130.50',
+        status: 'Paid',
+        sourceStatementUrl: '/broker/statements',
+      },
+      {
+        id: 'COMM-DO-3',
+        date: '2024-09-15',
+        statementNumber: 'STM-2024-09-ABC',
+        carrier: 'ABC Insurance',
+        policyNumber: 'ABC-A123',
+        premium: '$2,450.00',
+        rate: '10% × 50%',
+        amount: '$122.50',
+        status: 'Paid',
+        sourceStatementUrl: '/broker/statements',
+      },
+    ],
+    timeline: [
+      {
+        id: 'TL-DO-1',
+        title: 'Rewritten — new carrier',
+        type: 'policy',
+        date: '15 Sep 2026',
+        detail: 'XYZ Insurance Pending · Home · $2,840.00',
+        actor: 'Jordan Davis',
+      },
+      {
+        id: 'TL-DO-2',
+        title: 'Renewed — same carrier',
+        type: 'policy',
+        date: '15 Sep 2025',
+        detail: 'ABC Insurance ABC-B456 · Home · $2,610.00',
+        actor: 'Jordan Davis',
+      },
+      {
+        id: 'TL-DO-3',
+        title: 'New business',
+        type: 'policy',
+        date: '15 Sep 2024',
+        detail: 'ABC Insurance ABC-A123 · Home · $2,450.00',
+        actor: 'Jordan Davis',
+      },
+    ],
+  },
   {
     id: 'CL-1001',
     firstName: 'Marcus',

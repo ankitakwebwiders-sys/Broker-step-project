@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo, useRef, useEffect } from 'react'
+import React, { useState, useMemo, useRef, useEffect, Fragment, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams, useRouter } from 'next/navigation'
 import {
   Users,
   Search,
@@ -23,6 +24,9 @@ import {
   Edit3,
   Eye,
   ChevronDown,
+  ChevronUp,
+  ArrowLeft,
+  Copy,
   UserCheck,
   UserX,
   X,
@@ -39,6 +43,14 @@ import {
   Check,
   Sparkles,
   ArrowUpRight,
+  Shield,
+  ArrowLeftRight,
+  Ban,
+  Receipt,
+  Link2,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
 } from 'lucide-react'
 import {
   initialClients,
@@ -50,20 +62,59 @@ import {
   type ClientTimelineEvent,
 } from '@/data/broker/clients'
 
-export default function ClientsPage() {
+function ClientsContent() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const viewParam = searchParams.get('view')
+  const idParam = searchParams.get('id')
+  const tabParam = searchParams.get('tab')
+  const actionParam = searchParams.get('action')
+
   // Clients state (interactive client data)
   const [clients, setClients] = useState<ClientItem[]>(initialClients)
 
   // Status Filter Tabs
-  const [activeTab, setActiveTab] = useState<string>('All')
+  const [activeTab, setActiveTab] = useState<string>(() => tabParam || 'All')
   const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'All' | 'Active' | 'Inactive'>('All')
+  const [statusFilter, setStatusFilter] = useState<'All' | 'Active' | 'Inactive'>(() => {
+    if (tabParam === 'Active' || tabParam === 'Inactive') return tabParam
+    return 'All'
+  })
   const [policyLineFilter, setPolicyLineFilter] = useState('All')
   const [consentFilter, setConsentFilter] = useState<'All' | 'Granted' | 'Pending' | 'Declined' | 'Revoked'>('All')
 
-  // Modals & Drawers state
-  const [selectedClientForView, setSelectedClientForView] = useState<ClientItem | null>(null)
+  // Full-Page Broker Details View & Tabs state - pre-initialize from query parameters
+  const [selectedClientForView, setSelectedClientForView] = useState<ClientItem | null>(() => {
+    if (idParam) {
+      return initialClients.find(c => c.id === idParam) || initialClients[0]
+    }
+    if (viewParam === 'details') {
+      return initialClients[0]
+    }
+    return null
+  })
   const [clientDetailTab, setClientDetailTab] = useState<'overview' | 'policies' | 'commissions' | 'consent' | 'notes' | 'timeline'>('overview')
+  const [policySubFilter, setPolicySubFilter] = useState<'All' | 'Active' | 'Historical'>('All')
+
+  // Table Column Sorting State (Client Name, Client Status, Marketing Consent)
+  type ClientSortField = 'name' | 'status' | 'consent'
+  type SortDirection = 'asc' | 'desc'
+  const [sortField, setSortField] = useState<ClientSortField>('name')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+
+  const handleSort = (field: ClientSortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }
+
+  // Inline expansion states for full-page view (NO POPUP MODALS)
+  const [expandedPolicyId, setExpandedPolicyId] = useState<string | null>(null)
+  const [expandedStatementId, setExpandedStatementId] = useState<string | null>(null)
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
 
   // Add / Edit Client Modal state
   const [isClientModalOpen, setIsClientModalOpen] = useState(false)
@@ -72,12 +123,6 @@ export default function ClientsPage() {
   // Add Policy Modal state
   const [isAddPolicyModalOpen, setIsAddPolicyModalOpen] = useState(false)
   const [policyClientTarget, setPolicyClientTarget] = useState<ClientItem | null>(null)
-
-  // View Policy Preview Modal
-  const [previewPolicy, setPreviewPolicy] = useState<{ clientName: string; policy: ClientPolicy } | null>(null)
-
-  // View Statement Preview Modal
-  const [previewStatement, setPreviewStatement] = useState<CommissionTransaction | null>(null)
 
   // Form State for Add/Edit Client
   const [clientForm, setClientForm] = useState({
@@ -110,48 +155,62 @@ export default function ClientsPage() {
     status: 'Active' as 'Active' | 'Pending Renewal',
   })
 
-  // New Note input in Client Details drawer
+  // New Note input in Broker Details view
   const [newNoteText, setNewNoteText] = useState('')
 
-  // Sync URL query params with tabs, modals, and drawers
+  // Clipboard copy handler with feedback key
+  const handleCopy = (text: string, key: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
+    if (!text || text === '—') return
+    navigator.clipboard.writeText(text)
+    setCopiedKey(key)
+    setTimeout(() => {
+      setCopiedKey(prev => (prev === key ? null : prev))
+    }, 2000)
+  }
+
+  // Client Selection & Back handlers with URL sync
+  const handleSelectClient = (client: ClientItem) => {
+    setSelectedClientForView(client)
+    setClientDetailTab('overview')
+    setExpandedPolicyId(null)
+    setExpandedStatementId(null)
+    router.push(`/broker/clients?view=details&id=${client.id}`)
+  }
+
+  const handleBackToList = () => {
+    setSelectedClientForView(null)
+    setExpandedPolicyId(null)
+    setExpandedStatementId(null)
+    if (searchParams.get('from') === 'book-of-business') {
+      router.push('/broker/book-of-business')
+      return
+    }
+    router.push('/broker/clients')
+  }
+
+  // Sync URL query params with tabs and full-page details
   useEffect(() => {
-    function applyUrlParams(searchStr?: string) {
-      if (typeof window === 'undefined') return
-      const query = searchStr !== undefined ? searchStr : window.location.search
-      const params = new URLSearchParams(query)
-      const tab = params.get('tab')
-      const action = params.get('action')
-      const view = params.get('view')
-      if (tab) {
-        setActiveTab(tab)
-        if (tab === 'Active' || tab === 'Inactive') setStatusFilter(tab)
-      } else if (!params.toString()) {
-        setActiveTab('All')
-        setStatusFilter('All')
-      }
-      if (action === 'add') {
-        setEditingClient(null)
-        setIsClientModalOpen(true)
-      }
-      if (view === 'details' && initialClients.length > 0) {
-        setSelectedClientForView(initialClients[0])
-      }
+    if (tabParam) {
+      setActiveTab(tabParam)
+      if (tabParam === 'Active' || tabParam === 'Inactive') setStatusFilter(tabParam)
+    } else if (!searchParams.toString()) {
+      setActiveTab('All')
+      setStatusFilter('All')
     }
-
-    applyUrlParams()
-
-    const handleNavChange = (e: any) => {
-      const search = e?.detail?.search !== undefined ? e.detail.search : undefined
-      applyUrlParams(search)
+    if (actionParam === 'add') {
+      setEditingClient(null)
+      setIsClientModalOpen(true)
     }
-
-    window.addEventListener('popstate', () => applyUrlParams())
-    window.addEventListener('broker-nav-change', handleNavChange)
-    return () => {
-      window.removeEventListener('popstate', () => applyUrlParams())
-      window.removeEventListener('broker-nav-change', handleNavChange)
+    if (idParam) {
+      const found = clients.find(c => c.id === idParam) || initialClients.find(c => c.id === idParam)
+      if (found) setSelectedClientForView(found)
+    } else if (viewParam === 'details' && initialClients.length > 0) {
+      setSelectedClientForView(clients[0] || initialClients[0])
+    } else if (!viewParam && !idParam) {
+      setSelectedClientForView(null)
     }
-  }, [])
+  }, [tabParam, actionParam, idParam, viewParam, searchParams, clients])
 
   const handleTabSelect = (tabKey: string) => {
     setActiveTab(tabKey)
@@ -162,13 +221,7 @@ export default function ClientsPage() {
     if (tabKey === 'Active') newHref = '/broker/clients?tab=Active'
     else if (tabKey === 'Inactive') newHref = '/broker/clients?tab=Inactive'
 
-    const targetSearch = newHref.includes('?') ? `?${newHref.split('?')[1]}` : ''
-    window.history.pushState(null, '', newHref)
-    window.dispatchEvent(
-      new CustomEvent('broker-nav-change', {
-        detail: { href: newHref, search: targetSearch, pathname: '/broker/clients' },
-      })
-    )
+    router.push(newHref)
   }
 
   // Summary Metrics
@@ -192,9 +245,9 @@ export default function ClientsPage() {
     }
   }, [clients])
 
-  // Filtered Clients List
+  // Filtered & Sorted Clients List
   const filteredClients = useMemo(() => {
-    return clients.filter(client => {
+    const list = clients.filter(client => {
       // Tab filter
       if (activeTab === 'Active' && client.status !== 'Active') return false
       if (activeTab === 'Inactive' && client.status !== 'Inactive') return false
@@ -229,7 +282,28 @@ export default function ClientsPage() {
 
       return true
     })
-  }, [clients, activeTab, statusFilter, policyLineFilter, consentFilter, searchQuery])
+
+    // Sort according to sortField ('name' | 'status' | 'consent') and sortDirection
+    list.sort((a, b) => {
+      let comparison = 0
+      switch (sortField) {
+        case 'name':
+          comparison = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+          break
+        case 'status':
+          comparison = a.status.localeCompare(b.status)
+          break
+        case 'consent':
+          comparison = a.marketingConsent.status.localeCompare(b.marketingConsent.status)
+          break
+        default:
+          comparison = 0
+      }
+      return sortDirection === 'asc' ? comparison : -comparison
+    })
+
+    return list
+  }, [clients, activeTab, statusFilter, policyLineFilter, consentFilter, searchQuery, sortField, sortDirection])
 
   // Table horizontal drag-to-scroll state & handlers
   const tableContainerRef = useRef<HTMLDivElement>(null)
@@ -591,17 +665,265 @@ export default function ClientsPage() {
     }
   }
 
+  // Reusable Copy Button with 2s visual feedback
+  function CopyButton({
+    text,
+    copyKey,
+    label,
+    className = '',
+  }: {
+    text: string
+    copyKey: string
+    label?: string
+    className?: string
+  }) {
+    const isCopied = copiedKey === copyKey
+    return (
+      <button
+        type="button"
+        onClick={(e) => handleCopy(text, copyKey, e)}
+        title={isCopied ? 'Copied to clipboard!' : `Copy ${label || text}`}
+        className={`inline-flex items-center gap-1 rounded-md p-1 transition cursor-pointer text-slate-400 hover:text-blue-600 hover:bg-blue-50/80 active:scale-95 ${className}`}
+        aria-label={`Copy ${label || text}`}
+      >
+        {isCopied ? (
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 animate-in fade-in zoom-in-75 duration-150">
+            <Check className="size-3.5 text-emerald-600" />
+            <span className="text-[10px] font-medium hidden sm:inline">Copied!</span>
+          </span>
+        ) : (
+          <Copy className="size-3.5 text-slate-400 hover:text-blue-600 transition" />
+        )}
+      </button>
+    )
+  }
+
+  // Render Policy Card matching Client Screenshot (Image 1 Reference)
+  const renderPolicyCard = (policy: ClientPolicy) => {
+    const isActive = policy.status === 'Active'
+    const isPending = policy.policyNumberPending
+    const commissionPaid = policy.commissionStatus === 'Paid'
+    const commissionUnpaid = policy.commissionStatus === 'Unpaid'
+
+    return (
+      <div
+        key={policy.id}
+        className={`rounded-2xl bg-white p-5 sm:p-6 transition-all duration-200 shadow-2xs hover:shadow-xs ${
+          isActive || isPending
+            ? 'border-2 border-blue-400/90'
+            : 'border border-slate-200/90'
+        }`}
+      >
+        {/* Header Row: Carrier, Tags, Statuses */}
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-3 border-b border-slate-100">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h4 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                {policy.carrier}
+              </h4>
+              {policy.tag && (
+                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                  {policy.tag}
+                </span>
+              )}
+              {policy.isHistory && (
+                <span className="rounded-md border border-slate-300 bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                  HISTORY
+                </span>
+              )}
+            </div>
+
+            {/* Policy Number Row */}
+            {isPending ? (
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+                <span className="font-semibold italic text-amber-700">Policy number Pending</span>
+                <button
+                  type="button"
+                  onClick={() => alert(`Manual policy number entry opened for ${policy.carrier}`)}
+                  className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                >
+                  Enter manually
+                </button>
+                <span className="text-slate-400">· {policy.policyNumberSubtext || 'will fill from a matched statement'}</span>
+              </div>
+            ) : (
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+                <span className="font-mono font-bold text-slate-900 text-sm">{policy.policyNumber}</span>
+                <CopyButton text={policy.policyNumber} copyKey={`pol-num-${policy.id}`} label="Policy Number" />
+                {policy.policyNumberSubtext && (
+                  <span className="text-slate-400">· {policy.policyNumberSubtext}</span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Right Status Badges */}
+          <div className="flex items-center gap-6 sm:gap-8 text-left sm:text-right shrink-0">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                POLICY STATUS
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                <span className={`size-2 rounded-full ${isActive ? 'bg-blue-600' : 'bg-slate-900'}`} />
+                {policy.status}
+              </span>
+            </div>
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                COMMISSION
+              </span>
+              <span
+                className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                  commissionPaid
+                    ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                    : commissionUnpaid
+                    ? 'bg-rose-50 text-rose-600 ring-1 ring-rose-200'
+                    : 'bg-slate-100 text-slate-700'
+                }`}
+              >
+                {policy.commissionStatus || (isActive ? 'Unpaid' : 'Paid')}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 5-Column Metrics Grid */}
+        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-5 text-xs">
+          <div>
+            <span className="text-slate-400 font-medium block mb-1">Line</span>
+            <span className="text-sm font-bold text-slate-900 block">{policy.type}</span>
+          </div>
+          <div>
+            <span className="text-slate-400 font-medium block mb-1">Term</span>
+            <span className="text-xs font-bold text-slate-900 block leading-snug">
+              {policy.effectiveDate} – {policy.expirationDate}
+            </span>
+          </div>
+          <div>
+            <span className="text-slate-400 font-medium block mb-1">Premium</span>
+            <span className="text-sm font-bold text-slate-900 block">{policy.premium}</span>
+          </div>
+          <div>
+            <span className="text-slate-400 font-medium block mb-1">Rate × split</span>
+            <span className="text-xs font-bold text-slate-900 block">
+              {policy.rateSplit || '10% × 50%'}
+            </span>
+          </div>
+          <div>
+            <span className="text-slate-400 font-medium block mb-1">Expected</span>
+            <span className="text-sm font-bold text-slate-900 block">
+              {policy.expectedCommission || '$177.50'}
+            </span>
+          </div>
+        </div>
+
+        {/* Paid / Net Row */}
+        <div className="mt-4 text-xs">
+          <span className="text-slate-400 font-medium block mb-0.5">Paid / net</span>
+          <span className="text-sm font-bold text-slate-900 font-mono">
+            {policy.paidCommission || (isActive ? '$0.00' : policy.expectedCommission || '$130.50')} / {policy.netCommission || policy.expectedCommission || '$177.50'}
+          </span>
+        </div>
+
+        {/* Chain Custody Note */}
+        {policy.chainNote && (
+          <div className="mt-3.5 flex items-center gap-2 text-xs text-slate-600 bg-slate-50/80 rounded-xl px-3 py-2 border border-slate-100">
+            <Link2 className="size-3.5 text-slate-400 shrink-0" />
+            <span>{policy.chainNote}</span>
+          </div>
+        )}
+
+        {/* Broker Explanation Note */}
+        {policy.brokerNote && (
+          <p className="mt-2 text-xs text-slate-500 italic pl-1">
+            {policy.brokerNote}
+          </p>
+        )}
+
+        {/* Action Buttons Row */}
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
+          <div className="flex flex-wrap items-center gap-2">
+            {!policy.isHistory ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => alert(`Initiating renewal workflow for ${policy.carrier} (${policy.policyNumber})`)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
+                >
+                  <RotateCcw className="size-3.5 text-slate-500" />
+                  Renew
+                </button>
+                <button
+                  type="button"
+                  onClick={() => alert(`Initiating rewrite process for ${policy.carrier} (${policy.policyNumber})`)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
+                >
+                  <ArrowLeftRight className="size-3.5 text-slate-500" />
+                  Rewrite
+                </button>
+                <button
+                  type="button"
+                  onClick={() => alert(`Cancel / non-renew requested for ${policy.carrier} (${policy.policyNumber})`)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition cursor-pointer shadow-2xs"
+                >
+                  <Ban className="size-3.5 text-rose-500" />
+                  Cancel / non-renew
+                </button>
+                <button
+                  type="button"
+                  onClick={() => alert(`Recording transaction for ${policy.carrier} (${policy.policyNumber})`)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
+                >
+                  <Receipt className="size-3.5 text-slate-500" />
+                  Record transaction
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => alert(`Recording transaction for ${policy.carrier} (${policy.policyNumber})`)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
+              >
+                <Receipt className="size-3.5 text-slate-500" />
+                Record transaction
+              </button>
+            )}
+          </div>
+
+          {!policy.policyNumberPending && (
+            <button
+              type="button"
+              onClick={() => handleCopy(policy.policyNumber, `btn-pol-card-${policy.id}`)}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-blue-600 transition cursor-pointer"
+            >
+              {copiedKey === `btn-pol-card-${policy.id}` ? (
+                <span className="text-emerald-600 flex items-center gap-1">
+                  <Check className="size-3.5" /> Copied Policy #
+                </span>
+              ) : (
+                <span className="flex items-center gap-1">
+                  <Copy className="size-3.5" /> Copy Policy #
+                </span>
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-4 sm:p-7 max-w-[1600px] mx-auto space-y-7">
-      <div>
+      {!selectedClientForView ? (
+        <div>
 
-        {/* ───── Header ───── */}
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
-            <p className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600">
-              <span className="size-1.5 rounded-full bg-blue-500" />
-              Broker Workspace · Client Directory
-            </p>
+          {/* ───── Header ───── */}
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600">
+                <span className="size-1.5 rounded-full bg-blue-500" />
+                Broker Workspace · Client Directory
+              </p>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
               Clients
             </h1>
@@ -824,15 +1146,118 @@ export default function ClientsPage() {
             <table className="w-full min-w-[1220px] text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold uppercase tracking-wider text-slate-500 select-none">
-                  <th className="px-4 py-3.5 min-w-[210px]">Client Name</th>
+                  {/* 1. Client Name (Sortable: A to Z / Z to A) */}
+                  <th className="px-4 py-3 min-w-[210px]">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('name')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${
+                        sortField === 'name' ? 'text-blue-600 font-extrabold' : 'text-slate-500 hover:text-slate-900'
+                      }`}
+                      title={`Sort by Client Name (${sortField === 'name' && sortDirection === 'asc' ? 'Z to A' : 'A to Z'})`}
+                    >
+                      <span>Client Name</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${
+                          sortField === 'name'
+                            ? 'bg-blue-100 text-blue-600 ring-1 ring-blue-300'
+                            : 'text-slate-400 group-hover:bg-slate-200/70 group-hover:text-slate-700'
+                        }`}
+                      >
+                        {sortField === 'name' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* 2. Business Name */}
                   <th className="px-4 py-3.5 min-w-[170px]">Business Name</th>
+
+                  {/* 3. Phone */}
                   <th className="px-4 py-3.5 min-w-[135px] whitespace-nowrap">Phone</th>
+
+                  {/* 4. Email */}
                   <th className="px-4 py-3.5 min-w-[185px]">Email</th>
-                  <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Client Status</th>
+
+                  {/* 5. Client Status (Sortable: Active / Inactive) */}
+                  <th className="px-3 py-3 min-w-[130px] whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('status')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${
+                        sortField === 'status' ? 'text-blue-600 font-extrabold' : 'text-slate-500 hover:text-slate-900'
+                      }`}
+                      title={`Sort by Client Status (${sortField === 'status' && sortDirection === 'asc' ? 'Inactive first' : 'Active first'})`}
+                    >
+                      <span>Client Status</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${
+                          sortField === 'status'
+                            ? 'bg-blue-100 text-blue-600 ring-1 ring-blue-300'
+                            : 'text-slate-400 group-hover:bg-slate-200/70 group-hover:text-slate-700'
+                        }`}
+                      >
+                        {sortField === 'status' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* 6. Policies */}
                   <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Policies</th>
-                  <th className="px-3 py-3.5 min-w-[125px] whitespace-nowrap">Marketing Consent</th>
+
+                  {/* 7. Marketing Consent (Sortable: Granted, Pending, Declined) */}
+                  <th className="px-3 py-3 min-w-[150px] whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('consent')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${
+                        sortField === 'consent' ? 'text-blue-600 font-extrabold' : 'text-slate-500 hover:text-slate-900'
+                      }`}
+                      title={`Sort by Marketing Consent (${sortField === 'consent' && sortDirection === 'asc' ? 'Z to A' : 'A to Z'})`}
+                    >
+                      <span>Marketing Consent</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${
+                          sortField === 'consent'
+                            ? 'bg-blue-100 text-blue-600 ring-1 ring-blue-300'
+                            : 'text-slate-400 group-hover:bg-slate-200/70 group-hover:text-slate-700'
+                        }`}
+                      >
+                        {sortField === 'consent' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* 8. Last Activity */}
                   <th className="px-4 py-3.5 min-w-[175px]">Last Activity</th>
-                  <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">Actions</th>
+
+                  {/* 9. Actions */}
+                  <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -863,10 +1288,7 @@ export default function ClientsPage() {
                             </div>
                             <div className="min-w-0">
                               <button
-                                onClick={() => {
-                                  setSelectedClientForView(client)
-                                  setClientDetailTab('overview')
-                                }}
+                                onClick={() => handleSelectClient(client)}
                                 className="text-sm font-semibold text-slate-900 transition hover:text-blue-600 text-left truncate block cursor-pointer"
                               >
                                 {client.name}
@@ -915,28 +1337,20 @@ export default function ClientsPage() {
                           </a>
                         </td>
 
-                        {/* 5. Client Status */}
+                        {/* 5. Client Status (Static display badge - non-clickable) */}
                         <td className="px-3 py-3.5 whitespace-nowrap">
-                          <button
-                            onClick={() => handleToggleStatus(client)}
-                            title={`Click to mark as ${client.status === 'Active' ? 'Inactive' : 'Active'}`}
-                            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 transition cursor-pointer whitespace-nowrap ${client.status === 'Active'
-                              ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100'
-                              : 'bg-slate-100 text-slate-600 ring-slate-200 hover:bg-slate-200'
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 whitespace-nowrap select-none ${client.status === 'Active'
+                              ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                              : 'bg-slate-100 text-slate-600 ring-slate-200'
                               }`}
                           >
-                            {client.status === 'Active' ? (
-                              <>
-                                <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
-                                Active
-                              </>
-                            ) : (
-                              <>
-                                <span className="size-1.5 rounded-full bg-slate-400 shrink-0" />
-                                Inactive
-                              </>
-                            )}
-                          </button>
+                            <span
+                              className={`size-1.5 rounded-full shrink-0 ${client.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-400'
+                                }`}
+                            />
+                            {client.status}
+                          </span>
                         </td>
 
                         {/* 6. Policies (Current / Historical count) */}
@@ -973,10 +1387,7 @@ export default function ClientsPage() {
                         <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
                           <div className="inline-flex items-center justify-end gap-1.5 whitespace-nowrap">
                             <button
-                              onClick={() => {
-                                setSelectedClientForView(client)
-                                setClientDetailTab('overview')
-                              }}
+                              onClick={() => handleSelectClient(client)}
                               className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
                             >
                               <Eye className="size-3.5 text-slate-400 shrink-0" />
@@ -1007,80 +1418,188 @@ export default function ClientsPage() {
             </table>
           </div>
         </div>
-
       </div>
+      ) : (
+        /* =========================================================================
+           4.5 FULL-PAGE BROKER DETAILS REVIEW SCREEN (NO POPUP / NO MODAL)
+           ========================================================================= */
+        <div className="space-y-6 animate-in fade-in duration-200">
+          {/* Top Breadcrumbs & Quick Return Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-slate-200/80">
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <button
+                onClick={handleBackToList}
+                className="inline-flex items-center gap-1.5 font-semibold text-slate-700 hover:text-blue-600 transition cursor-pointer py-1.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 shadow-2xs"
+              >
+                <ArrowLeft className="size-3.5" />
+                Back to Clients List
+              </button>
+              <ChevronRight className="size-3 text-slate-300" />
+              <span className="text-slate-500">Broker Review</span>
+              <ChevronRight className="size-3 text-slate-300" />
+              <span className="font-semibold text-slate-900">{selectedClientForView.name}</span>
+            </div>
 
-      {/* ─────────────────────────────────────────────────────────────
-          4.5 CLIENT DETAILS DRAWER / MODAL
-      ─────────────────────────────────────────────────────────────── */}
-      {selectedClientForView && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-xs transition-opacity">
-          <div className="flex h-full w-full max-w-3xl flex-col bg-white shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  const fullInfo = `Broker Name: ${selectedClientForView.name}
+Broker Code: ${selectedClientForView.brokerCode}
+Identifier: ${selectedClientForView.otherIdentifier}
+Status: ${selectedClientForView.status}
+Business: ${selectedClientForView.businessName}
+Phone: ${selectedClientForView.phone}
+Email: ${selectedClientForView.email}
+Address: ${selectedClientForView.street}, ${selectedClientForView.city}, ${selectedClientForView.state} ${selectedClientForView.zip}`
+                  handleCopy(fullInfo, 'all-summary')
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
+                title="Copy complete contact summary"
+              >
+                {copiedKey === 'all-summary' ? (
+                  <>
+                    <Check className="size-3.5 text-emerald-600" />
+                    <span className="text-emerald-700 font-semibold">Summary Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="size-3.5 text-slate-500" />
+                    <span>Copy Full Summary</span>
+                  </>
+                )}
+              </button>
+              <button
+                onClick={handleBackToList}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
+              >
+                <X className="size-3.5 text-slate-400" />
+                Close
+              </button>
+            </div>
+          </div>
 
-            {/* Drawer Header */}
-            <div className="border-b border-slate-200 bg-slate-50/50 px-4 sm:px-6 py-4 sm:py-5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
-                  <div className="flex size-10 sm:size-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-[13px] sm:text-[14px] font-bold text-white shadow-md">
-                    {selectedClientForView.firstName[0]}{selectedClientForView.lastName[0]}
+          {/* Main Broker Profile Header Card (Matching Screenshot Reference) */}
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              {/* Left: Avatar & Identity Details */}
+              <div className="flex items-start sm:items-center gap-4 sm:gap-5 min-w-0">
+                <div className="flex size-14 sm:size-16 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-[18px] sm:text-[20px] font-bold text-white shadow-md">
+                  {selectedClientForView.firstName[0]}{selectedClientForView.lastName[0]}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-950 flex items-center gap-2">
+                      <span>{selectedClientForView.name}</span>
+                      <CopyButton text={selectedClientForView.name} copyKey="hdr-name" label="Client Name" />
+                    </h1>
+                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                      {selectedClientForView.clientType || (selectedClientForView.businessName !== '—' ? 'Commercial' : 'Individual')}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                      <span className={`size-2 rounded-full ${selectedClientForView.status === 'Active' ? 'bg-blue-600' : 'bg-slate-400'}`} />
+                      {selectedClientForView.status}
+                    </span>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                      <h2 className="text-[16px] sm:text-[18px] font-bold tracking-tight text-slate-900 truncate">
-                        {selectedClientForView.name}
-                      </h2>
-                      <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${selectedClientForView.status === 'Active'
-                        ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                        : 'bg-slate-100 text-slate-600 ring-slate-200'
-                        }`}>
-                        {selectedClientForView.status}
-                      </span>
-                      {getConsentBadge(selectedClientForView.marketingConsent.status)}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[10.5px] sm:text-[11px] text-slate-500 mt-1">
-                      {selectedClientForView.businessName !== '—' && (
-                        <span className="font-medium text-slate-700 flex items-center gap-1">
-                          <Building2 className="size-3 text-slate-400" />
-                          {selectedClientForView.businessName}
-                        </span>
-                      )}
-                      <span>Broker Code: <strong className="text-slate-800">{selectedClientForView.brokerCode}</strong></span>
-                      <span>ID: <strong className="text-slate-800">{selectedClientForView.otherIdentifier}</strong></span>
-                    </div>
+
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500 mt-2">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="size-3.5 text-slate-400" />
+                      <span>{selectedClientForView.city}, {selectedClientForView.state}</span>
+                      <CopyButton text={`${selectedClientForView.city}, ${selectedClientForView.state}`} copyKey="hdr-city" label="Location" />
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Mail className="size-3.5 text-slate-400" />
+                      <a href={`mailto:${selectedClientForView.email}`} className="text-blue-600 hover:underline">{selectedClientForView.email}</a>
+                      <CopyButton text={selectedClientForView.email} copyKey="hdr-email" label="Email" />
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Phone className="size-3.5 text-slate-400" />
+                      <a href={`tel:${selectedClientForView.phone}`} className="text-slate-700 font-medium">{selectedClientForView.phone}</a>
+                      <CopyButton text={selectedClientForView.phone} copyKey="hdr-phone" label="Phone" />
+                    </span>
+                    <span className="text-slate-400">
+                      Client since {selectedClientForView.clientSince || '2 Sep 2024'}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="text-slate-400">Broker Code:</span>
+                      <strong className="text-slate-900 font-mono bg-slate-100 px-2 py-0.5 rounded text-[11px]">{selectedClientForView.brokerCode}</strong>
+                      <CopyButton text={selectedClientForView.brokerCode} copyKey="hdr-bcode" label="Broker Code" />
+                    </span>
                   </div>
                 </div>
-
-                {/* Close Button */}
-                <button
-                  onClick={() => setSelectedClientForView(null)}
-                  className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition shrink-0 cursor-pointer"
-                  aria-label="Close Drawer"
-                >
-                  <X className="size-5" />
-                </button>
               </div>
 
-              {/* Header Action Buttons */}
-              <div className="mt-3.5 sm:mt-4 flex items-center gap-2">
+              {/* Right Action Buttons */}
+              <div className="flex flex-wrap items-center gap-2.5">
                 <button
-                  onClick={() => openEditClientModal(selectedClientForView)}
-                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11.5px] font-medium text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50 transition cursor-pointer"
+                  type="button"
+                  onClick={() => setClientDetailTab('commissions')}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition cursor-pointer"
                 >
-                  <Edit3 className="size-3.5 text-slate-500" />
-                  Edit Client
+                  <Download className="size-3.5 text-slate-500" />
+                  Commission history
                 </button>
                 <button
+                  type="button"
                   onClick={() => openAddPolicyModal(selectedClientForView)}
-                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-950 px-3 py-2 text-[11.5px] font-semibold text-white shadow-sm hover:bg-blue-600 transition cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition cursor-pointer"
                 >
-                  <Plus className="size-3.5" />
-                  Add Policy
+                  <Plus className="size-4" />
+                  Add policy
                 </button>
               </div>
             </div>
+          </div>
 
-            {/* Navigation Tabs (Overview, Policies, Commissions, Consent, Notes, Timeline) */}
-            <div className="flex border-b border-slate-200 px-3 sm:px-6 gap-2 sm:gap-6 bg-white overflow-x-auto scrollbar-thin">
+          {/* ───── 7 Commission Summary Metrics (Single Row matching Screenshot) ───── */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+              <span className="text-[11px] text-slate-400 font-medium block">Original expected</span>
+              <span className="text-lg font-bold text-slate-900 block mt-1">
+                {selectedClientForView.originalExpected || '$430.50'}
+              </span>
+            </div>
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+              <span className="text-[11px] text-slate-400 font-medium block">Additional commission</span>
+              <span className="text-lg font-bold text-slate-900 block mt-1">
+                {selectedClientForView.additionalCommission || '$0.00'}
+              </span>
+            </div>
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+              <span className="text-[11px] text-slate-400 font-medium block">Chargebacks</span>
+              <span className="text-lg font-bold text-slate-900 block mt-1">
+                {selectedClientForView.chargebacks || '$0.00'}
+              </span>
+            </div>
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+              <span className="text-[11px] text-slate-400 font-medium block">Other adjustments</span>
+              <span className="text-lg font-bold text-slate-900 block mt-1">
+                {selectedClientForView.otherAdjustments || '$0.00'}
+              </span>
+            </div>
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+              <span className="text-[11px] text-slate-400 font-medium block">Net commission</span>
+              <span className="text-lg font-bold text-slate-900 block mt-1">
+                {selectedClientForView.netCommission || '$430.50'}
+              </span>
+            </div>
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+              <span className="text-[11px] text-slate-400 font-medium block">Total paid</span>
+              <span className="text-lg font-bold text-slate-900 block mt-1">
+                {selectedClientForView.totalPaid || '$253.00'}
+              </span>
+            </div>
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+              <span className="text-[11px] text-slate-400 font-medium block">Outstanding</span>
+              <span className="text-lg font-bold text-slate-900 block mt-1">
+                {selectedClientForView.outstanding || '$177.50'}
+              </span>
+            </div>
+          </div>
+
+          {/* Full-Page Navigation Tabs */}
+          <div className="border-b border-slate-200 bg-white rounded-xl shadow-2xs px-4 sm:px-6">
+            <div className="flex gap-2 sm:gap-6 overflow-x-auto scrollbar-thin">
               {[
                 { key: 'overview', label: 'Overview' },
                 { key: 'policies', label: `Policies (${selectedClientForView.policies.length})` },
@@ -1092,8 +1611,8 @@ export default function ClientsPage() {
                 <button
                   key={tab.key}
                   onClick={() => setClientDetailTab(tab.key as any)}
-                  className={`py-2.5 sm:py-3 text-[11.5px] sm:text-[12px] font-medium border-b-2 transition whitespace-nowrap px-1.5 sm:px-0 cursor-pointer ${clientDetailTab === tab.key
-                    ? 'border-blue-600 text-blue-600 font-semibold'
+                  className={`py-3.5 text-xs sm:text-sm font-semibold border-b-2 transition whitespace-nowrap cursor-pointer px-2 sm:px-1 ${clientDetailTab === tab.key
+                    ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-slate-500 hover:text-slate-900'
                     }`}
                 >
@@ -1101,488 +1620,745 @@ export default function ClientsPage() {
                 </button>
               ))}
             </div>
+          </div>
 
-            {/* Tab Contents */}
-            <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 bg-slate-50/40">
-
-              {/* TAB 1: OVERVIEW */}
-              {clientDetailTab === 'overview' && (
-                <div className="flex flex-col gap-4 sm:gap-6">
-                  {/* Primary Info Cards */}
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs">
-                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">
+          {/* Tab Contents Container */}
+          <div className="space-y-6">
+            {/* TAB 1: OVERVIEW */}
+            {clientDetailTab === 'overview' && (
+              <div className="space-y-6">
+                {/* Contact Information & Identifiers Grid */}
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Contact Information Card */}
+                  <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs">
+                    <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
                         Contact Information
                       </h3>
-                      <div className="flex flex-col gap-2.5 text-[12px]">
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-500 flex items-center gap-1.5"><Phone className="size-3.5 text-slate-400" /> Phone</span>
-                          <a href={`tel:${selectedClientForView.phone}`} className="font-semibold text-blue-600 hover:underline">{selectedClientForView.phone}</a>
+                      <span className="text-[11px] text-slate-400">One-click copy enabled</span>
+                    </div>
+                    <div className="space-y-3.5 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500 flex items-center gap-1.5">
+                          <Users className="size-3.5 text-slate-400" /> Name
+                        </span>
+                        <div className="inline-flex items-center gap-1">
+                          <span className="font-semibold text-slate-900">{selectedClientForView.name}</span>
+                          <CopyButton text={selectedClientForView.name} copyKey="cnt-name" label="Name" />
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-500 flex items-center gap-1.5"><Mail className="size-3.5 text-slate-400" /> Email</span>
-                          <a href={`mailto:${selectedClientForView.email}`} className="font-semibold text-blue-600 hover:underline">{selectedClientForView.email}</a>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500 flex items-center gap-1.5">
+                          <Phone className="size-3.5 text-slate-400" /> Phone
+                        </span>
+                        <div className="inline-flex items-center gap-1">
+                          <a href={`tel:${selectedClientForView.phone}`} className="font-semibold text-blue-600 hover:underline">
+                            {selectedClientForView.phone}
+                          </a>
+                          <CopyButton text={selectedClientForView.phone} copyKey="cnt-phone" label="Phone" />
                         </div>
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-                          <span className="text-slate-500 flex items-center gap-1.5 shrink-0"><MapPin className="size-3.5 text-slate-400 shrink-0" /> Address</span>
-                          <span className="font-medium text-slate-800 sm:text-right text-left break-words">
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500 flex items-center gap-1.5">
+                          <Mail className="size-3.5 text-slate-400" /> Email
+                        </span>
+                        <div className="inline-flex items-center gap-1">
+                          <a href={`mailto:${selectedClientForView.email}`} className="font-semibold text-blue-600 hover:underline">
+                            {selectedClientForView.email}
+                          </a>
+                          <CopyButton text={selectedClientForView.email} copyKey="cnt-email" label="Email" />
+                        </div>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 pt-1">
+                        <span className="text-slate-500 flex items-center gap-1.5 shrink-0">
+                          <MapPin className="size-3.5 text-slate-400 shrink-0" /> Address
+                        </span>
+                        <div className="inline-flex items-start gap-1 sm:text-right">
+                          <span className="font-medium text-slate-800 break-words">
                             {selectedClientForView.street}, {selectedClientForView.city}, {selectedClientForView.state} {selectedClientForView.zip}
                           </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-500 flex items-center gap-1.5"><Calendar className="size-3.5 text-slate-400" /> Date of Birth</span>
-                          <span className="font-medium text-slate-800">{selectedClientForView.dob || '—'}</span>
+                          <CopyButton
+                            text={`${selectedClientForView.street}, ${selectedClientForView.city}, ${selectedClientForView.state} ${selectedClientForView.zip}`}
+                            copyKey="cnt-addr"
+                            label="Address"
+                          />
                         </div>
                       </div>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-slate-500 flex items-center gap-1.5">
+                          <Calendar className="size-3.5 text-slate-400" /> Date of Birth
+                        </span>
+                        <span className="font-medium text-slate-800">{selectedClientForView.dob || '—'}</span>
+                      </div>
                     </div>
+                  </div>
 
-                    <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs">
-                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">
+                  {/* Broker Identifiers & Compliance Card */}
+                  <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs">
+                    <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
                         Broker Identifiers & Compliance
                       </h3>
-                      <div className="flex flex-col gap-2.5 text-[12px]">
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-500">Broker Assigned Code</span>
-                          <span className="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">{selectedClientForView.brokerCode}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-500">Agreed Identifier</span>
-                          <span className="font-mono font-medium text-slate-800 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">{selectedClientForView.otherIdentifier}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-500">Business Structure</span>
-                          <span className="font-medium text-slate-800">{selectedClientForView.businessName !== '—' ? selectedClientForView.businessName : 'Individual'}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-500">Status</span>
-                          <span className="font-semibold text-emerald-700">{selectedClientForView.status}</span>
+                      <span className="text-[11px] text-slate-400">Compliance Verified</span>
+                    </div>
+                    <div className="space-y-3.5 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500">Broker Assigned Code</span>
+                        <div className="inline-flex items-center gap-1">
+                          <span className="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
+                            {selectedClientForView.brokerCode}
+                          </span>
+                          <CopyButton text={selectedClientForView.brokerCode} copyKey="comp-bcode" label="Broker Code" />
                         </div>
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Policies Quick Peek */}
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                        In-Force Policies ({selectedClientForView.policies.length})
-                      </h3>
-                      <button
-                        onClick={() => setClientDetailTab('policies')}
-                        className="text-[11px] font-semibold text-blue-600 hover:underline"
-                      >
-                        View all &rarr;
-                      </button>
-                    </div>
-                    {selectedClientForView.policies.length === 0 ? (
-                      <p className="text-[12px] text-slate-400 py-3 text-center">No active policies bound yet.</p>
-                    ) : (
-                      <div className="flex flex-col gap-2">
-                        {selectedClientForView.policies.map((p) => (
-                          <div key={p.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 rounded-lg bg-slate-50 px-3 py-2.5 text-[12px]">
-                            <div>
-                              <p className="font-semibold text-slate-800">{p.type} <span className="text-slate-400 font-normal">({p.carrier})</span></p>
-                              <p className="text-[10.5px] text-slate-500">{p.policyNumber} · Expires {p.expirationDate}</p>
-                            </div>
-                            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-slate-200/50 pt-1.5 sm:pt-0">
-                              <p className="font-bold text-slate-900">{p.premium}</p>
-                              <span className={`text-[9.5px] font-bold uppercase ${p.status === 'Active' ? 'text-emerald-600' : 'text-slate-500'}`}>{p.status}</span>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500">Agent Identifier</span>
+                        <div className="inline-flex items-center gap-1">
+                          <span className="font-mono font-medium text-slate-800 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                            {selectedClientForView.otherIdentifier}
+                          </span>
+                          <CopyButton text={selectedClientForView.otherIdentifier} copyKey="comp-id" label="Identifier" />
+                        </div>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Recent Notes Preview */}
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                        Recent Broker Notes
-                      </h3>
-                      <button
-                        onClick={() => setClientDetailTab('notes')}
-                        className="text-[11px] font-semibold text-blue-600 hover:underline"
-                      >
-                        Add note &rarr;
-                      </button>
-                    </div>
-                    {selectedClientForView.notes.length === 0 ? (
-                      <p className="text-[12px] text-slate-400 py-2">No notes recorded.</p>
-                    ) : (
-                      <div className="flex flex-col gap-2">
-                        {selectedClientForView.notes.slice(0, 2).map((n) => (
-                          <div key={n.id} className="rounded-lg border border-slate-100 bg-slate-50/60 p-3 text-[12px]">
-                            <p className="text-slate-700">{n.text}</p>
-                            <p className="mt-1.5 text-[10px] text-slate-400 font-medium">Logged by {n.author} · {n.date}</p>
-                          </div>
-                        ))}
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500">Business Structure</span>
+                        <span className="font-medium text-slate-800">
+                          {selectedClientForView.businessName !== '—' ? selectedClientForView.businessName : 'Individual Policyholder'}
+                        </span>
                       </div>
-                    )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500">Status</span>
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${selectedClientForView.status === 'Active'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-slate-100 text-slate-600 border border-slate-200'
+                            }`}
+                        >
+                          {selectedClientForView.status}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-slate-500">Marketing Consent</span>
+                        {getConsentBadge(selectedClientForView.marketingConsent.status)}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              )}
 
-              {/* TAB 2: POLICIES (Current & Historical) */}
-              {clientDetailTab === 'policies' && (
-                <div className="flex flex-col gap-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                {/* Policies Comprehensive Section - Matching Image 1 Exactly */}
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
                     <div>
-                      <h3 className="text-[14px] font-semibold text-slate-900">Current &amp; Historical Policies</h3>
-                      <p className="text-[11px] text-slate-500">Track all policies associated with this client record</p>
+                      <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <span>Policies</span>
+                        <span className="text-slate-400 font-medium">·</span>
+                        <span className="text-slate-500 font-semibold">{selectedClientForView.policies.length}</span>
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Active insurance policies and historical rewriting chain bound to this broker account.
+                      </p>
                     </div>
-                    <button
-                      onClick={() => openAddPolicyModal(selectedClientForView)}
-                      className="self-start sm:self-auto inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-blue-600 transition"
-                    >
-                      <Plus className="size-3.5" />
-                      Add Policy
-                    </button>
+                    <div className="flex items-center gap-2 self-start sm:self-auto">
+                      <button
+                        onClick={() => openAddPolicyModal(selectedClientForView)}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-blue-600 transition cursor-pointer shadow-2xs"
+                      >
+                        <Plus className="size-3.5" />
+                        Add Policy
+                      </button>
+                      <button
+                        onClick={() => setClientDetailTab('policies')}
+                        className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer flex items-center gap-1 px-2 py-1.5"
+                      >
+                        Ledger Table &rarr;
+                      </button>
+                    </div>
                   </div>
 
                   {selectedClientForView.policies.length === 0 ? (
-                    <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-400">
-                      <ClipboardList className="mx-auto size-8 text-slate-300 mb-2" />
-                      <p className="text-[13px] font-medium text-slate-600">No policies in record</p>
+                    <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center">
+                      <p className="text-xs text-slate-400">No active policies bound yet.</p>
                       <button
                         onClick={() => openAddPolicyModal(selectedClientForView)}
-                        className="mt-3 text-[12px] font-semibold text-blue-600 hover:underline"
+                        className="mt-2 text-xs font-semibold text-blue-600 hover:underline"
                       >
-                        + Bind the first policy
+                        + Bind First Policy
                       </button>
                     </div>
                   ) : (
-                    <>
-                      {/* Mobile Cards View for Policies (< sm) */}
-                      <div className="sm:hidden space-y-2.5">
-                        {selectedClientForView.policies.map((policy) => (
-                          <div key={policy.id} className="rounded-xl border border-slate-200 bg-white p-3.5 text-[12px] shadow-2xs">
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <p className="font-mono font-bold text-slate-900 text-[11.5px]">{policy.policyNumber}</p>
-                                <p className="font-medium text-slate-800 text-[12px] mt-0.5">{policy.type}</p>
-                                <p className="text-[11px] text-slate-500">{policy.carrier}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-bold text-slate-900 text-[13px]">{policy.premium}</p>
-                                <span className={`inline-block mt-0.5 rounded-md px-1.5 py-0.5 text-[9.5px] font-semibold ring-1 ${policy.status === 'Active'
-                                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                  : 'bg-amber-50 text-amber-700 ring-amber-200'
-                                  }`}>
-                                  {policy.status}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                              <span className="text-slate-500">{policy.effectiveDate} &rarr; {policy.expirationDate}</span>
-                              <button
-                                onClick={() => setPreviewPolicy({ clientName: selectedClientForView.name, policy })}
-                                className="text-blue-600 font-semibold hover:underline"
-                              >
-                                View Policy
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Desktop Table View for Policies (sm:block) */}
-                      <div className="hidden sm:block overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs custom-scrollbar">
-                        <table className="w-full min-w-[580px] text-left">
-                          <thead>
-                            <tr className="border-b border-slate-100 text-[10px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-50/50">
-                              <th className="px-4 py-3">Policy #</th>
-                              <th className="px-3 py-3">Coverage Line</th>
-                              <th className="px-3 py-3">Carrier</th>
-                              <th className="px-3 py-3">Premium</th>
-                              <th className="px-3 py-3">Term Dates</th>
-                              <th className="px-3 py-3">Status</th>
-                              <th className="px-4 py-3 text-right sticky right-0 bg-slate-50/95 backdrop-blur-xs shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] select-none">Action</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {selectedClientForView.policies.map((policy) => (
-                              <tr key={policy.id} className="group border-b border-slate-50 text-[12px] hover:bg-slate-50/60 last:border-0">
-                                <td className="px-4 py-3 font-semibold text-slate-900 font-mono text-[11px]">
-                                  {policy.policyNumber}
-                                </td>
-                                <td className="px-3 py-3 font-medium text-slate-800">{policy.type}</td>
-                                <td className="px-3 py-3 text-slate-600">{policy.carrier}</td>
-                                <td className="px-3 py-3 font-semibold text-slate-900">{policy.premium}</td>
-                                <td className="px-3 py-3 text-[11px] text-slate-500">
-                                  {policy.effectiveDate} &rarr; {policy.expirationDate}
-                                </td>
-                                <td className="px-3 py-3">
-                                  <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${policy.status === 'Active'
-                                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                    : policy.status === 'Pending Renewal'
-                                      ? 'bg-amber-50 text-amber-700 ring-amber-200'
-                                      : 'bg-slate-100 text-slate-600 ring-slate-200'
-                                    }`}>
-                                    {policy.status}
-                                  </span>
-                                </td>
-                                <td className="px-4 py-3 text-right sticky right-0 bg-white group-hover:bg-slate-50/60 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
-                                  <button
-                                    onClick={() => setPreviewPolicy({ clientName: selectedClientForView.name, policy })}
-                                    className="text-[11px] font-medium text-blue-600 hover:underline cursor-pointer"
-                                  >
-                                    View Policy
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </>
+                    <div className="space-y-4">
+                      {selectedClientForView.policies.map((p) => renderPolicyCard(p))}
+                    </div>
                   )}
                 </div>
-              )}
 
-              {/* TAB 3: COMMISSION HISTORY */}
-              {clientDetailTab === 'commissions' && (
-                <div className="flex flex-col gap-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div>
-                      <h3 className="text-[14px] font-semibold text-slate-900">Transaction-level Commission History</h3>
-                      <p className="text-[11px] text-slate-500">Traceable carrier statements and revenue payouts</p>
-                    </div>
-                    <Link
-                      href="/broker/commissions"
-                      className="self-start sm:self-auto text-[11px] font-semibold text-blue-600 hover:underline flex items-center gap-1"
+                {/* Recent Notes Preview */}
+                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-bold text-slate-900">
+                      Recent Broker Notes
+                    </h3>
+                    <button
+                      onClick={() => setClientDetailTab('notes')}
+                      className="text-xs font-semibold text-blue-600 hover:underline cursor-pointer"
                     >
-                      Commission Ledger <ArrowUpRight className="size-3" />
-                    </Link>
+                      Manage notes &rarr;
+                    </button>
                   </div>
-
-                  {selectedClientForView.commissions.length === 0 ? (
-                    <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-400">
-                      <DollarSign className="mx-auto size-8 text-slate-300 mb-2" />
-                      <p className="text-[13px] font-medium text-slate-600">No commission records for this client yet</p>
-                    </div>
+                  {selectedClientForView.notes.length === 0 ? (
+                    <p className="text-xs text-slate-400 py-2">No notes recorded.</p>
                   ) : (
-                    <>
-                      {/* Mobile Cards View for Commissions (< sm) */}
-                      <div className="sm:hidden space-y-2.5">
-                        {selectedClientForView.commissions.map((c) => (
-                          <div key={c.id} className="rounded-xl border border-slate-200 bg-white p-3.5 text-[12px] shadow-2xs">
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <span className="font-mono font-bold text-slate-900 text-[11.5px]">{c.statementNumber}</span>
-                                <p className="text-[11.5px] text-slate-600 mt-0.5">{c.carrier}</p>
-                                <p className="text-[10.5px] text-slate-400">{c.date}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-bold text-emerald-600 text-[13px]">{c.amount}</p>
-                                <p className="text-[10.5px] text-slate-400">Prem: {c.premium} ({c.rate})</p>
-                                <span className={`inline-block mt-0.5 rounded-md px-1.5 py-0.5 text-[9.5px] font-semibold ring-1 ${c.status === 'Paid'
-                                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                  : 'bg-rose-50 text-rose-700 ring-rose-200'
-                                  }`}>
-                                  {c.status}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-end">
-                              <button
-                                onClick={() => setPreviewStatement(c)}
-                                className="text-[11px] font-semibold text-blue-600 hover:underline inline-flex items-center gap-1 cursor-pointer"
-                              >
-                                View Source <ExternalLink className="size-2.5" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Desktop Table View for Commissions (sm:block) */}
-                      <div className="hidden sm:block overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs custom-scrollbar">
-                        <table className="w-full min-w-[580px] text-left">
-                          <thead>
-                            <tr className="border-b border-slate-100 text-[10px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-50/50">
-                              <th className="px-4 py-3">Date</th>
-                              <th className="px-3 py-3">Statement #</th>
-                              <th className="px-3 py-3">Carrier</th>
-                              <th className="px-3 py-3">Premium</th>
-                              <th className="px-3 py-3">Rate</th>
-                              <th className="px-3 py-3">Amount</th>
-                              <th className="px-3 py-3">Status</th>
-                              <th className="px-4 py-3 text-right">Trace Statement</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {selectedClientForView.commissions.map((c) => (
-                              <tr key={c.id} className="border-b border-slate-50 text-[12px] hover:bg-slate-50/60 last:border-0">
-                                <td className="px-4 py-3 text-slate-600 font-medium">{c.date}</td>
-                                <td className="px-3 py-3 font-mono font-semibold text-slate-900">{c.statementNumber}</td>
-                                <td className="px-3 py-3 text-slate-600">{c.carrier}</td>
-                                <td className="px-3 py-3 text-slate-700">{c.premium}</td>
-                                <td className="px-3 py-3 text-slate-600">{c.rate}</td>
-                                <td className="px-3 py-3 font-bold text-emerald-600">{c.amount}</td>
-                                <td className="px-3 py-3">
-                                  <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ring-1 ${c.status === 'Paid'
-                                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                    : 'bg-rose-50 text-rose-700 ring-rose-200'
-                                    }`}>
-                                    {c.status}
-                                  </span>
-                                </td>
-                                <td className="px-4 py-3 text-right">
-                                  <button
-                                    onClick={() => setPreviewStatement(c)}
-                                    className="text-[11px] font-medium text-blue-600 hover:underline inline-flex items-center gap-1 cursor-pointer"
-                                  >
-                                    View Source
-                                    <ExternalLink className="size-2.5" />
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {selectedClientForView.notes.slice(0, 2).map((n) => (
+                        <div key={n.id} className="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5 text-xs">
+                          <p className="text-slate-700 leading-relaxed">{n.text}</p>
+                          <p className="mt-2 text-[11px] text-slate-400 font-medium">Logged by {n.author} · {n.date}</p>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* TAB 4: MARKETING CONSENT */}
-              {clientDetailTab === 'consent' && (
-                <div className="flex flex-col gap-4 sm:gap-5">
-                  <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h3 className="text-[14px] font-semibold text-slate-900">Current Consent Status</h3>
-                        <p className="text-[11px] text-slate-500 mt-0.5">Compliance records with TCPA &amp; data privacy regulations</p>
-                      </div>
-                      {getConsentBadge(selectedClientForView.marketingConsent.status)}
+            {/* TAB 2: POLICIES (Current & Historical - Inline expanded row, NO POPUP!) */}
+            {clientDetailTab === 'policies' && (
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Current &amp; Historical Policies</h3>
+                    <p className="text-xs text-slate-500">Track all policies associated with this broker record. Click any row to expand details inline without any popup modals.</p>
+                  </div>
+                  <button
+                    onClick={() => openAddPolicyModal(selectedClientForView)}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-3.5 py-2 text-xs font-semibold text-white hover:bg-blue-600 transition cursor-pointer self-start sm:self-auto shadow-2xs"
+                  >
+                    <Plus className="size-3.5" />
+                    Add Policy
+                  </button>
+                </div>
+
+                {selectedClientForView.policies.length === 0 ? (
+                  <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-400">
+                    <ClipboardList className="mx-auto size-9 text-slate-300 mb-2" />
+                    <p className="text-sm font-semibold text-slate-700">No policies in record</p>
+                    <button
+                      onClick={() => openAddPolicyModal(selectedClientForView)}
+                      className="mt-3 text-xs font-semibold text-blue-600 hover:underline"
+                    >
+                      + Bind the first policy
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden sm:block overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-xs">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400 bg-slate-50/70">
+                            <th className="px-5 py-3.5">Policy #</th>
+                            <th className="px-4 py-3.5">Coverage Line</th>
+                            <th className="px-4 py-3.5">Carrier</th>
+                            <th className="px-4 py-3.5">Premium</th>
+                            <th className="px-4 py-3.5">Term Dates</th>
+                            <th className="px-4 py-3.5">Status</th>
+                            <th className="px-5 py-3.5 text-right">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedClientForView.policies.map((policy) => {
+                            const isExpanded = expandedPolicyId === policy.id
+                            return (
+                              <Fragment key={policy.id}>
+                                <tr
+                                  onClick={() => setExpandedPolicyId(isExpanded ? null : policy.id)}
+                                  className={`group border-b border-slate-100 text-xs transition-colors cursor-pointer ${
+                                    isExpanded ? 'bg-blue-50/40' : 'hover:bg-slate-50/80'
+                                  }`}
+                                >
+                                  <td className="px-5 py-4 font-mono font-bold text-slate-900">
+                                    <div className="inline-flex items-center gap-1.5">
+                                      <span>{policy.policyNumber}</span>
+                                      <CopyButton text={policy.policyNumber} copyKey={`pol-table-${policy.id}`} label="Policy Number" />
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-4 font-semibold text-slate-800">{policy.type}</td>
+                                  <td className="px-4 py-4 text-slate-600">{policy.carrier}</td>
+                                  <td className="px-4 py-4 font-bold text-slate-900">{policy.premium}</td>
+                                  <td className="px-4 py-4 text-slate-500 font-medium">
+                                    {policy.effectiveDate} &rarr; {policy.expirationDate}
+                                  </td>
+                                  <td className="px-4 py-4">
+                                    <span
+                                      className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ${
+                                        policy.status === 'Active'
+                                          ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                          : policy.status === 'Pending Renewal'
+                                          ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                                          : 'bg-slate-100 text-slate-600 ring-slate-200'
+                                      }`}
+                                    >
+                                      {policy.status}
+                                    </span>
+                                  </td>
+                                  <td className="px-5 py-4 text-right">
+                                    <div className="inline-flex items-center gap-2 justify-end">
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          handleCopy(policy.policyNumber, `btn-pol-tbl-${policy.id}`)
+                                        }}
+                                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                                        title="Copy Policy Number"
+                                      >
+                                        {copiedKey === `btn-pol-tbl-${policy.id}` ? (
+                                          <Check className="size-3 text-emerald-600" />
+                                        ) : (
+                                          <Copy className="size-3 text-slate-400" />
+                                        )}
+                                        <span>{copiedKey === `btn-pol-tbl-${policy.id}` ? 'Copied' : 'Copy'}</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setExpandedPolicyId(isExpanded ? null : policy.id)
+                                        }}
+                                        className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                      >
+                                        <span>{isExpanded ? 'Hide Specs' : 'View Specs'}</span>
+                                        {isExpanded ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+
+                                {/* Inline Expanded Details Row: Render Image 1 Reference Card directly! */}
+                                {isExpanded && (
+                                  <tr className="bg-blue-50/20 border-b border-slate-200 animate-in fade-in duration-200">
+                                    <td colSpan={7} className="p-4 sm:p-6">
+                                      <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200/60">
+                                        <span className="text-xs font-bold uppercase tracking-wider text-blue-600 flex items-center gap-1.5">
+                                          <Shield className="size-3.5" /> Policy Specifications &amp; Overview
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                            setExpandedPolicyId(null)
+                                          }}
+                                          className="text-xs font-semibold text-slate-500 hover:text-slate-900 cursor-pointer flex items-center gap-1"
+                                        >
+                                          <X className="size-3.5" /> Collapse
+                                        </button>
+                                      </div>
+                                      {renderPolicyCard(policy)}
+                                    </td>
+                                  </tr>
+                                )}
+                              </Fragment>
+                            )
+                          })}
+                        </tbody>
+                      </table>
                     </div>
 
-                    <div className="mt-4 sm:mt-5 grid gap-3 sm:gap-4 sm:grid-cols-2 text-[12px]">
-                      <div className="rounded-lg bg-slate-50 p-3">
-                        <span className="text-[11px] text-slate-400 block font-medium">Opted Channels</span>
-                        <div className="mt-1 flex flex-wrap gap-1.5">
-                          {selectedClientForView.marketingConsent.channels.length > 0 ? (
-                            selectedClientForView.marketingConsent.channels.map((ch) => (
-                              <span key={ch} className="rounded bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-700 border border-slate-200">
-                                {ch}
+                    {/* Mobile Cards View (< sm) - Render Image 1 Reference Cards directly */}
+                    <div className="sm:hidden space-y-4">
+                      {selectedClientForView.policies.map((policy) => (
+                        <div key={policy.id} className="relative">
+                          {renderPolicyCard(policy)}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* TAB 3: COMMISSION HISTORY (Inline Source Breakdown, NO POPUP!) */}
+            {clientDetailTab === 'commissions' && (
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Transaction-level Commission History</h3>
+                    <p className="text-xs text-slate-500">Traceable carrier statements and revenue payouts. Click View Source to inspect inline statement audit data.</p>
+                  </div>
+                  <Link
+                    href="/broker/commissions"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline self-start sm:self-auto"
+                  >
+                    Commission Ledger <ArrowUpRight className="size-3.5" />
+                  </Link>
+                </div>
+
+                {selectedClientForView.commissions.length === 0 ? (
+                  <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-400">
+                    <DollarSign className="mx-auto size-9 text-slate-300 mb-2" />
+                    <p className="text-sm font-semibold text-slate-700">No commission records for this broker yet</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden sm:block overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-xs">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400 bg-slate-50/70">
+                            <th className="px-5 py-3.5">Date</th>
+                            <th className="px-4 py-3.5">Statement #</th>
+                            <th className="px-4 py-3.5">Carrier</th>
+                            <th className="px-4 py-3.5">Gross Premium</th>
+                            <th className="px-4 py-3.5">Rate</th>
+                            <th className="px-4 py-3.5">Net Broker Amount</th>
+                            <th className="px-4 py-3.5">Status</th>
+                            <th className="px-5 py-3.5 text-right">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedClientForView.commissions.map((c) => {
+                            const isExpanded = expandedStatementId === c.id
+                            return (
+                              <Fragment key={c.id}>
+                                <tr
+                                  onClick={() => setExpandedStatementId(isExpanded ? null : c.id)}
+                                  className={`group border-b border-slate-100 text-xs transition-colors cursor-pointer ${
+                                    isExpanded ? 'bg-blue-50/40' : 'hover:bg-slate-50/80'
+                                  }`}
+                                >
+                                  <td className="px-5 py-4 text-slate-600 font-medium">{c.date}</td>
+                                  <td className="px-4 py-4 font-mono font-bold text-slate-900">
+                                    <div className="inline-flex items-center gap-1.5">
+                                      <span>{c.statementNumber}</span>
+                                      <CopyButton text={c.statementNumber} copyKey={`stmt-${c.id}`} label="Statement #" />
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-4 text-slate-700 font-semibold">{c.carrier}</td>
+                                  <td className="px-4 py-4 text-slate-700">{c.premium}</td>
+                                  <td className="px-4 py-4 text-slate-600">{c.rate}</td>
+                                  <td className="px-4 py-4 font-bold text-emerald-600 text-sm">{c.amount}</td>
+                                  <td className="px-4 py-4">
+                                    <span
+                                      className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ${
+                                        c.status === 'Paid'
+                                          ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                          : 'bg-rose-50 text-rose-700 ring-rose-200'
+                                      }`}
+                                    >
+                                      {c.status}
+                                    </span>
+                                  </td>
+                                  <td className="px-5 py-4 text-right">
+                                    <div className="inline-flex items-center gap-2 justify-end">
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          handleCopy(c.statementNumber, `btn-copy-stmt-${c.id}`)
+                                        }}
+                                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                                        title="Copy Statement Number"
+                                      >
+                                        {copiedKey === `btn-copy-stmt-${c.id}` ? (
+                                          <Check className="size-3 text-emerald-600" />
+                                        ) : (
+                                          <Copy className="size-3 text-slate-400" />
+                                        )}
+                                        <span>{copiedKey === `btn-copy-stmt-${c.id}` ? 'Copied' : 'Copy'}</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setExpandedStatementId(isExpanded ? null : c.id)
+                                        }}
+                                        className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                      >
+                                        <span>{isExpanded ? 'Hide Source' : 'View Source'}</span>
+                                        {isExpanded ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+
+                                {/* Inline Statement Reconciliation Panel (NO POPUP!) */}
+                                {isExpanded && (
+                                  <tr className="bg-slate-50/90 border-b border-slate-200 animate-in fade-in duration-200">
+                                    <td colSpan={8} className="p-5 sm:p-6">
+                                      <div className="rounded-xl border border-blue-200/80 bg-white p-5 shadow-xs">
+                                        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-100">
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                              Reconciliation Audit
+                                            </span>
+                                            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                                              <span>Statement #{c.statementNumber}</span>
+                                              <CopyButton text={c.statementNumber} copyKey={`stmt-detail-${c.id}`} label="Statement #" />
+                                            </h4>
+                                            <span className="text-xs text-slate-500">· Carrier: {c.carrier}</span>
+                                          </div>
+                                          <button
+                                            onClick={() => setExpandedStatementId(null)}
+                                            className="text-xs font-medium text-slate-400 hover:text-slate-700 cursor-pointer flex items-center gap-1"
+                                          >
+                                            <X className="size-3.5" /> Collapse
+                                          </button>
+                                        </div>
+
+                                        <div className="grid gap-3 sm:grid-cols-4 text-xs">
+                                          <div className="rounded-lg bg-slate-50 p-3">
+                                            <span className="text-slate-400 block text-[11px]">Transaction ID</span>
+                                            <span className="font-mono font-bold text-slate-900 text-xs mt-0.5 block">{c.id}</span>
+                                          </div>
+                                          <div className="rounded-lg bg-slate-50 p-3">
+                                            <span className="text-slate-400 block text-[11px]">Payout Date</span>
+                                            <span className="font-semibold text-slate-900 text-xs mt-0.5 block">{c.date}</span>
+                                          </div>
+                                          <div className="rounded-lg bg-slate-50 p-3">
+                                            <span className="text-slate-400 block text-[11px]">Associated Policy</span>
+                                            <div className="inline-flex items-center gap-1 mt-0.5">
+                                              <span className="font-mono font-bold text-slate-900 text-xs">{c.policyNumber}</span>
+                                              <CopyButton text={c.policyNumber} copyKey={`stmt-pol-${c.id}`} label="Policy Number" />
+                                            </div>
+                                          </div>
+                                          <div className="rounded-lg bg-slate-50 p-3">
+                                            <span className="text-slate-400 block text-[11px]">Broker Net Payment</span>
+                                            <span className="font-bold text-emerald-600 text-sm mt-0.5 block">{c.amount}</span>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs">
+                                          <div className="flex items-center gap-4 text-slate-600">
+                                            <span>Gross Premium: <strong className="text-slate-900">{c.premium}</strong></span>
+                                            <span>Commission Rate: <strong className="text-slate-900">{c.rate}</strong></span>
+                                            <span>Status: <strong className="text-emerald-700">{c.status}</strong></span>
+                                          </div>
+                                          <Link
+                                            href="/broker/statements"
+                                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:underline"
+                                          >
+                                            Go to Statements Module <ArrowUpRight className="size-3.5" />
+                                          </Link>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )}
+                              </Fragment>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Cards View (< sm) */}
+                    <div className="sm:hidden space-y-3">
+                      {selectedClientForView.commissions.map((c) => {
+                        const isExpanded = expandedStatementId === c.id
+                        return (
+                          <div key={c.id} className="rounded-2xl border border-slate-200 bg-white p-4 text-xs shadow-xs">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <div className="inline-flex items-center gap-1">
+                                  <span className="font-mono font-bold text-slate-900 text-sm">{c.statementNumber}</span>
+                                  <CopyButton text={c.statementNumber} copyKey={`mob-stmt-${c.id}`} label="Statement #" />
+                                </div>
+                                <p className="text-slate-700 font-semibold mt-0.5">{c.carrier}</p>
+                                <p className="text-slate-400 text-[11px]">{c.date}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-bold text-emerald-600 text-sm">{c.amount}</p>
+                                <p className="text-[10px] text-slate-400 mt-0.5">{c.rate} of {c.premium}</p>
+                              </div>
+                            </div>
+
+                            <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                              <span
+                                className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
+                                  c.status === 'Paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                                }`}
+                              >
+                                {c.status}
                               </span>
-                            ))
-                          ) : (
-                            <span className="text-slate-400 italic">No channels permitted</span>
-                          )}
-                        </div>
-                      </div>
+                              <button
+                                onClick={() => setExpandedStatementId(isExpanded ? null : c.id)}
+                                className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
+                              >
+                                <span>{isExpanded ? 'Hide Source' : 'View Source'}</span>
+                                {isExpanded ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
+                              </button>
+                            </div>
 
-                      <div className="rounded-lg bg-slate-50 p-3">
-                        <span className="text-[11px] text-slate-400 block font-medium">Capture Method</span>
-                        <span className="mt-1 block font-semibold text-slate-800">
-                          {selectedClientForView.marketingConsent.method || 'Direct Intake'}
-                        </span>
-                      </div>
-
-                      <div className="rounded-lg bg-slate-50 p-3">
-                        <span className="text-[11px] text-slate-400 block font-medium">Date Verified</span>
-                        <span className="mt-1 block font-semibold text-slate-800">
-                          {selectedClientForView.marketingConsent.consentDate || 'Pending confirmation'}
-                        </span>
-                      </div>
-
-                      <div className="rounded-lg bg-slate-50 p-3">
-                        <span className="text-[11px] text-slate-400 block font-medium">IP Address / Signature Stamp</span>
-                        <span className="mt-1 block font-mono text-[11px] text-slate-800 break-all">
-                          {selectedClientForView.marketingConsent.ipAddress || 'Verified via paper/verbal intake'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {selectedClientForView.marketingConsent.notes && (
-                      <div className="mt-4 rounded-lg bg-blue-50/50 border border-blue-100 p-3 text-[11px] text-blue-900">
-                        <strong className="font-semibold">Compliance Note:</strong> {selectedClientForView.marketingConsent.notes}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 5: NOTES */}
-              {clientDetailTab === 'notes' && (
-                <div className="flex flex-col gap-4">
-                  {/* Add Note Input */}
-                  <div className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-xs">
-                    <h3 className="text-[12px] font-semibold text-slate-900 mb-2">Add Internal Broker Note</h3>
-                    <textarea
-                      rows={3}
-                      value={newNoteText}
-                      onChange={(e) => setNewNoteText(e.target.value)}
-                      placeholder="Type details regarding client conversations, policy renewals, coverage inquiries..."
-                      className="w-full rounded-lg border border-slate-200 p-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                    />
-                    <div className="mt-2.5 flex justify-end">
-                      <button
-                        onClick={handleAddNote}
-                        disabled={!newNoteText.trim()}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-3.5 py-1.5 text-[11px] font-semibold text-white shadow-xs hover:bg-blue-600 disabled:opacity-40 transition cursor-pointer"
-                      >
-                        <Send className="size-3" />
-                        Save Note
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Notes List */}
-                  <div className="flex flex-col gap-3">
-                    {selectedClientForView.notes.map((n) => (
-                      <div key={n.id} className="rounded-xl border border-slate-200/80 bg-white p-3.5 sm:p-4 shadow-xs">
-                        <div className="flex items-center justify-between text-[11px] text-slate-400 border-b border-slate-100 pb-2 mb-2">
-                          <span className="font-semibold text-slate-700">{n.author}</span>
-                          <span>{n.date}</span>
-                        </div>
-                        <p className="text-[12px] text-slate-700 leading-relaxed">{n.text}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 6: TIMELINE & ACTIVITY */}
-              {clientDetailTab === 'timeline' && (
-                <div className="flex flex-col gap-4">
-                  <h3 className="text-[14px] font-semibold text-slate-900">Chronological Client History</h3>
-                  <div className="relative pl-5 sm:pl-6 border-l-2 border-slate-200 space-y-6">
-                    {selectedClientForView.timeline.map((event) => (
-                      <div key={event.id} className="relative group">
-                        {/* Dot */}
-                        <div className="absolute -left-[27px] sm:-left-[31px] top-0.5 size-3.5 sm:size-4 rounded-full border-2 border-white bg-blue-600 ring-2 ring-blue-100" />
-                        <div>
-                          <div className="flex items-center justify-between gap-2">
-                            <h4 className="text-[13px] font-semibold text-slate-900">{event.title}</h4>
-                            <span className="text-[10px] text-slate-400 shrink-0">{event.date}</span>
+                            {isExpanded && (
+                              <div className="mt-3 pt-3 border-t border-slate-100 space-y-2 bg-slate-50 p-3 rounded-xl animate-in fade-in">
+                                <div className="flex justify-between py-1 border-b border-slate-200/60">
+                                  <span className="text-slate-500">Transaction ID</span>
+                                  <span className="font-mono text-slate-900">{c.id}</span>
+                                </div>
+                                <div className="flex justify-between py-1 border-b border-slate-200/60">
+                                  <span className="text-slate-500">Associated Policy</span>
+                                  <span className="font-mono text-slate-900">{c.policyNumber}</span>
+                                </div>
+                                <div className="flex justify-between py-1 border-b border-slate-200/60">
+                                  <span className="text-slate-500">Gross Premium</span>
+                                  <span className="font-semibold text-slate-900">{c.premium}</span>
+                                </div>
+                                <div className="flex justify-between py-1">
+                                  <span className="text-slate-500">Commission Rate</span>
+                                  <span className="font-semibold text-slate-900">{c.rate}</span>
+                                </div>
+                                <div className="pt-2 flex justify-end">
+                                  <Link
+                                    href="/broker/statements"
+                                    className="text-[11px] font-semibold text-blue-600 hover:underline inline-flex items-center gap-1"
+                                  >
+                                    Go to Statements <ArrowUpRight className="size-3" />
+                                  </Link>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <p className="mt-1 text-[12px] text-slate-600">{event.detail}</p>
-                          <p className="mt-1 text-[10px] text-slate-400">Actor: <span className="font-medium text-slate-600">{event.actor}</span></p>
-                        </div>
+                        )
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* TAB 4: MARKETING CONSENT */}
+            {clientDetailTab === 'consent' && (
+              <div className="space-y-5">
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7 shadow-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-4 border-b border-slate-100">
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900">Current Consent &amp; Privacy Compliance</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">Regulatory compliance verification with TCPA and state insurance privacy rules.</p>
+                    </div>
+                    {getConsentBadge(selectedClientForView.marketingConsent.status)}
+                  </div>
+
+                  <div className="mt-5 grid gap-4 sm:grid-cols-2 text-xs">
+                    <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                      <span className="text-xs text-slate-400 block font-semibold mb-2">Permitted Communication Channels</span>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedClientForView.marketingConsent.channels.length > 0 ? (
+                          selectedClientForView.marketingConsent.channels.map((ch) => (
+                            <span key={ch} className="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-800 border border-slate-200 shadow-2xs">
+                              {ch}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-slate-400 italic">No channels permitted</span>
+                        )}
                       </div>
-                    ))}
+                    </div>
+
+                    <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                      <span className="text-xs text-slate-400 block font-semibold mb-1">Intake / Capture Method</span>
+                      <span className="font-semibold text-slate-900 text-sm block">
+                        {selectedClientForView.marketingConsent.method || 'Direct Broker Intake'}
+                      </span>
+                    </div>
+
+                    <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                      <span className="text-xs text-slate-400 block font-semibold mb-1">Date Verified &amp; Logged</span>
+                      <span className="font-semibold text-slate-900 text-sm block">
+                        {selectedClientForView.marketingConsent.consentDate || 'Pending confirmation'}
+                      </span>
+                    </div>
+
+                    <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                      <span className="text-xs text-slate-400 block font-semibold mb-1">IP Address / Signature Stamp</span>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="font-mono text-xs text-slate-900 break-all">
+                          {selectedClientForView.marketingConsent.ipAddress || 'Verified via intake documentation'}
+                        </span>
+                        {selectedClientForView.marketingConsent.ipAddress && (
+                          <CopyButton
+                            text={selectedClientForView.marketingConsent.ipAddress}
+                            copyKey="consent-ip"
+                            label="IP Stamp"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {selectedClientForView.marketingConsent.notes && (
+                    <div className="mt-4 rounded-xl bg-blue-50/70 border border-blue-100 p-4 text-xs text-blue-900">
+                      <strong className="font-semibold block mb-0.5">Compliance Audit Note:</strong>
+                      {selectedClientForView.marketingConsent.notes}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 5: NOTES */}
+            {clientDetailTab === 'notes' && (
+              <div className="space-y-5">
+                {/* Add Note Composer */}
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs">
+                  <h3 className="text-sm font-bold text-slate-900 mb-2">Add Internal Broker Note</h3>
+                  <textarea
+                    rows={3}
+                    value={newNoteText}
+                    onChange={(e) => setNewNoteText(e.target.value)}
+                    placeholder="Type details regarding client conversations, policy renewals, coverage inquiries..."
+                    className="w-full rounded-xl border border-slate-200 p-3.5 text-xs outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                  />
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      onClick={handleAddNote}
+                      disabled={!newNoteText.trim()}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-blue-600 disabled:opacity-40 transition cursor-pointer"
+                    >
+                      <Send className="size-3.5" />
+                      Save Note
+                    </button>
                   </div>
                 </div>
-              )}
 
-            </div>
+                {/* Notes History Stream */}
+                <div className="space-y-3">
+                  {selectedClientForView.notes.map((n) => (
+                    <div key={n.id} className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+                      <div className="flex items-center justify-between text-xs text-slate-400 border-b border-slate-100 pb-2.5 mb-2.5">
+                        <span className="font-bold text-slate-800">{n.author}</span>
+                        <span>{n.date}</span>
+                      </div>
+                      <p className="text-xs text-slate-700 leading-relaxed">{n.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            {/* Drawer Footer */}
-            <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-200 bg-white px-4 sm:px-6 py-3.5 sm:py-4">
-              <span className="text-[10.5px] sm:text-[11px] text-slate-400 leading-tight">
-                Last recorded activity: {selectedClientForView.lastActivity.description} ({selectedClientForView.lastActivity.time})
-              </span>
-              <button
-                onClick={() => setSelectedClientForView(null)}
-                className="w-full sm:w-auto rounded-xl border border-slate-200 px-4 py-2 text-[12px] font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
+            {/* TAB 6: TIMELINE & ACTIVITY */}
+            {clientDetailTab === 'timeline' && (
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7 shadow-xs space-y-6">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Chronological Broker &amp; Client History</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Audited timeline of policies, endorsements, consent records, and notes.</p>
+                </div>
+                <div className="relative pl-6 sm:pl-8 border-l-2 border-slate-200 space-y-7 ml-2">
+                  {selectedClientForView.timeline.map((event) => (
+                    <div key={event.id} className="relative group">
+                      <div className="absolute -left-[31px] sm:-left-[39px] top-0.5 size-4 rounded-full border-2 border-white bg-blue-600 ring-4 ring-blue-100" />
+                      <div>
+                        <div className="flex items-center justify-between gap-2">
+                          <h4 className="text-sm font-bold text-slate-900">{event.title}</h4>
+                          <span className="text-[11px] text-slate-400 shrink-0 font-medium">{event.date}</span>
+                        </div>
+                        <p className="mt-1 text-xs text-slate-600 leading-relaxed">{event.detail}</p>
+                        <p className="mt-1 text-[11px] text-slate-400">Actor: <span className="font-semibold text-slate-700">{event.actor}</span></p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1954,128 +2730,20 @@ export default function ClientsPage() {
         </div>
       )}
 
-      {/* ─────────────────────────────────────────────────────────────
-          VIEW POLICY PREVIEW MODAL
-      ─────────────────────────────────────────────────────────────── */}
-      {previewPolicy && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
-              <div>
-                <span className="text-[10px] font-semibold text-blue-600 uppercase tracking-wider">Policy Detail</span>
-                <h3 className="text-[16px] font-bold text-slate-900 mt-0.5">{previewPolicy.policy.policyNumber}</h3>
-                <p className="text-[11px] text-slate-500">Client: {previewPolicy.clientName}</p>
-              </div>
-              <button onClick={() => setPreviewPolicy(null)} className="text-slate-400 hover:text-slate-700">
-                <X className="size-5" />
-              </button>
-            </div>
-
-            <div className="mt-4 space-y-2.5 text-[12px]">
-              <div className="flex justify-between py-1 border-b border-slate-50">
-                <span className="text-slate-500">Coverage Type</span>
-                <span className="font-semibold text-slate-800">{previewPolicy.policy.type}</span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-50">
-                <span className="text-slate-500">Underwriting Carrier</span>
-                <span className="font-semibold text-slate-800">{previewPolicy.policy.carrier}</span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-50">
-                <span className="text-slate-500">Annual Premium</span>
-                <span className="font-bold text-slate-900">{previewPolicy.policy.premium}</span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-50">
-                <span className="text-slate-500">Effective Date</span>
-                <span className="text-slate-700">{previewPolicy.policy.effectiveDate}</span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-50">
-                <span className="text-slate-500">Expiration Date</span>
-                <span className="text-slate-700">{previewPolicy.policy.expirationDate}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-slate-500">Status</span>
-                <span className="font-semibold text-emerald-600">{previewPolicy.policy.status}</span>
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => setPreviewPolicy(null)}
-                className="rounded-xl bg-slate-950 px-4 py-2 text-[12px] font-semibold text-white hover:bg-blue-600 transition"
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─────────────────────────────────────────────────────────────
-          VIEW SOURCE STATEMENT MODAL
-      ─────────────────────────────────────────────────────────────── */}
-      {previewStatement && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
-              <div>
-                <span className="text-[10px] font-semibold text-blue-600 uppercase tracking-wider">Traceable Carrier Statement</span>
-                <h3 className="text-[16px] font-bold text-slate-900 mt-0.5">Statement #{previewStatement.statementNumber}</h3>
-                <p className="text-[11px] text-slate-500">Carrier: {previewStatement.carrier}</p>
-              </div>
-              <button onClick={() => setPreviewStatement(null)} className="text-slate-400 hover:text-slate-700">
-                <X className="size-5" />
-              </button>
-            </div>
-
-            <div className="mt-4 space-y-2.5 text-[12px]">
-              <div className="flex justify-between py-1 border-b border-slate-50">
-                <span className="text-slate-500">Transaction ID</span>
-                <span className="font-mono font-medium text-slate-800">{previewStatement.id}</span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-50">
-                <span className="text-slate-500">Payout Date</span>
-                <span className="text-slate-700">{previewStatement.date}</span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-50">
-                <span className="text-slate-500">Associated Policy</span>
-                <span className="font-mono text-slate-800">{previewStatement.policyNumber}</span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-50">
-                <span className="text-slate-500">Gross Premium</span>
-                <span className="font-medium text-slate-800">{previewStatement.premium}</span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-50">
-                <span className="text-slate-500">Commission Rate</span>
-                <span className="font-medium text-slate-800">{previewStatement.rate}</span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-50">
-                <span className="text-slate-500">Broker Net Payment</span>
-                <span className="font-bold text-emerald-600 text-[14px]">{previewStatement.amount}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-slate-500">Reconciliation Status</span>
-                <span className="font-semibold text-emerald-600">{previewStatement.status}</span>
-              </div>
-            </div>
-
-            <div className="mt-6 flex items-center justify-between">
-              <Link
-                href="/broker/statements"
-                className="text-[11px] font-semibold text-blue-600 hover:underline inline-flex items-center gap-1"
-              >
-                Go to Statements Module <ArrowUpRight className="size-3" />
-              </Link>
-              <button
-                onClick={() => setPreviewStatement(null)}
-                className="rounded-xl bg-slate-950 px-4 py-2 text-[12px] font-semibold text-white hover:bg-blue-600 transition"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
+  )
+}
+
+export default function ClientsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[400px] items-center justify-center">
+          <div className="size-8 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600" />
+        </div>
+      }
+    >
+      <ClientsContent />
+    </Suspense>
   )
 }

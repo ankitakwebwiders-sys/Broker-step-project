@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   BarChart3,
   BookOpen,
@@ -13,16 +13,24 @@ import {
   UserPlus,
   X,
   Zap,
+  Upload,
+  List,
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 
+interface NavSubItemDef {
+  label: string
+  href: string
+  icon?: React.ComponentType<{ className?: string }>
+}
 
 interface NavItemDef {
   label: string
   icon: React.ComponentType<{ className?: string }>
   href: string
+  subItems?: NavSubItemDef[]
 }
 
 const navItems: NavItemDef[] = [
@@ -44,12 +52,24 @@ const navItems: NavItemDef[] = [
   {
     label: 'My Book',
     icon: BookOpen,
-    href: '/broker/book-of-business?tab=active',
+    href: '/broker/book-of-business',
   },
   {
     label: 'Statement',
     icon: FileSpreadsheet,
     href: '/broker/statements',
+    subItems: [
+      {
+        label: 'Upload New Statement',
+        href: '/broker/statements/upload',
+        icon: Upload,
+      },
+      {
+        label: 'All Statement',
+        href: '/broker/statements',
+        icon: List,
+      },
+    ],
   },
   {
     label: 'Reports',
@@ -60,11 +80,6 @@ const navItems: NavItemDef[] = [
     label: 'Settings',
     icon: Settings,
     href: '/broker/settings',
-  },
-  {
-    label: 'Logout',
-    icon: LogOut,
-    href: '/login',
   },
 ]
 
@@ -98,8 +113,26 @@ function NavItem({
   const Icon = item.icon
   const router = useRouter()
   const isLogout = item.label === 'Logout'
+  const hasSubItems = Boolean(item.subItems && item.subItems.length > 0)
+  const isStatement = item.label === 'Statement'
+  const isStatementRoute = pathname.startsWith('/broker/statements')
+
+  const [isSubmenuOpen, setIsSubmenuOpen] = useState(() => {
+    return isStatement && isStatementRoute
+  })
+
+  // Auto-open submenu when visiting statements routes
+  useEffect(() => {
+    if (isStatement && isStatementRoute) {
+      setIsSubmenuOpen(true)
+    }
+  }, [isStatement, isStatementRoute])
 
   const handleClick = (e: React.MouseEvent) => {
+    if (hasSubItems) {
+      setIsSubmenuOpen(true)
+    }
+
     onClick()
 
     if (isLogout) {
@@ -120,28 +153,90 @@ function NavItem({
     }
   }
 
+  const handleSubClick = () => {
+    onClick()
+  }
+
   return (
     <div className="flex flex-col">
-      <Link
-        href={item.href}
-        onClick={handleClick}
-        className={`group relative flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer ${active
-          ? 'bg-[#DBEAFE] text-[#246BFD] font-semibold shadow-xs'
-          : isLogout
-            ? 'text-[#64748B] hover:bg-rose-50 hover:text-rose-600'
-            : 'text-[#334155] hover:bg-slate-200/70 hover:text-[#0F172A]'
-          }`}
-      >
-        <Icon
-          className={`size-[18px] shrink-0 transition-colors ${active
-            ? 'text-[#246BFD]'
+      <div className="group relative flex w-full items-center">
+        <Link
+          href={item.href}
+          onClick={handleClick}
+          className={`flex flex-1 items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer ${active
+            ? 'bg-[#DBEAFE] text-[#246BFD] font-semibold shadow-xs'
             : isLogout
-              ? 'text-[#64748B] group-hover:text-rose-600'
-              : 'text-[#64748B] group-hover:text-[#334155]'
+              ? 'text-[#64748B] hover:bg-rose-50 hover:text-rose-600'
+              : 'text-[#334155] hover:bg-slate-200/70 hover:text-[#0F172A]'
             }`}
-        />
-        <span className="flex-1 truncate tracking-wide">{item.label}</span>
-      </Link>
+        >
+          <Icon
+            className={`size-[18px] shrink-0 transition-colors ${active
+              ? 'text-[#246BFD]'
+              : isLogout
+                ? 'text-[#64748B] group-hover:text-rose-600'
+                : 'text-[#64748B] group-hover:text-[#334155]'
+              }`}
+          />
+          <span className="flex-1 truncate tracking-wide">{item.label}</span>
+        </Link>
+
+        {hasSubItems && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setIsSubmenuOpen((prev) => !prev)
+            }}
+            aria-label="Toggle submenu"
+            className={`ml-1 flex size-8 items-center justify-center rounded-lg transition-colors cursor-pointer ${active
+              ? 'text-[#246BFD] hover:bg-blue-200/60'
+              : 'text-slate-400 hover:bg-slate-200/70 hover:text-slate-700'
+              }`}
+          >
+            <ChevronDown
+              className={`size-4 transition-transform duration-200 ${isSubmenuOpen ? 'rotate-180' : ''
+                }`}
+            />
+          </button>
+        )}
+      </div>
+
+      {/* Submenu Items */}
+      {hasSubItems && isSubmenuOpen && item.subItems && (
+        <div className="mt-1 ml-5 flex flex-col space-y-1 border-l-2 border-slate-200/90 pl-2.5 py-0.5 animate-in fade-in duration-150">
+          {item.subItems.map((sub) => {
+            const SubIcon = sub.icon
+            const isSubActive =
+              sub.href === '/broker/statements/upload'
+                ? pathname === '/broker/statements/upload'
+                : pathname === '/broker/statements'
+
+            return (
+              <Link
+                key={sub.label}
+                href={sub.href}
+                onClick={handleSubClick}
+                className={`group flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all duration-150 cursor-pointer ${isSubActive
+                  ? 'bg-[#246BFD] text-white font-semibold shadow-xs'
+                  : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
+                  }`}
+              >
+                {SubIcon && (
+                  <SubIcon
+                    className={`size-3.5 shrink-0 transition-colors ${isSubActive
+                      ? 'text-white'
+                      : 'text-slate-400 group-hover:text-slate-700'
+                      }`}
+                  />
+                )}
+                <span className="truncate">{sub.label}</span>
+              </Link>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -180,6 +275,7 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
     if (item.label === 'Statement') {
       return (
         pathname === '/broker/statements' ||
+        pathname.startsWith('/broker/statements/') ||
         pathname === '/broker/reconciliation' ||
         pathname === '/broker/commissions'
       )

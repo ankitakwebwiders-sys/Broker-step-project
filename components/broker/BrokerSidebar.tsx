@@ -38,7 +38,7 @@ export const brokerNavItems: NavItemDef[] = [
   {
     label: 'My Book',
     icon: BookOpen,
-    href: '/broker/book-of-business?tab=active',
+    href: '/broker/book-of-business',
   },
   {
     label: 'Statement',
@@ -55,11 +55,7 @@ export const brokerNavItems: NavItemDef[] = [
     icon: Settings,
     href: '/broker/settings',
   },
-  {
-    label: 'Logout',
-    icon: LogOut,
-    href: '/login',
-  },
+
 ]
 
 export function BrokerSidebar({

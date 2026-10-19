@@ -47,6 +47,7 @@ import {
   Layers,
   HelpCircle,
   Briefcase,
+  Lock,
 } from 'lucide-react'
 import {
   initialLeads,
@@ -55,6 +56,76 @@ import {
   type LeadNote,
   type LeadTimelineEvent,
 } from '@/data/broker/leads'
+
+export interface ConsentRecordItem {
+  id: string
+  client: string
+  contact: string
+  channel: string
+  date: string
+  status: 'Consented' | 'Pending' | 'Withdrawn' | 'Declined'
+  hash: string
+  ip: string
+  scope: string[]
+}
+
+const initialConsentRecords: ConsentRecordItem[] = [
+  {
+    id: 'REC-901',
+    client: 'Apex Logistics Inc.',
+    contact: 'Robert Vance',
+    channel: 'SMS + Email',
+    date: 'Oct 08, 2026',
+    status: 'Consented',
+    hash: 'SHA256:8891c4d92a104e76',
+    ip: '198.51.100.42 (New York, NY)',
+    scope: ['SMS Renewal Notices', 'Email Quotes', 'Electronic Delivery'],
+  },
+  {
+    id: 'REC-902',
+    client: 'Harbor Dental Care',
+    contact: 'Dr. Amy Lin',
+    channel: 'Email Verification',
+    date: 'Oct 02, 2026',
+    status: 'Consented',
+    hash: 'SHA256:4910a173bd9120ee',
+    ip: '198.51.100.11 (Brooklyn, NY)',
+    scope: ['Email Quotes', 'Policy Revisions'],
+  },
+  {
+    id: 'REC-903',
+    client: 'Cascade Manufacturing',
+    contact: 'Thomas Miller',
+    channel: 'SMS Automated',
+    date: 'Sep 24, 2026',
+    status: 'Withdrawn',
+    hash: 'SHA256:1192e9bf4327aa81',
+    ip: '203.0.113.88 (Albany, NY)',
+    scope: ['SMS Renewal Notices'],
+  },
+  {
+    id: 'REC-904',
+    client: 'Skyline Restaurant Group',
+    contact: 'Mario Conti',
+    channel: 'In-Person Digital',
+    date: 'Sep 18, 2026',
+    status: 'Consented',
+    hash: 'SHA256:6630d88470aefb19',
+    ip: '198.51.100.95 (Manhattan, NY)',
+    scope: ['SMS Renewal Notices', 'Email Quotes', 'Direct Calls'],
+  },
+  {
+    id: 'REC-905',
+    client: 'Beacon Freight LLC',
+    contact: 'Marcus Brody',
+    channel: 'Phone Verification',
+    date: 'Sep 12, 2026',
+    status: 'Declined',
+    hash: 'SHA256:0041f2e1a88c39b7',
+    ip: '203.0.113.4 (Queens, NY)',
+    scope: ['Direct Calls'],
+  },
+]
 
 export default function LeadsPage() {
   // Main Leads state
@@ -207,6 +278,31 @@ export default function LeadsPage() {
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [leads, filteredLeads])
+
+  // Consent History & Client Registry state
+  const [consentRecords, setConsentRecords] = useState<ConsentRecordItem[]>(initialConsentRecords)
+  const [consentSearchQuery, setConsentSearchQuery] = useState('')
+  const [consentFilterStatus, setConsentFilterStatus] = useState<string>('All')
+  const [selectedAuditRecord, setSelectedAuditRecord] = useState<ConsentRecordItem | null>(null)
+  const [copiedConsentHash, setCopiedConsentHash] = useState(false)
+
+  const handleCopyConsentHash = (text: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedConsentHash(true)
+    setTimeout(() => setCopiedConsentHash(false), 2000)
+  }
+
+  const filteredConsentRecords = useMemo(() => {
+    return consentRecords.filter((r) => {
+      const matchesFilter = consentFilterStatus === 'All' || r.status === consentFilterStatus
+      const matchesSearch =
+        r.client.toLowerCase().includes(consentSearchQuery.toLowerCase()) ||
+        r.contact.toLowerCase().includes(consentSearchQuery.toLowerCase()) ||
+        r.channel.toLowerCase().includes(consentSearchQuery.toLowerCase()) ||
+        r.id.toLowerCase().includes(consentSearchQuery.toLowerCase())
+      return matchesFilter && matchesSearch
+    })
+  }, [consentRecords, consentFilterStatus, consentSearchQuery])
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement
@@ -1134,6 +1230,110 @@ export default function LeadsPage() {
           </div>
         </div>
 
+        {/* Consent History & Client Registry Table */}
+        <div className="mt-8 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h3 className="text-lg font-bold text-slate-950">Consent History &amp; Client Registry</h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Complete verifiable registry of all policyholder opt-in agreements with cryptographic audit fingerprints.
+              </p>
+            </div>
+
+            {/* Filter pills & search */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+              <input
+                type="text"
+                placeholder="Search client or contact..."
+                value={consentSearchQuery}
+                onChange={(e) => setConsentSearchQuery(e.target.value)}
+                className="h-8.5 w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none focus:border-[#0170FE]"
+              />
+              <div className="flex items-center overflow-x-auto rounded-lg border border-slate-200 p-0.5 bg-slate-50 shrink-0">
+                {['All', 'Consented', 'Pending', 'Withdrawn'].map((st) => (
+                  <button
+                    key={st}
+                    type="button"
+                    onClick={() => setConsentFilterStatus(st)}
+                    className={`px-2.5 py-1 text-xs font-semibold rounded-md transition cursor-pointer whitespace-nowrap ${consentFilterStatus === st ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                      }`}
+                  >
+                    {st}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[960px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <th className="py-3.5 pl-4 pr-4 whitespace-nowrap min-w-[200px]">Client / Business</th>
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[150px]">Contact</th>
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[160px]">Channel Authorized</th>
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[120px]">Date</th>
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[120px]">Status</th>
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[200px]">Audit Verification Hash</th>
+                  <th className="py-3.5 pl-4 pr-6 text-right min-w-[120px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none whitespace-nowrap">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredConsentRecords.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-8 text-center text-xs text-slate-500">
+                      No matching consent records found.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredConsentRecords.map((r) => (
+                    <tr key={r.id} className="group hover:bg-slate-50/60 transition">
+                      <td className="py-3.5 pl-4 pr-4 whitespace-nowrap font-semibold text-slate-900">
+                        <div>{r.client}</div>
+                        <span className="text-[11px] font-mono text-slate-400 font-normal">{r.id}</span>
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap text-slate-700">{r.contact}</td>
+                      <td className="py-3.5 px-4 whitespace-nowrap text-slate-600 text-xs font-medium">
+                        <span className="rounded-md bg-slate-100 px-2 py-0.5 text-slate-700">{r.channel}</span>
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap text-slate-500 text-xs">{r.date}</td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${r.status === 'Consented'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : r.status === 'Pending'
+                              ? 'bg-blue-50 text-[#0170FE] border border-blue-200'
+                              : r.status === 'Withdrawn'
+                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                : 'bg-rose-50 text-rose-700 border border-rose-200'
+                            }`}
+                        >
+                          {r.status}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap font-mono text-xs text-slate-400">
+                        <span className="inline-flex items-center gap-1">
+                          <Lock className="size-3 text-slate-400" />
+                          {r.hash}
+                        </span>
+                      </td>
+                      <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[120px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedAuditRecord(r)}
+                          className="cursor-pointer text-xs sm:text-sm font-semibold text-[#0170FE] hover:underline"
+                        >
+                          Audit Log
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -2033,6 +2233,109 @@ export default function LeadsPage() {
               >
                 Confirm Conversion
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Audit Verification Hash Details */}
+      {selectedAuditRecord && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="rounded-xl bg-emerald-50 p-2 text-emerald-600">
+                  <ShieldCheck className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-950">Cryptographic Audit Certificate</h3>
+                  <p className="text-xs text-slate-500">TCPA &amp; ESIGN Act Digital Compliance Record</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedAuditRecord(null)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3.5 text-xs">
+              <div className="rounded-xl bg-slate-50 p-3.5 border border-slate-200 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-medium">Registry ID:</span>
+                  <span className="font-mono font-bold text-slate-900">{selectedAuditRecord.id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-medium">Client / Insured:</span>
+                  <span className="font-semibold text-slate-900">{selectedAuditRecord.client}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-medium">Authorized Contact:</span>
+                  <span className="text-slate-800">{selectedAuditRecord.contact}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-medium">Consent Status:</span>
+                  <span className="font-bold text-emerald-700">{selectedAuditRecord.status}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-medium">Timestamp:</span>
+                  <span className="text-slate-800">{selectedAuditRecord.date}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-medium">IP Address / Geo:</span>
+                  <span className="font-mono text-slate-700">{selectedAuditRecord.ip}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                  SHA-256 Checksum Signature
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={selectedAuditRecord.hash}
+                    className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 font-mono text-xs text-slate-800 outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleCopyConsentHash(selectedAuditRecord.hash)}
+                    className="h-9 px-3 rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 hover:border-[#0170FE] cursor-pointer"
+                  >
+                    {copiedConsentHash ? 'Copied' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
+                  Authorized Scope of Consent
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedAuditRecord.scope.map((s) => (
+                    <span key={s} className="rounded-lg bg-blue-50 border border-blue-200 px-2.5 py-1 text-xs font-semibold text-[#0170FE]">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-emerald-950 text-[11px] leading-relaxed">
+                This record provides admissible proof of express written consent under 47 U.S.C. § 227 (TCPA) and federal ESIGN Act.
+              </div>
+
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedAuditRecord(null)}
+                  className="w-full rounded-xl bg-slate-900 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 cursor-pointer"
+                >
+                  Close Audit Record
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -8,7 +8,6 @@ import {
   User,
   ShieldCheck,
   Award,
-  Building2,
   Sliders,
   FileCheck2,
   QrCode,
@@ -54,7 +53,6 @@ type TabId =
   | 'profile'
   | 'account'
   | 'membership'
-  | 'carriers'
   | 'commissions'
   | 'consent'
   | 'qr-leads'
@@ -70,7 +68,6 @@ const TABS: TabDef[] = [
   { id: 'profile', label: 'My Profile', icon: User, badge: 'Verified' },
   { id: 'account', label: 'Account', icon: ShieldCheck },
   { id: 'membership', label: 'Membership / Subscription', icon: Award, badge: 'Pro' },
-  { id: 'carriers', label: 'Carriers', icon: Building2, badge: '8 Connected' },
   { id: 'commissions', label: 'Commission Settings', icon: Sliders },
   { id: 'consent', label: 'Marketing Consent', icon: FileCheck2, badge: 'Compliant' },
   { id: 'qr-leads', label: 'QR / Lead Settings', icon: QrCode, badge: 'Active' },
@@ -80,8 +77,9 @@ function SettingsContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const tabParam = searchParams.get('tab') as TabId | null
+  const initialTab = tabParam && TABS.some((t) => t.id === tabParam) ? tabParam : 'profile'
 
-  const [activeTab, setActiveTab] = useState<TabId>(tabParam || 'profile')
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
 
@@ -171,7 +169,6 @@ function SettingsContent() {
         {activeTab === 'profile' && <MyProfileTab onSave={triggerSaveToast} onCopy={handleCopy} copiedKey={copiedKey} />}
         {activeTab === 'account' && <AccountTab onSave={triggerSaveToast} />}
         {activeTab === 'membership' && <MembershipTab onSave={triggerSaveToast} />}
-        {activeTab === 'carriers' && <CarriersTab onSave={triggerSaveToast} />}
         {activeTab === 'commissions' && <CommissionSettingsTab onSave={triggerSaveToast} />}
         {activeTab === 'consent' && <MarketingConsentTab onSave={triggerSaveToast} onCopy={handleCopy} copiedKey={copiedKey} />}
         {activeTab === 'qr-leads' && <QrLeadSettingsTab onSave={triggerSaveToast} onCopy={handleCopy} copiedKey={copiedKey} />}
@@ -722,376 +719,11 @@ function MembershipTab({ onSave }: { onSave: () => void }) {
 }
 
 /* =========================================================================
-   4. TAB: CARRIERS
-   ========================================================================= */
-function CarriersTab({ onSave }: { onSave: () => void }) {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [formData, setFormData] = useState({
-    name: '',
-    id: '',
-    code: '',
-    status: 'Active',
-    rep: '',
-    phone: '',
-    payout: 'Bi-weekly Direct Deposit',
-    appointmentId: '',
-  })
-
-  const [carriers, setCarriers] = useState([
-    {
-      id: 'TRV',
-      name: 'Travelers Insurance',
-      code: 'TRV-88214',
-      status: 'Active',
-      rep: 'Sarah Jenkins',
-      phone: '+1 (800) 252-4633',
-      payout: 'Bi-weekly Direct Deposit',
-      appointmentId: 'APT-99410',
-      connected: true,
-    },
-    {
-      id: 'HTF',
-      name: 'The Hartford',
-      code: 'HTF-51209',
-      status: 'Active',
-      rep: 'Michael Rossi',
-      phone: '+1 (800) 447-7649',
-      payout: 'Monthly Direct Deposit',
-      appointmentId: 'APT-30119',
-      connected: true,
-    },
-    {
-      id: 'LBM',
-      name: 'Liberty Mutual Commercial',
-      code: 'LBM-99312',
-      status: 'Active',
-      rep: 'Jessica Wu',
-      phone: '+1 (800) 362-0000',
-      payout: 'Bi-weekly Direct Deposit',
-      appointmentId: 'APT-14920',
-      connected: true,
-    },
-    {
-      id: 'PRG',
-      name: 'Progressive Commercial Lines',
-      code: 'PRG-44182',
-      status: 'Active',
-      rep: 'Daniel Kim',
-      phone: '+1 (800) 876-5581',
-      payout: 'Weekly Direct Deposit',
-      appointmentId: 'APT-58190',
-      connected: true,
-    },
-    {
-      id: 'CHB',
-      name: 'Chubb Commercial Insurance',
-      code: 'CHB-30911',
-      status: 'Active',
-      rep: 'Elena Vance',
-      phone: '+1 (800) 699-9916',
-      payout: 'Monthly Direct Deposit',
-      appointmentId: 'APT-84012',
-      connected: true,
-    },
-    {
-      id: 'NW',
-      name: 'Nationwide Mutual',
-      code: 'NW-77218',
-      status: 'Active',
-      rep: 'Marcus Clark',
-      phone: '+1 (800) 542-9080',
-      payout: 'Monthly ACH',
-      appointmentId: 'APT-60291',
-      connected: true,
-    },
-    {
-      id: 'BHH',
-      name: 'Berkshire Hathaway Homestate',
-      code: 'BHH-20419',
-      status: 'Pending Appointment',
-      rep: 'Underwriting Review',
-      phone: '+1 (800) 488-2930',
-      payout: 'Awaiting Activation',
-      appointmentId: 'SUBMITTED-OCT26',
-      connected: false,
-    },
-  ])
-
-  function handleAddCarrier(e: React.FormEvent) {
-    e.preventDefault()
-    if (!formData.name.trim()) return
-
-    const shortId = formData.id.trim()
-      ? formData.id.trim().toUpperCase().slice(0, 4)
-      : formData.name
-        .trim()
-        .split(' ')
-        .map((w) => w[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 3) || 'NEW'
-
-    const carrierCode = formData.code.trim() || `${shortId}-${Math.floor(10000 + Math.random() * 90000)}`
-    const aptId = formData.appointmentId.trim() || `APT-${Math.floor(10000 + Math.random() * 90000)}`
-
-    const newCarrier = {
-      id: shortId,
-      name: formData.name.trim(),
-      code: carrierCode,
-      status: formData.status,
-      rep: formData.rep.trim() || 'Assigned Specialist',
-      phone: formData.phone.trim() || '+1 (800) 555-0100',
-      payout: formData.payout,
-      appointmentId: aptId,
-      connected: formData.status === 'Active',
-    }
-
-    setCarriers([newCarrier, ...carriers])
-    setIsAddModalOpen(false)
-    setFormData({
-      name: '',
-      id: '',
-      code: '',
-      status: 'Active',
-      rep: '',
-      phone: '',
-      payout: 'Bi-weekly Direct Deposit',
-      appointmentId: '',
-    })
-    onSave()
-  }
-
-  const filtered = carriers.filter((c) =>
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.code.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
-  return (
-    <div className="space-y-6">
-      {/* Search and Action Bar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
-        <div className="flex-1 max-w-md">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search carriers by name or code..."
-            className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-          />
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setIsAddModalOpen(true)}
-          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#0170FE] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db]"
-        >
-          <Plus className="size-4" />
-          <span>Add Carrier</span>
-        </button>
-      </div>
-
-      {/* Add Carrier Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-[#0170FE]/10 text-[#0170FE]">
-                  <Building2 className="size-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-950">Add New Carrier</h3>
-                  <p className="text-xs text-slate-500">Connect a new insurance carrier to your brokerage</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsAddModalOpen(false)}
-                className="cursor-pointer rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddCarrier} className="mt-5 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Carrier Name <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g. Hanover Insurance Group"
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Carrier Code
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                    placeholder="e.g. HVR-77401"
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Appointment ID
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.appointmentId}
-                    onChange={(e) => setFormData({ ...formData, appointmentId: e.target.value })}
-                    placeholder="e.g. APT-40192"
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Representative Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.rep}
-                    onChange={(e) => setFormData({ ...formData, rep: e.target.value })}
-                    placeholder="e.g. John Anderson"
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Phone Number
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="e.g. +1 (800) 555-0199"
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Payout Schedule
-                  </label>
-                  <select
-                    value={formData.payout}
-                    onChange={(e) => setFormData({ ...formData, payout: e.target.value })}
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-                  >
-                    <option value="Bi-weekly Direct Deposit">Bi-weekly Direct Deposit</option>
-                    <option value="Monthly Direct Deposit">Monthly Direct Deposit</option>
-                    <option value="Weekly Direct Deposit">Weekly Direct Deposit</option>
-                    <option value="Monthly ACH">Monthly ACH</option>
-                    <option value="Awaiting Activation">Awaiting Activation</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Status
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Pending Appointment">Pending Appointment</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#0170FE] px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db]"
-                >
-                  <Plus className="size-4" />
-                  <span>Add Carrier</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Carriers Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((carrier) => (
-          <div
-            key={`${carrier.id}-${carrier.code}-${carrier.appointmentId}`}
-            className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition hover:border-[#0170FE]/40 hover:shadow-md"
-          >
-            <div>
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex size-11 items-center justify-center rounded-xl bg-slate-900 text-white font-bold text-sm shadow-xs">
-                  {carrier.id}
-                </div>
-                <span
-                  className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${carrier.status === 'Active'
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                    : 'bg-amber-50 text-amber-700 border border-amber-200'
-                    }`}
-                >
-                  {carrier.status}
-                </span>
-              </div>
-
-              <h4 className="mt-3.5 text-lg font-bold text-slate-950">{carrier.name}</h4>
-              <p className="text-xs text-slate-500 font-mono font-medium">Code: {carrier.code}</p>
-
-              <div className="mt-4 space-y-2 border-t border-slate-100 pt-3 text-xs sm:text-sm text-slate-600">
-                <div className="flex justify-between">
-                  <span className="text-slate-400 font-medium">Appointment ID:</span>
-                  <span className="font-semibold text-slate-800 font-mono">{carrier.appointmentId}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400 font-medium">Representative:</span>
-                  <span className="font-semibold text-slate-800">{carrier.rep}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400 font-medium">Phone:</span>
-                  <span className="font-semibold text-slate-800">{carrier.phone}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400 font-medium">Payout Schedule:</span>
-                  <span className="font-semibold text-emerald-600">{carrier.payout}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-/* =========================================================================
-   5. TAB: COMMISSION SETTINGS
+   4. TAB: COMMISSION SETTINGS
    ========================================================================= */
 interface SplitRule {
   carrier: string
+  policyPrefix?: string
   defaultComm: number
   brokerSplit: number
   houseSplit: number
@@ -1100,18 +732,19 @@ interface SplitRule {
 
 function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
   const [splits, setSplits] = useState<SplitRule[]>([
-    { carrier: 'Travelers Insurance', defaultComm: 15.0, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
-    { carrier: 'The Hartford', defaultComm: 14.5, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
-    { carrier: 'Liberty Mutual', defaultComm: 15.0, brokerSplit: 85, houseSplit: 15, renewalRate: 13.0 },
-    { carrier: 'Progressive Commercial', defaultComm: 12.5, brokerSplit: 75, houseSplit: 25, renewalRate: 10.0 },
-    { carrier: 'Chubb Commercial', defaultComm: 16.0, brokerSplit: 85, houseSplit: 15, renewalRate: 14.0 },
-    { carrier: 'Nationwide Mutual', defaultComm: 14.0, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
+    { carrier: 'Travelers Insurance', policyPrefix: 'TRV', defaultComm: 15.0, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
+    { carrier: 'The Hartford', policyPrefix: 'HTF', defaultComm: 14.5, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
+    { carrier: 'Liberty Mutual', policyPrefix: 'LBM', defaultComm: 15.0, brokerSplit: 85, houseSplit: 15, renewalRate: 13.0 },
+    { carrier: 'Progressive Commercial', policyPrefix: 'PRG', defaultComm: 12.5, brokerSplit: 75, houseSplit: 25, renewalRate: 10.0 },
+    { carrier: 'Chubb Commercial', policyPrefix: 'CHB', defaultComm: 16.0, brokerSplit: 85, houseSplit: 15, renewalRate: 14.0 },
+    { carrier: 'Nationwide Mutual', policyPrefix: 'NWM', defaultComm: 14.0, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
   ])
 
   const [modalMode, setModalMode] = useState<'add' | 'edit' | null>(null)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [formData, setFormData] = useState<SplitRule>({
     carrier: '',
+    policyPrefix: '',
     defaultComm: 15.0,
     brokerSplit: 80,
     houseSplit: 20,
@@ -1123,6 +756,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
     setEditingIndex(null)
     setFormData({
       carrier: '',
+      policyPrefix: '',
       defaultComm: 15.0,
       brokerSplit: 80,
       houseSplit: 20,
@@ -1133,7 +767,10 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
   function handleOpenEdit(index: number) {
     setModalMode('edit')
     setEditingIndex(index)
-    setFormData({ ...splits[index] })
+    setFormData({
+      ...splits[index],
+      policyPrefix: splits[index].policyPrefix || '',
+    })
   }
 
   function handleCloseModal() {
@@ -1163,12 +800,15 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
     e.preventDefault()
     if (!formData.carrier.trim()) return
 
+    const sanitizedPrefix = (formData.policyPrefix || '').trim().toUpperCase().slice(0, 3)
+
     if (modalMode === 'edit' && editingIndex !== null) {
       setSplits((prev) => {
         const next = [...prev]
         next[editingIndex] = {
           ...formData,
           carrier: formData.carrier.trim(),
+          policyPrefix: sanitizedPrefix,
         }
         return next
       })
@@ -1177,6 +817,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
         {
           ...formData,
           carrier: formData.carrier.trim(),
+          policyPrefix: sanitizedPrefix,
         },
         ...prev,
       ])
@@ -1232,6 +873,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
             <thead>
               <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <th className="py-3.5 pr-6 whitespace-nowrap">Carrier Name</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Policy Prefix</th>
                 <th className="py-3.5 px-4 whitespace-nowrap">Default Commission %</th>
                 <th className="py-3.5 px-4 whitespace-nowrap">Broker Share %</th>
                 <th className="py-3.5 px-4 whitespace-nowrap">Brokerage (House) %</th>
@@ -1243,6 +885,15 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
               {splits.map((row, idx) => (
                 <tr key={`${row.carrier}-${idx}`} className="group hover:bg-slate-50/50">
                   <td className="py-3.5 pr-6 font-semibold text-slate-900 whitespace-nowrap">{row.carrier}</td>
+                  <td className="py-3.5 px-4 whitespace-nowrap">
+                    {row.policyPrefix ? (
+                      <span className="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-mono font-bold text-slate-700 border border-slate-200">
+                        {row.policyPrefix}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-400 font-mono">—</span>
+                    )}
+                  </td>
                   <td className="py-3.5 px-4 whitespace-nowrap">
                     <span className="rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-mono font-bold text-[#0170FE]">
                       {row.defaultComm}%
@@ -1297,18 +948,45 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
             </div>
 
             <form onSubmit={handleSaveRule} className="mt-5 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Carrier Name <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.carrier}
-                  onChange={(e) => setFormData({ ...formData, carrier: e.target.value })}
-                  placeholder="e.g. Hanover Insurance / AIG Commercial"
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Carrier Name <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.carrier}
+                    onChange={(e) => setFormData({ ...formData, carrier: e.target.value })}
+                    placeholder="e.g. Hanover Insurance / AIG"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 whitespace-nowrap">
+                      Policy No Prefix <span className="text-rose-500">*</span>
+                    </label>
+                    <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md whitespace-nowrap">
+                      3 Chars
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    maxLength={3}
+                    value={formData.policyPrefix || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        policyPrefix: e.target.value.toUpperCase().slice(0, 3),
+                      })
+                    }
+                    placeholder="e.g. POL"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-mono font-bold uppercase tracking-wider text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -1499,18 +1177,6 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
 /* =========================================================================
    6. TAB: MARKETING CONSENT
    ========================================================================= */
-interface ConsentRecordItem {
-  id: string
-  client: string
-  contact: string
-  channel: string
-  date: string
-  status: 'Consented' | 'Pending' | 'Withdrawn' | 'Declined'
-  hash: string
-  ip: string
-  scope: string[]
-}
-
 function MarketingConsentTab({
   onSave,
   onCopy,
@@ -1521,65 +1187,6 @@ function MarketingConsentTab({
   copiedKey: string | null
 }) {
   const consentLink = 'https://brokerstep.app/consent/req/brk-ny-90214'
-
-  // Records state
-  const [records, setRecords] = useState<ConsentRecordItem[]>([
-    {
-      id: 'REC-901',
-      client: 'Apex Logistics Inc.',
-      contact: 'Robert Vance',
-      channel: 'SMS + Email',
-      date: 'Oct 08, 2026',
-      status: 'Consented',
-      hash: 'SHA256:8891c4d92a104e76',
-      ip: '198.51.100.42 (New York, NY)',
-      scope: ['SMS Renewal Notices', 'Email Quotes', 'Electronic Delivery'],
-    },
-    {
-      id: 'REC-902',
-      client: 'Harbor Dental Care',
-      contact: 'Dr. Amy Lin',
-      channel: 'Email Verification',
-      date: 'Oct 02, 2026',
-      status: 'Consented',
-      hash: 'SHA256:4910a173bd9120ee',
-      ip: '198.51.100.11 (Brooklyn, NY)',
-      scope: ['Email Quotes', 'Policy Revisions'],
-    },
-    {
-      id: 'REC-903',
-      client: 'Cascade Manufacturing',
-      contact: 'Thomas Miller',
-      channel: 'SMS Automated',
-      date: 'Sep 24, 2026',
-      status: 'Withdrawn',
-      hash: 'SHA256:1192e9bf4327aa81',
-      ip: '203.0.113.88 (Albany, NY)',
-      scope: ['SMS Renewal Notices'],
-    },
-    {
-      id: 'REC-904',
-      client: 'Skyline Restaurant Group',
-      contact: 'Mario Conti',
-      channel: 'In-Person Digital',
-      date: 'Sep 18, 2026',
-      status: 'Consented',
-      hash: 'SHA256:6630d88470aefb19',
-      ip: '198.51.100.95 (Manhattan, NY)',
-      scope: ['SMS Renewal Notices', 'Email Quotes', 'Direct Calls'],
-    },
-    {
-      id: 'REC-905',
-      client: 'Beacon Freight LLC',
-      contact: 'Marcus Brody',
-      channel: 'Phone Verification',
-      date: 'Sep 12, 2026',
-      status: 'Declined',
-      hash: 'SHA256:0041f2e1a88c39b7',
-      ip: '203.0.113.4 (Queens, NY)',
-      scope: ['Direct Calls'],
-    },
-  ])
 
   // Customizer form settings
   const [formSettings, setFormSettings] = useState({
@@ -1607,20 +1214,8 @@ function MarketingConsentTab({
   const [previewSubmitted, setPreviewSubmitted] = useState(false)
 
   // Modals state
-  const [isSendModalOpen, setIsSendModalOpen] = useState(false)
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop')
-  const [selectedAuditRecord, setSelectedAuditRecord] = useState<ConsentRecordItem | null>(null)
-  const [filterStatus, setFilterStatus] = useState<string>('All')
-  const [searchQuery, setSearchQuery] = useState('')
-
-  // New Send Request Modal form fields
-  const [sendName, setSendName] = useState('')
-  const [sendCompany, setSendCompany] = useState('')
-  const [sendContactValue, setSendContactValue] = useState('')
-  const [sendMethod, setSendMethod] = useState<'SMS' | 'Email' | 'Both'>('SMS')
-  const [sendRenewalAlerts, setSendRenewalAlerts] = useState(true)
-  const [sendQuoteMarketing, setSendQuoteMarketing] = useState(true)
 
   // Handle preview form submit test
   const handleTestSubmit = (e: React.FormEvent) => {
@@ -1636,145 +1231,8 @@ function MarketingConsentTab({
     }, 4500)
   }
 
-  // Handle sending new consent request
-  const handleSendRequest = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!sendName.trim()) return
-
-    const newRecord: ConsentRecordItem = {
-      id: `REC-${Math.floor(100 + Math.random() * 900)}`,
-      client: sendCompany.trim() || `${sendName.trim()} Commercial`,
-      contact: sendName.trim(),
-      channel: sendMethod === 'Both' ? 'SMS + Email' : sendMethod,
-      date: 'Today, Just Now',
-      status: 'Pending',
-      hash: `SHA256:${Math.random().toString(36).substring(2, 10)}..${Math.random().toString(36).substring(2, 4)}`,
-      ip: 'Awaiting Client Signature',
-      scope: [
-        ...(sendRenewalAlerts ? ['SMS Renewal Notices'] : []),
-        ...(sendQuoteMarketing ? ['Email Quotes & Marketing'] : []),
-      ],
-    }
-
-    setRecords([newRecord, ...records])
-    setIsSendModalOpen(false)
-    setSendName('')
-    setSendCompany('')
-    setSendContactValue('')
-    onSave()
-  }
-
-  const filteredRecords = records.filter((r) => {
-    const matchesFilter = filterStatus === 'All' || r.status === filterStatus
-    const matchesSearch =
-      r.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.contact.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.channel.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesFilter && matchesSearch
-  })
-
   return (
     <div className="space-y-6">
-      {/* 1. Header Overview & Compliance Metrics Bar */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-100 pb-5">
-          <div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h3 className="text-xl font-bold text-slate-950 flex items-center gap-2">
-                <FileCheck2 className="size-6 text-[#0170FE]" />
-                Marketing &amp; TCPA Consent Management
-              </h3>
-              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
-                <ShieldCheck className="size-3.5" />
-                TCPA &amp; GLBA Compliant
-              </span>
-              <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#0170FE] border border-blue-200 flex items-center gap-1.5">
-                <Lock className="size-3.5" />
-                SHA-256 Audit Trail
-              </span>
-            </div>
-            <p className="text-sm text-slate-500 mt-1.5 max-w-2xl">
-              Configure, customize, and dispatch digital communication consent forms to policyholders. Meets FCC TCPA 10DLC,
-              GLBA privacy regulations, and state insurance solicitation standards.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => setIsPreviewModalOpen(true)}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-xs hover:border-[#0170FE] hover:text-[#0170FE] transition"
-            >
-              <Eye className="size-4" />
-              <span>Preview Client Form</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsSendModalOpen(true)}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#0170FE] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-[#0060db] transition"
-            >
-              <Send className="size-4" />
-              <span>Send Consent Request</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Quick Compliance Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 pt-1">
-          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Registry</p>
-            <p className="text-xl font-extrabold text-slate-900 mt-0.5">248</p>
-            <p className="text-xs text-emerald-600 font-medium mt-0.5">+14 this month</p>
-          </div>
-          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Active Consent Rate</p>
-            <p className="text-xl font-extrabold text-emerald-600 mt-0.5">95.2%</p>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">236 valid consents</p>
-          </div>
-          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">SMS 10DLC Opt-in</p>
-            <p className="text-xl font-extrabold text-[#0170FE] mt-0.5">218</p>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">Direct SMS enabled</p>
-          </div>
-          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Pending Requests</p>
-            <p className="text-xl font-extrabold text-amber-600 mt-0.5">12</p>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">Awaiting signature</p>
-          </div>
-        </div>
-
-        {/* Shareable Consent Request Link */}
-        <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1.5">
-            Broker Public Consent Intake Link (Send to any client or embed in quote emails)
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              readOnly
-              value={consentLink}
-              className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-xs sm:text-sm font-mono text-slate-800 outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => onCopy(consentLink, 'consent')}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-xs sm:text-sm font-semibold text-slate-800 hover:border-[#0170FE] hover:text-[#0170FE] transition"
-            >
-              {copiedKey === 'consent' ? <Check className="size-4 text-emerald-600" /> : <Copy className="size-4 text-slate-500" />}
-              <span>{copiedKey === 'consent' ? 'Copied' : 'Copy'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsPreviewModalOpen(true)}
-              className="hidden sm:inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs sm:text-sm font-semibold text-slate-800 hover:border-[#0170FE] hover:text-[#0170FE] transition"
-            >
-              <ExternalLink className="size-4 text-slate-500" />
-              <span>Preview</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* 2. Consent Form Suite: Form Customizer & Live Interactive Form */}
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Left Column: Form Builder & Disclosures Customizer */}
@@ -2158,233 +1616,8 @@ function MarketingConsentTab({
         </div>
       </div>
 
-      {/* 3. Consent History Table & Registry */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3">
-          <div>
-            <h3 className="text-lg font-bold text-slate-950">Consent History &amp; Client Registry</h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Complete verifiable registry of all policyholder opt-in agreements with cryptographic audit fingerprints.
-            </p>
-          </div>
 
-          {/* Filter pills & search */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
-            <input
-              type="text"
-              placeholder="Search client or contact..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8.5 w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none focus:border-[#0170FE]"
-            />
-            <div className="flex items-center overflow-x-auto rounded-lg border border-slate-200 p-0.5 bg-slate-50 shrink-0">
-              {['All', 'Consented', 'Pending', 'Withdrawn'].map((st) => (
-                <button
-                  key={st}
-                  type="button"
-                  onClick={() => setFilterStatus(st)}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded-md transition cursor-pointer whitespace-nowrap ${filterStatus === st ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
-                    }`}
-                >
-                  {st}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[960px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
-                <th className="py-3.5 pl-4 pr-4 whitespace-nowrap min-w-[200px]">Client / Business</th>
-                <th className="py-3.5 px-4 whitespace-nowrap min-w-[150px]">Contact</th>
-                <th className="py-3.5 px-4 whitespace-nowrap min-w-[160px]">Channel Authorized</th>
-                <th className="py-3.5 px-4 whitespace-nowrap min-w-[120px]">Date</th>
-                <th className="py-3.5 px-4 whitespace-nowrap min-w-[120px]">Status</th>
-                <th className="py-3.5 px-4 whitespace-nowrap min-w-[200px]">Audit Verification Hash</th>
-                <th className="py-3.5 pl-4 pr-6 text-right min-w-[120px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none whitespace-nowrap">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredRecords.map((r) => (
-                <tr key={r.id} className="group hover:bg-slate-50/60 transition">
-                  <td className="py-3.5 pl-4 pr-4 whitespace-nowrap font-semibold text-slate-900">
-                    <div>{r.client}</div>
-                    <span className="text-[11px] font-mono text-slate-400 font-normal">{r.id}</span>
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap text-slate-700">{r.contact}</td>
-                  <td className="py-3.5 px-4 whitespace-nowrap text-slate-600 text-xs font-medium">
-                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-slate-700">{r.channel}</span>
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap text-slate-500 text-xs">{r.date}</td>
-                  <td className="py-3.5 px-4 whitespace-nowrap">
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${r.status === 'Consented'
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        : r.status === 'Pending'
-                          ? 'bg-blue-50 text-[#0170FE] border border-blue-200'
-                          : r.status === 'Withdrawn'
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                            : 'bg-rose-50 text-rose-700 border border-rose-200'
-                        }`}
-                    >
-                      {r.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap font-mono text-xs text-slate-400">
-                    <span className="inline-flex items-center gap-1">
-                      <Lock className="size-3 text-slate-400" />
-                      {r.hash}
-                    </span>
-                  </td>
-                  <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[120px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedAuditRecord(r)}
-                      className="cursor-pointer text-xs sm:text-sm font-semibold text-[#0170FE] hover:underline"
-                    >
-                      Audit Log
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* 4. MODAL: Send Consent Request to a Client */}
-      {isSendModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="rounded-xl bg-blue-50 p-2 text-[#0170FE]">
-                  <Send className="size-5" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-slate-950">Send Client Consent Request</h3>
-                  <p className="text-xs text-slate-500">Dispatch digital consent form via SMS or Email</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsSendModalOpen(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSendRequest} className="mt-4 space-y-4">
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
-                  Client / Contact Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={sendName}
-                  onChange={(e) => setSendName(e.target.value)}
-                  placeholder="e.g. Thomas Miller"
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
-                  Business / Company Name
-                </label>
-                <input
-                  type="text"
-                  value={sendCompany}
-                  onChange={(e) => setSendCompany(e.target.value)}
-                  placeholder="e.g. Cascade Manufacturing"
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
-                    Dispatch Via
-                  </label>
-                  <select
-                    value={sendMethod}
-                    onChange={(e) => setSendMethod(e.target.value as any)}
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm text-slate-900 outline-none focus:border-[#0170FE]"
-                  >
-                    <option value="SMS">SMS Text Message</option>
-                    <option value="Email">Email Delivery</option>
-                    <option value="Both">Both (SMS + Email)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
-                    Destination Phone / Email *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={sendContactValue}
-                    onChange={(e) => setSendContactValue(e.target.value)}
-                    placeholder={sendMethod === 'Email' ? 'client@company.com' : '(555) 000-0000'}
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm text-slate-900 outline-none focus:border-[#0170FE]"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2 pt-2 border-t border-slate-100">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
-                  Requested Consent Permissions
-                </span>
-                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={sendRenewalAlerts}
-                    onChange={(e) => setSendRenewalAlerts(e.target.checked)}
-                    className="size-4 rounded text-[#0170FE]"
-                  />
-                  <span>Automated Renewal Reminders &amp; Policy Expiration Alerts</span>
-                </label>
-                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={sendQuoteMarketing}
-                    onChange={(e) => setSendQuoteMarketing(e.target.checked)}
-                    className="size-4 rounded text-[#0170FE]"
-                  />
-                  <span>Electronic Policy Quotes &amp; Commercial Insurance Advisory</span>
-                </label>
-              </div>
-
-              <div className="rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
-                <p className="font-semibold text-slate-900 mb-0.5">Pre-Formatted Invitation Message:</p>
-                <p className="font-mono text-[11px] text-slate-500">
-                  &ldquo;Hello {sendName || 'Client'}, please review and authorize your communication preferences with {formSettings.agencyName} at {consentLink}&rdquo;
-                </p>
-              </div>
-
-              <div className="flex gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsSendModalOpen(false)}
-                  className="flex-1 rounded-xl border border-slate-200 bg-white py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded-xl bg-[#0170FE] py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-[#0060db] shadow-sm cursor-pointer"
-                >
-                  Dispatch Request Link
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* 5. MODAL: Full Public Client View Preview Modal */}
       {isPreviewModalOpen && (
@@ -2510,108 +1743,7 @@ function MarketingConsentTab({
         </div>
       )}
 
-      {/* 6. MODAL: Audit Verification Hash Details */}
-      {selectedAuditRecord && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="rounded-xl bg-emerald-50 p-2 text-emerald-600">
-                  <ShieldCheck className="size-5" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-slate-950">Cryptographic Audit Certificate</h3>
-                  <p className="text-xs text-slate-500">TCPA &amp; ESIGN Act Digital Compliance Record</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedAuditRecord(null)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
 
-            <div className="mt-4 space-y-3.5 text-xs">
-              <div className="rounded-xl bg-slate-50 p-3.5 border border-slate-200 space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Registry ID:</span>
-                  <span className="font-mono font-bold text-slate-900">{selectedAuditRecord.id}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Client / Insured:</span>
-                  <span className="font-semibold text-slate-900">{selectedAuditRecord.client}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Authorized Contact:</span>
-                  <span className="text-slate-800">{selectedAuditRecord.contact}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Consent Status:</span>
-                  <span className="font-bold text-emerald-700">{selectedAuditRecord.status}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Timestamp:</span>
-                  <span className="text-slate-800">{selectedAuditRecord.date}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">IP Address / Geo:</span>
-                  <span className="font-mono text-slate-700">{selectedAuditRecord.ip}</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
-                  SHA-256 Checksum Signature
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    readOnly
-                    value={selectedAuditRecord.hash}
-                    className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 font-mono text-xs text-slate-800 outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => onCopy(selectedAuditRecord.hash, 'auditHash')}
-                    className="h-9 px-3 rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 hover:border-[#0170FE] cursor-pointer"
-                  >
-                    {copiedKey === 'auditHash' ? 'Copied' : 'Copy'}
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
-                  Authorized Scope of Consent
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedAuditRecord.scope.map((s) => (
-                    <span key={s} className="rounded-lg bg-blue-50 border border-blue-200 px-2.5 py-1 text-xs font-semibold text-[#0170FE]">
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-emerald-950 text-[11px] leading-relaxed">
-                This record provides admissible proof of express written consent under 47 U.S.C. § 227 (TCPA) and federal ESIGN Act.
-              </div>
-
-              <div className="flex gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedAuditRecord(null)}
-                  className="w-full rounded-xl bg-slate-900 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 cursor-pointer"
-                >
-                  Close Audit Record
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

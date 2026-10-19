@@ -237,7 +237,7 @@ function MyProfileTab({
       </div>
 
       {/* Main Details Grid */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6">
         {/* Personal & Business Info */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
           <h3 className="text-lg font-bold text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
@@ -334,99 +334,7 @@ function MyProfileTab({
           </div>
         </div>
 
-        {/* Regulatory & Broker Identifiers */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
-          <h3 className="text-lg font-bold text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-            <ShieldCheck className="size-5 text-[#0170FE]" />
-            Broker Code &amp; Agreed Identifiers
-          </h3>
 
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Broker Code / Identifier</label>
-              <span className="text-xs text-emerald-600 font-semibold">Verified System ID</span>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                readOnly
-                value={profile.brokerCode}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-sm font-mono font-medium text-slate-800 outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => onCopy(profile.brokerCode, 'bcode2')}
-                className="cursor-pointer rounded-xl border border-slate-200 bg-white px-3.5 text-xs sm:text-sm font-semibold hover:border-[#0170FE]"
-              >
-                {copiedKey === 'bcode2' ? <Check className="size-4 text-emerald-600" /> : <Copy className="size-4 text-slate-500" />}
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">National Producer # (NPN)</label>
-              <input
-                type="text"
-                value={profile.npn}
-                onChange={(e) => setProfile({ ...profile, npn: e.target.value })}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">Resident State License</label>
-              <input
-                type="text"
-                value={profile.stateLicense}
-                onChange={(e) => setProfile({ ...profile, stateLicense: e.target.value })}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">Surplus Lines License</label>
-              <input
-                type="text"
-                value={profile.surplusLicense}
-                onChange={(e) => setProfile({ ...profile, surplusLicense: e.target.value })}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">Agency Tax ID / EIN</label>
-              <input
-                type="text"
-                value={profile.ein}
-                onChange={(e) => setProfile({ ...profile, ein: e.target.value })}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-              />
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-4">
-            <div className="flex items-start gap-2.5">
-              <ShieldCheck className="size-4.5 text-[#0170FE] shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-bold text-slate-900">Regulatory Verification Status</p>
-                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  Your agreed identifiers are synced with NIPR and state insurance departments.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-2 flex justify-end">
-            <button
-              type="button"
-              onClick={onSave}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#0170FE] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-[#0060db]"
-            >
-              Update Profile Details
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   )

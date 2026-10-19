@@ -158,7 +158,7 @@ export function AdminLogo() {
         alt="BrokerStep Logo"
         width={360}
         height={100}
-        style={{ width: 'auto', height: '96px' }}
+        style={{ width: 'auto', }}
         className="object-contain"
         priority
       />

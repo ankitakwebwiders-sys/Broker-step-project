@@ -46,6 +46,8 @@ import {
   Clock,
   Sparkles,
   Trash2,
+  Pencil,
+  RotateCcw,
 } from 'lucide-react'
 
 // Tabs definition
@@ -638,15 +640,101 @@ interface SplitRule {
   renewalRate: number
 }
 
+export interface LobRule {
+  id: string
+  lob: string
+  baseComm: number
+  brokerSplit: number
+  houseSplit: number
+  transType: string
+  note: string
+}
+
+const DEFAULT_LOB_RULES: LobRule[] = [
+  {
+    id: 'lob-1',
+    lob: 'Commercial Property',
+    baseComm: 15.0,
+    brokerSplit: 80,
+    houseSplit: 20,
+    transType: 'All Transactions',
+    note: 'Standard commercial schedule',
+  },
+  {
+    id: 'lob-2',
+    lob: 'General Liability',
+    baseComm: 14.0,
+    brokerSplit: 80,
+    houseSplit: 20,
+    transType: 'All Transactions',
+    note: 'Standard CGL transactions',
+  },
+  {
+    id: 'lob-3',
+    lob: 'Commercial Auto',
+    baseComm: 13.5,
+    brokerSplit: 80,
+    houseSplit: 20,
+    transType: 'All Transactions',
+    note: 'Fleet & commercial vehicle',
+  },
+  {
+    id: 'lob-4',
+    lob: 'Workers Compensation',
+    baseComm: 10.0,
+    brokerSplit: 80,
+    houseSplit: 20,
+    transType: 'All Transactions',
+    note: 'State mandated rating schedule',
+  },
+  {
+    id: 'lob-5',
+    lob: 'Cyber & Technology E&O',
+    baseComm: 17.5,
+    brokerSplit: 85,
+    houseSplit: 15,
+    transType: 'New Business & Renewals',
+    note: 'Specialty surplus lines bonus',
+  },
+]
+
+const DEFAULT_CARRIER_SPLITS: SplitRule[] = [
+  { carrier: 'Intact Insurance', policyPrefix: 'INT', defaultComm: 15.5, brokerSplit: 82, houseSplit: 18, renewalRate: 13.5 },
+  { carrier: 'Travelers Insurance', policyPrefix: 'TRV', defaultComm: 15.0, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
+  { carrier: 'The Hartford', policyPrefix: 'HTF', defaultComm: 14.5, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
+  { carrier: 'Liberty Mutual', policyPrefix: 'LBM', defaultComm: 15.0, brokerSplit: 85, houseSplit: 15, renewalRate: 13.0 },
+  { carrier: 'Progressive Commercial', policyPrefix: 'PRG', defaultComm: 12.5, brokerSplit: 75, houseSplit: 25, renewalRate: 10.0 },
+  { carrier: 'Chubb Commercial', policyPrefix: 'CHB', defaultComm: 16.0, brokerSplit: 85, houseSplit: 15, renewalRate: 14.0 },
+  { carrier: 'Nationwide Mutual', policyPrefix: 'NWM', defaultComm: 14.0, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
+  { carrier: 'Aviva Canada', policyPrefix: 'AVV', defaultComm: 14.0, brokerSplit: 80, houseSplit: 20, renewalRate: 12.5 },
+  { carrier: 'Wawanesa Mutual Insurance', policyPrefix: 'WAW', defaultComm: 13.5, brokerSplit: 78, houseSplit: 22, renewalRate: 11.5 },
+  { carrier: 'Economical / Definity Insurance', policyPrefix: 'DEF', defaultComm: 14.5, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
+]
+
 function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
-  const [splits, setSplits] = useState<SplitRule[]>([
-    { carrier: 'Travelers Insurance', policyPrefix: 'TRV', defaultComm: 15.0, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
-    { carrier: 'The Hartford', policyPrefix: 'HTF', defaultComm: 14.5, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
-    { carrier: 'Liberty Mutual', policyPrefix: 'LBM', defaultComm: 15.0, brokerSplit: 85, houseSplit: 15, renewalRate: 13.0 },
-    { carrier: 'Progressive Commercial', policyPrefix: 'PRG', defaultComm: 12.5, brokerSplit: 75, houseSplit: 25, renewalRate: 10.0 },
-    { carrier: 'Chubb Commercial', policyPrefix: 'CHB', defaultComm: 16.0, brokerSplit: 85, houseSplit: 15, renewalRate: 14.0 },
-    { carrier: 'Nationwide Mutual', policyPrefix: 'NWM', defaultComm: 14.0, brokerSplit: 80, houseSplit: 20, renewalRate: 12.0 },
-  ])
+  const [splits, setSplits] = useState<SplitRule[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('broker_settings_carriers')
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    return DEFAULT_CARRIER_SPLITS
+  })
+
+  // Persist to localStorage whenever carrier splits change so Add Client form stays in sync
+  useEffect(() => {
+    try {
+      localStorage.setItem('broker_settings_carriers', JSON.stringify(splits))
+    } catch (e) {
+      console.error(e)
+    }
+  }, [splits])
 
   const [modalMode, setModalMode] = useState<'add' | 'edit' | null>(null)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
@@ -743,16 +831,211 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
     }
   }
 
-  const lobRules = [
-    { lob: 'Commercial Property', baseComm: '15.0%', split: '80 / 20', note: 'Standard commercial schedule' },
-    { lob: 'General Liability', baseComm: '14.0%', split: '80 / 20', note: 'Standard CGL transactions' },
-    { lob: 'Commercial Auto', baseComm: '13.5%', split: '80 / 20', note: 'Fleet & commercial vehicle' },
-    { lob: 'Workers Compensation', baseComm: '10.0%', split: '80 / 20', note: 'State mandated rating schedule' },
-    { lob: 'Cyber & Technology E&O', baseComm: '17.5%', split: '85 / 15', note: 'Specialty surplus lines bonus' },
-  ]
+  // Dynamic Line of Business & Transaction-Specific Rules State
+  const [lobRules, setLobRules] = useState<LobRule[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('broker_settings_lob_rules')
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    return DEFAULT_LOB_RULES
+  })
+
+  // Persist to localStorage whenever LOB rules change
+  useEffect(() => {
+    try {
+      localStorage.setItem('broker_settings_lob_rules', JSON.stringify(lobRules))
+    } catch (e) {
+      console.error(e)
+    }
+  }, [lobRules])
+
+  // LOB modal state
+  const [lobModalMode, setLobModalMode] = useState<'add' | 'edit' | null>(null)
+  const [editingLobIndex, setEditingLobIndex] = useState<number | null>(null)
+  const [lobFormData, setLobFormData] = useState<LobRule>({
+    id: '',
+    lob: '',
+    baseComm: 15.0,
+    brokerSplit: 80,
+    houseSplit: 20,
+    transType: 'All Transactions',
+    note: '',
+  })
+
+  function handleOpenAddLob() {
+    setLobModalMode('add')
+    setEditingLobIndex(null)
+    setLobFormData({
+      id: `lob-${Date.now()}`,
+      lob: '',
+      baseComm: 15.0,
+      brokerSplit: 80,
+      houseSplit: 20,
+      transType: 'All Transactions',
+      note: '',
+    })
+  }
+
+  function handleOpenEditLob(index: number) {
+    setLobModalMode('edit')
+    setEditingLobIndex(index)
+    setLobFormData({
+      ...lobRules[index],
+    })
+  }
+
+  function handleCloseLobModal() {
+    setLobModalMode(null)
+    setEditingLobIndex(null)
+  }
+
+  function handleLobBrokerSplitChange(val: number) {
+    const broker = isNaN(val) ? 0 : Math.max(0, Math.min(100, val))
+    setLobFormData((prev) => ({
+      ...prev,
+      brokerSplit: broker,
+      houseSplit: Math.max(0, 100 - broker),
+    }))
+  }
+
+  function handleLobHouseSplitChange(val: number) {
+    const house = isNaN(val) ? 0 : Math.max(0, Math.min(100, val))
+    setLobFormData((prev) => ({
+      ...prev,
+      houseSplit: house,
+      brokerSplit: Math.max(0, 100 - house),
+    }))
+  }
+
+  function handleSaveLobRule(e: React.FormEvent) {
+    e.preventDefault()
+    if (!lobFormData.lob.trim()) return
+
+    if (lobModalMode === 'edit' && editingLobIndex !== null) {
+      setLobRules((prev) => {
+        const next = [...prev]
+        next[editingLobIndex] = {
+          ...lobFormData,
+          lob: lobFormData.lob.trim(),
+        }
+        return next
+      })
+    } else {
+      setLobRules((prev) => [
+        {
+          ...lobFormData,
+          id: `lob-${Date.now()}`,
+          lob: lobFormData.lob.trim(),
+        },
+        ...prev,
+      ])
+    }
+
+    handleCloseLobModal()
+    onSave()
+  }
+
+  function handleDeleteLobRule() {
+    if (editingLobIndex !== null) {
+      setLobRules((prev) => prev.filter((_, i) => i !== editingLobIndex))
+      handleCloseLobModal()
+      onSave()
+    }
+  }
+
+  function handleDeleteLobRuleByIndex(index: number) {
+    setLobRules((prev) => prev.filter((_, i) => i !== index))
+    onSave()
+  }
+
+  function handleResetLobDefaults() {
+    setLobRules(DEFAULT_LOB_RULES)
+    onSave()
+  }
+
+  const [defaultPolicyPending, setDefaultPolicyPending] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('broker_setting_default_policy_pending')
+        if (stored !== null) return stored === 'true'
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    return true // Default is always ON (Pending marked) per client request
+  })
 
   return (
     <div className="space-y-6">
+      {/* Client Intake & Policy Workflow Defaults */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-2">
+          <div>
+            <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
+              <FileCheck2 className="size-5 text-[#0170FE]" />
+              Client Intake &amp; Policy Workflow Defaults
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Customize default behavior when adding new clients and binding policies in your brokerage.
+            </p>
+          </div>
+          <span className="text-xs font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200 self-start sm:self-auto">
+            Intake Workflow
+          </span>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 p-4 sm:p-5 bg-slate-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1 max-w-xl">
+            <div className="flex items-center gap-2">
+              <label htmlFor="default-policy-pending-toggle" className="text-sm font-bold text-slate-900 cursor-pointer">
+                Always mark Policy Number as &quot;Pending&quot; by default
+              </label>
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-200">
+                POL-PENDING
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              When enabled, opening the Add Client form will automatically pre-select <strong className="text-slate-700 font-semibold">Pending</strong> for the policy number. Brokers can uncheck it whenever they have a policy number ready to type. When disabled, the policy number input starts blank and editable.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              id="default-policy-pending-toggle"
+              type="button"
+              role="switch"
+              aria-checked={defaultPolicyPending}
+              onClick={() => {
+                const nextVal = !defaultPolicyPending
+                setDefaultPolicyPending(nextVal)
+                try {
+                  localStorage.setItem('broker_setting_default_policy_pending', String(nextVal))
+                } catch (e) {
+                  console.error(e)
+                }
+                onSave()
+              }}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0170FE] focus:ring-offset-2 ${defaultPolicyPending ? 'bg-[#0170FE]' : 'bg-slate-300'
+                }`}
+            >
+              <span
+                className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${defaultPolicyPending ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+              />
+            </button>
+            <span className="text-xs font-bold text-slate-700 min-w-[70px]">
+              {defaultPolicyPending ? 'Always On' : 'Unmarked'}
+            </span>
+          </div>
+        </div>
+      </div>
       {/* Commission Splits by Carrier */}
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-2">
@@ -874,10 +1157,10 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="block text-xs font-semibold text-slate-700 whitespace-nowrap">
-                      Policy No Prefix <span className="text-rose-500">*</span>
+                      Policy No Prefix <span className="text-gray-400">(optional)</span><span className="text-rose-500">*</span>
                     </label>
                     <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md whitespace-nowrap">
-                      3 Chars
+                      max 3 words
                     </span>
                   </div>
                   <input
@@ -1048,35 +1331,320 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
         </div>
       )}
 
-      {/* Policy / Transaction-Specific Commission Information */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
-        <div className="border-b border-slate-100 pb-3">
-          <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
-            <Sliders className="size-5 text-[#0170FE]" />
-            Line of Business &amp; Transaction-Specific Information
-          </h3>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Rules apply automatically during reconciliation when matching carrier statement records.
-          </p>
+      {/* Add / Edit LOB & Transaction Rule Modal */}
+      {lobModalMode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-[#0170FE]/10 text-[#0170FE]">
+                  <Sliders className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-950">
+                    {lobModalMode === 'add' ? 'Add Line of Business Rule' : 'Edit Line of Business Rule'}
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    {lobModalMode === 'add'
+                      ? 'Configure commission rates and broker splits for a line of business'
+                      : `Update commission schedule for ${lobFormData.lob}`}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleCloseLobModal}
+                className="cursor-pointer rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveLobRule} className="mt-5 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Line of Business / Coverage Name <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={lobFormData.lob}
+                  onChange={(e) => setLobFormData({ ...lobFormData, lob: e.target.value })}
+                  placeholder="e.g. Commercial Property, Cyber & Tech E&O..."
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                />
+                {/* Quick suggestions */}
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {[
+                    'Commercial Property',
+                    'General Liability',
+                    'Commercial Auto',
+                    'Workers Compensation',
+                    'Cyber & Tech E&O',
+                    'Inland Marine',
+                    'Umbrella / Excess',
+                    'Professional Liability',
+                  ].map((sug) => (
+                    <button
+                      key={sug}
+                      type="button"
+                      onClick={() => setLobFormData({ ...lobFormData, lob: sug })}
+                      className="text-[11px] font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-0.5 rounded-md transition cursor-pointer"
+                    >
+                      {sug}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Applicable Transaction Type
+                </label>
+                <select
+                  value={lobFormData.transType || 'All Transactions'}
+                  onChange={(e) => setLobFormData({ ...lobFormData, transType: e.target.value })}
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                >
+                  <option value="All Transactions">All Transactions (New, Renewal, Endorsements)</option>
+                  <option value="New Business Only">New Business Only</option>
+                  <option value="Renewal Only">Renewal Only</option>
+                  <option value="New Business & Renewals">New Business & Renewals</option>
+                  <option value="Endorsement / Mid-term Adjustment">Endorsement / Mid-term Adjustment</option>
+                  <option value="Audit & Year-End True-Up">Audit & Year-End True-Up</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Base Commission Rate (%) <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      required
+                      value={lobFormData.baseComm}
+                      onChange={(e) =>
+                        setLobFormData({ ...lobFormData, baseComm: parseFloat(e.target.value) || 0 })
+                      }
+                      className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-3.5 pr-8 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 font-mono font-bold"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                      %
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Split Ratio (Broker / House)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={lobFormData.brokerSplit}
+                        onChange={(e) => handleLobBrokerSplitChange(parseFloat(e.target.value))}
+                        className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-2.5 pr-7 text-sm font-mono font-bold text-slate-900 outline-none focus:border-[#0170FE]"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 pointer-events-none">
+                        % Brk
+                      </span>
+                    </div>
+                    <span className="text-slate-400 font-bold">/</span>
+                    <div className="relative flex-1">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={lobFormData.houseSplit}
+                        onChange={(e) => handleLobHouseSplitChange(parseFloat(e.target.value))}
+                        className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-2.5 pr-7 text-sm font-mono font-bold text-slate-900 outline-none focus:border-[#0170FE]"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 pointer-events-none">
+                        % Hse
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Schedule Notes &amp; Guidelines
+                </label>
+                <textarea
+                  rows={2}
+                  value={lobFormData.note}
+                  onChange={(e) => setLobFormData({ ...lobFormData, note: e.target.value })}
+                  placeholder="e.g. Standard rating schedule, applies to direct bill statements..."
+                  className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                {lobModalMode === 'edit' ? (
+                  <button
+                    type="button"
+                    onClick={handleDeleteLobRule}
+                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition"
+                  >
+                    <Trash2 className="size-3.5" />
+                    <span>Delete Rule</span>
+                  </button>
+                ) : (
+                  <div />
+                )}
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCloseLobModal}
+                    className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#0170FE] px-4 py-2 text-xs font-semibold text-white shadow-md shadow-[#0170FE]/25 hover:bg-[#0060db] transition"
+                  >
+                    <Check className="size-4" />
+                    <span>{lobModalMode === 'add' ? 'Add Rule' : 'Save Changes'}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Policy / Transaction-Specific Commission Information (DYNAMIC) */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
+                <Sliders className="size-5 text-[#0170FE]" />
+                Line of Business &amp; Transaction-Specific Information
+              </h3>
+              <span className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs font-bold text-[#0170FE]">
+                {lobRules.length} Rules Active
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Rules apply automatically during reconciliation when matching carrier statement records. Click any rule to edit, add new coverage lines, or adjust broker split rates dynamically.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleResetLobDefaults}
+              title="Reset to default standard schedule"
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+            >
+              <RotateCcw className="size-3.5" />
+              <span className="hidden sm:inline">Reset Defaults</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleOpenAddLob}
+              className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#0170FE] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db]"
+            >
+              <Plus className="size-4" />
+              <span>Add LOB Rule</span>
+            </button>
+          </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {lobRules.map((rule) => (
-            <div key={rule.lob} className="rounded-xl border border-slate-200 p-4 space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-slate-900">{rule.lob}</span>
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-mono font-bold text-slate-700">
-                  {rule.baseComm}
-                </span>
+        {lobRules.length === 0 ? (
+          <div className="p-8 text-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50">
+            <Sliders className="size-8 text-slate-400 mx-auto mb-2" />
+            <p className="text-sm font-bold text-slate-800">No Line of Business rules configured</p>
+            <p className="text-xs text-slate-500 mt-1">Add custom rules or restore default schedules.</p>
+            <button
+              type="button"
+              onClick={handleResetLobDefaults}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white cursor-pointer"
+            >
+              <RotateCcw className="size-3.5" />
+              <span>Restore Defaults</span>
+            </button>
+          </div>
+        ) : (
+          <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+            {lobRules.map((rule, idx) => (
+              <div
+                key={rule.id || `${rule.lob}-${idx}`}
+                className="group rounded-xl border border-slate-200 hover:border-blue-300 bg-white p-4 space-y-3 transition shadow-xs hover:shadow-sm"
+              >
+                {/* Header: Title + Base Comm Pill */}
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="text-sm font-bold text-slate-900 group-hover:text-[#0170FE] transition">
+                      {rule.lob}
+                    </span>
+                    {rule.transType && (
+                      <span className="block text-[11px] font-medium text-slate-500 mt-0.5">
+                        {rule.transType}
+                      </span>
+                    )}
+                  </div>
+                  <span className="rounded-lg bg-blue-50 border border-blue-200/80 px-2.5 py-1 text-xs font-mono font-bold text-[#0170FE] shrink-0">
+                    {rule.baseComm}%
+                  </span>
+                </div>
+
+                {/* Broker Split & House Share */}
+                <div className="space-y-1.5 bg-slate-50/70 p-2.5 rounded-lg border border-slate-100">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-500">Broker Split Share:</span>
+                    <span className="font-mono font-bold text-slate-900">
+                      {rule.brokerSplit}% <span className="text-slate-400 font-normal">/ {rule.houseSplit}% house</span>
+                    </span>
+                  </div>
+                  {/* Visual Ratio Bar */}
+                  <div className="h-1.5 w-full rounded-full bg-slate-200 overflow-hidden flex">
+                    <div className="bg-[#0170FE] h-full" style={{ width: `${rule.brokerSplit}%` }} />
+                    <div className="bg-slate-400 h-full" style={{ width: `${rule.houseSplit}%` }} />
+                  </div>
+                </div>
+
+                {/* Description Note */}
+                <p className="text-xs text-slate-500 leading-relaxed min-h-[32px]">
+                  {rule.note || 'Standard schedule applies during statement reconciliation.'}
+                </p>
+
+                {/* Action footer */}
+                <div className="flex items-center justify-between border-t border-slate-100 pt-2.5">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEditLob(idx)}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#0170FE] hover:underline cursor-pointer"
+                  >
+                    <Pencil className="size-3" />
+                    <span>Edit Rule</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteLobRuleByIndex(idx)}
+                    title={`Delete ${rule.lob} rule`}
+                    className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                </div>
               </div>
-              <div className="flex justify-between text-xs sm:text-sm text-slate-500">
-                <span>Broker Split:</span>
-                <span className="font-mono font-bold text-slate-800">{rule.split}</span>
-              </div>
-              <p className="text-xs text-slate-500 border-t border-slate-100 pt-2 leading-relaxed">{rule.note}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

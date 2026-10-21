@@ -18,6 +18,10 @@ export interface ClientPolicy {
   commissionStatus?: 'Paid' | 'Unpaid' | 'Pending'
   chainNote?: string
   brokerNote?: string
+  paymentStatus?: 'Paid' | 'Unpaid'
+  billingMethod?: 'Direct Bill' | 'Agency Bill' | string
+  paymentDate?: string
+  paymentNote?: string
 }
 
 export interface CommissionTransaction {
@@ -97,9 +101,211 @@ export interface ClientItem {
   netCommission?: string
   totalPaid?: string
   outstanding?: string
+  paymentStatus?: 'Paid' | 'Unpaid'
+  effectiveDate?: string
+}
+
+export function getClientPaymentStatus(client: ClientItem): 'Paid' | 'Unpaid' {
+  if (client.paymentStatus === 'Paid') return 'Paid'
+  if (client.paymentStatus === 'Unpaid') return 'Unpaid'
+
+  if (client.status === 'Draft' || client.status === 'Draft / Incomplete') {
+    return 'Unpaid'
+  }
+
+  if (client.outstanding) {
+    const val = parseFloat(client.outstanding.replace(/[^0-9.]/g, ''))
+    if (!isNaN(val)) {
+      return val === 0 ? 'Paid' : 'Unpaid'
+    }
+  }
+
+  if (client.commissions && client.commissions.length > 0) {
+    const hasUnpaid = client.commissions.some(c => c.status === 'Outstanding' || c.status === 'Pending Reconciliation')
+    if (hasUnpaid) return 'Unpaid'
+    return 'Paid'
+  }
+
+  if (client.policies && client.policies.length > 0) {
+    const hasUnpaid = client.policies.some(p => p.commissionStatus === 'Unpaid')
+    if (hasUnpaid) return 'Unpaid'
+    const hasPaid = client.policies.some(p => p.commissionStatus === 'Paid')
+    if (hasPaid) return 'Paid'
+  }
+
+  const numId = parseInt(client.id.replace(/\D/g, ''), 10) || 0
+  return numId % 2 === 0 ? 'Paid' : 'Unpaid'
+}
+
+export function getClientEffectiveDate(client: ClientItem): string {
+  if (client.effectiveDate) return client.effectiveDate
+  const activePol = client.policies?.find(p => p.status === 'Active' && p.effectiveDate)
+  if (activePol?.effectiveDate) return activePol.effectiveDate
+  const anyPol = client.policies?.find(p => p.effectiveDate)
+  if (anyPol?.effectiveDate) return anyPol.effectiveDate
+  if (client.clientSince && client.clientSince !== '—') return client.clientSince
+  return '—'
+}
+
+export function getPolicyPaymentStatus(policy: ClientPolicy, client?: ClientItem): 'Paid' | 'Unpaid' {
+  if (policy.paymentStatus === 'Paid') return 'Paid'
+  if (policy.paymentStatus === 'Unpaid') return 'Unpaid'
+  if (policy.commissionStatus === 'Paid') return 'Paid'
+  if (policy.commissionStatus === 'Unpaid') return 'Unpaid'
+  if (policy.status === 'Historical' || policy.isHistory) return 'Paid'
+  if (policy.policyNumberPending) return 'Unpaid'
+  if (client) {
+    if (client.status === 'Draft' || client.status === 'Draft / Incomplete') return 'Unpaid'
+    if (client.paymentStatus === 'Paid') return 'Paid'
+    if (client.paymentStatus === 'Unpaid') return 'Unpaid'
+    if (client.outstanding && client.outstanding !== '$0.00') return 'Unpaid'
+  }
+  return 'Paid'
 }
 
 export const initialClients: ClientItem[] = [
+  {
+    id: 'CL-DRAFT-101',
+    firstName: 'Robert',
+    lastName: 'MacKenzie',
+    name: 'Northern Ridge Contracting Ltd.',
+    businessName: 'Northern Ridge Contracting Ltd.',
+    clientType: 'Commercial',
+    clientSince: 'Today (Draft)',
+    dob: '—',
+    phone: '+1 (416) 555-0149',
+    email: 'robert@northernridge.ca',
+    street: '880 Industrial Pkwy, Unit 4',
+    city: 'Vaughan',
+    state: 'ON',
+    province: 'ON',
+    zip: 'L4K 4V8',
+    postalCode: 'L4K 4V8',
+    brokerCode: 'BRK-8821',
+    otherIdentifier: 'DRAFT-INCOMPLETE-55%',
+    status: 'Draft',
+    linesOfBusiness: ['Commercial Auto', 'General Liability'],
+    yearlyPremium: '— (Pending quote)',
+    insurerName: 'Intact Insurance',
+    marketingConsent: {
+      status: 'Pending',
+      channels: ['Email'],
+      consentDate: 'Today',
+      method: 'Draft Intake',
+      notes: 'Pending final review and client signature',
+    },
+    notes: [
+      {
+        id: 'n-draft-1',
+        date: 'Today',
+        author: 'Jordan Davis',
+        text: 'Draft saved: Awaiting fleet schedule and liability limit confirmation from Robert before binding.',
+      },
+    ],
+    lastActivity: {
+      description: 'Saved in Drafts (55% complete - Half Info)',
+      time: '2 hours ago',
+    },
+    policies: [
+      {
+        id: 'pol-draft-101',
+        policyNumber: 'DRAFT-PENDING',
+        type: 'Commercial Auto',
+        carrier: 'Intact Insurance',
+        premium: 'Pending quote',
+        effectiveDate: '2026-11-01',
+        expirationDate: '2027-11-01',
+        status: 'Active',
+        policyNumberPending: true,
+        policyNumberSubtext: 'Draft intake - policy not yet bound',
+        rateSplit: '15.5% / 82%',
+        expectedCommission: 'Pending',
+        commissionStatus: 'Pending',
+      },
+    ],
+    commissions: [],
+    timeline: [
+      {
+        id: 'tl-draft-101',
+        title: 'Draft Intake Saved',
+        type: 'system',
+        date: 'Today',
+        detail: 'Incomplete client intake record saved to Drafts folder (55% complete).',
+        actor: 'Broker Intake',
+      },
+    ],
+  },
+  {
+    id: 'CL-DRAFT-102',
+    firstName: 'Amina',
+    lastName: 'Zahra',
+    name: 'Amina Zahra',
+    businessName: '—',
+    clientType: 'Individual',
+    clientSince: 'Yesterday (Draft)',
+    dob: '—',
+    phone: '+1 (905) 555-0188',
+    email: '',
+    street: '142 Maplewood Ave',
+    city: 'Hamilton',
+    state: 'ON',
+    province: 'ON',
+    zip: 'L8M 1W9',
+    postalCode: 'L8M 1W9',
+    brokerCode: 'BRK-8821',
+    otherIdentifier: 'DRAFT-HALF-INFO-40%',
+    status: 'Draft',
+    linesOfBusiness: ['Home'],
+    yearlyPremium: '$1,850',
+    insurerName: 'Travelers Insurance',
+    marketingConsent: {
+      status: 'Pending',
+      channels: ['Phone'],
+      consentDate: 'Yesterday',
+      method: 'Phone Intake (Half Info)',
+      notes: 'Caller intake incomplete; awaiting prior dec page and email.',
+    },
+    notes: [
+      {
+        id: 'n-draft-2',
+        date: 'Yesterday',
+        author: 'Jordan Davis',
+        text: 'Half Info saved: Client had to drop off call. Missing email address and date of birth. Follow up to finalize.',
+      },
+    ],
+    lastActivity: {
+      description: 'Saved in Drafts (Half info - missing email & DOB)',
+      time: 'Yesterday',
+    },
+    policies: [
+      {
+        id: 'pol-draft-102',
+        policyNumber: 'DRAFT-PENDING',
+        type: 'Home',
+        carrier: 'Travelers Insurance',
+        premium: '$1,850',
+        effectiveDate: '2026-11-15',
+        expirationDate: '2027-11-15',
+        status: 'Active',
+        policyNumberPending: true,
+        policyNumberSubtext: 'Draft quote - awaiting missing info',
+        rateSplit: '15.0% / 80%',
+        expectedCommission: '$222',
+        commissionStatus: 'Pending',
+      },
+    ],
+    commissions: [],
+    timeline: [
+      {
+        id: 'tl-draft-102',
+        title: 'Draft Intake Saved',
+        type: 'system',
+        date: 'Yesterday',
+        detail: 'Phone intake saved with half info. Needs email and DOB before binding.',
+        actor: 'Broker Intake',
+      },
+    ],
+  },
   {
     id: 'CL-1000',
     firstName: 'Daniel',
@@ -967,3 +1173,4 @@ export const initialClients: ClientItem[] = [
     ],
   },
 ]
+

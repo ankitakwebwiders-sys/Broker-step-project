@@ -26,7 +26,7 @@ export interface StatementTransactionItem {
   matchScore: number // 0-100
   matchedSystemPolicyId?: string
   ruleMatched: string
-  status: 'Auto-Matched' | 'Pending Broker Review' | 'Action Required' | 'Resolved'
+  status: 'Auto-Matched' | 'Pending Broker Review' | 'Action Required' | 'Resolved' | 'Disputed'
   resolutionNote?: string
 }
 

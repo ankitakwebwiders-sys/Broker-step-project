@@ -21,6 +21,9 @@ import {
   ChevronRight,
   Filter,
   ArrowRight,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
   ShieldCheck,
   ShieldAlert,
   List,
@@ -78,6 +81,30 @@ export default function AllStatementsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [carrierFilter, setCarrierFilter] = useState('All')
   const [statusFilter, setStatusFilter] = useState('All')
+
+  // Column Sorting state (A-Z / Z-A)
+  type StatementSortField =
+    | 'identifier'
+    | 'carrier'
+    | 'period'
+    | 'paymentMethod'
+    | 'uploadDate'
+    | 'status'
+    | 'matched'
+    | 'actionReq'
+    | 'remittance'
+
+  const [sortField, setSortField] = useState<StatementSortField>('uploadDate')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+
+  const handleSort = (field: StatementSortField) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }
 
   // Modals & Drawers state
   const [selectedStatementForDetail, setSelectedStatementForDetail] = useState<StatementRecord | null>(null)
@@ -205,9 +232,9 @@ export default function AllStatementsPage() {
     setTimeout(checkTableScroll, 350)
   }
 
-  // ───── Filtered Statements List ─────
+  // ───── Filtered & Sorted Statements List ─────
   const filteredStatements = useMemo(() => {
-    return statements.filter((stmt) => {
+    const list = statements.filter((stmt) => {
       // Carrier filter
       if (carrierFilter !== 'All' && stmt.carrier !== carrierFilter) {
         return false
@@ -233,7 +260,93 @@ export default function AllStatementsPage() {
 
       return true
     })
-  }, [statements, carrierFilter, statusFilter, searchQuery])
+
+    return list.sort((a, b) => {
+      let comparison = 0
+      switch (sortField) {
+        case 'identifier':
+          comparison = (a.statementIdentifier || a.fileName).localeCompare(b.statementIdentifier || b.fileName)
+          break
+        case 'carrier':
+          comparison = a.carrier.localeCompare(b.carrier)
+          break
+        case 'period':
+          comparison = (a.statementPeriodDate || a.statementPeriod).localeCompare(
+            b.statementPeriodDate || b.statementPeriod
+          )
+          break
+        case 'paymentMethod':
+          comparison = (a.paymentMethod || '').localeCompare(b.paymentMethod || '')
+          break
+        case 'uploadDate':
+          comparison = (a.statementPeriodDate || a.uploadDate || a.id).localeCompare(
+            b.statementPeriodDate || b.uploadDate || b.id
+          )
+          break
+        case 'status':
+          comparison = a.processingStatus.localeCompare(b.processingStatus)
+          break
+        case 'matched':
+          comparison = a.matchedCount - b.matchedCount
+          break
+        case 'actionReq':
+          comparison =
+            (a.unmatchedCount + (a.needsReviewCount || 0)) -
+            (b.unmatchedCount + (b.needsReviewCount || 0))
+          break
+        case 'remittance':
+          comparison = a.totalRemittance - b.totalRemittance
+          break
+        default:
+          comparison = 0
+      }
+      return sortDirection === 'asc' ? comparison : -comparison
+    })
+  }, [statements, carrierFilter, statusFilter, searchQuery, sortField, sortDirection])
+
+  // Helper for rendering sortable table header buttons with A to Z arrows
+  const renderSortHeader = (
+    field: StatementSortField,
+    label: string,
+    alignRight = false,
+    className = ''
+  ) => {
+    const isActive = sortField === field
+    const sortTitle =
+      isActive && sortDirection === 'asc'
+        ? `Sorted A to Z (Click for Z to A)`
+        : `Sort by ${label} (A to Z)`
+
+    return (
+      <button
+        type="button"
+        onClick={() => handleSort(field)}
+        className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer select-none ${
+          alignRight ? 'flex-row-reverse text-right' : ''
+        } ${isActive ? 'text-blue-600 font-extrabold' : 'text-slate-500 hover:text-slate-900'} ${className}`}
+        title={sortTitle}
+      >
+        <span>{label}</span>
+        <span
+          className={`inline-flex items-center justify-center rounded p-0.5 transition ${
+            isActive
+              ? 'bg-blue-100 text-blue-600 ring-1 ring-blue-300'
+              : 'text-slate-400 group-hover:bg-slate-200/70 group-hover:text-slate-700'
+          }`}
+        >
+          {isActive ? (
+            sortDirection === 'asc' ? (
+              <ArrowUp className="size-3.5 stroke-[2.5]" />
+            ) : (
+              <ArrowDown className="size-3.5 stroke-[2.5]" />
+            )
+          ) : (
+            <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+          )}
+        </span>
+      </button>
+    )
+  }
 
   // ───── Reprocess Statement Handler ─────
   function handleExecuteReprocess() {
@@ -526,12 +639,14 @@ export default function AllStatementsPage() {
               </div>
 
               {/* Reset Filter Button */}
-              {(searchQuery || carrierFilter !== 'All' || statusFilter !== 'All') && (
+              {(searchQuery || carrierFilter !== 'All' || statusFilter !== 'All' || sortField !== 'uploadDate' || sortDirection !== 'desc') && (
                 <button
                   onClick={() => {
                     setSearchQuery('')
                     setCarrierFilter('All')
                     setStatusFilter('All')
+                    setSortField('uploadDate')
+                    setSortDirection('desc')
                   }}
                   className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-100 cursor-pointer"
                 >
@@ -578,15 +693,33 @@ export default function AllStatementsPage() {
               <table className="w-full min-w-[1240px] text-left border-collapse text-[12.5px]">
                 <thead>
                   <tr className="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">
-                    <th className="px-4 py-3 min-w-[190px]">Statement ID / File</th>
-                    <th className="px-3.5 py-3 min-w-[140px]">Carrier Partner</th>
-                    <th className="px-3.5 py-3 min-w-[120px]">Period</th>
-                    <th className="px-3.5 py-3 min-w-[170px]">Payment Method</th>
-                    <th className="px-3.5 py-3 min-w-[130px]">Upload Date</th>
-                    <th className="px-3.5 py-3 min-w-[130px]">Status</th>
-                    <th className="px-3.5 py-3 text-right min-w-[140px]">Matched</th>
-                    <th className="px-3.5 py-3 text-right min-w-[120px]">Action Req.</th>
-                    <th className="px-4 py-3 text-right min-w-[150px]">Remittance</th>
+                    <th className="px-4 py-3 min-w-[210px]">
+                      {renderSortHeader('identifier', 'Statement ID / File')}
+                    </th>
+                    <th className="px-3.5 py-3 min-w-[150px]">
+                      {renderSortHeader('carrier', 'Carrier Partner')}
+                    </th>
+                    <th className="px-3.5 py-3 min-w-[120px]">
+                      {renderSortHeader('period', 'Period')}
+                    </th>
+                    <th className="px-3.5 py-3 min-w-[170px]">
+                      {renderSortHeader('paymentMethod', 'Payment Method')}
+                    </th>
+                    <th className="px-3.5 py-3 min-w-[130px]">
+                      {renderSortHeader('uploadDate', 'Upload Date')}
+                    </th>
+                    <th className="px-3.5 py-3 min-w-[130px]">
+                      {renderSortHeader('status', 'Status')}
+                    </th>
+                    <th className="px-3.5 py-3 text-right min-w-[140px]">
+                      {renderSortHeader('matched', 'Matched', true, 'justify-end w-full')}
+                    </th>
+                    <th className="px-3.5 py-3 text-right min-w-[130px]">
+                      {renderSortHeader('actionReq', 'Action Req.', true, 'justify-end w-full')}
+                    </th>
+                    <th className="px-4 py-3 text-right min-w-[150px]">
+                      {renderSortHeader('remittance', 'Remittance', true, 'justify-end w-full')}
+                    </th>
                     <th className="py-3 pl-4 pr-6 text-right min-w-[180px] w-[180px] md:sticky md:right-0 md:z-10 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)]">
                       Actions
                     </th>
@@ -771,13 +904,20 @@ export default function AllStatementsPage() {
                   <FileSpreadsheet className="size-5" />
                 </div>
                 <div>
-                  <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <span>Statement Details: {selectedStatementForDetail.statementIdentifier}</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                      Statement Details: {selectedStatementForDetail.statementIdentifier}
+                    </h2>
                     {getStatusBadge(selectedStatementForDetail.processingStatus)}
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    {selectedStatementForDetail.carrier} · {selectedStatementForDetail.statementPeriod} · Remittance:{' '}
-                    {fmtCurrency(selectedStatementForDetail.totalRemittance)}
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-700 ring-1 ring-blue-200">
+                      <Calendar className="size-3 text-blue-600" />
+                      <span>Statement Month &amp; Year: {selectedStatementForDetail.statementPeriod}</span>
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Carrier: <strong className="text-slate-800">{selectedStatementForDetail.carrier}</strong> · 
+                    Statement Received Month/Year: <strong className="text-blue-700">{selectedStatementForDetail.statementPeriod}</strong> · 
+                    Remittance: <strong className="text-slate-900 font-mono">{fmtCurrency(selectedStatementForDetail.totalRemittance)}</strong>
                   </p>
                 </div>
               </div>
@@ -793,39 +933,98 @@ export default function AllStatementsPage() {
 
             {/* Modal Content */}
             <div className="p-6 space-y-6">
+              {/* Manual Tracking Helper Card */}
+              <div className="rounded-2xl border border-blue-200/80 bg-gradient-to-r from-blue-50/90 via-slate-50 to-indigo-50/80 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+                <div className="flex items-start gap-3">
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs shrink-0">
+                    <Calendar className="size-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-blue-900">
+                        Commission Statement Period (Month &amp; Year)
+                      </span>
+                      <span className="rounded-full bg-blue-200/70 px-2 py-0.2 text-[10px] font-bold text-blue-900">
+                        Manual Tracking
+                      </span>
+                    </div>
+                    <p className="text-xl font-extrabold text-blue-950 mt-0.5 font-mono">
+                      {selectedStatementForDetail.statementPeriod}
+                    </p>
+                    <p className="text-xs text-slate-600 mt-0.5">
+                      This statement received commissions for <strong className="font-semibold text-blue-900">{selectedStatementForDetail.statementPeriod}</strong> from <strong className="text-slate-800">{selectedStatementForDetail.carrier}</strong>. Use this month &amp; year to easily track and verify against your carrier commission statement.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap sm:flex-col gap-2 sm:border-l sm:border-blue-200/80 sm:pl-4 shrink-0 text-xs">
+                  <div>
+                    <span className="text-[10.5px] font-semibold text-slate-400 block uppercase">Statement Received / Processed</span>
+                    <span className="font-semibold text-slate-800 font-mono block">{selectedStatementForDetail.uploadDate}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10.5px] font-semibold text-slate-400 block uppercase">Source File</span>
+                    <span className="font-medium text-slate-700 truncate max-w-[200px] block" title={selectedStatementForDetail.fileName}>
+                      {selectedStatementForDetail.fileName}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Summary Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-3">
+                  <span className="text-[11px] font-bold text-blue-700 block flex items-center gap-1">
+                    <Calendar className="size-3 text-blue-600" />
+                    Month &amp; Year
+                  </span>
+                  <span className="text-sm font-extrabold font-mono text-blue-950 mt-0.5 block">
+                    {selectedStatementForDetail.statementPeriod}
+                  </span>
+                  <span className="text-[10.5px] text-blue-600/80 block mt-0.5 font-medium">
+                    Commission Period
+                  </span>
+                </div>
                 <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
                   <span className="text-[11px] font-medium text-slate-400 block">Total Volume</span>
                   <span className="text-sm font-bold font-mono text-slate-900 mt-0.5 block">
                     {fmtCurrency(selectedStatementForDetail.totalRemittance)}
                   </span>
+                  <span className="text-[10.5px] text-slate-400 block mt-0.5">Paid Commission</span>
                 </div>
                 <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
                   <span className="text-[11px] font-medium text-slate-400 block">Matched Lines</span>
                   <span className="text-sm font-bold font-mono text-emerald-600 mt-0.5 block">
                     {selectedStatementForDetail.matchedCount} of {selectedStatementForDetail.transactionsCount}
                   </span>
+                  <span className="text-[10.5px] text-slate-400 block mt-0.5">Concordance Cleared</span>
                 </div>
                 <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
                   <span className="text-[11px] font-medium text-slate-400 block">Payment Method</span>
                   <span className="text-xs font-semibold text-slate-800 mt-0.5 block truncate">
                     {selectedStatementForDetail.paymentMethod}
                   </span>
-                </div>
-                <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
-                  <span className="text-[11px] font-medium text-slate-400 block">Batch Reference</span>
-                  <span className="text-xs font-mono font-bold text-slate-800 mt-0.5 block truncate">
+                  <span className="text-[10.5px] text-slate-400 block mt-0.5 truncate">
                     {selectedStatementForDetail.batchReference}
                   </span>
+                </div>
+                <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 col-span-2 sm:col-span-1">
+                  <span className="text-[11px] font-medium text-slate-400 block">Carrier Partner</span>
+                  <span className="text-xs font-bold text-slate-900 mt-0.5 block truncate">
+                    {selectedStatementForDetail.carrier}
+                  </span>
+                  <span className="text-[10.5px] text-slate-400 block mt-0.5">Carrier Remittance</span>
                 </div>
               </div>
 
               {/* Transactions Table */}
               <div>
                 <div className="flex items-center justify-between mb-2.5">
-                  <h3 className="text-sm font-bold text-slate-900">
-                    Line Item Transactions ({selectedStatementForDetail.transactions.length})
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <span>Line Item Transactions ({selectedStatementForDetail.transactions.length})</span>
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                      Period: {selectedStatementForDetail.statementPeriod}
+                    </span>
                   </h3>
                   <span className="text-xs text-slate-400">Ledger concordance preview</span>
                 </div>
@@ -833,10 +1032,11 @@ export default function AllStatementsPage() {
                 <div className="overflow-x-auto rounded-xl border border-slate-200">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
-                      <tr className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                      <tr className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 whitespace-nowrap">
                         <th className="px-3.5 py-3">Policy #</th>
                         <th className="px-3.5 py-3">Client / Insured</th>
                         <th className="px-3 py-3">Line</th>
+                        <th className="px-3.5 py-3">Statement Month &amp; Year</th>
                         <th className="px-3 py-3 text-right">Premium</th>
                         <th className="px-3 py-3 text-right">Rate</th>
                         <th className="px-3.5 py-3 text-right">Remittance</th>
@@ -855,6 +1055,12 @@ export default function AllStatementsPage() {
                               <p className="text-[11px] text-slate-400">{txn.businessName}</p>
                             </td>
                             <td className="px-3 py-3 font-medium text-slate-600">{txn.lineOfBusiness}</td>
+                            <td className="px-3.5 py-3 whitespace-nowrap">
+                              <span className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-800 ring-1 ring-blue-200">
+                                <Calendar className="size-3 text-blue-600" />
+                                <span>{selectedStatementForDetail.statementPeriod}</span>
+                              </span>
+                            </td>
                             <td className="px-3 py-3 text-right font-mono text-slate-800">
                               {fmtCurrency(txn.grossPremium)}
                             </td>
@@ -1002,6 +1208,22 @@ export default function AllStatementsPage() {
             </div>
 
             <div className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-2 rounded-xl bg-blue-50/60 p-3 border border-blue-200/70">
+                <div>
+                  <span className="text-[11px] font-medium text-blue-700 block">Statement Month &amp; Year</span>
+                  <p className="font-extrabold text-blue-950 font-mono mt-0.5 flex items-center gap-1.5">
+                    <Calendar className="size-3.5 text-blue-600" />
+                    <span>{selectedStatementForDetail?.statementPeriod || 'October 2026'}</span>
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[11px] font-medium text-blue-700 block">Carrier Remittance Batch</span>
+                  <p className="font-semibold text-slate-800 mt-0.5 truncate">
+                    {selectedStatementForDetail?.carrier || 'Carrier Remittance'}
+                  </p>
+                </div>
+              </div>
+
               <div>
                 <span className="text-slate-400 font-medium block">Policy Identifier</span>
                 <p className="font-mono font-bold text-slate-900">{selectedTxnForTrace.policyNumber}</p>

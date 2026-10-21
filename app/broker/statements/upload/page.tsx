@@ -25,12 +25,31 @@ import {
   FileCheck2,
   Info,
   GitBranch,
+  Search,
+  PlusCircle,
+  AlertTriangle,
+  ExternalLink,
+  User,
+  Scale,
+  SlidersHorizontal,
+  CheckCheck,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
+  Wrench,
+  FileEdit,
+  UserPlus,
+  Zap,
 } from 'lucide-react'
 import {
   initialStatements,
   type StatementRecord,
   type StatementTransactionItem,
 } from '@/data/broker/statements'
+import {
+  initialClients,
+  type ClientItem,
+} from '@/data/broker/clients'
 
 type UploadStep = 1 | 2 | 3 | 4
 
@@ -261,21 +280,885 @@ export default function UploadStatementPage() {
     setCurrentStep(4)
   }
 
-  // Resolve transaction action
-  const handleResolveTxn = (id: string) => {
+  // ───── Reconciliation Review & Link Modal State ─────
+  const [reviewingTxn, setReviewingTxn] = useState<StatementTransactionItem | null>(null)
+  const [reviewTab, setReviewTab] = useState<'candidates' | 'fix' | 'create' | 'search'>('candidates')
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string>('')
+
+  // Fix Discrepancy Form State (Next Tab: Fix It)
+  const [fixPolicyNumber, setFixPolicyNumber] = useState('')
+  const [fixClientName, setFixClientName] = useState('')
+  const [fixBusinessName, setFixBusinessName] = useState('')
+  const [fixCoverage, setFixCoverage] = useState('')
+  const [fixGrossPremium, setFixGrossPremium] = useState('')
+  const [fixCommRate, setFixCommRate] = useState('')
+  const [fixVarianceAction, setFixVarianceAction] = useState('Accept endorsement variance & balance line')
+  const [fixAdjustmentNote, setFixAdjustmentNote] = useState('')
+  const [clientSearchQuery, setClientSearchQuery] = useState('')
+  const [selectedSearchPolicy, setSelectedSearchPolicy] = useState<{
+    clientId: string
+    clientName: string
+    businessName: string
+    policyNumber: string
+    coverage: string
+    premium: string
+    carrier: string
+    status: string
+  } | null>(null)
+  const [resolutionReason, setResolutionReason] = useState('Endorsement & rate variance accepted')
+  const [resolutionNotes, setResolutionNotes] = useState('')
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+
+  // Quick Add Client State (Few-clicks client addition)
+  const [quickAddTxn, setQuickAddTxn] = useState<StatementTransactionItem | null>(null)
+  const [quickAddClientName, setQuickAddClientName] = useState('')
+  const [quickAddBusinessName, setQuickAddBusinessName] = useState('')
+  const [quickAddClientType, setQuickAddClientType] = useState<'Commercial' | 'Individual'>('Commercial')
+  const [quickAddPolicyNumber, setQuickAddPolicyNumber] = useState('')
+  const [quickAddCoverage, setQuickAddCoverage] = useState('')
+  const [quickAddPremium, setQuickAddPremium] = useState('')
+  const [quickAddRate, setQuickAddRate] = useState('')
+
+  // Step 3 Table Column Sorting (A to Z / Z to A)
+  type UploadTxnSortField =
+    | 'policyNumber'
+    | 'client'
+    | 'coverage'
+    | 'premium'
+    | 'rate'
+    | 'remittance'
+    | 'status'
+
+  const [txnSortField, setTxnSortField] = useState<UploadTxnSortField>('policyNumber')
+  const [txnSortDirection, setTxnSortDirection] = useState<'asc' | 'desc'>('asc')
+
+  const handleTxnSort = (field: UploadTxnSortField) => {
+    if (txnSortField === field) {
+      setTxnSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setTxnSortField(field)
+      setTxnSortDirection('asc')
+    }
+  }
+
+  const sortedTransactions = React.useMemo(() => {
+    return [...transactions].sort((a, b) => {
+      let comparison = 0
+      switch (txnSortField) {
+        case 'policyNumber':
+          comparison = a.policyNumber.localeCompare(b.policyNumber)
+          break
+        case 'client':
+          comparison = (a.clientName || a.businessName).localeCompare(b.clientName || b.businessName)
+          break
+        case 'coverage':
+          comparison = a.lineOfBusiness.localeCompare(b.lineOfBusiness)
+          break
+        case 'premium':
+          comparison = a.grossPremium - b.grossPremium
+          break
+        case 'rate':
+          comparison = a.commissionRate - b.commissionRate
+          break
+        case 'remittance':
+          comparison = a.paidCommission - b.paidCommission
+          break
+        case 'status':
+          comparison = a.status.localeCompare(b.status)
+          break
+        default:
+          comparison = 0
+      }
+      return txnSortDirection === 'asc' ? comparison : -comparison
+    })
+  }, [transactions, txnSortField, txnSortDirection])
+
+  const renderTxnSortHeader = (
+    field: UploadTxnSortField,
+    label: string,
+    alignRight = false,
+    className = ''
+  ) => {
+    const isActive = txnSortField === field
+    const title =
+      isActive && txnSortDirection === 'asc'
+        ? `Sorted A to Z (Click for Z to A)`
+        : `Sort by ${label} (A to Z)`
+
+    return (
+      <button
+        type="button"
+        onClick={() => handleTxnSort(field)}
+        className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer select-none ${
+          alignRight ? 'flex-row-reverse text-right' : ''
+        } ${isActive ? 'text-blue-600 font-extrabold' : 'text-slate-500 hover:text-slate-900'} ${className}`}
+        title={title}
+      >
+        <span>{label}</span>
+        <span
+          className={`inline-flex items-center justify-center rounded p-0.5 transition ${
+            isActive
+              ? 'bg-blue-100 text-blue-600 ring-1 ring-blue-300'
+              : 'text-slate-400 group-hover:bg-slate-200/70 group-hover:text-slate-700'
+          }`}
+        >
+          {isActive ? (
+            txnSortDirection === 'asc' ? (
+              <ArrowUp className="size-3.5 stroke-[2.5]" />
+            ) : (
+              <ArrowDown className="size-3.5 stroke-[2.5]" />
+            )
+          ) : (
+            <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+          )}
+        </span>
+      </button>
+    )
+  }
+
+  // New Client Form State (if client not in Book of Business)
+  const [newClientName, setNewClientName] = useState('')
+  const [newBusinessName, setNewBusinessName] = useState('')
+  const [newClientType, setNewClientType] = useState<'Commercial' | 'Individual'>('Commercial')
+  const [newPolicyNumber, setNewPolicyNumber] = useState('')
+  const [newLineOfBusiness, setNewLineOfBusiness] = useState('')
+  const [newGrossPremium, setNewGrossPremium] = useState('')
+  const [newCommRate, setNewCommRate] = useState('')
+  const [newBillingMethod, setNewBillingMethod] = useState<'Direct Bill' | 'Agency Bill'>('Direct Bill')
+
+  // Custom clients loaded from localStorage
+  const [customClients, setCustomClients] = useState<ClientItem[]>([])
+
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem('broker_custom_clients')
+      if (stored) {
+        setCustomClients(JSON.parse(stored))
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }, [])
+
+  // Candidate Match Item Interface
+  interface MatchCandidateItem {
+    id: string
+    clientName: string
+    businessName: string
+    policyNumber: string
+    coverage: string
+    carrier: string
+    bookPremium: number
+    commRate: number
+    expectedCommission: number
+    remittance: number
+    variance: number
+    matchScore: number
+    confidence: 'High Confidence' | 'Possible Match' | 'Low Confidence'
+    matchReason: string
+    policyStatus: string
+    detail: string
+    isExistingClient: boolean
+  }
+
+  // Generate candidate matches for a statement item
+  const getCandidateMatches = (txn: StatementTransactionItem): MatchCandidateItem[] => {
+    if (txn.id === 'TXN-UP-3') {
+      return [
+        {
+          id: 'CAND-VANCE-1',
+          clientName: 'Marcus Vance',
+          businessName: 'Vance Design Studio',
+          policyNumber: 'POL-1029-TRV-A',
+          coverage: 'General Liability',
+          carrier: 'Travelers',
+          bookPremium: 8200,
+          commRate: 15.0,
+          expectedCommission: 1230.0,
+          remittance: txn.paidCommission,
+          variance: -41.0,
+          matchScore: 92,
+          confidence: 'High Confidence',
+          matchReason: 'Fuzzy Policy Suffix Variance (Endorsement)',
+          policyStatus: 'Active',
+          detail:
+            'CRM has base policy POL-1029-TRV-A @ 15.0% ($1,230.00). Carrier statement remitted $1,189.00 reflecting a 0.5% rate endorsement reduction.',
+          isExistingClient: true,
+        },
+        {
+          id: 'CAND-VANCE-2',
+          clientName: 'Marcus Vance',
+          businessName: 'Vance Design Studio',
+          policyNumber: 'POL-1029-UMB',
+          coverage: 'Commercial Umbrella',
+          carrier: 'Travelers',
+          bookPremium: 3500,
+          commRate: 12.0,
+          expectedCommission: 420.0,
+          remittance: txn.paidCommission,
+          variance: 769.0,
+          matchScore: 78,
+          confidence: 'Possible Match',
+          matchReason: 'Same Insured & Carrier, Coverage Line Differential',
+          policyStatus: 'Active',
+          detail:
+            'Same client account in CRM with active Commercial Umbrella policy. Remittance amount exceeds expected umbrella commission.',
+          isExistingClient: true,
+        },
+        {
+          id: 'CAND-VANCE-3',
+          clientName: 'Marcus Vance',
+          businessName: 'Vance Logistics LLC',
+          policyNumber: 'POL-1030-TRV',
+          coverage: 'Commercial Auto',
+          carrier: 'Travelers',
+          bookPremium: 12400,
+          commRate: 15.0,
+          expectedCommission: 1860.0,
+          remittance: txn.paidCommission,
+          variance: -671.0,
+          matchScore: 64,
+          confidence: 'Possible Match',
+          matchReason: 'Related Corporate Entity / Same Named Contact',
+          policyStatus: 'Active',
+          detail: 'Associated corporate entity where Marcus Vance is listed as principal operating officer.',
+          isExistingClient: true,
+        },
+      ]
+    }
+
+    if (txn.id === 'TXN-UP-5') {
+      return [
+        {
+          id: 'CAND-ZHANG-1',
+          clientName: 'David Zhang',
+          businessName: 'Zhang & Sons Construction',
+          policyNumber: 'POL-9012-TRV',
+          coverage: 'Commercial Property',
+          carrier: 'Travelers',
+          bookPremium: 4100,
+          commRate: 12.0,
+          expectedCommission: 492.0,
+          remittance: txn.paidCommission,
+          variance: 0.0,
+          matchScore: 88,
+          confidence: 'High Confidence',
+          matchReason: 'Base Policy Suffix Reconciliation (-DB direct bill)',
+          policyStatus: 'Active',
+          detail:
+            'CRM has base policy POL-9012-TRV ($4,100 gross @ 12% = $492.00). Carrier statement included suffix -DB for electronic EFT direct billing.',
+          isExistingClient: true,
+        },
+        {
+          id: 'CAND-ZHANG-2',
+          clientName: 'David Zhang',
+          businessName: 'Zhang & Sons Construction',
+          policyNumber: 'POL-8812-TRV',
+          coverage: 'General Liability',
+          carrier: 'Travelers',
+          bookPremium: 5600,
+          commRate: 14.0,
+          expectedCommission: 784.0,
+          remittance: txn.paidCommission,
+          variance: -292.0,
+          matchScore: 61,
+          confidence: 'Possible Match',
+          matchReason: 'Same Insured Client, Separate Active Policy',
+          policyStatus: 'Active',
+          detail: 'Same client account in CRM with active General Liability coverage.',
+          isExistingClient: true,
+        },
+      ]
+    }
+
+    // Default dynamic lookup from CRM clients
+    const results: MatchCandidateItem[] = []
+    const all = [...customClients, ...initialClients]
+    const searchTerms = [
+      txn.clientName.toLowerCase(),
+      txn.businessName.toLowerCase(),
+      txn.policyNumber.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    ]
+
+    all.forEach((client) => {
+      const cName = `${client.firstName} ${client.lastName}`.toLowerCase()
+      const bName = (client.businessName || '').toLowerCase()
+      const isClientMatch =
+        searchTerms[0].includes(cName) ||
+        cName.includes(searchTerms[0]) ||
+        (bName && (searchTerms[1].includes(bName) || bName.includes(searchTerms[1])))
+
+      client.policies.forEach((pol, pIdx) => {
+        const cleanPolNum = pol.policyNumber.toLowerCase().replace(/[^a-z0-9]/g, '')
+        const isPolMatch = cleanPolNum.includes(searchTerms[2]) || searchTerms[2].includes(cleanPolNum)
+
+        if (isClientMatch || isPolMatch) {
+          const numPrem = parseFloat(pol.premium.replace(/[^0-9.]/g, '')) || txn.grossPremium
+          const rate = parseFloat((pol.rateSplit || '15%').replace(/[^0-9.]/g, '')) || txn.commissionRate
+          const exp = (numPrem * rate) / 100
+          results.push({
+            id: `CAND-${client.id}-${pIdx}`,
+            clientName: `${client.firstName} ${client.lastName}`,
+            businessName: client.businessName || '',
+            policyNumber: pol.policyNumber,
+            coverage: pol.type,
+            carrier: pol.carrier || txn.carrier,
+            bookPremium: numPrem,
+            commRate: rate,
+            expectedCommission: exp,
+            remittance: txn.paidCommission,
+            variance: Number((txn.paidCommission - exp).toFixed(2)),
+            matchScore: isPolMatch ? 95 : 80,
+            confidence: isPolMatch ? 'High Confidence' : 'Possible Match',
+            matchReason: isPolMatch ? 'Exact / Suffix Policy Number Concordance' : 'Insured Name Concordance in CRM',
+            policyStatus: pol.status || 'Active',
+            detail: `Found in Book of Business under ${client.firstName} ${client.lastName} (${client.businessName || 'Individual'}).`,
+            isExistingClient: true,
+          })
+        }
+      })
+    })
+
+    return results
+  }
+
+  const populateFixForm = (cand?: MatchCandidateItem, txn?: StatementTransactionItem) => {
+    const currentTxn = txn || reviewingTxn
+    if (!currentTxn) return
+    if (cand) {
+      setFixPolicyNumber(cand.policyNumber)
+      setFixClientName(cand.clientName)
+      setFixBusinessName(cand.businessName)
+      setFixCoverage(cand.coverage)
+      setFixGrossPremium(cand.bookPremium.toString())
+      setFixCommRate(cand.commRate.toString())
+      setFixVarianceAction('Accept endorsement variance & balance line')
+      setFixAdjustmentNote(`Reconciled variance with candidate match ${cand.policyNumber}. ${cand.matchReason}`)
+    } else {
+      setFixPolicyNumber(currentTxn.policyNumber)
+      setFixClientName(currentTxn.clientName)
+      setFixBusinessName(currentTxn.businessName)
+      setFixCoverage(currentTxn.lineOfBusiness)
+      setFixGrossPremium(currentTxn.grossPremium.toString())
+      setFixCommRate(currentTxn.commissionRate.toString())
+      setFixVarianceAction('Manual policy correction & balance')
+      setFixAdjustmentNote('Policy details and rate adjusted by broker')
+    }
+  }
+
+  // Open reconciliation modal
+  const handleOpenReviewModal = (txn: StatementTransactionItem) => {
+    setReviewingTxn(txn)
+    setClientSearchQuery('')
+    setSelectedSearchPolicy(null)
+    setResolutionReason(
+      txn.id === 'TXN-UP-3'
+        ? 'Endorsement & rate variance accepted'
+        : txn.id === 'TXN-UP-5'
+        ? 'Direct-bill unbound remittance linked'
+        : 'Reconciled and confirmed by broker'
+    )
+    setResolutionNotes(txn.resolutionNote || '')
+
+    // Pre-populate new client form in case they need to add client
+    setNewClientName(txn.clientName)
+    setNewBusinessName(txn.businessName)
+    setNewClientType(txn.businessName ? 'Commercial' : 'Individual')
+    setNewPolicyNumber(txn.policyNumber)
+    setNewLineOfBusiness(txn.lineOfBusiness)
+    setNewGrossPremium(txn.grossPremium.toString())
+    setNewCommRate(txn.commissionRate.toString())
+    setNewBillingMethod('Direct Bill')
+
+    const candidates = getCandidateMatches(txn)
+    if (candidates.length > 0) {
+      setSelectedCandidateId(candidates[0].id)
+      populateFixForm(candidates[0], txn)
+      setReviewTab('candidates')
+    } else {
+      setSelectedCandidateId('')
+      populateFixForm(undefined, txn)
+      setReviewTab('search')
+    }
+  }
+
+  // Filtered policies for Search Book of Business Tab
+  const searchedPolicies = React.useMemo(() => {
+    if (!clientSearchQuery.trim()) return []
+    const q = clientSearchQuery.toLowerCase()
+    const all = [...customClients, ...initialClients]
+    const list: Array<{
+      clientId: string
+      clientName: string
+      businessName: string
+      policyNumber: string
+      coverage: string
+      premium: string
+      carrier: string
+      status: string
+    }> = []
+
+    all.forEach((c) => {
+      const matchClient =
+        c.firstName.toLowerCase().includes(q) ||
+        c.lastName.toLowerCase().includes(q) ||
+        (c.businessName && c.businessName.toLowerCase().includes(q)) ||
+        c.id.toLowerCase().includes(q)
+
+      c.policies.forEach((p) => {
+        const matchPol = p.policyNumber.toLowerCase().includes(q) || p.type.toLowerCase().includes(q)
+        if (matchClient || matchPol) {
+          list.push({
+            clientId: c.id,
+            clientName: `${c.firstName} ${c.lastName}`,
+            businessName: c.businessName || '',
+            policyNumber: p.policyNumber,
+            coverage: p.type,
+            premium: p.premium,
+            carrier: p.carrier,
+            status: p.status,
+          })
+        }
+      })
+    })
+
+    return list.slice(0, 10)
+  }, [clientSearchQuery, customClients])
+
+  // Confirm match link from candidate list
+  const handleConfirmCandidateLink = () => {
+    if (!reviewingTxn) return
+    const candidates = getCandidateMatches(reviewingTxn)
+    const selected = candidates.find((c) => c.id === selectedCandidateId)
+    if (!selected) return
+
     setTransactions((prev) =>
       prev.map((t) =>
-        t.id === id
+        t.id === reviewingTxn.id
           ? {
-            ...t,
-            status: 'Resolved',
-            matchConfidence: 'High Confidence',
-            variance: 0,
-            resolutionNote: 'Manually verified and confirmed by broker.',
-          }
+              ...t,
+              status: 'Resolved',
+              matchConfidence: 'High Confidence',
+              matchScore: selected.matchScore,
+              policyNumber: selected.policyNumber,
+              clientName: selected.clientName,
+              businessName: selected.businessName,
+              expectedCommission: selected.expectedCommission,
+              variance: selected.variance,
+              ruleMatched: `Manual Match: ${selected.matchReason}`,
+              resolutionNote: resolutionNotes.trim()
+                ? resolutionNotes
+                : `${resolutionReason}. Linked to policy ${selected.policyNumber}.`,
+            }
           : t
       )
     )
+
+    setToastMessage(`Policy ${selected.policyNumber} (${selected.clientName}) linked and reconciled!`)
+    setTimeout(() => setToastMessage(null), 4000)
+    setReviewingTxn(null)
+  }
+
+  // Confirm match link from search tab
+  const handleConfirmSearchPolicyLink = () => {
+    if (!reviewingTxn || !selectedSearchPolicy) return
+
+    setTransactions((prev) =>
+      prev.map((t) =>
+        t.id === reviewingTxn.id
+          ? {
+              ...t,
+              status: 'Resolved',
+              matchConfidence: 'High Confidence',
+              matchScore: 95,
+              policyNumber: selectedSearchPolicy.policyNumber,
+              clientName: selectedSearchPolicy.clientName,
+              businessName: selectedSearchPolicy.businessName,
+              ruleMatched: `Manual Search Match: Linked to CRM policy ${selectedSearchPolicy.policyNumber}`,
+              resolutionNote: resolutionNotes.trim()
+                ? resolutionNotes
+                : `Manually linked to CRM policy ${selectedSearchPolicy.policyNumber} (${selectedSearchPolicy.clientName}).`,
+            }
+          : t
+      )
+    )
+
+    setToastMessage(`Linked to ${selectedSearchPolicy.policyNumber} (${selectedSearchPolicy.clientName}) from Book of Business.`)
+    setTimeout(() => setToastMessage(null), 4000)
+    setReviewingTxn(null)
+  }
+
+  // Apply Fix & Reconcile (Next Tab: Fix Discrepancy & Adjust)
+  const handleApplyFix = (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    if (!reviewingTxn) return
+
+    const numPrem = parseFloat(fixGrossPremium.replace(/[^0-9.]/g, '')) || reviewingTxn.grossPremium
+    const numRate = parseFloat(fixCommRate.replace(/[^0-9.]/g, '')) || reviewingTxn.commissionRate
+    const newExpected = Number(((numPrem * numRate) / 100).toFixed(2))
+    const newVariance = Number((reviewingTxn.paidCommission - newExpected).toFixed(2))
+
+    setTransactions((prev) =>
+      prev.map((t) =>
+        t.id === reviewingTxn.id
+          ? {
+              ...t,
+              status: 'Resolved',
+              matchConfidence: 'High Confidence',
+              matchScore: 100,
+              policyNumber: fixPolicyNumber.trim() || t.policyNumber,
+              clientName: fixClientName.trim() || t.clientName,
+              businessName: fixBusinessName.trim() || t.businessName,
+              lineOfBusiness: fixCoverage.trim() || t.lineOfBusiness,
+              grossPremium: numPrem,
+              commissionRate: numRate,
+              expectedCommission: newExpected,
+              variance: newVariance,
+              ruleMatched: `Broker Fix: ${fixVarianceAction}`,
+              resolutionNote: fixAdjustmentNote.trim()
+                ? fixAdjustmentNote
+                : `Discrepancy fixed by broker (${fixVarianceAction}). Policy ${fixPolicyNumber} reconciled.`,
+            }
+          : t
+      )
+    )
+
+    setToastMessage(`Discrepancy fixed! Policy ${fixPolicyNumber} has been updated and reconciled.`)
+    setTimeout(() => setToastMessage(null), 4000)
+    setReviewingTxn(null)
+  }
+
+  // Open Quick Add Client Modal (Fast, few clicks)
+  const handleOpenQuickAdd = (txn: StatementTransactionItem) => {
+    setQuickAddTxn(txn)
+    setQuickAddClientName(txn.clientName)
+    setQuickAddBusinessName(txn.businessName)
+    setQuickAddClientType(txn.businessName ? 'Commercial' : 'Individual')
+    setQuickAddPolicyNumber(txn.policyNumber)
+    setQuickAddCoverage(txn.lineOfBusiness)
+    setQuickAddPremium(txn.grossPremium.toString())
+    setQuickAddRate(txn.commissionRate.toString())
+  }
+
+  // Confirm Quick Add Client in Few Clicks
+  const handleConfirmQuickAdd = (txnToUse?: StatementTransactionItem) => {
+    const targetTxn = txnToUse || quickAddTxn
+    if (!targetTxn) return
+
+    const newId = `CL-${Math.floor(1200 + Math.random() * 800)}`
+    const isUsingQuickModal = Boolean(!txnToUse && quickAddTxn)
+    const clientFullName = (isUsingQuickModal ? quickAddClientName.trim() : '') || targetTxn.clientName
+    const bName =
+      (isUsingQuickModal ? quickAddBusinessName.trim() : '') ||
+      targetTxn.businessName ||
+      (quickAddClientType === 'Commercial' ? clientFullName : '')
+    const polNum = (isUsingQuickModal ? quickAddPolicyNumber.trim() : '') || targetTxn.policyNumber
+    const coverage = (isUsingQuickModal ? quickAddCoverage.trim() : '') || targetTxn.lineOfBusiness
+    const grossNum =
+      parseFloat((isUsingQuickModal ? quickAddPremium : '').replace(/[^0-9.]/g, '')) || targetTxn.grossPremium
+    const rateNum =
+      parseFloat((isUsingQuickModal ? quickAddRate : '').replace(/[^0-9.]/g, '')) || targetTxn.commissionRate
+
+    const newClientObj: ClientItem = {
+      id: newId,
+      firstName: clientFullName.split(' ')[0] || clientFullName,
+      lastName: clientFullName.split(' ').slice(1).join(' ') || '',
+      name: bName || clientFullName,
+      businessName: bName,
+      clientType: quickAddClientType,
+      clientSince: 'Today (Quick Add)',
+      dob: '1985-05-15',
+      phone: '+1 (416) 555-0199',
+      email: `${clientFullName.toLowerCase().replace(/[^a-z]/g, '.')}@example.com`,
+      street: '450 Bay Street, Suite 1200',
+      city: 'Toronto',
+      state: 'ON',
+      zip: 'M5H 2V9',
+      province: 'ON',
+      postalCode: 'M5H 2V9',
+      brokerCode: 'BRK-8821',
+      otherIdentifier: `STMT-QUICK-${newId}`,
+      status: 'Active',
+      linesOfBusiness: [coverage],
+      yearlyPremium: `$${grossNum.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      insurerName: targetTxn.carrier,
+      marketingConsent: {
+        status: 'Granted',
+        channels: ['Email', 'Phone'],
+        consentDate: 'Today',
+        method: 'Carrier Statement Quick Add',
+        notes: 'Client auto-created via Statement Quick Add',
+      },
+      notes: [
+        {
+          id: `note-${Date.now()}`,
+          date: 'Today',
+          author: 'Statement Quick Add',
+          text: `Client created with few clicks for policy ${polNum}. Remittance ${fmtCurrency(
+            targetTxn.paidCommission
+          )} reconciled.`,
+        },
+      ],
+      lastActivity: {
+        description: `Quick Add from Carrier Statement (${targetTxn.carrier})`,
+        time: 'Just now',
+      },
+      policies: [
+        {
+          id: `pol-${Date.now()}`,
+          policyNumber: polNum,
+          type: coverage,
+          carrier: targetTxn.carrier,
+          premium: `$${grossNum.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+          effectiveDate: new Date().toISOString().split('T')[0],
+          expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          status: 'Active',
+          rateSplit: `${rateNum}% / 100%`,
+          expectedCommission: `$${targetTxn.paidCommission.toFixed(2)}`,
+          paidCommission: `$${targetTxn.paidCommission.toFixed(2)}`,
+          netCommission: `$${targetTxn.paidCommission.toFixed(2)}`,
+          commissionStatus: 'Paid',
+          paymentStatus: 'Paid',
+          billingMethod: 'Direct Bill',
+          paymentDate: 'Today',
+          paymentNote: `Reconciled from ${targetTxn.carrier} statement batch.`,
+        },
+      ],
+      commissions: [
+        {
+          id: `comm-${Date.now()}`,
+          date: 'Today',
+          statementNumber: targetTxn.statementId,
+          carrier: targetTxn.carrier,
+          policyNumber: polNum,
+          premium: `$${grossNum.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+          rate: `${rateNum}%`,
+          amount: `$${targetTxn.paidCommission.toFixed(2)}`,
+          status: 'Paid',
+        },
+      ],
+      timeline: [
+        {
+          id: `tl-${Date.now()}`,
+          title: 'Client Quick-Added & Reconciled',
+          type: 'policy',
+          date: 'Today',
+          detail: `Policy ${polNum} created and linked to statement remittance ${fmtCurrency(targetTxn.paidCommission)}.`,
+          actor: 'Reconciliation Quick Add',
+        },
+      ],
+      paymentStatus: 'Paid',
+      effectiveDate: new Date().toISOString().split('T')[0],
+    }
+
+    try {
+      const stored = localStorage.getItem('broker_custom_clients')
+      const existing: ClientItem[] = stored ? JSON.parse(stored) : []
+      const updated = [newClientObj, ...existing]
+      localStorage.setItem('broker_custom_clients', JSON.stringify(updated))
+      setCustomClients(updated)
+    } catch (e) {
+      console.error(e)
+    }
+
+    setTransactions((prev) =>
+      prev.map((t) =>
+        t.id === targetTxn.id
+          ? {
+              ...t,
+              status: 'Resolved',
+              matchConfidence: 'High Confidence',
+              matchScore: 100,
+              policyNumber: polNum,
+              clientName: clientFullName,
+              businessName: bName,
+              lineOfBusiness: coverage,
+              grossPremium: grossNum,
+              commissionRate: rateNum,
+              expectedCommission: targetTxn.paidCommission,
+              variance: 0,
+              ruleMatched: 'Quick Add: Client Created & Reconciled with Few Clicks',
+              resolutionNote: `Client ${clientFullName} quick-added to Book of Business. Policy ${polNum} reconciled.`,
+            }
+          : t
+      )
+    )
+
+    setToastMessage(`⚡ Quick Add Success! ${clientFullName} added to Book of Business & policy ${polNum} reconciled!`)
+    setTimeout(() => setToastMessage(null), 4500)
+    setQuickAddTxn(null)
+    if (reviewingTxn?.id === targetTxn.id) {
+      setReviewingTxn(null)
+    }
+  }
+
+  // Create & Link as New Client
+  const handleCreateAndLinkNewClient = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!reviewingTxn) return
+
+    const newId = `CL-${Math.floor(1200 + Math.random() * 800)}`
+    const clientFullName = newClientName.trim() || reviewingTxn.clientName
+    const bName = newBusinessName.trim() || (newClientType === 'Commercial' ? clientFullName : '')
+    const polNum = newPolicyNumber.trim() || reviewingTxn.policyNumber
+    const coverage = newLineOfBusiness.trim() || reviewingTxn.lineOfBusiness
+    const grossNum = parseFloat(newGrossPremium.replace(/[^0-9.]/g, '')) || reviewingTxn.grossPremium
+    const rateNum = parseFloat(newCommRate.replace(/[^0-9.]/g, '')) || reviewingTxn.commissionRate
+
+    const newClientObj: ClientItem = {
+      id: newId,
+      firstName: clientFullName.split(' ')[0] || clientFullName,
+      lastName: clientFullName.split(' ').slice(1).join(' ') || '',
+      name: bName || clientFullName,
+      businessName: bName,
+      clientType: newClientType,
+      clientSince: 'Today (Statement Ingestion)',
+      dob: '1985-05-15',
+      phone: '+1 (416) 555-0199',
+      email: `${clientFullName.toLowerCase().replace(/[^a-z]/g, '.')}@example.com`,
+      street: '450 Bay Street, Suite 1200',
+      city: 'Toronto',
+      state: 'ON',
+      zip: 'M5H 2V9',
+      province: 'ON',
+      postalCode: 'M5H 2V9',
+      brokerCode: 'BRK-8821',
+      otherIdentifier: `STMT-INGEST-${newId}`,
+      status: 'Active',
+      linesOfBusiness: [coverage],
+      yearlyPremium: `$${grossNum.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      insurerName: reviewingTxn.carrier,
+      marketingConsent: {
+        status: 'Granted',
+        channels: ['Email', 'Phone'],
+        consentDate: 'Today',
+        method: 'Carrier Remittance Ingestion',
+        notes: 'Client auto-created via Statement Reconciliation Review',
+      },
+      notes: [
+        {
+          id: `note-${Date.now()}`,
+          date: 'Today',
+          author: 'Reconciliation Pipeline',
+          text: `Client created automatically via Statement Reconciliation Review for policy ${polNum}. Remittance ${fmtCurrency(
+            reviewingTxn.paidCommission
+          )} linked.`,
+        },
+      ],
+      lastActivity: {
+        description: `Created & Linked from Carrier Statement (${reviewingTxn.carrier})`,
+        time: 'Just now',
+      },
+      policies: [
+        {
+          id: `pol-${Date.now()}`,
+          policyNumber: polNum,
+          type: coverage,
+          carrier: reviewingTxn.carrier,
+          premium: `$${grossNum.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+          effectiveDate: new Date().toISOString().split('T')[0],
+          expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          status: 'Active',
+          rateSplit: `${rateNum}% / 100%`,
+          expectedCommission: `$${reviewingTxn.paidCommission.toFixed(2)}`,
+          paidCommission: `$${reviewingTxn.paidCommission.toFixed(2)}`,
+          netCommission: `$${reviewingTxn.paidCommission.toFixed(2)}`,
+          commissionStatus: 'Paid',
+          paymentStatus: 'Paid',
+          billingMethod: newBillingMethod,
+          paymentDate: 'Today',
+          paymentNote: `Reconciled from ${reviewingTxn.carrier} statement batch.`,
+        },
+      ],
+      commissions: [
+        {
+          id: `comm-${Date.now()}`,
+          date: 'Today',
+          statementNumber: reviewingTxn.statementId,
+          carrier: reviewingTxn.carrier,
+          policyNumber: polNum,
+          premium: `$${grossNum.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+          rate: `${rateNum}%`,
+          amount: `$${reviewingTxn.paidCommission.toFixed(2)}`,
+          status: 'Paid',
+        },
+      ],
+      timeline: [
+        {
+          id: `tl-${Date.now()}`,
+          title: 'New Client & Policy Ingested',
+          type: 'policy',
+          date: 'Today',
+          detail: `Policy ${polNum} created and linked to statement remittance ${fmtCurrency(reviewingTxn.paidCommission)}.`,
+          actor: 'Reconciliation Pipeline',
+        },
+      ],
+      paymentStatus: 'Paid',
+      effectiveDate: new Date().toISOString().split('T')[0],
+    }
+
+    try {
+      const stored = localStorage.getItem('broker_custom_clients')
+      const existing: ClientItem[] = stored ? JSON.parse(stored) : []
+      const updated = [newClientObj, ...existing]
+      localStorage.setItem('broker_custom_clients', JSON.stringify(updated))
+      setCustomClients(updated)
+    } catch (e) {
+      console.error(e)
+    }
+
+    setTransactions((prev) =>
+      prev.map((t) =>
+        t.id === reviewingTxn.id
+          ? {
+              ...t,
+              status: 'Resolved',
+              matchConfidence: 'High Confidence',
+              matchScore: 100,
+              clientName: clientFullName,
+              businessName: bName,
+              policyNumber: polNum,
+              lineOfBusiness: coverage,
+              grossPremium: grossNum,
+              commissionRate: rateNum,
+              expectedCommission: t.paidCommission,
+              variance: 0,
+              ruleMatched: `New Client Created (${newId}) & Policy Bound in Book of Business`,
+              resolutionNote: resolutionNotes.trim()
+                ? resolutionNotes
+                : `Created new client ${clientFullName} (${newId}) and bound policy ${polNum}. Reconciled.`,
+            }
+          : t
+      )
+    )
+
+    setToastMessage(`New client "${clientFullName}" (${newId}) created and policy ${polNum} linked!`)
+    setTimeout(() => setToastMessage(null), 4000)
+    setReviewingTxn(null)
+  }
+
+  // Flag as carrier dispute
+  const handleFlagDispute = () => {
+    if (!reviewingTxn) return
+
+    setTransactions((prev) =>
+      prev.map((t) =>
+        t.id === reviewingTxn.id
+          ? {
+              ...t,
+              status: 'Disputed',
+              matchConfidence: 'Unmatched',
+              resolutionNote: resolutionNotes.trim()
+                ? resolutionNotes
+                : 'Flagged for carrier audit inquiry. Discrepancy under broker investigation.',
+            }
+          : t
+      )
+    )
+
+    setToastMessage(`Transaction for ${reviewingTxn.policyNumber} flagged as Carrier Dispute.`)
+    setTimeout(() => setToastMessage(null), 4000)
+    setReviewingTxn(null)
   }
 
   const fmtCurrency = (val: number) =>
@@ -659,7 +1542,7 @@ export default function UploadStatementPage() {
           STEP 3: RECONCILIATION REVIEW
       ══════════════════════════════════════════════════════════════════ */}
       {currentStep === 3 && (
-        <div className="max-w-5xl mx-auto rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-xs space-y-6">
+        <div className="max-w-6xl mx-auto rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-xs space-y-6">
           <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -672,34 +1555,82 @@ export default function UploadStatementPage() {
                 Review extracted transaction rows before final commitment to the general ledger.
               </p>
             </div>
-            <div className="flex items-center gap-2 text-xs font-semibold">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
               <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700 ring-1 ring-emerald-200">
                 {transactions.filter((t) => t.status === 'Auto-Matched' || t.status === 'Resolved').length} Matched
               </span>
               <span className="rounded-full bg-amber-50 px-2.5 py-1 text-amber-700 ring-1 ring-amber-200">
                 {transactions.filter((t) => t.status === 'Pending Broker Review' || t.status === 'Action Required').length} Action Req.
               </span>
+              {transactions.filter((t) => t.status === 'Disputed').length > 0 && (
+                <span className="rounded-full bg-rose-50 px-2.5 py-1 text-rose-700 ring-1 ring-rose-200">
+                  {transactions.filter((t) => t.status === 'Disputed').length} Disputed
+                </span>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  const unverified = transactions.find(
+                    (t) => t.status !== 'Auto-Matched' && t.status !== 'Resolved' && t.status !== 'Disputed'
+                  )
+                  if (unverified) {
+                    handleOpenQuickAdd(unverified)
+                  } else {
+                    handleOpenQuickAdd(transactions[0])
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 hover:bg-emerald-100 hover:border-emerald-400 transition cursor-pointer shadow-2xs ml-1"
+                title="Add unmatched client directly to Book of Business in few clicks"
+              >
+                <UserPlus className="size-3.5 text-emerald-600" />
+                <span>+ Quick Add Client</span>
+              </button>
             </div>
           </div>
+
+          {/* Toast Notification */}
+          {toastMessage && (
+            <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-xs font-medium text-emerald-800 shadow-xs animate-in fade-in slide-in-from-top-1">
+              <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
+              <span>{toastMessage}</span>
+            </div>
+          )}
 
           {/* Transactions Table */}
           <div className="overflow-x-auto rounded-xl border border-slate-200">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
-                  <th className="px-3.5 py-3">Policy #</th>
-                  <th className="px-3.5 py-3">Client / Insured</th>
-                  <th className="px-3 py-3">Coverage Line</th>
-                  <th className="px-3 py-3 text-right">Premium</th>
-                  <th className="px-3 py-3 text-right">Comm. Rate</th>
-                  <th className="px-3.5 py-3 text-right">Remittance</th>
-                  <th className="px-3.5 py-3">Match Status</th>
-                  <th className="px-3.5 py-3 text-right">Action</th>
+                  <th className="px-3 py-3">
+                    {renderTxnSortHeader('policyNumber', 'Policy #')}
+                  </th>
+                  <th className="px-3 py-3">
+                    {renderTxnSortHeader('client', 'Client / Insured')}
+                  </th>
+                  <th className="px-3 py-3">
+                    {renderTxnSortHeader('coverage', 'Coverage Line')}
+                  </th>
+                  <th className="px-2.5 py-3 text-right">
+                    {renderTxnSortHeader('premium', 'Premium', true, 'justify-end w-full')}
+                  </th>
+                  <th className="px-2.5 py-3 text-right">
+                    {renderTxnSortHeader('rate', 'Comm. Rate', true, 'justify-end w-full')}
+                  </th>
+                  <th className="px-2.5 py-3 text-right">
+                    {renderTxnSortHeader('remittance', 'Remittance', true, 'justify-end w-full')}
+                  </th>
+                  <th className="px-3 py-3">
+                    {renderTxnSortHeader('status', 'Match Status')}
+                  </th>
+                  <th className="px-3 py-3 text-right min-w-[190px]">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {transactions.map((txn) => {
+                {sortedTransactions.map((txn) => {
                   const isResolvedOrMatched = txn.status === 'Auto-Matched' || txn.status === 'Resolved'
+                  const isDisputed = txn.status === 'Disputed'
+
                   return (
                     <tr key={txn.id} className="hover:bg-slate-50/70 transition">
                       <td className="px-3.5 py-3 font-mono font-bold text-slate-900">{txn.policyNumber}</td>
@@ -716,31 +1647,76 @@ export default function UploadStatementPage() {
                         {fmtCurrency(txn.paidCommission)}
                       </td>
                       <td className="px-3.5 py-3">
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ring-1 ${isResolvedOrMatched
-                              ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                              : 'bg-amber-50 text-amber-700 ring-amber-200'
+                        {isDisputed ? (
+                          <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold bg-rose-50 text-rose-700 ring-1 ring-rose-200">
+                            <AlertTriangle className="size-3" />
+                            <span>Disputed</span>
+                          </span>
+                        ) : (
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ring-1 ${
+                              isResolvedOrMatched
+                                ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                : 'bg-amber-50 text-amber-700 ring-amber-200'
                             }`}
-                        >
-                          {isResolvedOrMatched ? (
-                            <CheckCircle2 className="size-3" />
-                          ) : (
-                            <AlertCircle className="size-3" />
-                          )}
-                          <span>{txn.status}</span>
-                        </span>
-                      </td>
-                      <td className="px-3.5 py-3 text-right">
-                        {!isResolvedOrMatched ? (
-                          <button
-                            type="button"
-                            onClick={() => handleResolveTxn(txn.id)}
-                            className="rounded-lg bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-2xs hover:bg-blue-700 transition cursor-pointer"
                           >
-                            Resolve &amp; Link
+                            {isResolvedOrMatched ? (
+                              <CheckCircle2 className="size-3" />
+                            ) : (
+                              <AlertCircle className="size-3" />
+                            )}
+                            <span>{txn.status}</span>
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3.5 py-3 text-right whitespace-nowrap">
+                        {!isResolvedOrMatched && !isDisputed ? (
+                          <div className="inline-flex items-center gap-1.5 justify-end">
+                            <button
+                              id={`quick-add-btn-${txn.id}`}
+                              type="button"
+                              onClick={() => handleOpenQuickAdd(txn)}
+                              className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100 hover:border-emerald-400 transition cursor-pointer shadow-2xs"
+                              title="Add client & policy to Book of Business with few clicks"
+                            >
+                              <UserPlus className="size-3 text-emerald-600" />
+                              <span>+ Quick Add</span>
+                            </button>
+                            <button
+                              id={`resolve-btn-${txn.id}`}
+                              type="button"
+                              onClick={() => handleOpenReviewModal(txn)}
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-[11px] font-semibold text-white shadow-2xs hover:bg-blue-700 transition cursor-pointer"
+                            >
+                              <GitBranch className="size-3" />
+                              <span>Resolve &amp; Link</span>
+                            </button>
+                          </div>
+                        ) : isDisputed ? (
+                          <button
+                            id={`dispute-btn-${txn.id}`}
+                            type="button"
+                            onClick={() => handleOpenReviewModal(txn)}
+                            className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50/70 px-2.5 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-100 transition cursor-pointer"
+                          >
+                            <span>Review Dispute</span>
+                            <ChevronRight className="size-3" />
                           </button>
                         ) : (
-                          <span className="text-[11px] font-medium text-slate-400">Verified</span>
+                          <div className="inline-flex items-center gap-2">
+                            <span className="text-[11px] font-medium text-emerald-600 inline-flex items-center gap-1">
+                              <CheckCircle2 className="size-3" />
+                              {txn.status === 'Resolved' ? 'Resolved' : 'Matched'}
+                            </span>
+                            <button
+                              id={`review-btn-${txn.id}`}
+                              type="button"
+                              onClick={() => handleOpenReviewModal(txn)}
+                              className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[10px] font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                            >
+                              Review
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -767,6 +1743,1296 @@ export default function UploadStatementPage() {
               <CheckCircle2 className="size-4" />
               <span>Commit &amp; Save to Statements Ledger</span>
             </button>
+          </div>
+
+          {/* ══════════════════════════════════════════════════════════════════
+              RECONCILIATION REVIEW & LINK MODAL
+          ══════════════════════════════════════════════════════════════════ */}
+          {reviewingTxn && (() => {
+            const candidates = getCandidateMatches(reviewingTxn)
+            const activeCandidate = candidates.find((c) => c.id === selectedCandidateId) || candidates[0]
+
+            return (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 sm:p-6 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150">
+                <div className="relative w-full max-w-4xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[92vh] flex flex-col">
+                  {/* Modal Header */}
+                  <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex size-9 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                        <GitBranch className="size-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-bold text-slate-900">
+                            Reconciliation Review &amp; Match Resolver
+                          </h3>
+                          <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                            Line #{reviewingTxn.lineIndex}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500">
+                          Verify extracted carrier statement item against Book of Business records.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setReviewingTxn(null)}
+                      className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-200/70 hover:text-slate-700 transition cursor-pointer"
+                    >
+                      <X className="size-5" />
+                    </button>
+                  </div>
+
+                  {/* Top Banner: Statement Extracted Item Details */}
+                  <div className="border-b border-slate-200 bg-slate-900 px-6 py-4 text-white">
+                    <div className="flex flex-wrap items-center justify-between gap-3 text-xs mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-md bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-300">
+                          Extracted Statement Line
+                        </span>
+                        <span className="font-mono font-bold text-white text-sm">
+                          {reviewingTxn.policyNumber}
+                        </span>
+                        <span className="text-slate-400">·</span>
+                        <span className="font-semibold text-slate-200">{reviewingTxn.carrier}</span>
+                      </div>
+                      <span className="rounded-full bg-amber-400/20 px-2.5 py-0.5 text-[11px] font-semibold text-amber-300 ring-1 ring-amber-400/30">
+                        {reviewingTxn.ruleMatched}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                      <div className="rounded-xl bg-white/5 p-2.5 border border-white/10">
+                        <p className="text-[10px] uppercase font-bold text-slate-400">Insured / Entity</p>
+                        <p className="font-bold text-white mt-0.5 truncate">{reviewingTxn.clientName}</p>
+                        <p className="text-[11px] text-slate-300 truncate">{reviewingTxn.businessName}</p>
+                      </div>
+                      <div className="rounded-xl bg-white/5 p-2.5 border border-white/10">
+                        <p className="text-[10px] uppercase font-bold text-slate-400">Coverage Line</p>
+                        <p className="font-bold text-white mt-0.5">{reviewingTxn.lineOfBusiness}</p>
+                        <p className="text-[11px] text-slate-300">Annual Commercial</p>
+                      </div>
+                      <div className="rounded-xl bg-white/5 p-2.5 border border-white/10">
+                        <p className="text-[10px] uppercase font-bold text-slate-400">Gross Premium / Rate</p>
+                        <p className="font-bold text-white mt-0.5 font-mono">{fmtCurrency(reviewingTxn.grossPremium)}</p>
+                        <p className="text-[11px] text-slate-300 font-mono">Rate: {reviewingTxn.commissionRate}%</p>
+                      </div>
+                      <div className="rounded-xl bg-blue-500/10 p-2.5 border border-blue-400/30">
+                        <p className="text-[10px] uppercase font-bold text-blue-300">Carrier Remittance</p>
+                        <p className="text-base font-extrabold text-blue-200 font-mono mt-0.5">
+                          {fmtCurrency(reviewingTxn.paidCommission)}
+                        </p>
+                        {reviewingTxn.variance !== 0 ? (
+                          <p className="text-[10px] font-semibold text-amber-300">
+                            Variance: {reviewingTxn.variance > 0 ? '+' : ''}{fmtCurrency(reviewingTxn.variance)}
+                          </p>
+                        ) : (
+                          <p className="text-[10px] text-emerald-400">Balanced (100% Concordance)</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sub-Tabs: 1) Review Matches, 2) Next Tab: Fix Discrepancy, 3) Add This Policy / Client, 4) Search CRM Ledger */}
+                  <div className="flex flex-wrap border-b border-slate-200 bg-slate-50/80 px-6 pt-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setReviewTab('candidates')}
+                      className={`inline-flex items-center gap-2 border-b-2 px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                        reviewTab === 'candidates'
+                          ? 'border-blue-600 text-blue-600'
+                          : 'border-transparent text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      <Sparkles className="size-3.5 text-blue-500" />
+                      <span>1. Review Matches</span>
+                      <span className="rounded-full bg-blue-100 px-2 py-0.2 text-[10px] font-bold text-blue-700">
+                        {candidates.length}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (activeCandidate) populateFixForm(activeCandidate)
+                        setReviewTab('fix')
+                      }}
+                      className={`inline-flex items-center gap-2 border-b-2 px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                        reviewTab === 'fix'
+                          ? 'border-indigo-600 text-indigo-600'
+                          : 'border-transparent text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      <Wrench className="size-3.5 text-indigo-600" />
+                      <span>2. Fix Discrepancy &amp; Adjust</span>
+                      <span className="rounded-full bg-indigo-100 px-2 py-0.2 text-[10px] font-bold text-indigo-700">
+                        Next Tab: Fix It
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setReviewTab('create')}
+                      className={`inline-flex items-center gap-2 border-b-2 px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                        reviewTab === 'create'
+                          ? 'border-emerald-600 text-emerald-600'
+                          : 'border-transparent text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      <PlusCircle className="size-3.5 text-emerald-600" />
+                      <span>3. Add This Policy / Client</span>
+                      <span className="rounded-full bg-emerald-100 px-2 py-0.2 text-[10px] font-bold text-emerald-700">
+                        Add This
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setReviewTab('search')}
+                      className={`inline-flex items-center gap-2 border-b-2 px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                        reviewTab === 'search'
+                          ? 'border-blue-600 text-blue-600'
+                          : 'border-transparent text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      <Search className="size-3.5 text-slate-400" />
+                      <span>4. Search CRM Ledger</span>
+                    </button>
+                  </div>
+
+                  {/* Modal Body / Tab Content */}
+                  <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                    {/* TAB 1: SUGGESTED CANDIDATE MATCHES */}
+                    {reviewTab === 'candidates' && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-slate-600 font-medium">
+                            The matching engine found <strong className="text-slate-900">{candidates.length} potential match candidates</strong> in your CRM records. Select a policy to review concordance and link:
+                          </p>
+                          <span className="text-[11px] text-slate-400">Click card to select</span>
+                        </div>
+
+                        {candidates.length === 0 ? (
+                          <div className="rounded-2xl border border-emerald-300 bg-gradient-to-b from-emerald-50/90 to-slate-50 p-6 text-center space-y-4 shadow-xs">
+                            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-xs">
+                              <UserPlus className="size-6" />
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-bold text-emerald-950">
+                                No Client Found in Book of Business
+                              </h3>
+                              <p className="text-xs text-emerald-800 max-w-md mx-auto mt-1">
+                                No matching records found for <strong>{reviewingTxn.clientName}</strong>. You can add them to your CRM right now with few clicks:
+                              </p>
+                            </div>
+                            <div className="flex flex-wrap justify-center items-center gap-3 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => handleConfirmQuickAdd(reviewingTxn)}
+                                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition cursor-pointer"
+                              >
+                                <Zap className="size-4" />
+                                <span>⚡ 1-Click Quick Add &amp; Reconcile</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setReviewTab('create')}
+                                className="rounded-xl border border-emerald-300 bg-white px-4 py-2.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-50 transition cursor-pointer"
+                              >
+                                Open Full Client Form
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setReviewTab('search')}
+                                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                              >
+                                Search CRM Ledger
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {/* Quick Add Helper if client is not in candidates */}
+                            <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+                              <div className="flex items-center gap-2.5">
+                                <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold text-xs shrink-0 shadow-2xs">
+                                  <Zap className="size-4" />
+                                </div>
+                                <div>
+                                  <p className="font-bold text-emerald-950">
+                                    No match applies? Quick add {reviewingTxn.clientName} in few clicks
+                                  </p>
+                                  <p className="text-[11px] text-emerald-800">
+                                    Create this client and bind policy {reviewingTxn.policyNumber} instantly to your Book of Business.
+                                  </p>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleConfirmQuickAdd(reviewingTxn)}
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-emerald-700 transition cursor-pointer shrink-0"
+                              >
+                                <Zap className="size-3.5" />
+                                <span>⚡ Quick Add in 1-Click</span>
+                              </button>
+                            </div>
+                            {candidates.map((cand) => {
+                              const isSelected = selectedCandidateId === cand.id
+
+                              return (
+                                <div
+                                  key={cand.id}
+                                  onClick={() => {
+                                    setSelectedCandidateId(cand.id)
+                                    populateFixForm(cand)
+                                  }}
+                                  className={`rounded-xl border p-4 transition cursor-pointer ${
+                                    isSelected
+                                      ? 'border-blue-600 bg-blue-50/40 ring-2 ring-blue-500/20'
+                                      : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50'
+                                  }`}
+                                >
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div className="flex items-start gap-3">
+                                      <div className="pt-0.5">
+                                        <div
+                                          className={`flex size-5 items-center justify-center rounded-full border ${
+                                            isSelected
+                                              ? 'border-blue-600 bg-blue-600 text-white'
+                                              : 'border-slate-300 bg-white'
+                                          }`}
+                                        >
+                                          {isSelected && <Check className="size-3 stroke-[3]" />}
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                          <span className="font-mono font-bold text-slate-900 text-sm">
+                                            {cand.policyNumber}
+                                          </span>
+                                          <span className="text-xs font-bold text-slate-800">
+                                            {cand.clientName}
+                                          </span>
+                                          {cand.businessName && (
+                                            <span className="text-xs text-slate-500">
+                                              ({cand.businessName})
+                                            </span>
+                                          )}
+                                          <span
+                                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                              cand.matchScore >= 90
+                                                ? 'bg-emerald-100 text-emerald-800'
+                                                : cand.matchScore >= 75
+                                                ? 'bg-amber-100 text-amber-800'
+                                                : 'bg-slate-100 text-slate-700'
+                                            }`}
+                                          >
+                                            {cand.matchScore}% Match · {cand.confidence}
+                                          </span>
+                                        </div>
+                                        <p className="text-xs text-slate-500 mt-1 font-medium">
+                                          {cand.detail}
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    {/* Financial comparison on card */}
+                                    <div className="text-right sm:border-l sm:border-slate-200 sm:pl-4 min-w-[170px] shrink-0">
+                                      <div className="flex justify-between sm:justify-end gap-2 text-xs">
+                                        <span className="text-slate-500">Expected:</span>
+                                        <span className="font-mono font-bold text-slate-800">
+                                          {fmtCurrency(cand.expectedCommission)}
+                                        </span>
+                                      </div>
+                                      <div className="flex justify-between sm:justify-end gap-2 text-xs mt-0.5">
+                                        <span className="text-slate-500">Remittance:</span>
+                                        <span className="font-mono font-bold text-blue-700">
+                                          {fmtCurrency(cand.remittance)}
+                                        </span>
+                                      </div>
+                                      <div className="mt-1">
+                                        {cand.variance === 0 ? (
+                                          <span className="inline-block rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-200">
+                                            Exact $0.00 Variance
+                                          </span>
+                                        ) : (
+                                          <span
+                                            className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 ${
+                                              cand.variance < 0
+                                                ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                                                : 'bg-blue-50 text-blue-700 ring-blue-200'
+                                            }`}
+                                          >
+                                            {cand.variance > 0 ? '+' : ''}{fmtCurrency(cand.variance)} Variance
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Quick link to Fix Tab */}
+                                  <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                                    <span className="text-slate-400">Match score: {cand.matchScore}%</span>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        setSelectedCandidateId(cand.id)
+                                        populateFixForm(cand)
+                                        setReviewTab('fix')
+                                      }}
+                                      className="inline-flex items-center gap-1 font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
+                                    >
+                                      <Wrench className="size-3" />
+                                      <span>Next Tab: Fix Discrepancy &amp; Adjust →</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+
+                        {/* Selected Candidate Concordance Breakdown */}
+                        {activeCandidate && (
+                          <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
+                            <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wider">
+                              <Scale className="size-3.5 text-blue-600" />
+                              <span>Side-by-Side Concordance Comparison</span>
+                            </h4>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                              {/* Left: Statement */}
+                              <div className="rounded-lg border border-slate-200 bg-white p-3 space-y-1.5">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                  Carrier Statement Line
+                                </span>
+                                <div className="flex justify-between border-b border-slate-100 pb-1">
+                                  <span className="text-slate-500">Policy #:</span>
+                                  <span className="font-mono font-bold text-slate-900">{reviewingTxn.policyNumber}</span>
+                                </div>
+                                <div className="flex justify-between border-b border-slate-100 pb-1">
+                                  <span className="text-slate-500">Insured:</span>
+                                  <span className="font-semibold text-slate-900">{reviewingTxn.clientName}</span>
+                                </div>
+                                <div className="flex justify-between border-b border-slate-100 pb-1">
+                                  <span className="text-slate-500">Coverage:</span>
+                                  <span className="font-medium text-slate-800">{reviewingTxn.lineOfBusiness}</span>
+                                </div>
+                                <div className="flex justify-between border-b border-slate-100 pb-1">
+                                  <span className="text-slate-500">Gross Premium:</span>
+                                  <span className="font-mono text-slate-900">{fmtCurrency(reviewingTxn.grossPremium)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-slate-500">Remitted Comm:</span>
+                                  <span className="font-mono font-bold text-blue-700">{fmtCurrency(reviewingTxn.paidCommission)} ({reviewingTxn.commissionRate}%)</span>
+                                </div>
+                              </div>
+
+                              {/* Right: Selected CRM Candidate */}
+                              <div className="rounded-lg border border-blue-200 bg-blue-50/30 p-3 space-y-1.5">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">
+                                  Selected CRM Ledger Record
+                                </span>
+                                <div className="flex justify-between border-b border-blue-100/70 pb-1">
+                                  <span className="text-slate-500">Policy #:</span>
+                                  <span className="font-mono font-bold text-slate-900">{activeCandidate.policyNumber}</span>
+                                </div>
+                                <div className="flex justify-between border-b border-blue-100/70 pb-1">
+                                  <span className="text-slate-500">Insured:</span>
+                                  <span className="font-semibold text-slate-900">{activeCandidate.clientName}</span>
+                                </div>
+                                <div className="flex justify-between border-b border-blue-100/70 pb-1">
+                                  <span className="text-slate-500">Coverage:</span>
+                                  <span className="font-medium text-slate-800">{activeCandidate.coverage}</span>
+                                </div>
+                                <div className="flex justify-between border-b border-blue-100/70 pb-1">
+                                  <span className="text-slate-500">Book Premium:</span>
+                                  <span className="font-mono text-slate-900">{fmtCurrency(activeCandidate.bookPremium)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-slate-500">Expected Comm:</span>
+                                  <span className="font-mono font-bold text-slate-900">{fmtCurrency(activeCandidate.expectedCommission)} ({activeCandidate.commRate}%)</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Settlement Rationale Select */}
+                            <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                                  Resolution Classification
+                                </label>
+                                <select
+                                  value={resolutionReason}
+                                  onChange={(e) => setResolutionReason(e.target.value)}
+                                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-800 focus:border-blue-500 focus:outline-none"
+                                >
+                                  <option value="Endorsement & rate variance accepted">Endorsement &amp; rate variance accepted</option>
+                                  <option value="Direct-bill policy confirmed & linked">Direct-bill policy confirmed &amp; linked</option>
+                                  <option value="Base policy match confirmed (suffix variant)">Base policy match confirmed (suffix variant)</option>
+                                  <option value="Commission variance approved by broker">Commission variance approved by broker</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                                  Broker Audit Note (Optional)
+                                </label>
+                                <input
+                                  type="text"
+                                  value={resolutionNotes}
+                                  onChange={(e) => setResolutionNotes(e.target.value)}
+                                  placeholder="e.g. Endorsement rate reduction reconciled with carrier..."
+                                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:outline-none"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Next Action Callout (Client request: "There should be a next tab. So they can fix it or add this") */}
+                        <div className="rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-slate-50 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+                          <div className="flex items-start gap-3">
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs">
+                              <Wrench className="size-5" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-slate-900">
+                                Discrepancy detected? Go to the Next Tab to Fix or Add this item
+                              </p>
+                              <p className="text-[11px] text-slate-600 mt-0.5">
+                                You can fix policy number typos, endorse rate variances, or add this policy directly to your Book of Business.
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (activeCandidate) populateFixForm(activeCandidate)
+                                setReviewTab('fix')
+                              }}
+                              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-indigo-700 transition cursor-pointer"
+                            >
+                              <span>Next Tab: Fix Discrepancy</span>
+                              <ArrowRight className="size-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setReviewTab('create')}
+                              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition cursor-pointer"
+                            >
+                              <PlusCircle className="size-3.5 text-emerald-600" />
+                              <span>Or Add This Policy</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TAB 2: FIX DISCREPANCY & ADJUST (Client Request: Next Tab to Fix it or Add this) */}
+                    {reviewTab === 'fix' && (
+                      <form onSubmit={handleApplyFix} className="space-y-5">
+                        {/* Header Info Banner */}
+                        <div className="rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50/90 to-blue-50/70 p-4 flex items-start gap-3">
+                          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-xs">
+                            <Wrench className="size-4" />
+                          </div>
+                          <div className="text-xs text-indigo-950">
+                            <div className="flex items-center gap-2">
+                              <p className="font-bold text-sm text-indigo-950">Fix Discrepancy &amp; Commission Adjustment</p>
+                              <span className="rounded-full bg-indigo-200/80 px-2 py-0.5 text-[10px] font-extrabold text-indigo-800">
+                                Next Tab Workbench
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-indigo-700 mt-0.5 leading-relaxed">
+                              Adjust policy number typos, endorse rate differences, reconcile gross premiums, or balance variance directly against carrier remittance.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Live Reconciliation Calculation Banner */}
+                        {(() => {
+                          const numPrem = parseFloat(fixGrossPremium.replace(/[^0-9.]/g, '')) || reviewingTxn.grossPremium
+                          const numRate = parseFloat(fixCommRate.replace(/[^0-9.]/g, '')) || reviewingTxn.commissionRate
+                          const calcExpected = Number(((numPrem * numRate) / 100).toFixed(2))
+                          const calcVariance = Number((reviewingTxn.paidCommission - calcExpected).toFixed(2))
+                          const isBalanced = calcVariance === 0
+
+                          return (
+                            <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                                  Live Balance &amp; Recalculation
+                                </span>
+                                <span
+                                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold ring-1 ${
+                                    isBalanced
+                                      ? 'bg-emerald-100 text-emerald-800 ring-emerald-300'
+                                      : 'bg-amber-100 text-amber-800 ring-amber-300'
+                                  }`}
+                                >
+                                  {isBalanced ? 'Balanced ($0.00 Variance)' : `Variance: ${calcVariance > 0 ? '+' : ''}${fmtCurrency(calcVariance)}`}
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                                <div className="rounded-lg bg-white border border-slate-200 p-2">
+                                  <span className="text-[10px] text-slate-400 block font-medium">Expected Comm</span>
+                                  <span className="font-mono font-bold text-slate-900 text-xs sm:text-sm">{fmtCurrency(calcExpected)}</span>
+                                  <span className="text-[10px] text-slate-400 block mt-0.5">({numRate}% of {fmtCurrency(numPrem)})</span>
+                                </div>
+                                <div className="rounded-lg bg-white border border-slate-200 p-2">
+                                  <span className="text-[10px] text-slate-400 block font-medium">Carrier Remittance</span>
+                                  <span className="font-mono font-bold text-blue-700 text-xs sm:text-sm">{fmtCurrency(reviewingTxn.paidCommission)}</span>
+                                  <span className="text-[10px] text-slate-400 block mt-0.5">Received</span>
+                                </div>
+                                <div className={`rounded-lg border p-2 ${isBalanced ? 'bg-emerald-50/50 border-emerald-200' : 'bg-amber-50/50 border-amber-200'}`}>
+                                  <span className="text-[10px] text-slate-400 block font-medium">Discrepancy / Variance</span>
+                                  <span className={`font-mono font-bold text-xs sm:text-sm ${isBalanced ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                    {calcVariance > 0 ? '+' : ''}{fmtCurrency(calcVariance)}
+                                  </span>
+                                  <span className="text-[10px] text-slate-500 block mt-0.5">{isBalanced ? 'Fully Cleared' : 'Adjustable'}</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })()}
+
+                        {/* Form Inputs */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {/* Policy Number */}
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Policy Number (Correct typos or suffix variants) <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={fixPolicyNumber}
+                              onChange={(e) => setFixPolicyNumber(e.target.value)}
+                              required
+                              placeholder="e.g. POL-1029-TRV-A"
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 font-mono text-xs font-bold text-slate-800 focus:border-indigo-500 focus:outline-none"
+                            />
+                            <p className="text-[10px] text-slate-400 mt-0.5">Statement had: {reviewingTxn.policyNumber}</p>
+                          </div>
+
+                          {/* Coverage Line */}
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Coverage / Line of Business
+                            </label>
+                            <input
+                              type="text"
+                              value={fixCoverage}
+                              onChange={(e) => setFixCoverage(e.target.value)}
+                              placeholder="e.g. Commercial General Liability"
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:border-indigo-500 focus:outline-none"
+                            />
+                            <p className="text-[10px] text-slate-400 mt-0.5">Carrier: {reviewingTxn.carrier}</p>
+                          </div>
+
+                          {/* Insured Client Name */}
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Insured Contact Name
+                            </label>
+                            <input
+                              type="text"
+                              value={fixClientName}
+                              onChange={(e) => setFixClientName(e.target.value)}
+                              placeholder="e.g. Marcus Vance"
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:border-indigo-500 focus:outline-none"
+                            />
+                          </div>
+
+                          {/* Business Name */}
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Business / Company Name
+                            </label>
+                            <input
+                              type="text"
+                              value={fixBusinessName}
+                              onChange={(e) => setFixBusinessName(e.target.value)}
+                              placeholder="e.g. Vance Design Studio"
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:border-indigo-500 focus:outline-none"
+                            />
+                          </div>
+
+                          {/* Gross Premium */}
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Gross Premium ($)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={fixGrossPremium}
+                              onChange={(e) => setFixGrossPremium(e.target.value)}
+                              placeholder="8200"
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 font-mono text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                            />
+                            <p className="text-[10px] text-slate-400 mt-0.5">Used to compute expected commissions</p>
+                          </div>
+
+                          {/* Commission Rate (%) */}
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Commission Rate (%)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={fixCommRate}
+                              onChange={(e) => setFixCommRate(e.target.value)}
+                              placeholder="15.0"
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 font-mono text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                            />
+                            <p className="text-[10px] text-slate-400 mt-0.5">Carrier remitted at {reviewingTxn.commissionRate}%</p>
+                          </div>
+
+                          {/* Variance Action / Treatment */}
+                          <div className="sm:col-span-2">
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Variance Treatment / Reason
+                            </label>
+                            <select
+                              value={fixVarianceAction}
+                              onChange={(e) => setFixVarianceAction(e.target.value)}
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:border-indigo-500 focus:outline-none"
+                            >
+                              <option value="Accept endorsement variance & balance line">Accept endorsement variance &amp; balance line</option>
+                              <option value="Adjust Book of Business rate to match carrier remittance">Adjust Book of Business rate to match carrier remittance</option>
+                              <option value="One-time commission audit adjustment">One-time commission audit adjustment</option>
+                              <option value="Correction of policy number typo / suffix">Correction of policy number typo / suffix</option>
+                              <option value="Direct-bill policy commission accepted">Direct-bill policy commission accepted</option>
+                            </select>
+                          </div>
+
+                          {/* Broker Audit Note */}
+                          <div className="sm:col-span-2">
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Audit Trail Note (Recorded in Statement Batch Ledger)
+                            </label>
+                            <input
+                              type="text"
+                              value={fixAdjustmentNote}
+                              onChange={(e) => setFixAdjustmentNote(e.target.value)}
+                              placeholder="e.g. Endorsement rate reduction verified with carrier representative..."
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Bottom Action Bar inside Tab 2 */}
+                        <div className="flex flex-col sm:flex-row items-center justify-between pt-3 border-t border-slate-200 gap-3">
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setReviewTab('candidates')}
+                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer"
+                            >
+                              <ArrowLeft className="size-3.5" />
+                              <span>Back to Matches List</span>
+                            </button>
+                            <span className="text-slate-300">|</span>
+                            <button
+                              type="button"
+                              onClick={() => setReviewTab('create')}
+                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-900 cursor-pointer"
+                            >
+                              <PlusCircle className="size-3.5" />
+                              <span>Or Add This Policy as New</span>
+                            </button>
+                          </div>
+
+                          <button
+                            type="submit"
+                            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-indigo-700 transition cursor-pointer"
+                          >
+                            <Check className="size-4" />
+                            <span>Apply Fix &amp; Resolve Statement Line</span>
+                          </button>
+                        </div>
+                      </form>
+                    )}
+
+                    {/* TAB 2: SEARCH BOOK OF BUSINESS */}
+                    {reviewTab === 'search' && (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-800 mb-1.5">
+                            Search All Clients &amp; Policies in Book of Business
+                          </label>
+                          <div className="relative">
+                            <Search className="size-4 absolute left-3.5 top-3 text-slate-400" />
+                            <input
+                              type="text"
+                              value={clientSearchQuery}
+                              onChange={(e) => setClientSearchQuery(e.target.value)}
+                              placeholder="Type client name, business name, or policy # to search..."
+                              className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                              autoFocus
+                            />
+                          </div>
+                          <p className="text-[11px] text-slate-400 mt-1">
+                            Search across active, pending, and historical client policies in your CRM ledger.
+                          </p>
+                        </div>
+
+                        {selectedSearchPolicy && (
+                          <div className="rounded-xl border border-emerald-300 bg-emerald-50/70 p-4 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold">
+                                <Check className="size-4" />
+                              </div>
+                              <div>
+                                <p className="text-xs font-bold text-emerald-950">
+                                  Selected: {selectedSearchPolicy.policyNumber} — {selectedSearchPolicy.clientName}
+                                </p>
+                                <p className="text-[11px] text-emerald-800">
+                                  {selectedSearchPolicy.coverage} · {selectedSearchPolicy.carrier} · Premium: {selectedSearchPolicy.premium}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleConfirmSearchPolicyLink}
+                              className="rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-emerald-700 transition cursor-pointer"
+                            >
+                              Link This Policy
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                          {clientSearchQuery.trim() === '' ? (
+                            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-8 text-center text-xs text-slate-500">
+                              Start typing above to search existing policies from your Book of Business.
+                            </div>
+                          ) : searchedPolicies.length === 0 ? (
+                            <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center space-y-3">
+                              <AlertCircle className="size-6 text-slate-400 mx-auto" />
+                              <p className="text-xs font-semibold text-slate-700">
+                                No clients or policies matched &quot;{clientSearchQuery}&quot;
+                              </p>
+                              <p className="text-[11px] text-slate-500">
+                                If this is a newly written or direct-bill policy, you can add them to your CRM right now.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => setReviewTab('create')}
+                                className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+                              >
+                                Create as New Client &amp; Link
+                              </button>
+                            </div>
+                          ) : (
+                            searchedPolicies.map((p) => {
+                              const isThisSelected = selectedSearchPolicy?.policyNumber === p.policyNumber
+
+                              return (
+                                <div
+                                  key={`${p.clientId}-${p.policyNumber}`}
+                                  className={`rounded-xl border p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
+                                    isThisSelected
+                                      ? 'border-emerald-500 bg-emerald-50/40'
+                                      : 'border-slate-200 bg-white hover:border-slate-300'
+                                  }`}
+                                >
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-mono font-bold text-slate-900 text-xs">
+                                        {p.policyNumber}
+                                      </span>
+                                      <span className="font-semibold text-slate-800 text-xs">
+                                        {p.clientName}
+                                      </span>
+                                      {p.businessName && (
+                                        <span className="text-[11px] text-slate-400">
+                                          ({p.businessName})
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 mt-0.5">
+                                      {p.coverage} · {p.carrier} · Annual Premium: {p.premium}
+                                    </p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedSearchPolicy(p)}
+                                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition cursor-pointer shrink-0 ${
+                                      isThisSelected
+                                        ? 'bg-emerald-600 text-white'
+                                        : 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                                    }`}
+                                  >
+                                    {isThisSelected ? 'Selected' : 'Select'}
+                                  </button>
+                                </div>
+                              )
+                            })
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TAB 3: ADD NEW CLIENT & LINK */}
+                    {reviewTab === 'create' && (
+                      <form onSubmit={handleCreateAndLinkNewClient} className="space-y-4">
+                        <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-3.5 flex items-start gap-3">
+                          <Info className="size-4 text-blue-600 shrink-0 mt-0.5" />
+                          <div className="text-xs text-blue-900">
+                            <p className="font-semibold">Client not found in Book of Business?</p>
+                            <p className="text-[11px] text-blue-700 mt-0.5">
+                              Pre-filled below with carrier remittance data. Submitting this form will automatically create an <strong>Active client</strong> in your CRM and mark this statement transaction as <strong>Resolved</strong>.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Client Full Name <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={newClientName}
+                              onChange={(e) => setNewClientName(e.target.value)}
+                              required
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Business / Company Name
+                            </label>
+                            <input
+                              type="text"
+                              value={newBusinessName}
+                              onChange={(e) => setNewBusinessName(e.target.value)}
+                              placeholder="e.g. Vance Design Studio"
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Client Type
+                            </label>
+                            <div className="grid grid-cols-2 gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setNewClientType('Commercial')}
+                                className={`rounded-lg py-1.5 text-xs font-semibold transition ${
+                                  newClientType === 'Commercial'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'border border-slate-200 bg-slate-50 text-slate-700'
+                                }`}
+                              >
+                                Commercial
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setNewClientType('Individual')}
+                                className={`rounded-lg py-1.5 text-xs font-semibold transition ${
+                                  newClientType === 'Individual'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'border border-slate-200 bg-slate-50 text-slate-700'
+                                }`}
+                              >
+                                Individual
+                              </button>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Policy Number <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={newPolicyNumber}
+                              onChange={(e) => setNewPolicyNumber(e.target.value)}
+                              required
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-mono font-bold text-slate-800 focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Line of Business
+                            </label>
+                            <input
+                              type="text"
+                              value={newLineOfBusiness}
+                              onChange={(e) => setNewLineOfBusiness(e.target.value)}
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Carrier
+                            </label>
+                            <input
+                              type="text"
+                              value={reviewingTxn.carrier}
+                              disabled
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-slate-100 px-3 text-xs font-medium text-slate-500"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Gross Annual Premium ($)
+                            </label>
+                            <input
+                              type="number"
+                              value={newGrossPremium}
+                              onChange={(e) => setNewGrossPremium(e.target.value)}
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-mono text-slate-800 focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                              Commission Rate (%)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={newCommRate}
+                              onChange={(e) => setNewCommRate(e.target.value)}
+                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-mono text-slate-800 focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end pt-3 border-t border-slate-100">
+                          <button
+                            type="submit"
+                            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-emerald-700 transition cursor-pointer"
+                          >
+                            <PlusCircle className="size-4" />
+                            <span>Create Client &amp; Link Statement Line</span>
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+
+                  {/* Modal Footer Actions */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4 gap-3">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      {reviewTab === 'candidates' ? (
+                        <button
+                          type="button"
+                          onClick={handleFlagDispute}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-800 hover:bg-amber-100 transition cursor-pointer w-full sm:w-auto justify-center"
+                        >
+                          <AlertTriangle className="size-3.5" />
+                          <span>Flag as Carrier Dispute</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setReviewTab('candidates')}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                        >
+                          <ArrowLeft className="size-3.5" />
+                          <span>Back to Matches</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setReviewingTxn(null)}
+                        className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+
+                      {reviewTab === 'candidates' && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setReviewTab('create')}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition cursor-pointer"
+                          >
+                            <PlusCircle className="size-3.5 text-emerald-600" />
+                            <span>Add This Policy</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (activeCandidate) populateFixForm(activeCandidate)
+                              setReviewTab('fix')
+                            }}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition cursor-pointer"
+                          >
+                            <Wrench className="size-3.5" />
+                            <span>Next Tab: Fix It</span>
+                            <ArrowRight className="size-3.5" />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleConfirmCandidateLink}
+                            disabled={!selectedCandidateId && candidates.length > 0}
+                            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold text-white shadow-md hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer"
+                          >
+                            <Check className="size-4" />
+                            <span>Confirm Match &amp; Link Policy</span>
+                          </button>
+                        </>
+                      )}
+
+                      {reviewTab === 'fix' && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setReviewTab('create')}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition cursor-pointer"
+                          >
+                            <PlusCircle className="size-3.5 text-emerald-600" />
+                            <span>Or Add This Policy</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleApplyFix}
+                            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2 text-xs font-semibold text-white shadow-md hover:bg-indigo-700 transition cursor-pointer"
+                          >
+                            <Check className="size-4" />
+                            <span>Apply Fix &amp; Resolve Line</span>
+                          </button>
+                        </>
+                      )}
+
+                      {reviewTab === 'create' && (
+                        <button
+                          type="button"
+                          onClick={(e) => handleCreateAndLinkNewClient(e as unknown as React.FormEvent)}
+                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-md hover:bg-emerald-700 transition cursor-pointer"
+                        >
+                          <PlusCircle className="size-4" />
+                          <span>Create Client &amp; Link</span>
+                        </button>
+                      )}
+
+                      {reviewTab === 'search' && (
+                        <button
+                          type="button"
+                          onClick={handleConfirmSearchPolicyLink}
+                          disabled={!selectedSearchPolicy}
+                          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold text-white shadow-md hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer"
+                        >
+                          <Check className="size-4" />
+                          <span>Link Selected CRM Policy</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════════════
+          QUICK ADD CLIENT MODAL (Client Request: Add client quickie in few clicks)
+      ══════════════════════════════════════════════════════════════════ */}
+      {quickAddTxn && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-6 py-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-xs">
+                  <UserPlus className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <span>Quick Add Client to Book of Business</span>
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800">
+                      2 Clicks
+                    </span>
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Pre-filled from extracted statement line {quickAddTxn.policyNumber}.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setQuickAddTxn(null)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                handleConfirmQuickAdd()
+              }}
+              className="p-6 space-y-4 text-xs"
+            >
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 flex items-start gap-2.5">
+                <Zap className="size-4 text-emerald-600 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-emerald-950 leading-relaxed">
+                  Clicking <strong>&quot;Create &amp; Reconcile Now&quot;</strong> will immediately create an <strong>Active client</strong> in your CRM, bind policy <strong>{quickAddPolicyNumber}</strong>, and mark this statement transaction as <strong>Resolved</strong> in 2 clicks.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Client Full Name <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={quickAddClientName}
+                    onChange={(e) => setQuickAddClientName(e.target.value)}
+                    required
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 font-semibold text-slate-900 focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Business / Entity Name
+                  </label>
+                  <input
+                    type="text"
+                    value={quickAddBusinessName}
+                    onChange={(e) => setQuickAddBusinessName(e.target.value)}
+                    placeholder="e.g. Vance Design Studio"
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-slate-800 focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Client Type
+                  </label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setQuickAddClientType('Commercial')}
+                      className={`rounded-lg py-1.5 text-xs font-bold transition cursor-pointer ${
+                        quickAddClientType === 'Commercial'
+                          ? 'bg-emerald-600 text-white'
+                          : 'border border-slate-200 bg-slate-50 text-slate-700'
+                      }`}
+                    >
+                      Commercial
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setQuickAddClientType('Individual')}
+                      className={`rounded-lg py-1.5 text-xs font-bold transition cursor-pointer ${
+                        quickAddClientType === 'Individual'
+                          ? 'bg-emerald-600 text-white'
+                          : 'border border-slate-200 bg-slate-50 text-slate-700'
+                      }`}
+                    >
+                      Individual
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Policy Number <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={quickAddPolicyNumber}
+                    onChange={(e) => setQuickAddPolicyNumber(e.target.value)}
+                    required
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 font-mono font-bold text-slate-900 focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Coverage Line
+                  </label>
+                  <input
+                    type="text"
+                    value={quickAddCoverage}
+                    onChange={(e) => setQuickAddCoverage(e.target.value)}
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-slate-800 focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Gross Annual Premium ($)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={quickAddPremium}
+                    onChange={(e) => setQuickAddPremium(e.target.value)}
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 font-mono text-slate-800 focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Carrier &amp; Remittance
+                  </label>
+                  <div className="h-9 flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 text-slate-700">
+                    <span className="font-semibold">{quickAddTxn.carrier}</span>
+                    <span className="font-mono font-bold text-emerald-700">{fmtCurrency(quickAddTxn.paidCommission)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const txn = quickAddTxn
+                    setQuickAddTxn(null)
+                    handleOpenReviewModal(txn)
+                  }}
+                  className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                >
+                  Open Full Match Resolver →
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setQuickAddTxn(null)}
+                    className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition cursor-pointer"
+                  >
+                    <Zap className="size-4" />
+                    <span>Create Client &amp; Reconcile Now</span>
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       )}

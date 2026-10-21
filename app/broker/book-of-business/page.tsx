@@ -56,6 +56,9 @@ import {
 } from 'lucide-react'
 import {
   initialClients,
+  getClientPaymentStatus,
+  getClientEffectiveDate,
+  getPolicyPaymentStatus,
   type ClientItem,
   type ClientPolicy,
   type CommissionTransaction,
@@ -147,9 +150,16 @@ function BookOfBusinessContent() {
   const actionParam = searchParams.get('action')
 
   // Clients state (interactive client data)
-  const [clients, setClients] = useState<ClientItem[]>(initialClients)
+  const [clients, setClients] = useState<ClientItem[]>(() => {
+    const seen = new Set<string>()
+    return initialClients.filter((c) => {
+      if (seen.has(c.id)) return false
+      seen.add(c.id)
+      return true
+    })
+  })
 
-  // Load custom clients added via Add Client form
+  // Load custom clients added via Add Client form with deduplication
   useEffect(() => {
     try {
       const stored = localStorage.getItem('broker_custom_clients')
@@ -157,9 +167,12 @@ function BookOfBusinessContent() {
         const parsed: ClientItem[] = JSON.parse(stored)
         if (Array.isArray(parsed) && parsed.length > 0) {
           setClients((prev) => {
-            const existingIds = new Set(prev.map((c) => c.id))
-            const newOnes = parsed.filter((c) => !existingIds.has(c.id))
-            return [...newOnes, ...prev]
+            const clientMap = new Map<string, ClientItem>()
+            // First load existing
+            prev.forEach((c) => clientMap.set(c.id, c))
+            // Overwrite/prepend custom ones
+            parsed.forEach((c) => clientMap.set(c.id, c))
+            return Array.from(clientMap.values())
           })
         }
       }
@@ -191,8 +204,8 @@ function BookOfBusinessContent() {
   const [clientDetailTab, setClientDetailTab] = useState<'overview' | 'policies' | 'commissions' | 'consent' | 'notes' | 'timeline'>('overview')
   const [policySubFilter, setPolicySubFilter] = useState<'All' | 'Active' | 'Historical'>('All')
 
-  // Table Column Sorting State (Client Name, Client Status, Marketing Consent, Phone, Email)
-  type ClientSortField = 'name' | 'status' | 'consent' | 'phone' | 'email'
+  // Table Column Sorting State (Client Name, Client Status, Marketing Consent, Phone, Email, Paid/Unpaid, Eff Date)
+  type ClientSortField = 'name' | 'status' | 'consent' | 'phone' | 'email' | 'payment' | 'effectiveDate'
   type SortDirection = 'asc' | 'desc'
   const [sortField, setSortField] = useState<ClientSortField>('name')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
@@ -234,6 +247,7 @@ function BookOfBusinessContent() {
     firstName: '',
     lastName: '',
     businessName: '',
+    clientType: 'Individual' as 'Individual' | 'Commercial',
     dob: '',
     phone: '',
     email: '',
@@ -297,7 +311,13 @@ function BookOfBusinessContent() {
   useEffect(() => {
     if (tabParam) {
       setActiveTab(tabParam)
-      if (tabParam === 'Active' || tabParam === 'Inactive') setStatusFilter(tabParam)
+      if (tabParam === 'Active' || tabParam === 'Inactive' || tabParam === 'Pending') {
+        setStatusFilter(tabParam)
+      } else if (tabParam === 'Draft') {
+        setStatusFilter('Draft')
+      } else {
+        setStatusFilter('All')
+      }
     } else if (!searchParams.toString()) {
       setActiveTab('All')
       setStatusFilter('All')
@@ -318,11 +338,15 @@ function BookOfBusinessContent() {
 
   const handleTabSelect = (tabKey: string) => {
     setActiveTab(tabKey)
-    if (tabKey === 'Active' || tabKey === 'Inactive') setStatusFilter(tabKey)
-    else if (tabKey === 'All') setStatusFilter('All')
+    if (tabKey === 'Active' || tabKey === 'Inactive' || tabKey === 'Draft' || tabKey === 'Pending') setStatusFilter(tabKey)
+    else if (tabKey === 'Paid' || tabKey === 'Unpaid' || tabKey === 'All') setStatusFilter('All')
 
     let newHref = '/broker/book-of-business'
     if (tabKey === 'Active') newHref = '/broker/book-of-business?tab=Active'
+    else if (tabKey === 'Draft') newHref = '/broker/book-of-business?tab=Draft'
+    else if (tabKey === 'Paid') newHref = '/broker/book-of-business?tab=Paid'
+    else if (tabKey === 'Unpaid') newHref = '/broker/book-of-business?tab=Unpaid'
+    else if (tabKey === 'Pending') newHref = '/broker/book-of-business?tab=Pending'
     else if (tabKey === 'Inactive') newHref = '/broker/book-of-business?tab=Inactive'
 
     router.push(newHref)
@@ -332,6 +356,9 @@ function BookOfBusinessContent() {
   const totalClientsCount = clients.length
   const activeClientsCount = useMemo(() => clients.filter(c => c.status === 'Active' || c.status === 'Active / Submitted').length, [clients])
   const inactiveClientsCount = useMemo(() => clients.filter(c => c.status === 'Inactive').length, [clients])
+  const draftClientsCount = useMemo(() => clients.filter(c => c.status === 'Draft' || c.status === 'Draft / Incomplete').length, [clients])
+  const paidClientsCount = useMemo(() => clients.filter(c => getClientPaymentStatus(c) === 'Paid').length, [clients])
+  const unpaidClientsCount = useMemo(() => clients.filter(c => getClientPaymentStatus(c) === 'Unpaid').length, [clients])
   const totalPoliciesCount = useMemo(() => clients.reduce((acc, c) => acc + c.policies.filter(p => p.status === 'Active').length, 0), [clients])
   const consentGrantedCount = useMemo(() => clients.filter(c => c.marketingConsent.status === 'Granted').length, [clients])
   const consentRate = Math.round((consentGrantedCount / totalClientsCount) * 100) || 0
@@ -341,6 +368,10 @@ function BookOfBusinessContent() {
     return {
       All: clients.length,
       Active: clients.filter(c => c.status === 'Active' || c.status === 'Active / Submitted').length,
+      Draft: clients.filter(c => c.status === 'Draft' || c.status === 'Draft / Incomplete').length,
+      Paid: clients.filter(c => getClientPaymentStatus(c) === 'Paid').length,
+      Unpaid: clients.filter(c => getClientPaymentStatus(c) === 'Unpaid').length,
+      Pending: clients.filter(c => c.status === 'Pending').length,
       Inactive: clients.filter(c => c.status === 'Inactive').length,
       'Pending Renewal': clients.filter(c => c.policies.some(p => p.status === 'Pending Renewal')).length,
       'Consent Granted': clients.filter(c => c.marketingConsent.status === 'Granted').length,
@@ -354,6 +385,10 @@ function BookOfBusinessContent() {
     const list = clients.filter(client => {
       // Tab filter
       if (activeTab === 'Active' && client.status !== 'Active' && client.status !== 'Active / Submitted') return false
+      if (activeTab === 'Draft' && client.status !== 'Draft' && client.status !== 'Draft / Incomplete') return false
+      if (activeTab === 'Paid' && getClientPaymentStatus(client) !== 'Paid') return false
+      if (activeTab === 'Unpaid' && getClientPaymentStatus(client) !== 'Unpaid') return false
+      if (activeTab === 'Pending' && client.status !== 'Pending') return false
       if (activeTab === 'Inactive' && client.status !== 'Inactive') return false
       if (activeTab === 'Pending Renewal' && !client.policies.some(p => p.status === 'Pending Renewal')) return false
       if (activeTab === 'Consent Granted' && client.marketingConsent.status !== 'Granted') return false
@@ -363,6 +398,9 @@ function BookOfBusinessContent() {
       // Dropdown status filter
       if (statusFilter !== 'All') {
         if (statusFilter === 'Active' && client.status !== 'Active' && client.status !== 'Active / Submitted') return false
+        else if (statusFilter === 'Draft' && client.status !== 'Draft' && client.status !== 'Draft / Incomplete') return false
+        else if (statusFilter === 'Paid' && getClientPaymentStatus(client) !== 'Paid') return false
+        else if (statusFilter === 'Unpaid' && getClientPaymentStatus(client) !== 'Unpaid') return false
         else if (statusFilter === 'Inactive' && client.status !== 'Inactive') return false
         else if (statusFilter === 'Pending' && client.status !== 'Pending') return false
         else if (statusFilter === 'Lead' && client.status !== 'Lead') return false
@@ -393,7 +431,7 @@ function BookOfBusinessContent() {
       return true
     })
 
-    // Sort according to sortField ('name' | 'status' | 'consent') and sortDirection
+    // Sort according to sortField ('name' | 'status' | 'consent' | 'phone' | 'email' | 'payment') and sortDirection
     list.sort((a, b) => {
       let comparison = 0
       switch (sortField) {
@@ -402,6 +440,12 @@ function BookOfBusinessContent() {
           break
         case 'status':
           comparison = a.status.localeCompare(b.status)
+          break
+        case 'payment':
+          comparison = getClientPaymentStatus(a).localeCompare(getClientPaymentStatus(b))
+          break
+        case 'effectiveDate':
+          comparison = getClientEffectiveDate(a).localeCompare(getClientEffectiveDate(b))
           break
         case 'consent':
           comparison = a.marketingConsent.status.localeCompare(b.marketingConsent.status)
@@ -550,10 +594,15 @@ function BookOfBusinessContent() {
   function openAddClientModal() {
     setEditingClient(null)
     const today = '2026-10-16'
+    const isPendingDefault = typeof window !== 'undefined'
+      ? localStorage.getItem('broker_setting_default_policy_pending') !== 'false'
+      : true
+
     setClientForm({
       firstName: '',
       lastName: '',
       businessName: '',
+      clientType: 'Individual',
       dob: '',
       phone: '',
       email: '',
@@ -564,11 +613,11 @@ function BookOfBusinessContent() {
       status: 'Active / Submitted',
       effectiveDate: today,
       expirationDate: getExpiryFromEffective(today),
-      policyNumber: '',
-      isPendingPolicyNumber: false,
+      policyNumber: isPendingDefault ? 'POL-PENDING' : '',
+      isPendingPolicyNumber: isPendingDefault,
       linesOfBusiness: ['Auto'],
       yearlyPremium: '',
-      insurerName: 'Travelers Canada',
+      insurerName: 'Travelers Insurance',
       notes: '',
     })
     setAddressSearchQuery('')
@@ -585,6 +634,7 @@ function BookOfBusinessContent() {
       firstName: client.firstName,
       lastName: client.lastName,
       businessName: client.businessName === '—' ? '' : client.businessName,
+      clientType: (client.clientType || (client.businessName && client.businessName !== '—' ? 'Commercial' : 'Individual')) as 'Individual' | 'Commercial',
       dob: client.dob || '',
       phone: client.phone,
       email: client.email,
@@ -611,8 +661,19 @@ function BookOfBusinessContent() {
     if (e) e.preventDefault()
 
     if (!isDraft) {
-      if (!clientForm.firstName.trim() || !clientForm.lastName.trim() || !clientForm.email.trim()) {
-        alert('Please fill in First Name, Last Name, and Primary Email.')
+      if (clientForm.clientType === 'Commercial') {
+        if (!clientForm.businessName.trim() && !clientForm.firstName.trim()) {
+          alert('Please enter a Business Name for Commercial client.')
+          return
+        }
+      } else {
+        if (!clientForm.firstName.trim() || !clientForm.lastName.trim()) {
+          alert('Please fill in First Name and Last Name.')
+          return
+        }
+      }
+      if (!clientForm.email.trim()) {
+        alert('Please provide at least a Primary Email.')
         return
       }
     } else {
@@ -622,8 +683,11 @@ function BookOfBusinessContent() {
       }
     }
 
-    const fullName = `${clientForm.firstName.trim()} ${clientForm.lastName.trim()}`.trim() || (clientForm.businessName.trim() || 'Draft Lead')
-    const business = clientForm.businessName.trim() || '—'
+    const personName = `${clientForm.firstName.trim()} ${clientForm.lastName.trim()}`.trim()
+    const fullName = clientForm.clientType === 'Commercial'
+      ? clientForm.businessName.trim() || personName || 'Commercial Client'
+      : personName || clientForm.businessName.trim() || 'Draft Lead'
+    const business = clientForm.businessName.trim() || (clientForm.clientType === 'Commercial' ? fullName : '—')
     const finalStatus = isDraft ? 'Lead' : clientForm.status
 
     const policyNum = clientForm.isPendingPolicyNumber || !clientForm.policyNumber.trim()
@@ -648,6 +712,7 @@ function BookOfBusinessContent() {
         lastName: clientForm.lastName.trim(),
         name: fullName,
         businessName: business,
+        clientType: clientForm.clientType,
         dob: clientForm.dob,
         phone: clientForm.phone.trim(),
         email: clientForm.email.trim(),
@@ -679,6 +744,7 @@ function BookOfBusinessContent() {
         lastName: clientForm.lastName.trim(),
         name: fullName,
         businessName: business,
+        clientType: clientForm.clientType,
         dob: clientForm.dob,
         phone: clientForm.phone.trim(),
         email: clientForm.email.trim(),
@@ -930,8 +996,9 @@ function BookOfBusinessContent() {
   const renderPolicyCard = (policy: ClientPolicy) => {
     const isActive = policy.status === 'Active'
     const isPending = policy.policyNumberPending
-    const commissionPaid = policy.commissionStatus === 'Paid'
-    const commissionUnpaid = policy.commissionStatus === 'Unpaid'
+    const isPolicyPaid = getPolicyPaymentStatus(policy, selectedClientForView || undefined) === 'Paid'
+    const commissionPaid = policy.commissionStatus === 'Paid' || (isPolicyPaid && policy.commissionStatus !== 'Unpaid')
+    const commissionUnpaid = policy.commissionStatus === 'Unpaid' || (!isPolicyPaid)
 
     return (
       <div
@@ -984,8 +1051,8 @@ function BookOfBusinessContent() {
             )}
           </div>
 
-          {/* Right Status Badges */}
-          <div className="flex items-center gap-6 sm:gap-8 text-left sm:text-right shrink-0">
+          {/* Right Status Badges: Policy Status, Policy Payment, Commission */}
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-left sm:text-right shrink-0">
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
                 POLICY STATUS
@@ -993,6 +1060,29 @@ function BookOfBusinessContent() {
               <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900">
                 <span className={`size-2 rounded-full ${isActive ? 'bg-blue-600' : 'bg-slate-900'}`} />
                 {policy.status}
+              </span>
+            </div>
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                POLICY PAYMENT
+              </span>
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ring-1 ${isPolicyPaid
+                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                  : 'bg-rose-50 text-rose-700 ring-rose-200'
+                  }`}
+              >
+                {isPolicyPaid ? (
+                  <>
+                    <CheckCircle2 className="size-3 text-emerald-600" />
+                    <span>Paid</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="size-1.5 rounded-full bg-rose-500 animate-pulse" />
+                    <span>Unpaid</span>
+                  </>
+                )}
               </span>
             </div>
             <div>
@@ -1007,7 +1097,7 @@ function BookOfBusinessContent() {
                     : 'bg-slate-100 text-slate-700'
                   }`}
               >
-                {policy.commissionStatus || (isActive ? 'Unpaid' : 'Paid')}
+                {policy.commissionStatus || (isPolicyPaid ? 'Paid' : 'Unpaid')}
               </span>
             </div>
           </div>
@@ -1047,8 +1137,84 @@ function BookOfBusinessContent() {
         <div className="mt-4 text-xs">
           <span className="text-slate-400 font-medium block mb-0.5">Paid / net</span>
           <span className="text-sm font-bold text-slate-900 font-mono">
-            {policy.paidCommission || (isActive ? '$0.00' : policy.expectedCommission || '$130.50')} / {policy.netCommission || policy.expectedCommission || '$177.50'}
+            {policy.paidCommission || (isActive && !isPolicyPaid ? '$0.00' : policy.expectedCommission || '$130.50')} / {policy.netCommission || policy.expectedCommission || '$177.50'}
           </span>
+        </div>
+
+        {/* Dedicated Policy Payment Breakdown Card */}
+        <div
+          className={`mt-4 rounded-xl border p-4 text-xs transition ${isPolicyPaid
+            ? 'border-emerald-200/90 bg-gradient-to-r from-emerald-50/70 via-teal-50/30 to-white'
+            : 'border-rose-200/90 bg-gradient-to-r from-rose-50/70 via-red-50/30 to-white'
+            }`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-2.5 mb-3 border-slate-200/60">
+            <div className="flex items-center gap-2">
+              <div
+                className={`flex size-6 items-center justify-center rounded-lg ${isPolicyPaid ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
+                  }`}
+              >
+                <DollarSign className="size-3.5" />
+              </div>
+              <div>
+                <span className="text-xs font-bold text-slate-900">Policy Payment &amp; Settlement Details</span>
+                <span className="text-[11px] text-slate-500 ml-1.5">
+                  ({isPolicyPaid ? 'Premium Cleared' : 'Payment Outstanding'})
+                </span>
+              </div>
+            </div>
+
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 select-none ${isPolicyPaid
+                ? 'bg-emerald-100 text-emerald-800 ring-emerald-300'
+                : 'bg-rose-100 text-rose-800 ring-rose-300'
+                }`}
+            >
+              {isPolicyPaid ? (
+                <>
+                  <CheckCircle2 className="size-3 text-emerald-700" />
+                  <span>Premium Status: Paid</span>
+                </>
+              ) : (
+                <>
+                  <span className="size-1.5 rounded-full bg-rose-600 animate-pulse" />
+                  <span>Premium Status: Unpaid</span>
+                </>
+              )}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div>
+              <span className="text-slate-400 font-medium block text-[11px]">Gross Premium</span>
+              <span className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5 block">{policy.premium}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 font-medium block text-[11px]">Billing Method</span>
+              <span className="text-xs font-semibold text-slate-800 mt-0.5 block">{policy.billingMethod || 'Direct Bill (Insurer EFT)'}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 font-medium block text-[11px]">Broker Commission</span>
+              <span className={`text-xs font-bold mt-0.5 block ${commissionPaid ? 'text-emerald-700' : 'text-slate-700'}`}>
+                {commissionPaid ? `Paid (${policy.paidCommission || policy.expectedCommission || '$177.50'})` : 'Pending Reconciliation'}
+              </span>
+            </div>
+            <div>
+              <span className="text-slate-400 font-medium block text-[11px]">Settlement Date</span>
+              <span className="text-xs font-medium text-slate-700 mt-0.5 block">
+                {policy.paymentDate || policy.effectiveDate || 'Upon Statement Match'}
+              </span>
+            </div>
+          </div>
+
+          <p className="mt-2.5 pt-2 border-t border-slate-200/50 text-[11px] text-slate-500 flex items-center justify-between">
+            <span>
+              {policy.paymentNote || (isPolicyPaid
+                ? '✓ Policyholder premium has been paid and cleared with insurance carrier.'
+                : '⚠ Premium payment is pending invoice settlement or carrier statement verification.')}
+            </span>
+            <span className="text-slate-400 font-mono text-[10px]">LOB: {policy.type}</span>
+          </p>
         </div>
 
         {/* Chain Custody Note */}
@@ -1242,6 +1408,12 @@ function BookOfBusinessContent() {
                 { label: 'All Clients', key: 'All' },
                 { label: 'Active', key: 'Active' },
                 { label: 'Inactive', key: 'Inactive' },
+                { label: 'Paid', key: 'Paid', isPaid: true },
+                { label: 'Unpaid', key: 'Unpaid', isUnpaid: true },
+
+                { label: 'Drafts', key: 'Draft', highlight: true },
+                { label: 'Pending', key: 'Pending' },
+
               ].map((tab) => {
                 const count = (statusCounts as any)[tab.key] || 0
                 const isActive = activeTab === tab.key
@@ -1250,13 +1422,33 @@ function BookOfBusinessContent() {
                     key={tab.key}
                     onClick={() => handleTabSelect(tab.key)}
                     className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isActive
-                      ? 'bg-slate-950 text-white shadow-sm'
-                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                      ? tab.key === 'Draft'
+                        ? 'bg-amber-600 text-white shadow-sm ring-2 ring-amber-400/40'
+                        : tab.key === 'Paid'
+                          ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-400/40'
+                          : tab.key === 'Unpaid'
+                            ? 'bg-rose-600 text-white shadow-sm ring-2 ring-rose-400/40'
+                            : 'bg-slate-950 text-white shadow-sm'
+                      : tab.key === 'Draft' && count > 0
+                        ? 'text-amber-800 bg-amber-50/90 hover:bg-amber-100 hover:text-amber-900 ring-1 ring-amber-300/80 font-bold'
+                        : tab.key === 'Paid'
+                          ? 'text-emerald-700 bg-emerald-50/70 hover:bg-emerald-100 hover:text-emerald-800 ring-1 ring-emerald-200 font-semibold'
+                          : tab.key === 'Unpaid'
+                            ? 'text-rose-700 bg-rose-50/70 hover:bg-rose-100 hover:text-rose-800 ring-1 ring-rose-200 font-semibold'
+                            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                       }`}
                   >
                     <span>{tab.label}</span>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                      className={`rounded-full px-2 py-0.5 text-xs font-bold ${isActive
+                        ? 'bg-white/20 text-white'
+                        : tab.key === 'Draft' && count > 0
+                          ? 'bg-amber-200 text-amber-950'
+                          : tab.key === 'Paid'
+                            ? 'bg-emerald-200 text-emerald-950'
+                            : tab.key === 'Unpaid'
+                              ? 'bg-rose-200 text-rose-950'
+                              : 'bg-slate-100 text-slate-600'
                         }`}
                     >
                       {count}
@@ -1298,6 +1490,9 @@ function BookOfBusinessContent() {
                   >
                     <option value="All">All Statuses</option>
                     <option value="Active / Submitted">Active / Submitted</option>
+                    <option value="Draft">Drafts / Incomplete</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Unpaid">Unpaid</option>
                     <option value="Pending">Pending</option>
                     <option value="Lead">Lead</option>
                     <option value="Inactive">Inactive</option>
@@ -1371,7 +1566,7 @@ function BookOfBusinessContent() {
               className={`overflow-x-auto custom-scrollbar-table ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'
                 }`}
             >
-              <table className="w-full min-w-[1220px] text-left border-collapse">
+              <table className="w-full min-w-[1480px] text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold uppercase tracking-wider text-slate-500 select-none">
                     {/* 1. Client Name (Sortable: A to Z / Z to A) */}
@@ -1493,10 +1688,68 @@ function BookOfBusinessContent() {
                       </button>
                     </th>
 
-                    {/* 6. Policies */}
+                    {/* 6. Payment Status (Sortable: Paid / Unpaid) */}
+                    <th className="px-3 py-3 min-w-[140px] whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => handleSort('payment')}
+                        className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${sortField === 'payment' ? 'text-blue-600 font-extrabold' : 'text-slate-500 hover:text-slate-900'
+                          }`}
+                        title={`Sort by Payment Status (${sortField === 'payment' && sortDirection === 'asc' ? 'Unpaid first' : 'Paid first'})`}
+                      >
+                        <span>Paid / Unpaid</span>
+                        <span
+                          className={`inline-flex items-center justify-center rounded p-0.5 transition ${sortField === 'payment'
+                            ? 'bg-blue-100 text-blue-600 ring-1 ring-blue-300'
+                            : 'text-slate-400 group-hover:bg-slate-200/70 group-hover:text-slate-700'
+                            }`}
+                        >
+                          {sortField === 'payment' ? (
+                            sortDirection === 'asc' ? (
+                              <ArrowUp className="size-3.5 stroke-[2.5]" />
+                            ) : (
+                              <ArrowDown className="size-3.5 stroke-[2.5]" />
+                            )
+                          ) : (
+                            <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                          )}
+                        </span>
+                      </button>
+                    </th>
+
+                    {/* 7. Eff Date (Sortable) */}
+                    <th className="px-3 py-3 min-w-[125px] whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => handleSort('effectiveDate')}
+                        className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${sortField === 'effectiveDate' ? 'text-blue-600 font-extrabold' : 'text-slate-500 hover:text-slate-900'
+                          }`}
+                        title={`Sort by Effective Date (${sortField === 'effectiveDate' && sortDirection === 'asc' ? 'Oldest first' : 'Newest first'})`}
+                      >
+                        <span>Eff Date</span>
+                        <span
+                          className={`inline-flex items-center justify-center rounded p-0.5 transition ${sortField === 'effectiveDate'
+                            ? 'bg-blue-100 text-blue-600 ring-1 ring-blue-300'
+                            : 'text-slate-400 group-hover:bg-slate-200/70 group-hover:text-slate-700'
+                            }`}
+                        >
+                          {sortField === 'effectiveDate' ? (
+                            sortDirection === 'asc' ? (
+                              <ArrowUp className="size-3.5 stroke-[2.5]" />
+                            ) : (
+                              <ArrowDown className="size-3.5 stroke-[2.5]" />
+                            )
+                          ) : (
+                            <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                          )}
+                        </span>
+                      </button>
+                    </th>
+
+                    {/* 8. Policies */}
                     <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Policies</th>
 
-                    {/* 7. Marketing Consent (Sortable: Granted, Pending, Declined) */}
+                    {/* 9. Marketing Consent (Sortable: Granted, Pending, Declined) */}
                     <th className="px-3 py-3 min-w-[150px] whitespace-nowrap">
                       <button
                         type="button"
@@ -1525,10 +1778,10 @@ function BookOfBusinessContent() {
                       </button>
                     </th>
 
-                    {/* 8. Last Activity */}
+                    {/* 10. Last Activity */}
                     <th className="px-4 py-3.5 min-w-[175px]">Last Activity</th>
 
-                    {/* 9. Actions */}
+                    {/* 11. Actions */}
                     <th className="py-3.5 pl-4 pr-6 text-right min-w-[130px] w-[130px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">
                       Actions
                     </th>
@@ -1537,21 +1790,21 @@ function BookOfBusinessContent() {
                 <tbody>
                   {filteredClients.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="py-12 text-center text-slate-400">
+                      <td colSpan={11} className="py-12 text-center text-slate-400">
                         <Users className="mx-auto size-8 text-slate-300 mb-2" />
                         <p className="text-sm font-semibold text-slate-700">No clients matched your criteria</p>
                         <p className="text-xs text-slate-400 mt-1">Try selecting another status tab or resetting the search filter.</p>
                       </td>
                     </tr>
                   ) : (
-                    filteredClients.map((client) => {
+                    filteredClients.map((client, idx) => {
                       const initials = `${client.firstName[0] || ''}${client.lastName[0] || ''}`
                       const activePolicies = client.policies.filter(p => p.status === 'Active').length
                       const totalPolicies = client.policies.length
 
                       return (
                         <tr
-                          key={client.id}
+                          key={`${client.id}-${idx}`}
                           className="group border-b border-slate-100 transition-colors last:border-0 hover:bg-slate-50/80"
                         >
                           {/* 1. Client Name */}
@@ -1616,30 +1869,66 @@ function BookOfBusinessContent() {
                           {/* 5. Client Status (Static display badge - non-clickable) */}
                           <td className="px-3 py-3.5 whitespace-nowrap">
                             <span
-                              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 whitespace-nowrap select-none ${client.status === 'Active' || client.status === 'Active / Submitted'
-                                ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                : client.status === 'Pending'
-                                  ? 'bg-amber-50 text-amber-700 ring-amber-200'
-                                  : client.status === 'Lead'
-                                    ? 'bg-indigo-50 text-indigo-700 ring-indigo-200'
-                                    : 'bg-slate-100 text-slate-600 ring-slate-200'
+                              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 whitespace-nowrap select-none ${client.status === 'Draft' || client.status === 'Draft / Incomplete'
+                                ? 'bg-amber-50 text-amber-900 ring-amber-300'
+                                : client.status === 'Active' || client.status === 'Active / Submitted'
+                                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                  : client.status === 'Pending'
+                                    ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                                    : client.status === 'Lead'
+                                      ? 'bg-indigo-50 text-indigo-700 ring-indigo-200'
+                                      : 'bg-slate-100 text-slate-600 ring-slate-200'
                                 }`}
                             >
                               <span
-                                className={`size-1.5 rounded-full shrink-0 ${client.status === 'Active' || client.status === 'Active / Submitted'
-                                  ? 'bg-emerald-500'
-                                  : client.status === 'Pending'
-                                    ? 'bg-amber-500'
-                                    : client.status === 'Lead'
-                                      ? 'bg-indigo-500'
-                                      : 'bg-slate-400'
+                                className={`size-1.5 rounded-full shrink-0 ${client.status === 'Draft' || client.status === 'Draft / Incomplete'
+                                  ? 'bg-amber-500 animate-pulse'
+                                  : client.status === 'Active' || client.status === 'Active / Submitted'
+                                    ? 'bg-emerald-500'
+                                    : client.status === 'Pending'
+                                      ? 'bg-amber-500'
+                                      : client.status === 'Lead'
+                                        ? 'bg-indigo-500'
+                                        : 'bg-slate-400'
                                   }`}
                               />
-                              {client.status}
+                              {client.status === 'Draft' ? 'Draft / Incomplete' : client.status}
                             </span>
                           </td>
 
-                          {/* 6. Policies (Current / Historical count) */}
+                          {/* 6. Payment Status (Paid / Unpaid) */}
+                          <td className="px-3 py-3.5 whitespace-nowrap">
+                            {(() => {
+                              const payStatus = getClientPaymentStatus(client)
+                              if (payStatus === 'Paid') {
+                                return (
+                                  <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 select-none bg-emerald-50 text-emerald-700 ring-emerald-200">
+                                    <CheckCircle2 className="size-3.5 text-emerald-600" />
+                                    <span>Paid</span>
+                                  </span>
+                                )
+                              }
+                              return (
+                                <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 select-none bg-rose-50 text-rose-700 ring-rose-200">
+                                  <span className="size-1.5 rounded-full bg-rose-500 animate-pulse" />
+                                  <span>Unpaid</span>
+                                  {client.outstanding && client.outstanding !== '$0.00' && (
+                                    <span className="text-[10px] font-bold text-rose-600">({client.outstanding})</span>
+                                  )}
+                                </span>
+                              )
+                            })()}
+                          </td>
+
+                          {/* 7. Eff Date (Effective Date) */}
+                          <td className="px-3 py-3.5 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
+                              <Calendar className="size-3.5 text-slate-400 shrink-0" />
+                              <span>{getClientEffectiveDate(client)}</span>
+                            </div>
+                          </td>
+
+                          {/* 8. Policies (Current / Historical count) */}
                           <td className="px-3 py-3.5 whitespace-nowrap">
                             <div className="flex flex-col whitespace-nowrap">
                               <span className="text-sm font-semibold text-slate-800">
@@ -1651,12 +1940,12 @@ function BookOfBusinessContent() {
                             </div>
                           </td>
 
-                          {/* 7. Marketing Consent */}
+                          {/* 9. Marketing Consent */}
                           <td className="px-3 py-3.5 whitespace-nowrap">
                             {getConsentBadge(client.marketingConsent.status)}
                           </td>
 
-                          {/* 8. Last Activity */}
+                          {/* 10. Last Activity */}
                           <td className="px-4 py-3.5">
                             <div className="flex flex-col max-w-[170px]">
                               <span className="text-xs font-medium text-slate-700 truncate" title={client.lastActivity.description}>
@@ -1669,23 +1958,45 @@ function BookOfBusinessContent() {
                             </div>
                           </td>
 
-                          {/* 9. Actions */}
+                          {/* 11. Actions */}
                           <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[130px] w-[130px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
                             <div className="inline-flex items-center justify-end gap-1.5 whitespace-nowrap">
-                              <button
-                                onClick={() => handleSelectClient(client)}
-                                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
-                              >
-                                <Eye className="size-3.5 text-slate-400 shrink-0" />
-                                <span>View</span>
-                              </button>
-                              <button
-                                onClick={() => openEditClientModal(client)}
-                                className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 shrink-0 cursor-pointer"
-                                title="Edit Client"
-                              >
-                                <Edit3 className="size-3.5" />
-                              </button>
+                              {client.status === 'Draft' || client.status === 'Draft / Incomplete' ? (
+                                <>
+                                  <Link
+                                    href={`/broker/clients?draftId=${client.id}`}
+                                    className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs transition cursor-pointer whitespace-nowrap"
+                                    title="Resume editing this incomplete draft"
+                                  >
+                                    <Edit3 className="size-3.5 text-amber-200 shrink-0" />
+                                    <span>Resume</span>
+                                  </Link>
+                                  <button
+                                    onClick={() => handleSelectClient(client)}
+                                    className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 shrink-0 cursor-pointer"
+                                    title="View Draft Details"
+                                  >
+                                    <Eye className="size-3.5" />
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    onClick={() => handleSelectClient(client)}
+                                    className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
+                                  >
+                                    <Eye className="size-3.5 text-slate-400 shrink-0" />
+                                    <span>View</span>
+                                  </button>
+                                  <button
+                                    onClick={() => openEditClientModal(client)}
+                                    className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 shrink-0 cursor-pointer"
+                                    title="Edit Client"
+                                  >
+                                    <Edit3 className="size-3.5" />
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -1773,10 +2084,40 @@ Address: ${selectedClientForView.street}, ${selectedClientForView.city}, ${selec
                     <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
                       {selectedClientForView.clientType || (selectedClientForView.businessName !== '—' ? 'Commercial' : 'Individual')}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                      <span className={`size-2 rounded-full ${selectedClientForView.status === 'Active' ? 'bg-blue-600' : 'bg-slate-400'}`} />
-                      {selectedClientForView.status}
+                    <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${selectedClientForView.status === 'Draft' || selectedClientForView.status === 'Draft / Incomplete'
+                      ? 'text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-md ring-1 ring-amber-300'
+                      : 'text-slate-900'
+                      }`}>
+                      <span className={`size-2 rounded-full ${selectedClientForView.status === 'Draft' || selectedClientForView.status === 'Draft / Incomplete'
+                        ? 'bg-amber-500 animate-pulse'
+                        : selectedClientForView.status === 'Active'
+                          ? 'bg-blue-600'
+                          : 'bg-slate-400'
+                        }`} />
+                      {selectedClientForView.status === 'Draft' ? 'Draft / Incomplete' : selectedClientForView.status}
                     </span>
+
+                    {/* Client Overall Payment Status Badge */}
+                    {(() => {
+                      const payStatus = getClientPaymentStatus(selectedClientForView)
+                      if (payStatus === 'Paid') {
+                        return (
+                          <span className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 text-xs font-bold bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
+                            <CheckCircle2 className="size-3 text-emerald-600" />
+                            <span>Paid</span>
+                          </span>
+                        )
+                      }
+                      return (
+                        <span className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 text-xs font-bold bg-rose-50 text-rose-700 ring-1 ring-rose-200">
+                          <span className="size-1.5 rounded-full bg-rose-500 animate-pulse" />
+                          <span>Unpaid</span>
+                          {selectedClientForView.outstanding && selectedClientForView.outstanding !== '$0.00' && (
+                            <span className="text-[10.5px] text-rose-600 font-semibold">({selectedClientForView.outstanding})</span>
+                          )}
+                        </span>
+                      )
+                    })()}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500 mt-2">
@@ -1809,6 +2150,15 @@ Address: ${selectedClientForView.street}, ${selectedClientForView.city}, ${selec
 
               {/* Right Action Buttons */}
               <div className="flex flex-wrap items-center gap-2.5">
+                {(selectedClientForView.status === 'Draft' || selectedClientForView.status === 'Draft / Incomplete') && (
+                  <Link
+                    href={`/broker/clients?draftId=${selectedClientForView.id}`}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition cursor-pointer"
+                  >
+                    <Edit3 className="size-3.5 text-amber-200" />
+                    Resume &amp; Complete Draft
+                  </Link>
+                )}
                 <button
                   type="button"
                   onClick={() => setClientDetailTab('commissions')}
@@ -1820,6 +2170,28 @@ Address: ${selectedClientForView.street}, ${selectedClientForView.city}, ${selec
               </div>
             </div>
           </div>
+
+          {/* Draft Notice Banner if viewed client is draft */}
+          {(selectedClientForView.status === 'Draft' || selectedClientForView.status === 'Draft / Incomplete') && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-xs sm:text-sm text-amber-900 shadow-xs animate-in fade-in">
+              <div className="flex items-center gap-2.5">
+                <span className="size-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                <div>
+                  <span className="font-bold">This client record is saved in Drafts (Incomplete / Half Info).</span>
+                  <span className="text-amber-800 ml-1">
+                    {selectedClientForView.lastActivity?.description || 'Pending details before binding.'}
+                  </span>
+                </div>
+              </div>
+              <Link
+                href={`/broker/clients?draftId=${selectedClientForView.id}`}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition cursor-pointer shrink-0"
+              >
+                <Edit3 className="size-3.5" />
+                <span>Resume in Intake Form</span>
+              </Link>
+            </div>
+          )}
 
           {/* ───── 7 Commission Summary Metrics (Single Row matching Screenshot) ───── */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
@@ -2104,6 +2476,7 @@ Address: ${selectedClientForView.street}, ${selectedClientForView.city}, ${selec
                             <th className="px-4 py-3.5">Coverage Line</th>
                             <th className="px-4 py-3.5">Carrier</th>
                             <th className="px-4 py-3.5">Premium</th>
+                            <th className="px-4 py-3.5">Payment</th>
                             <th className="px-4 py-3.5">Term Dates</th>
                             <th className="px-4 py-3.5">Status</th>
                             <th className="px-5 py-3.5 text-right">Action</th>
@@ -2128,6 +2501,31 @@ Address: ${selectedClientForView.street}, ${selectedClientForView.city}, ${selec
                                   <td className="px-4 py-4 font-semibold text-slate-800">{policy.type}</td>
                                   <td className="px-4 py-4 text-slate-600">{policy.carrier}</td>
                                   <td className="px-4 py-4 font-bold text-slate-900">{policy.premium}</td>
+                                  <td className="px-4 py-4 whitespace-nowrap">
+                                    {(() => {
+                                      const isPolPaid = getPolicyPaymentStatus(policy, selectedClientForView) === 'Paid'
+                                      return (
+                                        <span
+                                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ${isPolPaid
+                                            ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                            : 'bg-rose-50 text-rose-700 ring-rose-200'
+                                            }`}
+                                        >
+                                          {isPolPaid ? (
+                                            <>
+                                              <CheckCircle2 className="size-3 text-emerald-600" />
+                                              <span>Paid</span>
+                                            </>
+                                          ) : (
+                                            <>
+                                              <span className="size-1.5 rounded-full bg-rose-500 animate-pulse" />
+                                              <span>Unpaid</span>
+                                            </>
+                                          )}
+                                        </span>
+                                      )
+                                    })()}
+                                  </td>
                                   <td className="px-4 py-4 text-slate-500 font-medium">
                                     {policy.effectiveDate} &rarr; {policy.expirationDate}
                                   </td>
@@ -2179,7 +2577,7 @@ Address: ${selectedClientForView.street}, ${selectedClientForView.city}, ${selec
                                 {/* Inline Expanded Details Row: Render Image 1 Reference Card directly! */}
                                 {isExpanded && (
                                   <tr className="bg-blue-50/20 border-b border-slate-200 animate-in fade-in duration-200">
-                                    <td colSpan={7} className="p-4 sm:p-6">
+                                    <td colSpan={8} className="p-4 sm:p-6">
                                       <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200/60">
                                         <span className="text-xs font-bold uppercase tracking-wider text-blue-600 flex items-center gap-1.5">
                                           <Shield className="size-3.5" /> Policy Specifications &amp; Overview
@@ -2641,43 +3039,75 @@ Address: ${selectedClientForView.street}, ${selectedClientForView.city}, ${selec
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">First Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={clientForm.firstName}
-                      onChange={(e) => setClientForm({ ...clientForm, firstName: e.target.value })}
-                      placeholder="e.g. Marcus"
-                      className="h-9.5 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                      Client Classification
+                    </label>
+                    <select
+                      value={clientForm.clientType}
+                      onChange={(e) => setClientForm({ ...clientForm, clientType: e.target.value as any })}
+                      className="h-9.5 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-medium"
+                    >
+                      <option value="Individual">Individual Policyholder</option>
+                      <option value="Commercial">Commercial / Business</option>
+                    </select>
                   </div>
+
                   <div>
-                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">Last Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={clientForm.lastName}
-                      onChange={(e) => setClientForm({ ...clientForm, lastName: e.target.value })}
-                      placeholder="e.g. Vance"
-                      className="h-9.5 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                      Business Name {clientForm.clientType === 'Commercial' ? <span className="text-rose-500">*</span> : <span className="text-slate-400 font-normal">(optional)</span>}
+                    </label>
+                    <div className="relative">
+                      <Building2 className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        required={clientForm.clientType === 'Commercial'}
+                        value={clientForm.businessName}
+                        onChange={(e) => setClientForm({ ...clientForm, businessName: e.target.value })}
+                        placeholder={clientForm.clientType === 'Commercial' ? 'e.g. Vance Logistics LLC (Required)' : 'e.g. Vance Logistics LLC'}
+                        className="h-9.5 w-full rounded-xl border border-slate-200 bg-white pl-9.5 pr-3 text-[13px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">Business Name (optional)</label>
-                    <div className="relative">
-                      <Building2 className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                      <input
-                        type="text"
-                        value={clientForm.businessName}
-                        onChange={(e) => setClientForm({ ...clientForm, businessName: e.target.value })}
-                        placeholder="e.g. Vance Logistics LLC"
-                        className="h-9.5 w-full rounded-xl border border-slate-200 bg-white pl-9.5 pr-3 text-[13px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                      />
-                    </div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                      {clientForm.clientType === 'Commercial' ? 'Contact Person First Name' : 'First Name'}{' '}
+                      {clientForm.clientType === 'Individual' ? <span className="text-rose-500">*</span> : <span className="text-slate-400 font-normal">(optional)</span>}
+                    </label>
+                    <input
+                      type="text"
+                      required={clientForm.clientType === 'Individual'}
+                      value={clientForm.firstName}
+                      onChange={(e) => setClientForm({ ...clientForm, firstName: e.target.value })}
+                      placeholder={clientForm.clientType === 'Commercial' ? 'e.g. Marcus (optional)' : 'e.g. Marcus'}
+                      className="h-9.5 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
                   </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                      {clientForm.clientType === 'Commercial' ? 'Contact Person Last Name' : 'Last Name'}{' '}
+                      {clientForm.clientType === 'Individual' ? <span className="text-rose-500">*</span> : <span className="text-slate-400 font-normal">(optional)</span>}
+                    </label>
+                    <input
+                      type="text"
+                      required={clientForm.clientType === 'Individual'}
+                      value={clientForm.lastName}
+                      onChange={(e) => setClientForm({ ...clientForm, lastName: e.target.value })}
+                      placeholder={clientForm.clientType === 'Commercial' ? 'e.g. Vance (optional)' : 'e.g. Vance'}
+                      className="h-9.5 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                </div>
+
+                {clientForm.clientType === 'Commercial' && (
+                  <div className="rounded-lg border border-blue-100 bg-blue-50/70 p-2.5 text-[11px] text-blue-900 flex items-center gap-2">
+                    <span className="size-1.5 rounded-full bg-blue-600 shrink-0" />
+                    <span>Commercial Account: Business Name is required. First Name and Last Name are optional contact person fields.</span>
+                  </div>
+                )}
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="text-[11px] font-semibold text-slate-700 block mb-1">
                       Date of Birth <span className="text-slate-400 font-normal">(optional)</span>
@@ -3132,20 +3562,35 @@ Address: ${selectedClientForView.street}, ${selectedClientForView.city}, ${selec
                   </select>
                 </div>
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-700 block mb-1">Carrier</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[11px] font-semibold text-slate-700">Insurance Company / Carrier</label>
+                    <span className="text-[10px] text-blue-600 font-medium">Settings Pre-selected</span>
+                  </div>
                   <select
                     value={policyForm.carrier}
                     onChange={(e) => setPolicyForm({ ...policyForm, carrier: e.target.value })}
-                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                    className="h-9 w-full rounded-xl border border-slate-200 px-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 font-medium text-slate-900"
                   >
-                    <option>Travelers</option>
-                    <option>Chubb</option>
-                    <option>Hartford</option>
-                    <option>AIG</option>
-                    <option>CNA</option>
-                    <option>Medical Protective</option>
-                    <option>Berkshire Hathaway</option>
+                    <option value="Travelers Insurance">Travelers Insurance</option>
+                    <option value="The Hartford">The Hartford</option>
+                    <option value="Liberty Mutual">Liberty Mutual</option>
+                    <option value="Progressive Commercial">Progressive Commercial</option>
+                    <option value="Chubb Commercial">Chubb Commercial</option>
+                    <option value="Nationwide Mutual">Nationwide Mutual</option>
+                    <option value="Intact Insurance">Intact Insurance</option>
+                    <option value="Aviva Canada">Aviva Canada</option>
+                    <option value="Wawanesa Mutual Insurance">Wawanesa Mutual Insurance</option>
+                    <option value="Economical / Definity Insurance">Economical / Definity Insurance</option>
+                    <option value="Other">Other (Type custom carrier)...</option>
                   </select>
+                  {policyForm.carrier === 'Other' && (
+                    <input
+                      type="text"
+                      placeholder="Type custom carrier name..."
+                      onChange={(e) => setPolicyForm({ ...policyForm, carrier: e.target.value })}
+                      className="mt-1.5 h-8 w-full rounded-xl border border-blue-200 px-3 text-[11px] outline-none focus:ring-2 focus:ring-blue-100"
+                    />
+                  )}
                 </div>
               </div>
 

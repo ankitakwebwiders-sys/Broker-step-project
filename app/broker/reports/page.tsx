@@ -30,6 +30,10 @@ import {
   Printer,
   Sparkles,
   ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  PieChart as PieChartIcon,
+  BarChart2,
   FileCheck2,
   Layers,
   HelpCircle,
@@ -378,6 +382,28 @@ function ReportsContent() {
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false)
 
+  // Column Sort State for Table Headers (Arrow sort button functionality)
+  const [sortColumn, setSortColumn] = useState<string | null>('client')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+
+  // Book of Business View Mode: 'split' (Charts + Table) | 'charts' | 'table'
+  const [bobViewMode, setBobViewMode] = useState<'split' | 'charts' | 'table'>('split')
+
+  // Toggle or cycle sort direction on column click
+  function handleSort(colKey: string) {
+    if (sortColumn === colKey) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc')
+      } else {
+        setSortColumn(null)
+        setSortDirection('asc')
+      }
+    } else {
+      setSortColumn(colKey)
+      setSortDirection('asc')
+    }
+  }
+
   // Sync URL query when selectedReport changes
   useEffect(() => {
     if (initialType && initialType !== selectedReport) {
@@ -518,6 +544,130 @@ function ReportsContent() {
     marketingConsentFilter,
   ])
 
+  // Sorted Records based on active column sort arrow
+  const sortedRecords = useMemo(() => {
+    if (!sortColumn) return currentRecords
+
+    return [...currentRecords].sort((a, b) => {
+      const aVal = a[sortColumn]
+      const bVal = b[sortColumn]
+
+      if (aVal === undefined || aVal === null) return 1
+      if (bVal === undefined || bVal === null) return -1
+
+      // Numeric comparison
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortDirection === 'asc' ? aVal - bVal : bVal - aVal
+      }
+
+      // Check if both strings are parseable as currency or numbers (e.g. "$14,500" or "15.0%")
+      const aNum = parseFloat(String(aVal).replace(/[^0-9.-]+/g, ''))
+      const bNum = parseFloat(String(bVal).replace(/[^0-9.-]+/g, ''))
+      if (!isNaN(aNum) && !isNaN(bNum) && String(aVal).includes('%') && String(bVal).includes('%')) {
+        return sortDirection === 'asc' ? aNum - bNum : bNum - aNum
+      }
+
+      // Date comparison (YYYY-MM-DD)
+      if (typeof aVal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(aVal)) {
+        return sortDirection === 'asc'
+          ? aVal.localeCompare(String(bVal))
+          : String(bVal).localeCompare(aVal)
+      }
+
+      // String alphabetical comparison
+      const aStr = String(aVal).toLowerCase()
+      const bStr = String(bVal).toLowerCase()
+      if (aStr < bStr) return sortDirection === 'asc' ? -1 : 1
+      if (aStr > bStr) return sortDirection === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [currentRecords, sortColumn, sortDirection])
+
+  // Book of Business Aggregated Visual Analytics (Pie charts & graphs)
+  const bobStats = useMemo(() => {
+    const rawRecords = SAMPLE_RECORDS['book-of-business'] || []
+    const records = selectedReport === 'book-of-business' ? currentRecords : rawRecords
+
+    const totalPremium = records.reduce((sum, r) => sum + (Number(r.premium) || 0), 0)
+    const totalExpectedComm = records.reduce((sum, r) => sum + (Number(r.expectedComm) || 0), 0)
+    const policyCount = records.length
+
+    // Group by Line of Business (LOB) for Pie / Donut Chart
+    const lobMap: Record<string, { count: number; premium: number }> = {}
+    records.forEach((r) => {
+      const key = r.lob || 'Other'
+      if (!lobMap[key]) lobMap[key] = { count: 0, premium: 0 }
+      lobMap[key].count += 1
+      lobMap[key].premium += Number(r.premium) || 0
+    })
+
+    const lobColors: Record<string, string> = {
+      'Commercial Property': '#0170FE',
+      'Commercial Auto': '#6366F1',
+      'General Liability': '#10B981',
+      'Cyber & Tech E&O': '#8B5CF6',
+      'Workers Comp': '#F59E0B',
+    }
+    const defaultColors = ['#0170FE', '#6366F1', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899', '#06B6D4']
+    let cIdx = 0
+
+    const lobBreakdown = Object.entries(lobMap).map(([lob, data]) => {
+      const color = lobColors[lob] || defaultColors[cIdx++ % defaultColors.length]
+      const percent = totalPremium > 0 ? (data.premium / totalPremium) * 100 : 0
+      return {
+        lob,
+        count: data.count,
+        premium: data.premium,
+        percent: Math.round(percent * 10) / 10,
+        color,
+      }
+    }).sort((a, b) => b.premium - a.premium)
+
+    // Group by Carrier for Horizontal Bar Distribution Graph
+    const carrierMap: Record<string, { count: number; premium: number }> = {}
+    records.forEach((r) => {
+      const key = r.carrier || 'Other'
+      if (!carrierMap[key]) carrierMap[key] = { count: 0, premium: 0 }
+      carrierMap[key].count += 1
+      carrierMap[key].premium += Number(r.premium) || 0
+    })
+
+    const carrierBreakdown = Object.entries(carrierMap).map(([carrier, data]) => {
+      const percent = totalPremium > 0 ? (data.premium / totalPremium) * 100 : 0
+      return {
+        carrier,
+        count: data.count,
+        premium: data.premium,
+        percent: Math.round(percent * 10) / 10,
+      }
+    }).sort((a, b) => b.premium - a.premium)
+
+    // Group by Policy Status
+    const statusCounts = {
+      Active: {
+        count: records.filter((r) => r.status === 'Active').length,
+        premium: records.filter((r) => r.status === 'Active').reduce((s, r) => s + (Number(r.premium) || 0), 0),
+      },
+      Pending: {
+        count: records.filter((r) => r.status === 'Pending').length,
+        premium: records.filter((r) => r.status === 'Pending').reduce((s, r) => s + (Number(r.premium) || 0), 0),
+      },
+      Expired: {
+        count: records.filter((r) => r.status === 'Expired').length,
+        premium: records.filter((r) => r.status === 'Expired').reduce((s, r) => s + (Number(r.premium) || 0), 0),
+      },
+    }
+
+    return {
+      totalPremium,
+      totalExpectedComm,
+      policyCount,
+      lobBreakdown,
+      carrierBreakdown,
+      statusCounts,
+    }
+  }, [selectedReport, currentRecords])
+
   // Real functional export to CSV / Excel
   function triggerExport(format: 'CSV' | 'Excel' | 'PDF', reportTitle?: string) {
     const title = reportTitle || (selectedReport === 'catalog' ? 'All_Reports_Catalog' : selectedReport)
@@ -539,7 +689,7 @@ function ReportsContent() {
         SOW_Filters: r.sowFilters,
         Export_Formats: r.exportFormats.join(' / '),
       }))
-      : currentRecords
+      : sortedRecords
 
     if (recordsToExport.length === 0) {
       showToast('No records to export with current filters')
@@ -1125,97 +1275,618 @@ function ReportsContent() {
               </div>
             </div>
 
-            {/* Live Data Table Preview */}
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden">
-              <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <p className="text-sm font-bold text-slate-800">
-                  Data Preview ({currentRecords.length} Rows)
-                </p>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => triggerExport('CSV')}
-                    className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-[#0170FE] hover:underline"
-                  >
-                    <Download className="size-3.5" />
-                    <span>Export CSV</span>
-                  </button>
-                  <span className="text-slate-300">·</span>
-                  <button
-                    type="button"
-                    onClick={() => triggerExport('PDF')}
-                    className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-slate-600 hover:underline"
-                  >
-                    <Printer className="size-3.5" />
-                    <span>Print PDF</span>
-                  </button>
+            {/* BOOK OF BUSINESS SPECIALIZED VISUAL ANALYTICS & QUICK CONTROLS */}
+            {selectedReport === 'book-of-business' && (
+              <div className="space-y-6">
+                {/* 1. View Mode Switcher & Quick Snapshot */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 mr-1">Display View:</span>
+                    <div className="inline-flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200/60">
+                      <button
+                        type="button"
+                        onClick={() => setBobViewMode('split')}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
+                          bobViewMode === 'split'
+                            ? 'bg-slate-900 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        <BarChart2 className="size-3.5" />
+                        <span>Charts + Table</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setBobViewMode('charts')}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
+                          bobViewMode === 'charts'
+                            ? 'bg-slate-900 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        <PieChartIcon className="size-3.5 text-blue-400" />
+                        <span>Visual Graphs Only</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setBobViewMode('table')}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
+                          bobViewMode === 'table'
+                            ? 'bg-slate-900 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        <FileSpreadsheet className="size-3.5 text-emerald-400" />
+                        <span>Policy Records Table</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-500 font-medium">Quick Total:</span>
+                    <span className="text-xs font-mono font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                      ${bobStats.totalPremium.toLocaleString()} Premium
+                    </span>
+                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200">
+                      {bobStats.policyCount} Policies
+                    </span>
+                  </div>
+                </div>
+
+                {/* 2. Visual Graphs & Pie Charts Section */}
+                {bobViewMode !== 'table' && (
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    {/* Left: Interactive Donut / Pie Chart for Line of Business */}
+                    <div className="lg:col-span-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                          <div className="flex items-center gap-2">
+                            <div className="size-8 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-[#0170FE]">
+                              <PieChartIcon className="size-4" />
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-bold text-slate-900">
+                                Premium by Line of Business
+                              </h3>
+                              <p className="text-xs text-slate-400">
+                                Interactive portfolio mix &amp; coverage shares
+                              </p>
+                            </div>
+                          </div>
+                          {lobFilter !== 'All' && (
+                            <button
+                              type="button"
+                              onClick={() => setLobFilter('All')}
+                              className="text-xs font-semibold text-[#0170FE] hover:underline flex items-center gap-1"
+                            >
+                              <span>Reset LOB ({lobFilter})</span>
+                              <X className="size-3" />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Chart + Legend Container */}
+                        <div className="mt-5 grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
+                          {/* SVG Donut Chart */}
+                          <div className="sm:col-span-5 flex items-center justify-center relative">
+                            <div className="relative size-44 sm:size-48">
+                              <svg viewBox="0 0 100 100" className="size-full -rotate-90">
+                                {/* Base track ring */}
+                                <circle
+                                  cx="50"
+                                  cy="50"
+                                  r="36"
+                                  fill="transparent"
+                                  stroke="#f1f5f9"
+                                  strokeWidth="14"
+                                />
+                                {/* Segments */}
+                                {(() => {
+                                  const radius = 36
+                                  const circumference = 2 * Math.PI * radius // ~226.195
+                                  let accumulatedPercent = 0
+                                  return bobStats.lobBreakdown.map((item, idx) => {
+                                    const strokeDash = (item.percent / 100) * circumference
+                                    const strokeOffset = - (accumulatedPercent / 100) * circumference
+                                    accumulatedPercent += item.percent
+                                    const isSelected = lobFilter === item.lob
+                                    return (
+                                      <circle
+                                        key={idx}
+                                        cx="50"
+                                        cy="50"
+                                        r={radius}
+                                        fill="transparent"
+                                        stroke={item.color}
+                                        strokeWidth={isSelected ? '16' : '14'}
+                                        strokeDasharray={`${strokeDash} ${circumference - strokeDash}`}
+                                        strokeDashoffset={strokeOffset}
+                                        className="transition-all duration-300 hover:opacity-80 cursor-pointer"
+                                        onClick={() => setLobFilter(lobFilter === item.lob ? 'All' : item.lob)}
+                                      >
+                                        <title>{`${item.lob}: $${item.premium.toLocaleString()} (${item.percent}%) - Click to filter`}</title>
+                                      </circle>
+                                    )
+                                  })
+                                })()}
+                              </svg>
+
+                              {/* Center KPI Display in donut hole */}
+                              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Book Total</span>
+                                <span className="text-lg font-mono font-extrabold text-slate-900 tracking-tight">
+                                  ${(bobStats.totalPremium / 1000).toFixed(1)}k
+                                </span>
+                                <span className="text-[11px] font-semibold text-emerald-600">
+                                  {bobStats.policyCount} Policies
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Legend with interactive click to filter */}
+                          <div className="sm:col-span-7 space-y-2">
+                            {bobStats.lobBreakdown.map((item) => {
+                              const isSelected = lobFilter === item.lob
+                              return (
+                                <button
+                                  key={item.lob}
+                                  type="button"
+                                  onClick={() => setLobFilter(isSelected ? 'All' : item.lob)}
+                                  className={`w-full text-left p-2 rounded-xl transition flex items-center justify-between border cursor-pointer ${
+                                    isSelected
+                                      ? 'bg-blue-50/80 border-blue-300 ring-1 ring-blue-300'
+                                      : 'bg-slate-50/70 border-slate-100 hover:bg-slate-100/80'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <span
+                                      className="size-3 rounded-md shrink-0"
+                                      style={{ backgroundColor: item.color }}
+                                    />
+                                    <div className="truncate">
+                                      <p className="text-xs font-bold text-slate-800 truncate">
+                                        {item.lob}
+                                      </p>
+                                      <p className="text-[11px] text-slate-400">
+                                        {item.count} {item.count === 1 ? 'policy' : 'policies'} · {item.percent}%
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <span className="text-xs font-mono font-bold text-slate-900 ml-2">
+                                    ${item.premium.toLocaleString()}
+                                  </span>
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                        <span>💡 Tip: Click any slice or legend item to filter the list</span>
+                        <span className="font-semibold text-slate-700">Top: {bobStats.lobBreakdown[0]?.lob || 'N/A'}</span>
+                      </div>
+                    </div>
+
+                    {/* Right: Carrier Market Share Horizontal Bar Graph & Status Gauge */}
+                    <div className="lg:col-span-6 space-y-5">
+                      {/* Carrier Distribution Horizontal Graph */}
+                      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                          <div className="flex items-center gap-2">
+                            <div className="size-8 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
+                              <Building2 className="size-4" />
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-bold text-slate-900">
+                                Premium Distribution by Carrier
+                              </h3>
+                              <p className="text-xs text-slate-400">
+                                Volume breakdown across underwriting partners
+                              </p>
+                            </div>
+                          </div>
+                          {carrierFilter !== 'All' && (
+                            <button
+                              type="button"
+                              onClick={() => setCarrierFilter('All')}
+                              className="text-xs font-semibold text-[#0170FE] hover:underline flex items-center gap-1"
+                            >
+                              <span>Reset ({carrierFilter.split(' ')[0]})</span>
+                              <X className="size-3" />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Horizontal Bar Chart Items */}
+                        <div className="mt-4 space-y-3">
+                          {bobStats.carrierBreakdown.map((c) => {
+                            const isSelected = carrierFilter === c.carrier
+                            const maxPremium = bobStats.carrierBreakdown[0]?.premium || 1
+                            const barPercent = Math.round((c.premium / maxPremium) * 100)
+                            return (
+                              <button
+                                key={c.carrier}
+                                type="button"
+                                onClick={() => setCarrierFilter(isSelected ? 'All' : c.carrier)}
+                                className={`w-full text-left p-2.5 rounded-xl transition border cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-emerald-50/80 border-emerald-300 ring-1 ring-emerald-300'
+                                    : 'bg-slate-50/50 border-slate-100 hover:bg-slate-100/60'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between text-xs mb-1.5">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-bold text-slate-800">{c.carrier}</span>
+                                    <span className="rounded-md bg-white border border-slate-200 px-1.5 py-0.2 text-[10px] font-semibold text-slate-600">
+                                      {c.count} {c.count === 1 ? 'pol' : 'pols'}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-mono font-bold text-slate-900">
+                                      ${c.premium.toLocaleString()}
+                                    </span>
+                                    <span className="text-[11px] font-semibold text-slate-400">
+                                      ({c.percent}%)
+                                    </span>
+                                  </div>
+                                </div>
+                                {/* Progress Meter */}
+                                <div className="h-2 w-full rounded-full bg-slate-200/70 overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-500 ${
+                                      isSelected
+                                        ? 'bg-emerald-600'
+                                        : 'bg-gradient-to-r from-emerald-500 to-[#0170FE]'
+                                    }`}
+                                    style={{ width: `${barPercent}%` }}
+                                  />
+                                </div>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Policy Health & Status Summary Cards */}
+                      <div className="grid grid-cols-3 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setPolicyStatusFilter(policyStatusFilter === 'Active' ? 'All' : 'Active')}
+                          className={`p-3.5 rounded-2xl border text-left transition cursor-pointer ${
+                            policyStatusFilter === 'Active'
+                              ? 'bg-emerald-50 border-emerald-300 ring-1 ring-emerald-300'
+                              : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">Active</span>
+                            <span className="size-2 rounded-full bg-emerald-500" />
+                          </div>
+                          <p className="text-xl font-bold font-mono text-slate-900">
+                            {bobStats.statusCounts.Active.count}
+                          </p>
+                          <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                            ${bobStats.statusCounts.Active.premium.toLocaleString()}
+                          </p>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setPolicyStatusFilter(policyStatusFilter === 'Pending' ? 'All' : 'Pending')}
+                          className={`p-3.5 rounded-2xl border text-left transition cursor-pointer ${
+                            policyStatusFilter === 'Pending'
+                              ? 'bg-amber-50 border-amber-300 ring-1 ring-amber-300'
+                              : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">Pending</span>
+                            <span className="size-2 rounded-full bg-amber-500" />
+                          </div>
+                          <p className="text-xl font-bold font-mono text-slate-900">
+                            {bobStats.statusCounts.Pending.count}
+                          </p>
+                          <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                            ${bobStats.statusCounts.Pending.premium.toLocaleString()}
+                          </p>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setPolicyStatusFilter(policyStatusFilter === 'Expired' ? 'All' : 'Expired')}
+                          className={`p-3.5 rounded-2xl border text-left transition cursor-pointer ${
+                            policyStatusFilter === 'Expired'
+                              ? 'bg-rose-50 border-rose-300 ring-1 ring-rose-300'
+                              : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-rose-700">Expired</span>
+                            <span className="size-2 rounded-full bg-rose-500" />
+                          </div>
+                          <p className="text-xl font-bold font-mono text-slate-900">
+                            {bobStats.statusCounts.Expired.count}
+                          </p>
+                          <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                            ${bobStats.statusCounts.Expired.premium.toLocaleString()}
+                          </p>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. Dedicated Filter Options Toolbar for Book of Business */}
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <Filter className="size-4 text-[#0170FE]" />
+                      <span className="text-sm font-bold text-slate-900">Book of Business Filters</span>
+                      {activeFiltersCount > 0 && (
+                        <span className="rounded-full bg-blue-100 text-[#0170FE] px-2 py-0.5 text-xs font-bold">
+                          {activeFiltersCount} Active
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Active Sort Pill with Reset */}
+                    <div className="flex items-center gap-2">
+                      {sortColumn && (
+                        <div className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 border border-blue-200/80 px-2.5 py-1 text-xs font-medium text-blue-900">
+                          <span className="font-semibold">Sorted by:</span>
+                          <span className="font-bold text-[#0170FE] capitalize">
+                            {sortColumn.replace(/([A-Z])/g, ' $1')}
+                          </span>
+                          <span className="text-[10px] font-mono font-bold bg-white px-1.5 py-0.2 rounded border border-blue-200 text-blue-700">
+                            {sortDirection === 'asc' ? 'A → Z ↑' : 'Z → A ↓'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setSortColumn(null)}
+                            className="text-blue-400 hover:text-blue-700 ml-1"
+                            title="Clear sorting"
+                          >
+                            <X className="size-3" />
+                          </button>
+                        </div>
+                      )}
+
+                      {(activeFiltersCount > 0 || sortColumn) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            resetAllFilters()
+                            setSortColumn(null)
+                          }}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-rose-600 transition cursor-pointer"
+                        >
+                          <RotateCcw className="size-3" />
+                          <span>Reset</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Filter Controls Row */}
+                  <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-slate-100">
+                    {/* Status Quick Filter Pills */}
+                    <div className="inline-flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200/60">
+                      {(['All', 'Active', 'Pending', 'Expired'] as const).map((st) => (
+                        <button
+                          key={st}
+                          type="button"
+                          onClick={() => setPolicyStatusFilter(st)}
+                          className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                            policyStatusFilter === st
+                              ? 'bg-slate-900 text-white shadow-xs'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                        >
+                          {st === 'All' ? 'All Statuses' : st}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Carrier Select */}
+                    <select
+                      value={carrierFilter}
+                      onChange={(e) => setCarrierFilter(e.target.value)}
+                      className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-[#0170FE]"
+                    >
+                      <option value="All">All Carriers</option>
+                      <option value="Travelers Insurance">Travelers Insurance</option>
+                      <option value="The Hartford">The Hartford</option>
+                      <option value="Liberty Mutual">Liberty Mutual</option>
+                      <option value="Progressive Commercial">Progressive Commercial</option>
+                      <option value="Chubb Commercial">Chubb Commercial</option>
+                      <option value="Nationwide Mutual">Nationwide Mutual</option>
+                    </select>
+
+                    {/* Line of Business Select */}
+                    <select
+                      value={lobFilter}
+                      onChange={(e) => setLobFilter(e.target.value)}
+                      className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-[#0170FE]"
+                    >
+                      <option value="All">All Coverage / LOB</option>
+                      <option value="Commercial Property">Commercial Property</option>
+                      <option value="General Liability">General Liability</option>
+                      <option value="Commercial Auto">Commercial Auto</option>
+                      <option value="Cyber & Tech E&O">Cyber & Tech E&O</option>
+                      <option value="Workers Comp">Workers Comp</option>
+                    </select>
+
+                    {/* Client / Policy Search */}
+                    <div className="relative flex-1 min-w-[200px]">
+                      <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search client, policy #..."
+                        className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-8 pr-3 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#0170FE] focus:bg-white"
+                      />
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                          <X className="size-3" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
+            )}
 
-              {currentRecords.length === 0 ? (
-                <div className="p-12 text-center">
-                  <AlertTriangle className="size-8 text-amber-500 mx-auto mb-2" />
-                  <p className="text-base font-bold text-slate-800">No records found matching filters</p>
-                  <p className="text-sm text-slate-500 mt-1">Try resetting or loosening the applied search parameters.</p>
-                  <button
-                    type="button"
-                    onClick={resetAllFilters}
-                    className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs sm:text-sm font-semibold text-white"
-                  >
-                    <RotateCcw className="size-3.5" />
-                    <span>Reset All Filters</span>
-                  </button>
+            {/* Live Data Table Preview */}
+            {(selectedReport !== 'book-of-business' || bobViewMode !== 'charts') && (
+              <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+                <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-slate-800">
+                      {selectedReport === 'book-of-business' ? 'Book of Business Policy Directory' : 'Data Preview'} ({sortedRecords.length} Rows)
+                    </p>
+                    <span className="text-xs text-slate-400 hidden sm:inline">
+                      · Click any column header to sort A → Z or Z → A
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => triggerExport('CSV')}
+                      className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-[#0170FE] hover:underline"
+                    >
+                      <Download className="size-3.5" />
+                      <span>Export CSV</span>
+                    </button>
+                    <span className="text-slate-300">·</span>
+                    <button
+                      type="button"
+                      onClick={() => triggerExport('PDF')}
+                      className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-slate-600 hover:underline"
+                    >
+                      <Printer className="size-3.5" />
+                      <span>Print PDF</span>
+                    </button>
+                  </div>
                 </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead>
-                      <tr className="border-b border-slate-100 bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                        {Object.keys(currentRecords[0]).map((colKey) => (
-                          <th key={colKey} className="py-3.5 px-4 capitalize whitespace-nowrap">
-                            {colKey.replace(/([A-Z])/g, ' $1').trim()}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium">
-                      {currentRecords.map((row, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/80 transition">
-                          {Object.entries(row).map(([k, v], cellIdx) => {
-                            const isAmount = typeof v === 'number' && (k.toLowerCase().includes('premium') || k.toLowerCase().includes('comm') || k.toLowerCase().includes('amount') || k.toLowerCase().includes('payout'))
-                            const isStatus = k.toLowerCase().includes('status')
+
+                {sortedRecords.length === 0 ? (
+                  <div className="p-12 text-center">
+                    <AlertTriangle className="size-8 text-amber-500 mx-auto mb-2" />
+                    <p className="text-base font-bold text-slate-800">No records found matching filters</p>
+                    <p className="text-sm text-slate-500 mt-1">Try resetting or loosening the applied search parameters.</p>
+                    <button
+                      type="button"
+                      onClick={resetAllFilters}
+                      className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs sm:text-sm font-semibold text-white"
+                    >
+                      <RotateCcw className="size-3.5" />
+                      <span>Reset All Filters</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead>
+                        <tr className="border-b border-slate-100 bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                          {Object.keys(sortedRecords[0]).map((colKey) => {
+                            const isSorted = sortColumn === colKey
                             return (
-                              <td key={cellIdx} className="py-3.5 px-4 whitespace-nowrap">
-                                {isAmount ? (
-                                  <span className="font-mono font-bold text-slate-900">
-                                    ${(v as number).toLocaleString()}
+                              <th
+                                key={colKey}
+                                onClick={() => handleSort(colKey)}
+                                title={`Click to sort by ${colKey.replace(/([A-Z])/g, ' $1').trim()}`}
+                                className={`py-3.5 px-4 capitalize whitespace-nowrap cursor-pointer select-none transition-colors group ${
+                                  isSorted ? 'bg-blue-50/70 text-[#0170FE]' : 'hover:bg-slate-100/80 hover:text-slate-800'
+                                }`}
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  <span className={isSorted ? 'font-bold text-[#0170FE]' : 'font-semibold text-slate-600'}>
+                                    {colKey.replace(/([A-Z])/g, ' $1').trim()}
                                   </span>
-                                ) : isStatus ? (
+                                  {/* Arrow Sort Button */}
                                   <span
-                                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${v === 'Active' || v === 'Paid' || v === 'Reconciled' || v === 'Consented' || v === 'Bound / Won'
-                                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                      : v === 'Outstanding' || v === 'Pending' || v === 'In Review' || v === 'Quoted'
-                                        ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                        : 'bg-rose-50 text-rose-700 border border-rose-200'
-                                      }`}
+                                    className={`inline-flex items-center justify-center size-5 rounded-md transition ${
+                                      isSorted
+                                        ? 'bg-blue-100 text-[#0170FE] shadow-2xs'
+                                        : 'text-slate-400 group-hover:text-slate-600 group-hover:bg-slate-200/60'
+                                    }`}
                                   >
-                                    {String(v)}
+                                    {isSorted ? (
+                                      sortDirection === 'asc' ? (
+                                        <ArrowUp className="size-3.5" />
+                                      ) : (
+                                        <ArrowDown className="size-3.5" />
+                                      )
+                                    ) : (
+                                      <ArrowUpDown className="size-3.5" />
+                                    )}
                                   </span>
-                                ) : (
-                                  <span className={cellIdx === 0 ? 'font-semibold text-slate-900' : 'text-slate-600'}>
-                                    {String(v)}
-                                  </span>
-                                )}
-                              </td>
+                                  {isSorted && (
+                                    <span className="text-[10px] font-bold uppercase tracking-tight text-[#0170FE] bg-white px-1.5 py-0.2 rounded border border-blue-200">
+                                      {sortDirection === 'asc' ? 'A→Z' : 'Z→A'}
+                                    </span>
+                                  )}
+                                </div>
+                              </th>
                             )
                           })}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 font-medium">
+                        {sortedRecords.map((row, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/80 transition">
+                            {Object.entries(row).map(([k, v], cellIdx) => {
+                              const isSorted = sortColumn === k
+                              const isAmount = typeof v === 'number' && (k.toLowerCase().includes('premium') || k.toLowerCase().includes('comm') || k.toLowerCase().includes('amount') || k.toLowerCase().includes('payout'))
+                              const isStatus = k.toLowerCase().includes('status')
+                              return (
+                                <td
+                                  key={cellIdx}
+                                  className={`py-3.5 px-4 whitespace-nowrap ${
+                                    isSorted ? 'bg-blue-50/20' : ''
+                                  }`}
+                                >
+                                  {isAmount ? (
+                                    <span className="font-mono font-bold text-slate-900">
+                                      ${(v as number).toLocaleString()}
+                                    </span>
+                                  ) : isStatus ? (
+                                    <span
+                                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${v === 'Active' || v === 'Paid' || v === 'Reconciled' || v === 'Consented' || v === 'Bound / Won'
+                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                        : v === 'Outstanding' || v === 'Pending' || v === 'In Review' || v === 'Quoted'
+                                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                          : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                        }`}
+                                    >
+                                      {String(v)}
+                                    </span>
+                                  ) : (
+                                    <span className={cellIdx === 0 ? 'font-semibold text-slate-900' : 'text-slate-600'}>
+                                      {String(v)}
+                                    </span>
+                                  )}
+                                </td>
+                              )
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

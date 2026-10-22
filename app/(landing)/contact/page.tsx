@@ -92,16 +92,27 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-white text-slate-950 antialiased selection:bg-blue-200/60 selection:text-slate-900">
+    <div className="relative min-h-screen bg-white text-slate-950 antialiased selection:bg-blue-200/60 selection:text-slate-900 dark:bg-[#070b14] dark:text-slate-100">
       {/* Background aurora lights */}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-blue-300/35 blur-[120px]" />
-        <div className="absolute top-1/3 -right-40 h-[500px] w-[500px] rounded-full bg-violet-300/30 blur-[120px]" />
-        <div className="absolute bottom-0 left-1/3 h-[500px] w-[500px] rounded-full bg-cyan-200/40 blur-[120px]" />
+        <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-blue-300/35 blur-[120px] dark:bg-blue-600/15" />
+        <div className="absolute top-1/3 -right-40 h-[500px] w-[500px] rounded-full bg-violet-300/30 blur-[120px] dark:bg-violet-600/15" />
+        <div className="absolute bottom-0 left-1/3 h-[500px] w-[500px] rounded-full bg-cyan-200/40 blur-[120px] dark:bg-cyan-600/15" />
+        {/* Light Mode Grid */}
         <div
-          className="absolute inset-0 opacity-[0.4]"
+          className="absolute inset-0 opacity-[0.4] dark:hidden"
           style={{
             backgroundImage: `linear-gradient(rgba(15,23,42,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.045) 1px, transparent 1px)`,
+            backgroundSize: '64px 64px',
+            maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 78%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 78%)',
+          }}
+        />
+        {/* Dark Mode Grid */}
+        <div
+          className="absolute inset-0 opacity-[0.35] hidden dark:block"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)`,
             backgroundSize: '64px 64px',
             maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 78%)',
             WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 78%)',
@@ -114,19 +125,19 @@ export default function ContactPage() {
       <main className="relative z-10 mx-auto max-w-7xl px-5 pt-32 pb-24 sm:px-8 lg:px-10 lg:pt-36">
         {/* Header Hero */}
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#0170FE]/20 bg-blue-50/80 px-3.5 py-1.5 text-xs font-semibold text-[#0170FE] shadow-xs backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#0170FE]/20 bg-blue-50/80 px-3.5 py-1.5 text-xs font-semibold text-[#0170FE] shadow-xs backdrop-blur-sm dark:border-blue-500/30 dark:bg-blue-950/50 dark:text-blue-300">
             <MessageSquare className="size-3.5" />
             Contact &amp; Support Hub
           </div>
 
-          <h1 className="mt-5 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
+          <h1 className="mt-5 text-4xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
             We&apos;re here for your{' '}
             <span className="bg-gradient-to-r from-blue-600 to-[#0170FE] bg-clip-text text-transparent">
               brokerage.
             </span>
           </h1>
 
-          <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
+          <p className="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg">
             Whether you have platform questions, require customized sales assistance, have billing inquiries, or need immediate dispute resolution, our teams are standing by.
           </p>
         </div>
@@ -140,28 +151,28 @@ export default function ContactPage() {
             return (
               <div
                 key={item.email}
-                className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white/95 p-6 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0170FE]/40 hover:shadow-xl hover:shadow-blue-500/5"
+                className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white/95 p-6 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0170FE]/40 hover:shadow-xl hover:shadow-blue-500/5 dark:border-white/10 dark:bg-slate-900/60 dark:hover:border-blue-500/40 dark:hover:bg-slate-900 dark:hover:shadow-black/60"
               >
                 <div>
                   <div className="flex items-center justify-between">
                     <div className={`flex size-11 items-center justify-center rounded-xl bg-gradient-to-br ${item.color} text-white shadow-md`}>
                       <Icon className="size-5.5" />
                     </div>
-                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
+                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                       {item.badge}
                     </span>
                   </div>
 
-                  <h3 className="mt-4 text-lg font-bold text-slate-900">{item.title}</h3>
-                  <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{item.description}</p>
+                  <h3 className="mt-4 text-lg font-bold text-slate-900 dark:text-white">{item.title}</h3>
+                  <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{item.description}</p>
                 </div>
 
-                <div className="mt-6 border-t border-slate-100 pt-4">
+                <div className="mt-6 border-t border-slate-100 pt-4 dark:border-white/10">
                   {/* Mailto link */}
                   <div className="flex items-center justify-between gap-2">
                     <a
                       href={item.mailto}
-                      className="truncate text-xs font-semibold text-[#0170FE] transition-colors hover:text-[#0060db] hover:underline"
+                      className="truncate text-xs font-semibold text-[#0170FE] transition-colors hover:text-[#0060db] hover:underline dark:text-blue-400 dark:hover:text-blue-300"
                       title={item.email}
                     >
                       {item.email}
@@ -170,19 +181,19 @@ export default function ContactPage() {
                     <button
                       type="button"
                       onClick={() => handleCopy(item.email)}
-                      className="cursor-pointer rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                      className="cursor-pointer rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
                       title="Copy email address"
                       aria-label={`Copy ${item.email}`}
                     >
                       {isCopied ? (
-                        <Check className="size-3.5 text-emerald-600" />
+                        <Check className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                       ) : (
                         <Copy className="size-3.5" />
                       )}
                     </button>
                   </div>
 
-                  <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-slate-400">
+                  <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500">
                     <Clock className="size-3" />
                     <span>{item.response}</span>
                   </div>
@@ -195,28 +206,28 @@ export default function ContactPage() {
         {/* Contact Form & Office Info Grid */}
         <div className="mt-16 grid gap-10 lg:grid-cols-12 lg:items-start">
           {/* Left Column: Direct Message Form */}
-          <div className="rounded-3xl border border-slate-200/90 bg-white/95 p-7 shadow-xl shadow-slate-200/40 backdrop-blur-xl sm:p-10 lg:col-span-7">
+          <div className="rounded-3xl border border-slate-200/90 bg-white/95 p-7 shadow-xl shadow-slate-200/40 backdrop-blur-xl sm:p-10 lg:col-span-7 dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/70">
             <div className="mb-6">
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#0170FE]">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#0170FE] dark:text-blue-400">
                 <Mail className="size-3.5" />
                 Direct Message
               </span>
-              <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
                 Send us a direct message
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 Fill out the details below and we will route your message to the responsible department immediately.
               </p>
             </div>
 
             {submitted ? (
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-8 text-center animate-in fade-in duration-300">
-                <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-8 text-center animate-in fade-in duration-300 dark:border-emerald-500/30 dark:bg-emerald-950/40">
+                <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-300">
                   <CheckCircle2 className="size-7" />
                 </div>
-                <h3 className="mt-4 text-xl font-bold text-emerald-950">Message Sent Successfully!</h3>
-                <p className="mx-auto mt-2 max-w-md text-sm text-emerald-700">
-                  Thank you for reaching out. We have received your inquiry and our team will get back to you shortly at <span className="font-semibold text-emerald-900">{formData.email}</span>.
+                <h3 className="mt-4 text-xl font-bold text-emerald-950 dark:text-emerald-200">Message Sent Successfully!</h3>
+                <p className="mx-auto mt-2 max-w-md text-sm text-emerald-700 dark:text-emerald-300">
+                  Thank you for reaching out. We have received your inquiry and our team will get back to you shortly at <span className="font-semibold text-emerald-900 dark:text-emerald-100">{formData.email}</span>.
                 </p>
                 <button
                   type="button"
@@ -240,7 +251,7 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="name" className="mb-1 block text-xs font-medium text-slate-700">
+                    <label htmlFor="name" className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
                       Full Name <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -250,12 +261,12 @@ export default function ContactPage() {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="John Doe"
-                      className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                      className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:border-white/10 dark:bg-slate-950/70 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="mb-1 block text-xs font-medium text-slate-700">
+                    <label htmlFor="email" className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
                       Work Email <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -265,14 +276,14 @@ export default function ContactPage() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="you@brokerage.com"
-                      className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                      className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:border-white/10 dark:bg-slate-950/70 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                     />
                   </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="phone" className="mb-1 block text-xs font-medium text-slate-700">
+                    <label htmlFor="phone" className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
                       Phone Number (Optional)
                     </label>
                     <input
@@ -281,30 +292,30 @@ export default function ContactPage() {
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="+1 (555) 000-0000"
-                      className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                      className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:border-white/10 dark:bg-slate-950/70 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="department" className="mb-1 block text-xs font-medium text-slate-700">
+                    <label htmlFor="department" className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
                       Department <span className="text-rose-500">*</span>
                     </label>
                     <select
                       id="department"
                       value={formData.department}
                       onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-all focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                      className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-all focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:border-white/10 dark:bg-slate-950/70 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                     >
-                      <option value="inquiry@brokerstep.com">General Inquiry (inquiry@brokerstep.com)</option>
-                      <option value="Sales@brokerstep.com">Sales &amp; Enterprise (Sales@brokerstep.com)</option>
-                      <option value="Billing@brokerstep.com">Billing &amp; Payments (Billing@brokerstep.com)</option>
-                      <option value="Complaints@brokerstep.com">Complaints &amp; Support (Complaints@brokerstep.com)</option>
+                      <option value="inquiry@brokerstep.com" className="dark:bg-slate-900 dark:text-white">General Inquiry (inquiry@brokerstep.com)</option>
+                      <option value="Sales@brokerstep.com" className="dark:bg-slate-900 dark:text-white">Sales &amp; Enterprise (Sales@brokerstep.com)</option>
+                      <option value="Billing@brokerstep.com" className="dark:bg-slate-900 dark:text-white">Billing &amp; Payments (Billing@brokerstep.com)</option>
+                      <option value="Complaints@brokerstep.com" className="dark:bg-slate-900 dark:text-white">Complaints &amp; Support (Complaints@brokerstep.com)</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="subject" className="mb-1 block text-xs font-medium text-slate-700">
+                  <label htmlFor="subject" className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
                     Subject <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -314,12 +325,12 @@ export default function ContactPage() {
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     placeholder="How can we help you?"
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:border-white/10 dark:bg-slate-950/70 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="mb-1 block text-xs font-medium text-slate-700">
+                  <label htmlFor="message" className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
                     Message <span className="text-rose-500">*</span>
                   </label>
                   <textarea
@@ -329,7 +340,7 @@ export default function ContactPage() {
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     placeholder="Describe your inquiry or request in detail..."
-                    className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                    className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:border-white/10 dark:bg-slate-950/70 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                   />
                 </div>
 
@@ -357,7 +368,7 @@ export default function ContactPage() {
           {/* Right Column: Key Details & Fast Channels */}
           <div className="space-y-6 lg:col-span-5">
             {/* Quick Email Directory Card */}
-            <div className="rounded-3xl border border-slate-200/90 bg-gradient-to-br from-slate-900 to-slate-950 p-7 text-white shadow-xl sm:p-8">
+            <div className="rounded-3xl border border-slate-200/90 bg-gradient-to-br from-slate-900 to-slate-950 p-7 text-white shadow-xl sm:p-8 dark:border-white/10">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
                 <Building2 className="size-3.5 text-[#0170FE]" />
                 Official Email Directory
@@ -396,35 +407,35 @@ export default function ContactPage() {
             </div>
 
             {/* Support Guarantee & Office Hours */}
-            <div className="rounded-3xl border border-slate-200/90 bg-white/95 p-7 shadow-sm backdrop-blur-md">
-              <h4 className="text-base font-bold text-slate-900">Operating Hours &amp; Response Guarantee</h4>
-              <p className="mt-1 text-xs text-slate-500">
+            <div className="rounded-3xl border border-slate-200/90 bg-white/95 p-7 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-slate-900/70">
+              <h4 className="text-base font-bold text-slate-900 dark:text-white">Operating Hours &amp; Response Guarantee</h4>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Our operations and customer advocacy desks are monitored round-the-clock for critical incidents.
               </p>
 
-              <div className="mt-5 space-y-3 text-xs text-slate-700">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                  <span className="text-slate-500">Customer Support:</span>
-                  <span className="font-semibold text-slate-900">Monday – Friday: 8 AM – 8 PM EST</span>
+              <div className="mt-5 space-y-3 text-xs text-slate-700 dark:text-slate-300">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 dark:border-white/10">
+                  <span className="text-slate-500 dark:text-slate-400">Customer Support:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">Monday – Friday: 8 AM – 8 PM EST</span>
                 </div>
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                  <span className="text-slate-500">Sales Inquiries:</span>
-                  <span className="font-semibold text-slate-900">Within 1 business hour</span>
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 dark:border-white/10">
+                  <span className="text-slate-500 dark:text-slate-400">Sales Inquiries:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">Within 1 business hour</span>
                 </div>
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                  <span className="text-slate-500">Urgent Escalations:</span>
-                  <span className="font-semibold text-emerald-600">24/7 Priority Queue</span>
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 dark:border-white/10">
+                  <span className="text-slate-500 dark:text-slate-400">Urgent Escalations:</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">24/7 Priority Queue</span>
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center justify-between rounded-xl bg-blue-50/70 p-4 border border-[#0170FE]/20">
+              <div className="mt-6 flex items-center justify-between rounded-xl bg-blue-50/70 p-4 border border-[#0170FE]/20 dark:bg-blue-950/40 dark:border-blue-500/30">
                 <div>
-                  <p className="text-xs font-semibold text-slate-900">Looking for self-service?</p>
-                  <p className="text-[11px] text-slate-500">Check our frequently asked questions.</p>
+                  <p className="text-xs font-semibold text-slate-900 dark:text-white">Looking for self-service?</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Check our frequently asked questions.</p>
                 </div>
                 <Link
                   href="/#faq"
-                  className="inline-flex items-center gap-1 text-xs font-bold text-[#0170FE] transition-colors hover:text-[#0060db]"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-[#0170FE] transition-colors hover:text-[#0060db] dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   View FAQ <ArrowRight className="size-3" />
                 </Link>

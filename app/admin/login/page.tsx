@@ -12,6 +12,7 @@ import {
 import { FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -52,7 +53,7 @@ export default function AdminLoginPage() {
 
       <div className="relative z-10 flex h-full w-full flex-col justify-between px-4 py-2 sm:px-8 sm:py-3">
         {/* Top Header Bar */}
-        <header className="flex shrink-0 items-center justify-between">
+        <header className="auth-header flex shrink-0 items-center justify-between bg-transparent border-none">
           <Link href="/" className="inline-flex items-center transition-transform hover:scale-[1.02]">
             <Image
               src="/images/logos/broker-dark-theme.png"
@@ -67,9 +68,10 @@ export default function AdminLoginPage() {
 
           <div className="flex items-center gap-3 text-xs text-slate-300 sm:text-sm">
             <span className="hidden sm:inline">Broker Portal?</span>
+            <ThemeToggle />
             <Link
               href="/login"
-              className="inline-flex items-center justify-center rounded-xl border border-white/80 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-900 shadow-xs backdrop-blur-md transition hover:bg-slate-100 hover:text-[#0170FE] sm:px-4 sm:py-2"
+              className="inline-flex items-center justify-center rounded-xl border border-white/80 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-900 shadow-xs backdrop-blur-md transition hover:bg-slate-100 hover:text-[#0170FE] dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:hover:bg-slate-700 sm:px-4 sm:py-2"
             >
               Broker sign in
             </Link>
@@ -78,19 +80,19 @@ export default function AdminLoginPage() {
 
         {/* Center Form Card */}
         <div className="flex flex-1 items-center justify-center py-1 min-h-0">
-          <div className="w-full max-w-[440px] rounded-2xl border border-white/20 bg-white p-4 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] sm:rounded-3xl sm:p-6">
+          <div className="w-full max-w-[440px] rounded-2xl border border-white/20 bg-white dark:bg-[#0e1726]/95 dark:border-slate-800/80 p-4 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] sm:rounded-3xl sm:p-6 text-slate-900 dark:text-slate-100">
             {/* Header */}
             <div className="mb-3 text-center sm:text-left sm:mb-4">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0170FE]/20 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-[#0170FE]">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0170FE]/20 bg-blue-50 dark:bg-blue-950/60 dark:border-blue-800/50 dark:text-blue-400 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-[#0170FE]">
                 <Sparkles className="size-3" />
                 Super Admin
               </div>
 
-              <h1 className="mt-1 text-lg font-bold tracking-tight text-slate-950 sm:text-2xl">
+              <h1 className="mt-1 text-lg font-bold tracking-tight text-slate-950 dark:text-white sm:text-2xl">
                 Sign in to Admin Console
               </h1>
 
-              <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
                 Enter your credentials to access the admin portal.
               </p>
             </div>
@@ -99,14 +101,14 @@ export default function AdminLoginPage() {
             <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-2.5 sm:gap-3">
               {/* Email */}
               <div>
-                <label htmlFor="email" className="mb-1 block text-xs font-medium text-slate-700">
+                <label htmlFor="email" className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
                   Email address
                 </label>
                 <div
-                  className={`relative flex items-center rounded-xl border bg-white transition-all ${
+                  className={`relative flex items-center rounded-xl border bg-white dark:bg-[#0b0f19] transition-all ${
                     focused === 'email'
                       ? 'border-[#0170FE] ring-2 ring-[#0170FE]/20'
-                      : 'border-slate-200 hover:border-slate-300'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                   }`}
                 >
                   <Mail
@@ -123,21 +125,21 @@ export default function AdminLoginPage() {
                     onBlur={() => setFocused(null)}
                     placeholder="admin@brokerstep.com"
                     autoComplete="email"
-                    className="h-9.5 w-full bg-transparent px-3 text-xs text-slate-900 outline-none placeholder:text-slate-400 sm:text-sm"
+                    className="h-9.5 w-full bg-transparent px-3 text-xs text-slate-900 dark:text-white outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 sm:text-sm"
                   />
                 </div>
               </div>
 
               {/* Password */}
               <div>
-                <label htmlFor="password" className="mb-1 block text-xs font-medium text-slate-700">
+                <label htmlFor="password" className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
                   Password
                 </label>
                 <div
-                  className={`relative flex items-center rounded-xl border bg-white transition-all ${
+                  className={`relative flex items-center rounded-xl border bg-white dark:bg-[#0b0f19] transition-all ${
                     focused === 'password'
                       ? 'border-[#0170FE] ring-2 ring-[#0170FE]/20'
-                      : 'border-slate-200 hover:border-slate-300'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                   }`}
                 >
                   <Lock
@@ -154,13 +156,13 @@ export default function AdminLoginPage() {
                     onBlur={() => setFocused(null)}
                     placeholder="Enter your password"
                     autoComplete="current-password"
-                    className="h-10 w-full bg-transparent px-3 pr-10 text-sm text-slate-900 outline-none placeholder:text-slate-400 sm:h-11"
+                    className="h-10 w-full bg-transparent px-3 pr-10 text-sm text-slate-900 dark:text-white outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 sm:h-11"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute right-2.5 text-slate-400 hover:text-slate-700 cursor-pointer"
+                    className="absolute right-2.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>
@@ -204,7 +206,7 @@ export default function AdminLoginPage() {
         </footer>
       </div>
 
-      {/* White form autofill fix */}
+      {/* Autofill fix for Light & Dark Themes */}
       <style jsx global>{`
         input:-webkit-autofill,
         input:-webkit-autofill:hover,
@@ -213,6 +215,15 @@ export default function AdminLoginPage() {
           -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
           -webkit-text-fill-color: #0f172a !important;
           caret-color: #0f172a;
+          transition: background-color 9999s ease-in-out 0s;
+        }
+        html.dark input:-webkit-autofill,
+        html.dark input:-webkit-autofill:hover,
+        html.dark input:-webkit-autofill:focus,
+        html.dark input:-webkit-autofill:active {
+          -webkit-box-shadow: 0 0 0 1000px #0b0f19 inset !important;
+          -webkit-text-fill-color: #f8fafc !important;
+          caret-color: #f8fafc !important;
           transition: background-color 9999s ease-in-out 0s;
         }
       `}</style>

@@ -693,55 +693,55 @@ export default function LeadsPage() {
     switch (status) {
       case 'New':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 ring-1 ring-blue-200 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:text-blue-400 ring-1 ring-blue-200 dark:ring-blue-800/40 whitespace-nowrap">
             <span className="size-1.5 rounded-full bg-blue-500 animate-pulse shrink-0" />
             New
           </span>
         )
       case 'Contacted':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700 ring-1 ring-violet-200 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 rounded-md bg-violet-50 dark:bg-violet-950/60 px-2 py-0.5 text-[10px] font-semibold text-violet-700 dark:text-violet-400 ring-1 ring-violet-200 dark:ring-violet-800/40 whitespace-nowrap">
             <span className="size-1.5 rounded-full bg-violet-500 shrink-0" />
             Contacted
           </span>
         )
       case 'Follow-Up':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-200 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-800/40 whitespace-nowrap">
             <Clock className="size-2.5 text-amber-500 shrink-0" />
             Follow-Up
           </span>
         )
       case 'Quoted':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 ring-1 ring-indigo-200 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 rounded-md bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 dark:text-indigo-400 ring-1 ring-indigo-200 dark:ring-indigo-800/40 whitespace-nowrap">
             <FileText className="size-2.5 text-indigo-500 shrink-0" />
             Quoted
           </span>
         )
       case 'Won / Converted':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-200 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-200 dark:ring-emerald-800/40 whitespace-nowrap">
             <CheckCircle2 className="size-2.5 text-emerald-500 shrink-0" />
             Won / Converted
           </span>
         )
       case 'Lost':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 ring-1 ring-rose-200 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 text-[10px] font-semibold text-rose-700 dark:text-rose-400 ring-1 ring-rose-200 dark:ring-rose-800/40 whitespace-nowrap">
             <XCircle className="size-2.5 text-rose-500 shrink-0" />
             Lost
           </span>
         )
       case 'Not Interested':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600 ring-1 ring-slate-200 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-700 whitespace-nowrap">
             Not Interested
           </span>
         )
       case 'Archived':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold text-zinc-600 ring-1 ring-zinc-200 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 rounded-md bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 text-[10px] font-semibold text-zinc-600 dark:text-zinc-400 ring-1 ring-zinc-200 dark:ring-zinc-700 whitespace-nowrap">
             Archived
           </span>
         )
@@ -753,21 +753,21 @@ export default function LeadsPage() {
     switch (status) {
       case 'Granted':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-200 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-200 dark:ring-emerald-800/40 whitespace-nowrap">
             <Check className="size-3" />
             Granted
           </span>
         )
       case 'Pending':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-200 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-800/40 whitespace-nowrap">
             <Clock className="size-3" />
             Pending
           </span>
         )
       case 'Declined':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 ring-1 ring-rose-200 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 text-[10px] font-semibold text-rose-700 dark:text-rose-400 ring-1 ring-rose-200 dark:ring-rose-800/40 whitespace-nowrap">
             <X className="size-3" />
             Declined
           </span>
@@ -842,59 +842,59 @@ export default function LeadsPage() {
 
         {/* ───── Stat Cards ───── */}
         <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white dark:bg-slate-900 dark:border-white/10 p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-sm font-medium text-slate-600">Total Leads</p>
-              <span className="rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600 ring-1 ring-blue-100">
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Leads</p>
+              <span className="rounded-md bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400">
                 All intake
               </span>
             </div>
-            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">{totalLeadsCount}</p>
-            <p className="mt-1 text-xs text-slate-500">Prospect pipeline size</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">{totalLeadsCount}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Prospect pipeline size</p>
           </div>
 
-          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white dark:bg-slate-900 dark:border-white/10 p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-sm font-medium text-slate-600">New Inquiries</p>
-              <span className="rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600 ring-1 ring-blue-100">
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">New Inquiries</p>
+              <span className="rounded-md bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400">
                 Needs contact
               </span>
             </div>
-            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-blue-600">{newLeadsCount}</p>
-            <p className="mt-1 text-xs text-slate-500">Uncontacted inbound leads</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-blue-600 dark:text-blue-400">{newLeadsCount}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Uncontacted inbound leads</p>
           </div>
 
-          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white dark:bg-slate-900 dark:border-white/10 p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-sm font-medium text-slate-600">In Pipeline</p>
-              <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-100">
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">In Pipeline</p>
+              <span className="rounded-md bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
                 Active negotiations
               </span>
             </div>
-            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">{activePipelineCount}</p>
-            <p className="mt-1 text-xs text-slate-500">Contacted / Quoted / Follow-up</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">{activePipelineCount}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Contacted / Quoted / Follow-up</p>
           </div>
 
-          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white dark:bg-slate-900 dark:border-white/10 p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-sm font-medium text-slate-600">Won / Converted</p>
-              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Won / Converted</p>
+              <span className="rounded-md bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
                 Active clients
               </span>
             </div>
-            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-600">{wonCount}</p>
-            <p className="mt-1 text-xs text-slate-500">Converted to client book</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400">{wonCount}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Converted to client book</p>
           </div>
 
-          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white dark:bg-slate-900 dark:border-white/10 p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.25)]">
             <div className="flex items-start justify-between">
-              <p className="text-sm font-medium text-slate-600">Win Rate</p>
-              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Win Rate</p>
+              <span className="rounded-md bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
                 Outcome ratio
               </span>
             </div>
-            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">{winRate}%</p>
-            <p className="mt-1 text-xs text-slate-500">Lead to client conversion</p>
+            <p className="mt-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">{winRate}%</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Lead to client conversion</p>
           </div>
         </div>
 
@@ -1340,32 +1340,32 @@ export default function LeadsPage() {
           5.3 LEAD DETAILS DRAWER / MODAL
       ─────────────────────────────────────────────────────────────── */}
       {selectedLeadForView && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-xs transition-opacity">
-          <div className="flex h-full w-full max-w-3xl flex-col bg-white shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300">
+        <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs transition-opacity">
+          <div className="flex h-full w-full max-w-3xl flex-col bg-white dark:bg-slate-900 border-l border-transparent dark:border-white/10 shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300">
 
             {/* Drawer Header */}
-            <div className="flex items-start justify-between border-b border-slate-200 bg-slate-50/50 px-6 py-5">
+            <div className="flex items-start justify-between border-b border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-900/90 px-6 py-5">
               <div className="flex items-center gap-4">
                 <div className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-700 text-[14px] font-bold text-white shadow-md">
                   {selectedLeadForView.firstName[0]}{selectedLeadForView.lastName[0]}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-[18px] font-bold tracking-tight text-slate-900">
+                    <h2 className="text-[18px] font-bold tracking-tight text-slate-900 dark:text-slate-100">
                       {selectedLeadForView.name}
                     </h2>
                     {getLeadStatusBadge(selectedLeadForView.status)}
                     {getConsentBadge(selectedLeadForView.marketingConsent.status)}
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 mt-1">
+                  <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                     {selectedLeadForView.businessName !== '—' && (
-                      <span className="font-medium text-slate-700 flex items-center gap-1">
+                      <span className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1">
                         <Building2 className="size-3 text-slate-400" />
                         {selectedLeadForView.businessName}
                       </span>
                     )}
-                    <span>Lead ID: <strong className="text-slate-800">{selectedLeadForView.id}</strong></span>
-                    <span>Source: <strong className="text-blue-600">{selectedLeadForView.source}</strong></span>
+                    <span>Lead ID: <strong className="text-slate-800 dark:text-slate-200">{selectedLeadForView.id}</strong></span>
+                    <span>Source: <strong className="text-blue-600 dark:text-blue-400">{selectedLeadForView.source}</strong></span>
                   </div>
                 </div>
               </div>
@@ -1383,21 +1383,21 @@ export default function LeadsPage() {
                 ) : (
                   <Link
                     href="/broker/clients"
-                    className="inline-flex items-center gap-1 rounded-xl bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-blue-600 transition"
+                    className="inline-flex items-center gap-1 rounded-xl bg-slate-900 dark:bg-blue-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-blue-600 dark:hover:bg-blue-500 transition"
                   >
                     View Client File &rarr;
                   </Link>
                 )}
                 <button
                   onClick={() => openEditLeadModal(selectedLeadForView)}
-                  className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50 transition cursor-pointer"
+                  className="inline-flex items-center gap-1 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 py-1.5 text-[11px] font-medium text-slate-700 dark:text-slate-300 shadow-xs hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
                 >
-                  <Edit3 className="size-3.5 text-slate-500" />
+                  <Edit3 className="size-3.5 text-slate-500 dark:text-slate-400" />
                   Edit
                 </button>
                 <button
                   onClick={() => setSelectedLeadForView(null)}
-                  className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
+                  className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition cursor-pointer"
                 >
                   <X className="size-5" />
                 </button>
@@ -1405,7 +1405,7 @@ export default function LeadsPage() {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex border-b border-slate-200 px-6 gap-6 bg-white overflow-x-auto">
+            <div className="flex border-b border-slate-200 dark:border-white/10 px-6 gap-6 bg-white dark:bg-slate-900 overflow-x-auto">
               {[
                 { key: 'overview', label: 'Overview & Contact' },
                 { key: 'insurance', label: 'Insurance Info' },
@@ -1417,8 +1417,8 @@ export default function LeadsPage() {
                   key={tab.key}
                   onClick={() => setLeadDetailTab(tab.key as any)}
                   className={`py-3 text-[12px] font-medium border-b-2 transition whitespace-nowrap cursor-pointer ${leadDetailTab === tab.key
-                    ? 'border-blue-600 text-blue-600 font-semibold'
-                    : 'border-transparent text-slate-500 hover:text-slate-900'
+                    ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400 font-semibold'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                     }`}
                 >
                   {tab.label}
@@ -1427,69 +1427,69 @@ export default function LeadsPage() {
             </div>
 
             {/* Drawer Body */}
-            <div className="flex-1 overflow-y-auto p-6 bg-slate-50/40">
+            <div className="flex-1 overflow-y-auto p-6 bg-slate-50/40 dark:bg-[#070b14]">
 
               {/* TAB 1: OVERVIEW & CONTACT */}
               {leadDetailTab === 'overview' && (
                 <div className="flex flex-col gap-5">
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
-                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">
+                    <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/80 p-4 shadow-xs">
+                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400 mb-3">
                         Contact Information
                       </h3>
                       <div className="flex flex-col gap-2.5 text-[12px]">
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-500 flex items-center gap-1.5"><Phone className="size-3.5 text-slate-400" /> Phone</span>
-                          <a href={`tel:${selectedLeadForView.phone}`} className="font-semibold text-blue-600 hover:underline">{selectedLeadForView.phone}</a>
+                          <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><Phone className="size-3.5 text-slate-400" /> Phone</span>
+                          <a href={`tel:${selectedLeadForView.phone}`} className="font-semibold text-blue-600 dark:text-blue-400 hover:underline">{selectedLeadForView.phone}</a>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-500 flex items-center gap-1.5"><Mail className="size-3.5 text-slate-400" /> Email</span>
-                          <a href={`mailto:${selectedLeadForView.email}`} className="font-semibold text-blue-600 hover:underline">{selectedLeadForView.email}</a>
+                          <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><Mail className="size-3.5 text-slate-400" /> Email</span>
+                          <a href={`mailto:${selectedLeadForView.email}`} className="font-semibold text-blue-600 dark:text-blue-400 hover:underline">{selectedLeadForView.email}</a>
                         </div>
                         <div className="flex items-start justify-between">
-                          <span className="text-slate-500 flex items-center gap-1.5"><MapPin className="size-3.5 text-slate-400 shrink-0 mt-0.5" /> Address</span>
-                          <span className="font-medium text-slate-800 text-right max-w-[180px]">
+                          <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><MapPin className="size-3.5 text-slate-400 shrink-0 mt-0.5" /> Address</span>
+                          <span className="font-medium text-slate-800 dark:text-slate-200 text-right max-w-[180px]">
                             {selectedLeadForView.street ? `${selectedLeadForView.street}, ${selectedLeadForView.city}, ${selectedLeadForView.state} ${selectedLeadForView.zip}` : '—'}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-500 flex items-center gap-1.5"><Calendar className="size-3.5 text-slate-400" /> Date of Birth</span>
-                          <span className="font-medium text-slate-800">{selectedLeadForView.dob || '—'}</span>
+                          <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><Calendar className="size-3.5 text-slate-400" /> Date of Birth</span>
+                          <span className="font-medium text-slate-800 dark:text-slate-200">{selectedLeadForView.dob || '—'}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
-                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">
+                    <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/80 p-4 shadow-xs">
+                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400 mb-3">
                         Pipeline Status &amp; Value
                       </h3>
                       <div className="flex flex-col gap-2.5 text-[12px]">
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-500">Pipeline Stage</span>
+                          <span className="text-slate-500 dark:text-slate-400">Pipeline Stage</span>
                           <div>{getLeadStatusBadge(selectedLeadForView.status)}</div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-500">Estimated Premium</span>
-                          <span className="font-bold text-slate-900 text-[13px]">{selectedLeadForView.estimatedPremium}</span>
+                          <span className="text-slate-500 dark:text-slate-400">Estimated Premium</span>
+                          <span className="font-bold text-slate-900 dark:text-slate-100 text-[13px]">{selectedLeadForView.estimatedPremium}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-500">Intake Channel</span>
-                          <span className="font-medium text-slate-800">{selectedLeadForView.source}</span>
+                          <span className="text-slate-500 dark:text-slate-400">Intake Channel</span>
+                          <span className="font-medium text-slate-800 dark:text-slate-200">{selectedLeadForView.source}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-500">Created Date</span>
-                          <span className="font-medium text-slate-800">{selectedLeadForView.createdDate}</span>
+                          <span className="text-slate-500 dark:text-slate-400">Created Date</span>
+                          <span className="font-medium text-slate-800 dark:text-slate-200">{selectedLeadForView.createdDate}</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {selectedLeadForView.additionalInfo && (
-                    <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
-                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                    <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/80 p-4 shadow-xs">
+                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400 mb-2">
                         Additional Prospect Notes
                       </h3>
-                      <p className="text-[12px] text-slate-700 leading-relaxed">
+                      <p className="text-[12px] text-slate-700 dark:text-slate-300 leading-relaxed">
                         {selectedLeadForView.additionalInfo}
                       </p>
                     </div>
@@ -1500,26 +1500,26 @@ export default function LeadsPage() {
               {/* TAB 2: INSURANCE INFO */}
               {leadDetailTab === 'insurance' && (
                 <div className="flex flex-col gap-4">
-                  <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
+                  <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/80 p-5 shadow-xs space-y-4">
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Requested Coverage</span>
-                      <h4 className="text-[16px] font-bold text-slate-900 mt-0.5">{selectedLeadForView.insuranceType}</h4>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Requested Coverage</span>
+                      <h4 className="text-[16px] font-bold text-slate-900 dark:text-slate-100 mt-0.5">{selectedLeadForView.insuranceType}</h4>
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-2 text-[12px] pt-3 border-t border-slate-100">
-                      <div className="rounded-lg bg-slate-50 p-3">
+                    <div className="grid gap-3 sm:grid-cols-2 text-[12px] pt-3 border-t border-slate-100 dark:border-white/5">
+                      <div className="rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-white/5 p-3">
                         <span className="text-slate-400 text-[11px] block">Current Insurance Policy</span>
-                        <span className="font-semibold text-slate-800 mt-1 block">{selectedLeadForView.currentInsurance}</span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200 mt-1 block">{selectedLeadForView.currentInsurance}</span>
                       </div>
-                      <div className="rounded-lg bg-slate-50 p-3">
+                      <div className="rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-white/5 p-3">
                         <span className="text-slate-400 text-[11px] block">Target Renewal Date</span>
-                        <span className="font-semibold text-slate-800 mt-1 block">{selectedLeadForView.renewalDate}</span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200 mt-1 block">{selectedLeadForView.renewalDate}</span>
                       </div>
-                      <div className="rounded-lg bg-slate-50 p-3">
+                      <div className="rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-white/5 p-3">
                         <span className="text-slate-400 text-[11px] block">Estimated Annual Value</span>
-                        <span className="font-bold text-emerald-600 mt-1 block">{selectedLeadForView.estimatedPremium}</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400 mt-1 block">{selectedLeadForView.estimatedPremium}</span>
                       </div>
-                      <div className="rounded-lg bg-slate-50 p-3">
+                      <div className="rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-white/5 p-3">
                         <span className="text-slate-400 text-[11px] block">Lead Status</span>
                         <span className="mt-1 block">{getLeadStatusBadge(selectedLeadForView.status)}</span>
                       </div>
@@ -1531,20 +1531,20 @@ export default function LeadsPage() {
               {/* TAB 3: NOTES */}
               {leadDetailTab === 'notes' && (
                 <div className="flex flex-col gap-4">
-                  <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-                    <h3 className="text-[12px] font-semibold text-slate-900 mb-2">Log Follow-up Note</h3>
+                  <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/80 p-4 shadow-xs">
+                    <h3 className="text-[12px] font-semibold text-slate-900 dark:text-slate-100 mb-2">Log Follow-up Note</h3>
                     <textarea
                       rows={3}
                       value={newNoteText}
                       onChange={(e) => setNewNoteText(e.target.value)}
                       placeholder="Add notes from phone conversation, quote considerations, follow-up schedule..."
-                      className="w-full rounded-lg border border-slate-200 p-3 text-[12px] outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                      className="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 p-3 text-[12px] outline-none transition focus:border-blue-400 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30"
                     />
                     <div className="mt-2.5 flex justify-end">
                       <button
                         onClick={handleAddNote}
                         disabled={!newNoteText.trim()}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-3.5 py-1.5 text-[11px] font-semibold text-white shadow-xs hover:bg-blue-600 disabled:opacity-40 transition cursor-pointer"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 dark:bg-blue-600 px-3.5 py-1.5 text-[11px] font-semibold text-white shadow-xs hover:bg-blue-600 dark:hover:bg-blue-500 disabled:opacity-40 transition cursor-pointer"
                       >
                         <Send className="size-3" />
                         Save Note
@@ -1554,12 +1554,12 @@ export default function LeadsPage() {
 
                   <div className="flex flex-col gap-3">
                     {selectedLeadForView.notes.map((n) => (
-                      <div key={n.id} className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
-                        <div className="flex items-center justify-between text-[11px] text-slate-400 border-b border-slate-100 pb-2 mb-2">
-                          <span className="font-semibold text-slate-700">{n.author}</span>
+                      <div key={n.id} className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/80 p-4 shadow-xs">
+                        <div className="flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-white/5 pb-2 mb-2">
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">{n.author}</span>
                           <span>{n.date}</span>
                         </div>
-                        <p className="text-[12px] text-slate-700 leading-relaxed">{n.text}</p>
+                        <p className="text-[12px] text-slate-700 dark:text-slate-300 leading-relaxed">{n.text}</p>
                       </div>
                     ))}
                   </div>
@@ -1568,25 +1568,25 @@ export default function LeadsPage() {
 
               {/* TAB 4: MARKETING CONSENT */}
               {leadDetailTab === 'consent' && (
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
+                <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/80 p-5 shadow-xs space-y-4">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="text-[14px] font-semibold text-slate-900">Marketing Consent Status</h3>
-                      <p className="text-[11px] text-slate-500 mt-0.5">Compliant opt-in records captured via lead forms</p>
+                      <h3 className="text-[14px] font-semibold text-slate-900 dark:text-slate-100">Marketing Consent Status</h3>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Compliant opt-in records captured via lead forms</p>
                     </div>
                     {getConsentBadge(selectedLeadForView.marketingConsent.status)}
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-2 text-[12px] pt-3">
-                    <div className="rounded-lg bg-slate-50 p-3">
+                    <div className="rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-white/5 p-3">
                       <span className="text-slate-400 text-[11px] block">Consent Channel</span>
-                      <span className="font-semibold text-slate-800 mt-1 block">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 mt-1 block">
                         {selectedLeadForView.marketingConsent.channel || selectedLeadForView.source}
                       </span>
                     </div>
-                    <div className="rounded-lg bg-slate-50 p-3">
+                    <div className="rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-white/5 p-3">
                       <span className="text-slate-400 text-[11px] block">Recorded Timestamp</span>
-                      <span className="font-semibold text-slate-800 mt-1 block">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 mt-1 block">
                         {selectedLeadForView.marketingConsent.date || selectedLeadForView.createdDate}
                       </span>
                     </div>
@@ -1597,18 +1597,18 @@ export default function LeadsPage() {
               {/* TAB 5: TIMELINE */}
               {leadDetailTab === 'timeline' && (
                 <div className="flex flex-col gap-4">
-                  <h3 className="text-[14px] font-semibold text-slate-900">Lead Interaction History</h3>
-                  <div className="relative pl-6 border-l-2 border-slate-200 space-y-6">
+                  <h3 className="text-[14px] font-semibold text-slate-900 dark:text-slate-100">Lead Interaction History</h3>
+                  <div className="relative pl-6 border-l-2 border-slate-200 dark:border-slate-800 space-y-6">
                     {selectedLeadForView.timeline.map((event) => (
                       <div key={event.id} className="relative group">
-                        <div className="absolute -left-[31px] top-0.5 size-4 rounded-full border-2 border-white bg-blue-600 ring-2 ring-blue-100" />
+                        <div className="absolute -left-[31px] top-0.5 size-4 rounded-full border-2 border-white dark:border-slate-900 bg-blue-600 ring-2 ring-blue-100 dark:ring-blue-900/40" />
                         <div>
                           <div className="flex items-center justify-between">
-                            <h4 className="text-[13px] font-semibold text-slate-900">{event.title}</h4>
-                            <span className="text-[10px] text-slate-400">{event.date}</span>
+                            <h4 className="text-[13px] font-semibold text-slate-900 dark:text-slate-100">{event.title}</h4>
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500">{event.date}</span>
                           </div>
-                          <p className="mt-1 text-[12px] text-slate-600">{event.detail}</p>
-                          <p className="mt-1 text-[10px] text-slate-400">Recorded by: <span className="font-medium text-slate-600">{event.actor}</span></p>
+                          <p className="mt-1 text-[12px] text-slate-600 dark:text-slate-300">{event.detail}</p>
+                          <p className="mt-1 text-[10px] text-slate-400 dark:text-slate-500">Recorded by: <span className="font-medium text-slate-600 dark:text-slate-400">{event.actor}</span></p>
                         </div>
                       </div>
                     ))}
@@ -1619,13 +1619,13 @@ export default function LeadsPage() {
             </div>
 
             {/* Drawer Footer */}
-            <div className="flex items-center justify-between border-t border-slate-200 bg-white px-6 py-4">
-              <span className="text-[11px] text-slate-400">
+            <div className="flex items-center justify-between border-t border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 px-6 py-4">
+              <span className="text-[11px] text-slate-400 dark:text-slate-500">
                 Created: {selectedLeadForView.createdDate}
               </span>
               <button
                 onClick={() => setSelectedLeadForView(null)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-[12px] font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 text-[12px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
               >
                 Close
               </button>
@@ -2149,10 +2149,10 @@ export default function LeadsPage() {
           CHANGE STATUS QUICK MODAL
       ─────────────────────────────────────────────────────────────── */}
       {statusChangeTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <h3 className="text-[15px] font-bold text-slate-900">Change Status</h3>
-            <p className="text-[11px] text-slate-500 mt-0.5">Select new stage for {statusChangeTarget.name}</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-[15px] font-bold text-slate-900 dark:text-slate-100">Change Status</h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Select new stage for {statusChangeTarget.name}</p>
 
             <div className="mt-4 space-y-2">
               {[
@@ -2169,12 +2169,12 @@ export default function LeadsPage() {
                   key={statusOption}
                   onClick={() => handleChangeStatus(statusChangeTarget, statusOption as LeadStatus)}
                   className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-[12px] font-medium transition cursor-pointer ${statusChangeTarget.status === statusOption
-                    ? 'bg-blue-50 text-blue-700 font-semibold border border-blue-200'
-                    : 'hover:bg-slate-50 text-slate-700'
+                    ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 font-semibold border border-blue-200 dark:border-blue-800/50'
+                    : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300'
                     }`}
                 >
                   <span>{statusOption}</span>
-                  {statusChangeTarget.status === statusOption && <Check className="size-4 text-blue-600" />}
+                  {statusChangeTarget.status === statusOption && <Check className="size-4 text-blue-600 dark:text-blue-400" />}
                 </button>
               ))}
             </div>
@@ -2182,7 +2182,7 @@ export default function LeadsPage() {
             <div className="mt-5 flex justify-end">
               <button
                 onClick={() => setStatusChangeTarget(null)}
-                className="rounded-xl border border-slate-200 px-3.5 py-1.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-1.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -2195,35 +2195,35 @@ export default function LeadsPage() {
           CONVERT TO CLIENT CONFIRMATION MODAL
       ─────────────────────────────────────────────────────────────── */}
       {convertTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 mb-4">
               <UserCheck className="size-6" />
             </div>
-            <h3 className="text-[17px] font-bold text-slate-900">Convert Lead to Client</h3>
-            <p className="text-[12px] text-slate-500 mt-1 leading-relaxed">
+            <h3 className="text-[17px] font-bold text-slate-900 dark:text-slate-100">Convert Lead to Client</h3>
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
               Converting <strong>{convertTarget.name}</strong> will create a new Active Client profile in your Book of Business and mark this lead as <strong>Won / Converted</strong>.
             </p>
 
-            <div className="mt-4 rounded-xl bg-slate-50 p-3.5 text-[12px] space-y-1.5 border border-slate-200/60">
+            <div className="mt-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3.5 text-[12px] space-y-1.5 border border-slate-200/60 dark:border-white/5">
               <div className="flex justify-between">
-                <span className="text-slate-500">Business</span>
-                <span className="font-semibold text-slate-800">{convertTarget.businessName}</span>
+                <span className="text-slate-500 dark:text-slate-400">Business</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{convertTarget.businessName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Coverage Line</span>
-                <span className="font-semibold text-slate-800">{convertTarget.insuranceType}</span>
+                <span className="text-slate-500 dark:text-slate-400">Coverage Line</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{convertTarget.insuranceType}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Estimated Annual Premium</span>
-                <span className="font-bold text-emerald-600">{convertTarget.estimatedPremium}</span>
+                <span className="text-slate-500 dark:text-slate-400">Estimated Annual Premium</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">{convertTarget.estimatedPremium}</span>
               </div>
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2.5">
               <button
                 onClick={() => setConvertTarget(null)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 text-[12px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
               >
                 Cancel
               </button>

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Mail, ArrowRight } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export default function VerifyPage() {
   return (
@@ -25,7 +26,7 @@ export default function VerifyPage() {
       <div className="relative z-10 flex h-full w-full flex-col justify-between px-4 py-3 sm:px-8 sm:py-4">
 
         {/* Top Header Bar with Larger Logo */}
-        <header className="flex shrink-0 items-center justify-between">
+        <header className="auth-header flex shrink-0 items-center justify-between bg-transparent border-none">
           <Link href="/" className="inline-flex items-center gap-2 transition-transform hover:scale-[1.02]">
             <Image
               src="/images/logos/broker-dark-theme.png"
@@ -40,9 +41,10 @@ export default function VerifyPage() {
 
           <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-300">
             <span className="hidden sm:inline">Already verified?</span>
+            <ThemeToggle />
             <Link
               href="/login"
-              className="inline-flex items-center justify-center rounded-xl border border-white/80 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-900 shadow-xs backdrop-blur-md transition hover:bg-slate-100 hover:text-[#0170FE] sm:px-4 sm:py-2"
+              className="inline-flex items-center justify-center rounded-xl border border-white/80 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-900 shadow-xs backdrop-blur-md transition hover:bg-slate-100 hover:text-[#0170FE] dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:hover:bg-slate-700 sm:px-4 sm:py-2"
             >
               Sign in
             </Link>
@@ -51,26 +53,26 @@ export default function VerifyPage() {
 
         {/* Center White Card */}
         <div className="flex flex-1 items-center justify-center py-2">
-          <div className="w-full max-w-[420px] rounded-2xl border border-white/20 bg-white p-5 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] sm:rounded-3xl sm:p-7 text-slate-900">
+          <div className="w-full max-w-[420px] rounded-2xl border border-white/20 bg-white dark:bg-[#0e1726]/95 dark:border-slate-800/80 p-5 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] sm:rounded-3xl sm:p-7 text-slate-900 dark:text-slate-100">
 
             {/* Header */}
             <div className="mb-4 text-center sm:text-left">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0170FE]/20 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#0170FE]">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0170FE]/20 bg-blue-50 dark:bg-blue-950/60 dark:border-blue-800/50 dark:text-blue-400 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#0170FE]">
                 <Mail className="size-3" />
                 Verification
               </div>
 
-              <h1 className="mt-2 text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
+              <h1 className="mt-2 text-xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-2xl">
                 Verify your email
               </h1>
 
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Check your email to verify your account and open your workspace.
               </p>
             </div>
 
-            <div className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50/80 p-3.5">
-              <p className="text-xs leading-5 text-blue-950">
+            <div className="flex items-start gap-3 rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/80 dark:bg-blue-950/30 p-3.5">
+              <p className="text-xs leading-5 text-blue-950 dark:text-blue-200">
                 Verification email sent! Check your inbox and click the verification link to activate your account.
               </p>
             </div>

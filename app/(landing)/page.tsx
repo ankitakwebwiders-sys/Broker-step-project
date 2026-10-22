@@ -746,26 +746,36 @@ export default function LandingPage() {
       <section id="about" className="relative z-10 px-6 py-24 lg:px-10">
         <div className="mx-auto max-w-6xl">
           <Reveal>
-            <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-blue-50 via-white to-violet-50 p-12 text-center shadow-xl shadow-slate-200/50 lg:p-20">
-              <div className="absolute -top-24 left-1/4 size-96 rounded-full bg-blue-300/40 blur-3xl" />
-              <div className="absolute -bottom-24 right-1/4 size-96 rounded-full bg-violet-300/40 blur-3xl" />
+            <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-blue-50 via-white to-violet-50 p-12 text-center shadow-xl shadow-slate-200/50 dark:border-slate-800 dark:from-[#0d1629] dark:via-[#111c35] dark:to-[#0b1220] dark:shadow-2xl dark:shadow-black/70 lg:p-20">
+              <div className="absolute -top-24 left-1/4 size-96 rounded-full bg-blue-300/40 blur-3xl dark:bg-blue-600/20" />
+              <div className="absolute -bottom-24 right-1/4 size-96 rounded-full bg-violet-300/40 blur-3xl dark:bg-violet-600/20" />
+              {/* Light Mode Dots Grid */}
               <div
                 aria-hidden
-                className="absolute inset-0 opacity-[0.35]"
+                className="absolute inset-0 opacity-[0.35] dark:hidden"
                 style={{
                   backgroundImage: `radial-gradient(circle at 1px 1px, rgba(15,23,42,0.12) 1px, transparent 0)`,
                   backgroundSize: '32px 32px',
                 }}
               />
+              {/* Dark Mode Dots Grid */}
+              <div
+                aria-hidden
+                className="absolute inset-0 opacity-[0.25] hidden dark:block"
+                style={{
+                  backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)`,
+                  backgroundSize: '32px 32px',
+                }}
+              />
               <div className="relative">
-                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm backdrop-blur-sm">
-                  <Rocket className="size-3.5 text-blue-500" />
+                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm backdrop-blur-sm dark:border-slate-700/80 dark:bg-slate-900/80 dark:text-slate-200">
+                  <Rocket className="size-3.5 text-blue-500 dark:text-blue-400" />
                   Ready to transform your brokerage?
                 </div>
-                <h2 className="mx-auto mt-6 max-w-3xl text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-6xl">
+                <h2 className="mx-auto mt-6 max-w-3xl text-4xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-white sm:text-6xl">
                   Run your brokerage with more clarity.
                 </h2>
-                <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-slate-600">
+                <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
                   Join the teams using BrokerStep to simplify operations, strengthen relationships, and build a more predictable business.
                 </p>
                 <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -780,7 +790,7 @@ export default function LandingPage() {
                   </Magnetic>
                   <Link
                     href="/login"
-                    className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white px-8 py-4 text-sm font-semibold text-slate-800 shadow-xs transition-all hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE]"
+                    className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white px-8 py-4 text-sm font-semibold text-slate-800 shadow-xs transition-all hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE] dark:border-slate-700 dark:bg-slate-800/90 dark:text-white dark:hover:bg-slate-700 dark:hover:border-slate-600"
                   >
                     Sign In to BrokerStep
                   </Link>

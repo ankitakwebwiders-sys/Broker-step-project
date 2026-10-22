@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import {
   Activity,
@@ -11,6 +11,7 @@ import {
   Building2,
   CalendarDays,
   Clock,
+  Check,
   CheckCircle2,
   ChevronDown,
   ClipboardList,
@@ -23,9 +24,11 @@ import {
   Plus,
   RefreshCw,
   Scale,
+  Search,
   ShieldCheck,
   Sparkles,
   TrendingUp,
+  UserCheck,
   UserPlus,
   Users,
   WalletCards,
@@ -47,7 +50,7 @@ import {
   type PolicyStatus,
   type TransactionType,
 } from '@/data/broker/policies'
-import { initialClients } from '@/data/broker/clients'
+import { initialClients, type ClientItem } from '@/data/broker/clients'
 
 const activities = [
   {
@@ -86,7 +89,7 @@ const quickActions = [
     description: 'Create client record & bind policies',
     icon: Users,
     href: '/broker/clients',
-    tone: 'bg-blue-50 text-blue-600 ring-blue-100/80 group-hover:bg-blue-600 group-hover:text-white',
+    tone: 'bg-blue-50 text-blue-600 ring-blue-100/80 group-hover:bg-blue-600 group-hover:text-white dark:bg-blue-950/40 dark:text-blue-400 dark:ring-blue-900/40 dark:group-hover:bg-blue-600 dark:group-hover:text-white',
     badge: 'Fast entry',
   },
   {
@@ -94,7 +97,7 @@ const quickActions = [
     description: 'Auto-reconcile carrier commissions',
     icon: FileSpreadsheet,
     href: '/broker/statements',
-    tone: 'bg-emerald-50 text-emerald-600 ring-emerald-100/80 group-hover:bg-emerald-600 group-hover:text-white',
+    tone: 'bg-emerald-50 text-emerald-600 ring-emerald-100/80 group-hover:bg-emerald-600 group-hover:text-white dark:bg-emerald-950/40 dark:text-emerald-400 dark:ring-emerald-900/40 dark:group-hover:bg-emerald-600 dark:group-hover:text-white',
     badge: '3 pending',
   },
   {
@@ -102,7 +105,7 @@ const quickActions = [
     description: '8 policies renewing in next 30 days',
     icon: CalendarDays,
     href: '/broker/renewals',
-    tone: 'bg-amber-50 text-amber-600 ring-amber-100/80 group-hover:bg-amber-600 group-hover:text-white',
+    tone: 'bg-amber-50 text-amber-600 ring-amber-100/80 group-hover:bg-amber-600 group-hover:text-white dark:bg-amber-950/40 dark:text-amber-400 dark:ring-amber-900/40 dark:group-hover:bg-amber-600 dark:group-hover:text-white',
     badge: 'Priority',
   },
 ]
@@ -110,24 +113,24 @@ const quickActions = [
 function StatCard({ stat }: { stat: KpiStat }) {
   const toneClasses =
     stat.tone === 'emerald'
-      ? 'bg-emerald-50 text-emerald-600 ring-emerald-100'
+      ? 'bg-emerald-50 text-emerald-600 ring-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-400 dark:ring-emerald-900/40'
       : stat.tone === 'amber'
-        ? 'bg-amber-50 text-amber-600 ring-amber-100'
+        ? 'bg-amber-50 text-amber-600 ring-amber-100 dark:bg-amber-950/40 dark:text-amber-400 dark:ring-amber-900/40'
         : stat.tone === 'violet'
-          ? 'bg-violet-50 text-violet-600 ring-violet-100'
+          ? 'bg-violet-50 text-violet-600 ring-violet-100 dark:bg-violet-950/40 dark:text-violet-400 dark:ring-violet-900/40'
           : stat.tone === 'rose'
-            ? 'bg-rose-50 text-rose-600 ring-rose-100'
+            ? 'bg-rose-50 text-rose-600 ring-rose-100 dark:bg-rose-950/40 dark:text-rose-400 dark:ring-rose-900/40'
             : stat.tone === 'indigo'
-              ? 'bg-indigo-50 text-indigo-600 ring-indigo-100'
-              : 'bg-blue-50 text-blue-600 ring-blue-100'
+              ? 'bg-indigo-50 text-indigo-600 ring-indigo-100 dark:bg-indigo-950/40 dark:text-indigo-400 dark:ring-indigo-900/40'
+              : 'bg-blue-50 text-blue-600 ring-blue-100 dark:bg-blue-950/40 dark:text-blue-400 dark:ring-blue-900/40'
 
   return (
     <Link href={stat.link} className="group block">
-      <div className="relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.22)]">
+      <div className="relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_8px_30px_-12px_rgba(59,130,246,0.22)] dark:border-white/10 dark:bg-slate-900/60 dark:hover:border-blue-500/40">
         <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
         <div>
           <div className="flex items-start justify-between gap-2">
-            <p className="text-sm font-medium text-slate-600 leading-tight">
+            <p className="text-sm font-medium text-slate-600 leading-tight dark:text-slate-400">
               {stat.label}
             </p>
             <span
@@ -136,11 +139,11 @@ function StatCard({ stat }: { stat: KpiStat }) {
               {stat.change}
             </span>
           </div>
-          <p className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 leading-tight">
+          <p className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 leading-tight dark:text-slate-100">
             {stat.value}
           </p>
         </div>
-        <div className="mt-3 flex items-center justify-between border-t border-slate-100/80 pt-2 text-xs text-slate-500">
+        <div className="mt-3 flex items-center justify-between border-t border-slate-100/80 pt-2 text-xs text-slate-500 dark:border-white/5 dark:text-slate-400">
           <span>{stat.note}</span>
 
         </div>
@@ -169,6 +172,40 @@ export default function BrokerDashboardPage() {
   const [isAddPolicyModalOpen, setIsAddPolicyModalOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
+  const [allClients, setAllClients] = useState<ClientItem[]>(initialClients)
+  const [clientSearchQuery, setClientSearchQuery] = useState('')
+  const [isClientDropdownOpen, setIsClientDropdownOpen] = useState(false)
+  const clientSearchRef = useRef<HTMLDivElement>(null)
+
+  // Load custom clients added via Add Client form with deduplication
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('broker_custom_clients')
+      if (stored) {
+        const parsed: ClientItem[] = JSON.parse(stored)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const clientMap = new Map<string, ClientItem>()
+          initialClients.forEach((c) => clientMap.set(c.id, c))
+          parsed.forEach((c) => clientMap.set(c.id, c))
+          setAllClients(Array.from(clientMap.values()))
+        }
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }, [isAddPolicyModalOpen])
+
+  // Close client search dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (clientSearchRef.current && !clientSearchRef.current.contains(e.target as Node)) {
+        setIsClientDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   const defaultClient = initialClients[0]
   const [policyForm, setPolicyForm] = useState({
     clientId: defaultClient?.id || 'cli-1',
@@ -191,6 +228,34 @@ export default function BrokerDashboardPage() {
     notes: '',
   })
 
+  // Live filter for client accounts by name, company, email, phone, or id
+  const filteredClients = useMemo(() => {
+    if (!clientSearchQuery.trim()) return allClients
+    const q = clientSearchQuery.toLowerCase()
+    return allClients.filter(
+      (c) =>
+        (c.name && c.name.toLowerCase().includes(q)) ||
+        (c.businessName && c.businessName.toLowerCase().includes(q)) ||
+        (c.email && c.email.toLowerCase().includes(q)) ||
+        (c.phone && c.phone.toLowerCase().includes(q)) ||
+        (c.id && c.id.toLowerCase().includes(q)) ||
+        (c.otherIdentifier && c.otherIdentifier.toLowerCase().includes(q))
+    )
+  }, [allClients, clientSearchQuery])
+
+  const handleSelectClient = (client: ClientItem) => {
+    setPolicyForm((prev) => ({
+      ...prev,
+      clientId: client.id,
+      clientName: client.name,
+      businessName: client.businessName || '',
+      clientEmail: client.email || '',
+      clientPhone: client.phone || '',
+    }))
+    setClientSearchQuery('')
+    setIsClientDropdownOpen(false)
+  }
+
   const calculatedExpectedCommission = useMemo(() => {
     const gross = (policyForm.premium * (policyForm.commissionRate || 0)) / 100
     const net = (gross * (policyForm.brokerSplit || 0)) / 100
@@ -207,8 +272,49 @@ export default function BrokerDashboardPage() {
     const finalPolicyNum = policyForm.isPendingNumber
       ? 'Pending'
       : policyForm.policyNumber.trim() || `POL-${policyForm.carrier.substring(0, 3).toUpperCase()}-${Math.floor(10000 + Math.random() * 90000)}`
+
+    // Attach policy to the target client's account in localStorage
+    try {
+      const stored = localStorage.getItem('broker_custom_clients')
+      const currentList: ClientItem[] = stored ? JSON.parse(stored) : [...initialClients]
+      const clientIndex = currentList.findIndex((c) => c.id === policyForm.clientId)
+
+      const newPolicy = {
+        id: `pol-${Date.now()}`,
+        policyNumber: finalPolicyNum,
+        type: policyForm.lineOfBusiness,
+        carrier: policyForm.carrier,
+        premium: `$${policyForm.premium.toLocaleString()}`,
+        effectiveDate: policyForm.effectiveDate,
+        expirationDate: policyForm.expiryDate,
+        status: (policyForm.policyStatus === 'Active' ? 'Active' : policyForm.policyStatus) as any,
+        rateSplit: `${policyForm.commissionRate}% / ${policyForm.brokerSplit}%`,
+        expectedCommission: `$${calculatedExpectedCommission.toLocaleString()}`,
+        paidCommission: `$${(policyForm.actualPaidCommission || 0).toLocaleString()}`,
+        commissionStatus: (policyForm.actualPaidCommission >= calculatedExpectedCommission && calculatedExpectedCommission > 0 ? 'Paid' : 'Unpaid') as any,
+        policyNumberPending: policyForm.isPendingNumber,
+      }
+
+      if (clientIndex >= 0) {
+        currentList[clientIndex].policies = [newPolicy, ...(currentList[clientIndex].policies || [])]
+        localStorage.setItem('broker_custom_clients', JSON.stringify(currentList))
+      } else {
+        const baseClient = initialClients.find((c) => c.id === policyForm.clientId)
+        if (baseClient) {
+          const updatedClient = {
+            ...baseClient,
+            policies: [newPolicy, ...(baseClient.policies || [])],
+          }
+          currentList.push(updatedClient)
+          localStorage.setItem('broker_custom_clients', JSON.stringify(currentList))
+        }
+      }
+    } catch (err) {
+      console.error('Failed to attach policy to client account:', err)
+    }
+
     setIsAddPolicyModalOpen(false)
-    setToastMessage(`Policy ${finalPolicyNum} added to Book of Business.`)
+    setToastMessage(`Policy ${finalPolicyNum} added to ${policyForm.clientName}'s account!`)
     setTimeout(() => setToastMessage(null), 3500)
   }
 
@@ -264,22 +370,22 @@ export default function BrokerDashboardPage() {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <button className="hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 sm:flex">
-            <CalendarDays className="size-4 text-slate-400" />
+          <button className="hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 sm:flex dark:bg-slate-900/80 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white dark:hover:border-white/20">
+            <CalendarDays className="size-4 text-slate-400 dark:text-slate-400" />
             <span>2026 Fiscal Year</span>
-            <ChevronDown className="size-3.5 text-slate-400" />
+            <ChevronDown className="size-3.5 text-slate-400 dark:text-slate-400" />
           </button>
           <Link
             href="/broker/clients?action=add"
-            className="group flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 cursor-pointer"
+            className="group flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 cursor-pointer dark:bg-slate-900/80 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white dark:hover:border-white/20"
           >
-            <UserPlus className="size-4 text-slate-500 transition-transform group-hover:scale-110" />
+            <UserPlus className="size-4 text-slate-500 transition-transform group-hover:scale-110 dark:text-slate-400" />
             <span>Add Client</span>
           </Link>
           <button
             type="button"
             onClick={() => setIsAddPolicyModalOpen(true)}
-            className="group flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 cursor-pointer"
+            className="group flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition-all hover:bg-blue-600 cursor-pointer dark:bg-blue-600 dark:hover:bg-blue-500 dark:shadow-blue-900/30"
           >
             <Plus className="size-4 transition-transform group-hover:rotate-90" />
             <span>Add New Policy</span>
@@ -300,30 +406,30 @@ export default function BrokerDashboardPage() {
           </div>
 
           {/* KPI category filter tabs */}
-          <div className="inline-flex rounded-xl border border-slate-200/80 bg-slate-100/70 p-1 text-xs sm:text-sm font-medium text-slate-600">
+          <div className="inline-flex rounded-xl border border-slate-200/80 bg-slate-100/70 p-1 text-xs sm:text-sm font-medium text-slate-600 dark:border-white/10 dark:bg-slate-900/80">
             <button
               onClick={() => setKpiCategory('all')}
-              className={`rounded-lg px-3 py-1.5 transition-all ${kpiCategory === 'all'
-                ? 'bg-white font-semibold text-slate-900 shadow-sm'
-                : 'hover:text-slate-900'
+              className={`rounded-lg px-3 py-1.5 transition-all cursor-pointer ${kpiCategory === 'all'
+                ? 'bg-white font-semibold text-slate-900 shadow-sm dark:bg-blue-600 dark:text-white'
+                : 'hover:text-slate-900 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60'
                 }`}
             >
               All KPIs (11)
             </button>
             <button
               onClick={() => setKpiCategory('production')}
-              className={`rounded-lg px-3 py-1.5 transition-all ${kpiCategory === 'production'
-                ? 'bg-white font-semibold text-slate-900 shadow-sm'
-                : 'hover:text-slate-900'
+              className={`rounded-lg px-3 py-1.5 transition-all cursor-pointer ${kpiCategory === 'production'
+                ? 'bg-white font-semibold text-slate-900 shadow-sm dark:bg-blue-600 dark:text-white'
+                : 'hover:text-slate-900 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60'
                 }`}
             >
               Production & Policies (5)
             </button>
             <button
               onClick={() => setKpiCategory('commission')}
-              className={`rounded-lg px-3 py-1.5 transition-all ${kpiCategory === 'commission'
-                ? 'bg-white font-semibold text-slate-900 shadow-sm'
-                : 'hover:text-slate-900'
+              className={`rounded-lg px-3 py-1.5 transition-all cursor-pointer ${kpiCategory === 'commission'
+                ? 'bg-white font-semibold text-slate-900 shadow-sm dark:bg-blue-600 dark:text-white'
+                : 'hover:text-slate-900 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60'
                 }`}
             >
               Commissions & Reconciliation (6)
@@ -374,9 +480,9 @@ export default function BrokerDashboardPage() {
           </div>
 
           {/* Timeframe Controls Bar */}
-          <div className="flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-2.5 border-b border-slate-100 bg-slate-50/70 px-3 sm:px-5 py-2.5">
+          <div className="flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-2.5 border-b border-slate-100 bg-slate-50/70 px-3 sm:px-5 py-2.5 dark:border-white/5 dark:bg-slate-900/50">
             <div className="overflow-x-auto scrollbar-none pb-0.5 xs:pb-0">
-              <div className="inline-flex rounded-xl border border-slate-200/80 bg-slate-200/60 p-0.5 text-xs font-semibold text-slate-600">
+              <div className="inline-flex rounded-xl border border-slate-200/80 bg-slate-200/60 p-0.5 text-xs font-semibold text-slate-600 dark:border-white/10 dark:bg-slate-800/80">
                 {[
                   { label: '7 Days', days: 7 },
                   { label: '30 Days', days: 30 },
@@ -389,9 +495,9 @@ export default function BrokerDashboardPage() {
                     <button
                       key={tab.label}
                       onClick={() => setRenewalDaysFilter(tab.days)}
-                      className={`rounded-lg px-2 sm:px-3 py-1 transition-all text-xs font-semibold whitespace-nowrap ${isActive
-                        ? 'bg-slate-950 text-white shadow-sm'
-                        : 'text-slate-600 hover:text-slate-950 hover:bg-white/60'
+                      className={`rounded-lg px-2 sm:px-3 py-1 transition-all text-xs font-semibold whitespace-nowrap cursor-pointer ${isActive
+                        ? 'bg-slate-950 text-white shadow-sm dark:bg-blue-600 dark:text-white'
+                        : 'text-slate-600 hover:text-slate-950 hover:bg-white/60 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700/60'
                         }`}
                     >
                       {tab.label}
@@ -507,13 +613,13 @@ export default function BrokerDashboardPage() {
                           {row.status}
                         </span>
                       </td>
-                      <td className="px-3 sm:px-5 py-3 text-right whitespace-nowrap min-w-[100px] sm:min-w-[120px] md:sticky md:right-0 bg-white group-hover:bg-slate-50/95 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                      <td className="px-3 sm:px-5 py-3 text-right whitespace-nowrap min-w-[100px] sm:min-w-[120px] md:sticky md:right-0 bg-white group-hover:bg-slate-50/95 dark:bg-slate-900 dark:group-hover:bg-slate-800 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] dark:md:shadow-none transition-colors">
                         <Link
                           href="/broker/renewals"
-                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-blue-500 hover:bg-blue-50/50 hover:text-blue-600 shadow-xs transition"
+                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-blue-500 hover:bg-blue-50/50 hover:text-blue-600 shadow-xs transition dark:bg-slate-900/80 dark:border-white/10 dark:text-slate-300 dark:hover:border-blue-500/50 dark:hover:bg-blue-950/40 dark:hover:text-blue-400"
                         >
                           <span>Review</span>
-                          <ArrowRight className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
+                          <ArrowRight className="size-3 text-slate-400 group-hover:text-blue-600 dark:text-slate-400 dark:group-hover:text-blue-400 transition" />
                         </Link>
                       </td>
                     </tr>
@@ -543,16 +649,16 @@ export default function BrokerDashboardPage() {
         </section>
 
         {/* Quick Actions Shortcuts Card */}
-        <section className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)] h-auto xl:h-[480px]">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+        <section className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)] h-auto xl:h-[480px] dark:border-white/10 dark:bg-slate-900/60">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 dark:border-white/5">
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Quick Actions</h2>
-              <p className="mt-0.5 text-xs text-slate-500">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight dark:text-slate-100">Quick Actions</h2>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                 Direct operations &amp; workflow shortcuts
               </p>
             </div>
-            <span className="inline-flex items-center gap-1 rounded-full border border-blue-100 bg-blue-50/80 px-2.5 py-0.5 text-xs font-semibold text-blue-700 shrink-0">
-              <Sparkles className="size-3 text-blue-600" /> Shortcuts
+            <span className="inline-flex items-center gap-1 rounded-full border border-blue-100 bg-blue-50/80 px-2.5 py-0.5 text-xs font-semibold text-blue-700 shrink-0 dark:border-blue-900/50 dark:bg-blue-950/50 dark:text-blue-400">
+              <Sparkles className="size-3 text-blue-600 dark:text-blue-400" /> Shortcuts
             </span>
           </div>
 
@@ -564,7 +670,7 @@ export default function BrokerDashboardPage() {
                 <Link
                   key={action.title}
                   href={action.href}
-                  className="group relative flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-white p-3 sm:p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:bg-slate-50/50 hover:shadow-md hover:shadow-blue-500/5"
+                  className="group relative flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-white p-3 sm:p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:bg-slate-50/50 hover:shadow-md hover:shadow-blue-500/5 dark:border-white/10 dark:bg-slate-900/40 dark:hover:border-blue-500/40 dark:hover:bg-white/[0.04] dark:hover:shadow-blue-950/20"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
@@ -574,19 +680,19 @@ export default function BrokerDashboardPage() {
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                        <p className="text-xs sm:text-sm font-semibold text-slate-900 transition-colors group-hover:text-blue-600">
+                        <p className="text-xs sm:text-sm font-semibold text-slate-900 transition-colors group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-400">
                           {action.title}
                         </p>
-                        <span className="rounded-full bg-slate-100 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-slate-600 shrink-0">
+                        <span className="rounded-full bg-slate-100 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-slate-600 shrink-0 dark:bg-slate-800 dark:text-slate-400">
                           {action.badge}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5 line-clamp-1 sm:truncate">
+                      <p className="text-xs text-slate-500 mt-0.5 line-clamp-1 sm:truncate dark:text-slate-400">
                         {action.description}
                       </p>
                     </div>
                   </div>
-                  <div className="flex size-7 sm:size-7.5 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400 transition-all duration-200 group-hover:bg-blue-50 group-hover:text-blue-600 group-hover:translate-x-0.5">
+                  <div className="flex size-7 sm:size-7.5 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400 transition-all duration-200 group-hover:bg-blue-50 group-hover:text-blue-600 group-hover:translate-x-0.5 dark:bg-slate-800/80 dark:text-slate-400 dark:group-hover:bg-blue-950/60 dark:group-hover:text-blue-400">
                     <ArrowUpRight className="size-3.5 sm:size-4" />
                   </div>
                 </Link>
@@ -594,10 +700,10 @@ export default function BrokerDashboardPage() {
             })}
           </div>
 
-          <div className="pt-3 border-t border-slate-100">
+          <div className="pt-3 border-t border-slate-100 dark:border-white/5">
             <Link
               href="/broker/dashboard/policy"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 dark:shadow-blue-900/25"
             >
               <Plus className="size-3.5" /> Bind New Policy
             </Link>
@@ -629,65 +735,65 @@ export default function BrokerDashboardPage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <Link
             href="/broker/policies"
-            className="group rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 transition hover:border-blue-300 hover:bg-blue-50/30"
+            className="group rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 transition hover:border-blue-300 hover:bg-blue-50/30 dark:border-white/10 dark:bg-slate-900/40 dark:hover:border-blue-500/40 dark:hover:bg-blue-950/20"
           >
-            <p className="text-xs sm:text-sm font-medium text-slate-600">New Business</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-dark">
+            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">New Business</p>
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
               $45,000
             </p>
-            <span className="mt-1 inline-flex items-center text-xs font-semibold text-emerald-600">
+            <span className="mt-1 inline-flex items-center text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               +15.3% this month
             </span>
           </Link>
 
           <Link
             href="/broker/renewals"
-            className="group rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 transition hover:border-blue-300 hover:bg-blue-50/30"
+            className="group rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 transition hover:border-blue-300 hover:bg-blue-50/30 dark:border-white/10 dark:bg-slate-900/40 dark:hover:border-blue-500/40 dark:hover:bg-blue-950/20"
           >
-            <p className="text-xs sm:text-sm font-medium text-slate-600">Renewals</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-dark">
+            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Renewals</p>
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
               $97,000
             </p>
-            <span className="mt-1 inline-flex items-center text-xs font-semibold text-blue-600">
+            <span className="mt-1 inline-flex items-center text-xs font-semibold text-blue-600 dark:text-blue-400">
               +10.8% this month
             </span>
           </Link>
 
           <Link
             href="/"
-            className="group rounded-xl border border-blue-200/80 bg-blue-50/40 p-4 transition hover:border-blue-300 hover:bg-blue-50/60"
+            className="group rounded-xl border border-blue-200/80 bg-blue-50/40 p-4 transition hover:border-blue-300 hover:bg-blue-50/60 dark:border-blue-900/50 dark:bg-blue-950/40 dark:hover:border-blue-500/50 dark:hover:bg-blue-900/30"
           >
-            <p className="text-xs sm:text-sm font-medium text-blue-700">Total Production</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-dark">
+            <p className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300">Total Production</p>
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
               $142,000
             </p>
-            <span className="mt-1 inline-flex items-center text-xs font-semibold text-blue-600">
+            <span className="mt-1 inline-flex items-center text-xs font-semibold text-blue-600 dark:text-blue-400">
               +12.1% total MTD
             </span>
           </Link>
 
           <Link
             href="/broker/carriers"
-            className="group rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 transition hover:border-blue-300 hover:bg-blue-50/30"
+            className="group rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 transition hover:border-blue-300 hover:bg-blue-50/30 dark:border-white/10 dark:bg-slate-900/40 dark:hover:border-blue-500/40 dark:hover:bg-blue-950/20"
           >
-            <p className="text-xs sm:text-sm font-medium text-slate-600">Top Carrier Share</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-dark">
+            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Top Carrier Share</p>
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
               Travelers (41%)
             </p>
-            <span className="mt-1 inline-flex text-xs font-medium text-dark">
+            <span className="mt-1 inline-flex text-xs font-medium text-slate-700 dark:text-slate-300">
               $58,000 volume
             </span>
           </Link>
 
           <Link
             href="/broker/policies"
-            className="group col-span-2 sm:col-span-1 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 transition hover:border-blue-300 hover:bg-blue-50/30"
+            className="group col-span-2 sm:col-span-1 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 transition hover:border-blue-300 hover:bg-blue-50/30 dark:border-white/10 dark:bg-slate-900/40 dark:hover:border-blue-500/40 dark:hover:bg-blue-950/20"
           >
-            <p className="text-xs sm:text-sm font-medium text-slate-600">Active Policies</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-dark">
+            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Active Policies</p>
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
               1,192
             </p>
-            <span className="mt-1 inline-flex text-xs font-semibold text-emerald-600">
+            <span className="mt-1 inline-flex text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               92.8% retention
             </span>
           </Link>
@@ -696,17 +802,17 @@ export default function BrokerDashboardPage() {
         {/* Carrier Production & LOB Breakdown */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Carrier Production */}
-          <div className="rounded-xl border border-slate-200/70 p-4 sm:p-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="rounded-xl border border-slate-200/70 p-4 sm:p-5 dark:border-white/10 dark:bg-slate-900/40">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/5">
               <div className="flex items-center gap-2">
-                <Building2 className="size-4 text-blue-600" />
-                <h3 className="text-sm sm:text-base font-semibold text-slate-900">
+                <Building2 className="size-4 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100">
                   Carrier Production
                 </h3>
               </div>
               <Link
                 href="/broker/carriers"
-                className="text-xs font-semibold text-blue-600 hover:underline"
+                className="text-xs font-semibold text-blue-600 hover:underline dark:text-blue-400"
               >
                 View all carriers
               </Link>
@@ -716,20 +822,20 @@ export default function BrokerDashboardPage() {
                 <Link
                   key={c.carrier}
                   href={c.link}
-                  className="group block space-y-1.5 rounded-lg p-2 transition hover:bg-slate-50"
+                  className="group block space-y-1.5 rounded-lg p-2 transition hover:bg-slate-50 dark:hover:bg-white/[0.04]"
                 >
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
+                    <span className="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors dark:text-slate-200 dark:group-hover:text-blue-400">
                       {c.carrier}
                     </span>
                     <div className="flex items-center gap-2.5">
-                      <span className="text-slate-500 text-xs">
+                      <span className="text-slate-500 text-xs dark:text-slate-400">
                         {c.policies} policies
                       </span>
-                      <span className="font-bold text-slate-900">{c.amount}</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100">{c.amount}</span>
                     </div>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                     <div
                       className="h-full rounded-full bg-blue-600 transition-all duration-500"
                       style={{ width: `${c.percentage}%` }}
@@ -741,11 +847,11 @@ export default function BrokerDashboardPage() {
           </div>
 
           {/* Line-of-Business Production */}
-          <div className="rounded-xl border border-slate-200/70 p-4 sm:p-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="rounded-xl border border-slate-200/70 p-4 sm:p-5 dark:border-white/10 dark:bg-slate-900/40">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/5">
               <div className="flex items-center gap-2">
-                <Layers className="size-4 text-violet-600" />
-                <h3 className="text-sm sm:text-base font-semibold text-slate-900">
+                <Layers className="size-4 text-violet-600 dark:text-violet-400" />
+                <h3 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100">
                   Line-of-Business Production
                 </h3>
               </div>
@@ -756,15 +862,15 @@ export default function BrokerDashboardPage() {
                 <Link
                   key={lob.lob}
                   href={lob.link}
-                  className="group block space-y-1.5 rounded-lg p-2 transition hover:bg-slate-50"
+                  className="group block space-y-1.5 rounded-lg p-2 transition hover:bg-slate-50 dark:hover:bg-white/[0.04]"
                 >
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-semibold text-slate-800 group-hover:text-violet-600 transition-colors">
+                    <span className="font-semibold text-slate-800 group-hover:text-violet-600 transition-colors dark:text-slate-200 dark:group-hover:text-violet-400">
                       {lob.lob}
                     </span>
-                    <span className="font-bold text-slate-900">{lob.amount} ({lob.percentage}%)</span>
+                    <span className="font-bold text-slate-900 dark:text-slate-100">{lob.amount} ({lob.percentage}%)</span>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 transition-all duration-500"
                       style={{ width: `${lob.percentage}%` }}
@@ -799,7 +905,7 @@ export default function BrokerDashboardPage() {
               <select
                 value={range}
                 onChange={(e) => setRange(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 outline-none transition hover:border-slate-300 focus:border-[#0170FE]"
+                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 outline-none transition hover:border-slate-300 focus:border-[#0170FE] dark:bg-slate-900 dark:border-white/10 dark:text-slate-300 dark:hover:border-white/20"
               >
                 <option value="Last 12 months">Last 12 months</option>
                 <option value="Last 6 months">Last 6 months</option>
@@ -946,68 +1052,68 @@ export default function BrokerDashboardPage() {
         <div className="grid gap-3.5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
           <Link
             href="/broker/commissions"
-            className="group rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
+            className="group rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-white/10 dark:bg-slate-900/60 dark:hover:border-blue-500/40"
           >
-            <p className="text-xs sm:text-sm font-medium text-slate-600">Expected</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900 group-hover:text-blue-600">
+            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Expected</p>
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900 group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-400">
               {commissionSummaryBreakdown.expected}
             </p>
-            <p className="mt-1 text-xs text-slate-400">Total projected</p>
+            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Total projected</p>
           </Link>
 
           <Link
             href="/broker/statements"
-            className="group rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md"
+            className="group rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md dark:border-white/10 dark:bg-slate-900/60 dark:hover:border-emerald-500/40"
           >
-            <p className="text-xs sm:text-sm font-medium text-slate-600">Actual / Paid</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-emerald-600">
+            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Actual / Paid</p>
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {commissionSummaryBreakdown.actualPaid}
             </p>
-            <p className="mt-1 text-xs text-slate-400">Matched in statements</p>
+            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Matched in statements</p>
           </Link>
 
           <Link
             href="/broker/commissions"
-            className="group rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-md"
+            className="group rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-md dark:border-white/10 dark:bg-slate-900/60 dark:hover:border-rose-500/40"
           >
-            <p className="text-xs sm:text-sm font-medium text-slate-600">Outstanding</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-rose-600">
+            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Outstanding</p>
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-rose-600 dark:text-rose-400">
               {commissionSummaryBreakdown.outstanding}
             </p>
-            <p className="mt-1 text-xs text-slate-400">Awaiting carrier pay</p>
+            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Awaiting carrier pay</p>
           </Link>
 
           <Link
             href="/broker/reconciliation"
-            className="group rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md"
+            className="group rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md dark:border-white/10 dark:bg-slate-900/60 dark:hover:border-amber-500/40"
           >
-            <p className="text-xs sm:text-sm font-medium text-slate-600">Partial / Short-Paid</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-amber-600">
+            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Partial / Short-Paid</p>
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-amber-600 dark:text-amber-400">
               {commissionSummaryBreakdown.partialShortPaid}
             </p>
-            <p className="mt-1 text-xs text-slate-400">Rate variance delta</p>
+            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Rate variance delta</p>
           </Link>
 
           <Link
             href="/broker/commissions"
-            className="group rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-md"
+            className="group rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-md dark:border-white/10 dark:bg-slate-900/60 dark:hover:border-rose-500/40"
           >
-            <p className="text-xs sm:text-sm font-medium text-slate-600">Chargebacks</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-rose-600">
+            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Chargebacks</p>
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-rose-600 dark:text-rose-400">
               -{commissionSummaryBreakdown.chargebacks}
             </p>
-            <p className="mt-1 text-xs text-slate-400">Policy cancellations</p>
+            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Policy cancellations</p>
           </Link>
 
           <Link
             href="/broker/reconciliation"
-            className="group rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-md"
+            className="group rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-md dark:border-white/10 dark:bg-slate-900/60 dark:hover:border-violet-500/40"
           >
-            <p className="text-xs sm:text-sm font-medium text-slate-600">Adjustments</p>
-            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-violet-600">
+            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Adjustments</p>
+            <p className="mt-1.5 text-xl sm:text-2xl font-bold text-violet-600 dark:text-violet-400">
               +{commissionSummaryBreakdown.adjustments}
             </p>
-            <p className="mt-1 text-xs text-slate-400">Manual corrections</p>
+            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Manual corrections</p>
           </Link>
         </div>
       </section>
@@ -1070,34 +1176,34 @@ export default function BrokerDashboardPage() {
             ].map((lead) => (
               <div
                 key={lead.name}
-                className="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5 transition hover:border-slate-300"
+                className="rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5 transition hover:border-slate-300 dark:border-white/10 dark:bg-slate-900/40 dark:hover:border-white/20"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold text-slate-900">{lead.name}</p>
-                    <p className="truncate text-xs text-slate-500 mt-0.5">{lead.company}</p>
+                    <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">{lead.name}</p>
+                    <p className="truncate text-xs text-slate-500 dark:text-slate-400 mt-0.5">{lead.company}</p>
                   </div>
                   <span
                     className={`shrink-0 rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ${lead.status === 'Hot Lead'
-                      ? 'bg-rose-50 text-rose-700 ring-rose-200'
+                      ? 'bg-rose-50 text-rose-700 ring-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:ring-rose-900/40'
                       : lead.status === 'Follow-up Required'
-                        ? 'bg-amber-50 text-amber-700 ring-amber-200'
-                        : 'bg-blue-50 text-blue-700 ring-blue-200'
+                        ? 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:ring-amber-900/40'
+                        : 'bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:ring-blue-900/40'
                       }`}
                   >
                     {lead.status}
                   </span>
                 </div>
 
-                <div className="mt-2.5 flex items-center justify-between border-t border-slate-200/50 pt-2 text-xs">
-                  <span className="truncate text-slate-700 max-w-[60%] font-medium">{lead.type}</span>
-                  <span className="text-slate-400 shrink-0">{lead.days}</span>
+                <div className="mt-2.5 flex items-center justify-between border-t border-slate-200/50 pt-2 text-xs dark:border-white/5">
+                  <span className="truncate text-slate-700 max-w-[60%] font-medium dark:text-slate-300">{lead.type}</span>
+                  <span className="text-slate-400 shrink-0 dark:text-slate-500">{lead.days}</span>
                 </div>
 
                 <div className="mt-2.5 flex items-center justify-end">
                   <Link
                     href="/broker/leads"
-                    className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+                    className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors dark:bg-blue-950/50 dark:text-blue-400 dark:hover:bg-blue-900/60"
                   >
                     Contact <ArrowUpRight className="size-3" />
                   </Link>
@@ -1147,36 +1253,36 @@ export default function BrokerDashboardPage() {
                 ].map((lead) => (
                   <tr
                     key={lead.name}
-                    className="group border-b border-slate-50 transition last:border-0 hover:bg-slate-50/70"
+                    className="group border-b border-slate-50 transition last:border-0 hover:bg-slate-50/70 dark:border-white/5 dark:hover:bg-white/[0.03]"
                   >
                     <td className="px-3 py-3">
-                      <p className="text-sm font-semibold text-slate-900">
+                      <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                         {lead.name}
                       </p>
-                      <p className="text-xs text-slate-500 mt-0.5">{lead.company}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{lead.company}</p>
                     </td>
-                    <td className="px-3 py-3 text-xs text-slate-700 font-medium">
+                    <td className="px-3 py-3 text-xs text-slate-700 font-medium dark:text-slate-300">
                       {lead.type}
                     </td>
                     <td className="px-3 py-3">
                       <span
                         className={`whitespace-nowrap rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ${lead.status === 'Hot Lead'
-                          ? 'bg-rose-50 text-rose-700 ring-rose-200'
+                          ? 'bg-rose-50 text-rose-700 ring-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:ring-rose-900/40'
                           : lead.status === 'Follow-up Required'
-                            ? 'bg-amber-50 text-amber-700 ring-amber-200'
-                            : 'bg-blue-50 text-blue-700 ring-blue-200'
+                            ? 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:ring-amber-900/40'
+                            : 'bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:ring-blue-900/40'
                           }`}
                       >
                         {lead.status}
                       </span>
                     </td>
-                    <td className="px-3 py-3 text-xs text-slate-500 font-medium">
+                    <td className="px-3 py-3 text-xs text-slate-500 font-medium dark:text-slate-400">
                       {lead.days}
                     </td>
-                    <td className="px-3 py-3 text-right whitespace-nowrap min-w-[110px] w-[110px] sticky right-0 bg-white group-hover:bg-slate-50/95 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] transition-colors">
+                    <td className="px-3 py-3 text-right whitespace-nowrap min-w-[110px] w-[110px] sticky right-0 bg-white group-hover:bg-slate-50/95 dark:bg-slate-900 dark:group-hover:bg-slate-800 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.06)] dark:shadow-none transition-colors">
                       <Link
                         href="/broker/leads"
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
                       >
                         Contact <ArrowUpRight className="size-3" />
                       </Link>
@@ -1242,29 +1348,29 @@ export default function BrokerDashboardPage() {
               <Link
                 key={record.carrier}
                 href={record.link}
-                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 rounded-xl border border-slate-200/70 p-3 sm:p-3.5 transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-slate-50/60 hover:shadow-xs"
+                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 rounded-xl border border-slate-200/70 p-3 sm:p-3.5 transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-slate-50/60 hover:shadow-xs dark:border-white/10 dark:bg-slate-900/40 dark:hover:border-blue-500/40 dark:hover:bg-white/[0.04]"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div
                     className={`flex size-9 shrink-0 items-center justify-center rounded-lg ring-1 ${record.priority === 'High'
-                      ? 'bg-rose-100 text-rose-700 ring-rose-200'
+                      ? 'bg-rose-100 text-rose-700 ring-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:ring-rose-900/40'
                       : record.priority === 'Medium'
-                        ? 'bg-amber-100 text-amber-700 ring-amber-200'
-                        : 'bg-blue-100 text-blue-700 ring-blue-200'
+                        ? 'bg-amber-100 text-amber-700 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:ring-amber-900/40'
+                        : 'bg-blue-100 text-blue-700 ring-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:ring-blue-900/40'
                       }`}
                   >
                     <FileCheck2 className="size-4" />
                   </div>
                   <div className="min-w-0 flex-1 truncate">
-                    <p className="truncate text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                    <p className="truncate text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors dark:text-slate-100 dark:group-hover:text-blue-400">
                       {record.carrier}
                     </p>
-                    <p className="truncate text-xs text-slate-500 mt-0.5">{record.statement}</p>
+                    <p className="truncate text-xs text-slate-500 dark:text-slate-400 mt-0.5">{record.statement}</p>
                   </div>
                 </div>
 
-                <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-slate-100/80 pt-2 sm:pt-0 shrink-0">
-                  <p className="text-sm font-bold text-slate-900 font-mono">
+                <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-slate-100/80 pt-2 sm:pt-0 shrink-0 dark:border-white/5">
+                  <p className="text-sm font-bold text-slate-900 font-mono dark:text-slate-100">
                     {record.discrepancy}
                   </p>
                   <span
@@ -1332,32 +1438,32 @@ export default function BrokerDashboardPage() {
             <Link
               key={item.task}
               href={item.link}
-              className="group flex flex-col justify-between rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-white hover:shadow-md"
+              className="group flex flex-col justify-between rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-white hover:shadow-md dark:border-white/10 dark:bg-slate-900/40 dark:hover:border-blue-500/40 dark:hover:bg-slate-800/80"
             >
               <div className="flex items-start justify-between">
                 <div
                   className={`flex size-9 items-center justify-center rounded-xl ring-1 ${item.color === 'blue'
-                    ? 'bg-blue-100 text-blue-700 ring-blue-200'
+                    ? 'bg-blue-100 text-blue-700 ring-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:ring-blue-900/40'
                     : item.color === 'violet'
-                      ? 'bg-violet-100 text-violet-700 ring-violet-200'
+                      ? 'bg-violet-100 text-violet-700 ring-violet-200 dark:bg-violet-950/40 dark:text-violet-400 dark:ring-violet-900/40'
                       : item.color === 'amber'
-                        ? 'bg-amber-100 text-amber-700 ring-amber-200'
-                        : 'bg-emerald-100 text-emerald-700 ring-emerald-200'
+                        ? 'bg-amber-100 text-amber-700 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:ring-amber-900/40'
+                        : 'bg-emerald-100 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:ring-emerald-900/40'
                     }`}
                 >
                   <Activity className="size-4" />
                 </div>
-                <span className="rounded-full bg-slate-900 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
+                <span className="rounded-full bg-slate-900 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm dark:bg-blue-600">
                   {item.count} items
                 </span>
               </div>
               <div className="mt-3">
-                <p className="text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                <p className="text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors dark:text-slate-100 dark:group-hover:text-blue-400">
                   {item.task}
                 </p>
-                <p className="text-xs text-slate-500 mt-0.5">{item.detail}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{item.detail}</p>
               </div>
-              <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2 text-xs font-semibold text-blue-600">
+              <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2 text-xs font-semibold text-blue-600 dark:border-white/5 dark:text-blue-400">
                 <span>Open task queue</span>
                 <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
               </div>
@@ -1391,7 +1497,7 @@ export default function BrokerDashboardPage() {
             return (
               <div
                 key={act.title}
-                className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-3.5 transition hover:bg-slate-50"
+                className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-3.5 transition hover:bg-slate-50 dark:border-white/5 dark:bg-slate-900/30 dark:hover:bg-white/[0.04]"
               >
                 <div
                   className={`flex size-8 shrink-0 items-center justify-center rounded-lg ring-1 ${act.tone}`}
@@ -1399,11 +1505,11 @@ export default function BrokerDashboardPage() {
                   <Icon className="size-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 truncate">
+                  <p className="text-sm font-semibold text-slate-900 truncate dark:text-slate-100">
                     {act.title}
                   </p>
-                  <p className="text-xs text-slate-500 truncate mt-0.5">{act.detail}</p>
-                  <p className="text-xs text-slate-400 mt-1">{act.time}</p>
+                  <p className="text-xs text-slate-500 truncate mt-0.5 dark:text-slate-400">{act.detail}</p>
+                  <p className="text-xs text-slate-400 mt-1 dark:text-slate-500">{act.time}</p>
                 </div>
               </div>
             )
@@ -1436,55 +1542,206 @@ export default function BrokerDashboardPage() {
 
             {/* Form Body */}
             <form onSubmit={handleSavePolicyForm} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
-              {/* Client & Carrier Row */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Select Client / Business *
-                  </label>
-                  <select
-                    value={policyForm.clientId}
-                    onChange={(e) => {
-                      const sel = initialClients.find((c) => c.id === e.target.value)
-                      if (sel) {
-                        setPolicyForm({
-                          ...policyForm,
-                          clientId: sel.id,
-                          clientName: sel.name,
-                          businessName: sel.businessName,
-                          clientEmail: sel.email,
-                          clientPhone: sel.phone,
-                        })
-                      }
-                    }}
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none"
-                    required
+              {/* Searchable Client Account Selection */}
+              <div ref={clientSearchRef} className="space-y-2 rounded-2xl border border-slate-200/90 bg-slate-50/70 p-4 dark:border-white/10 dark:bg-slate-900/40">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-900 dark:text-white">
+                      Current Client Account *
+                    </label>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Search client by name to add and bind this policy directly to their account.
+                    </p>
+                  </div>
+                  <Link
+                    href="/broker/clients?action=add"
+                    target="_blank"
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400"
                   >
-                    {initialClients.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name} — {c.businessName}
-                      </option>
-                    ))}
-                  </select>
+                    <UserPlus className="size-3.5" />
+                    <span>+ New Client Record</span>
+                  </Link>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Insurance Company / Carrier *
-                  </label>
-                  <select
-                    value={policyForm.carrier}
-                    onChange={(e) => setPolicyForm({ ...policyForm, carrier: e.target.value })}
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none"
-                    required
+                {/* Selected Client Card */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-blue-200 bg-white p-3 shadow-xs dark:border-blue-900/50 dark:bg-slate-900">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-xs font-bold text-white shadow-sm ring-2 ring-blue-500/20">
+                      {policyForm.clientName
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .substring(0, 2)
+                        .toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                          {policyForm.clientName}
+                        </span>
+                        {policyForm.businessName && (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                            <Building2 className="size-2.5 text-slate-400" />
+                            {policyForm.businessName}
+                          </span>
+                        )}
+                        <span className="rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300 font-mono">
+                          ID: {policyForm.clientId}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                        {policyForm.clientEmail} {policyForm.clientPhone ? `· ${policyForm.clientPhone}` : ''}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsClientDropdownOpen(true)
+                      setClientSearchQuery('')
+                    }}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50/80 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition cursor-pointer dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300 dark:hover:bg-blue-900/60"
                   >
-                    {carrierOptions.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
+                    <Search className="size-3.5" />
+                    <span>Search / Change Client</span>
+                  </button>
                 </div>
+
+                {/* Real-time Client Search Input */}
+                <div className="relative">
+                  <div className="relative">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Search by client name, business name, or email..."
+                      value={clientSearchQuery}
+                      onChange={(e) => {
+                        setClientSearchQuery(e.target.value)
+                        setIsClientDropdownOpen(true)
+                      }}
+                      onFocus={() => setIsClientDropdownOpen(true)}
+                      className="h-10.5 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-9 text-xs font-medium text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-900 dark:border-white/10 dark:text-white"
+                    />
+                    {clientSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setClientSearchQuery('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Search Results Dropdown */}
+                  {isClientDropdownOpen && (
+                    <div className="absolute left-0 right-0 z-30 mt-1.5 max-h-64 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-2xl ring-1 ring-black/5 dark:bg-slate-900 dark:border-white/15">
+                      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-slate-50/95 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500 backdrop-blur-sm dark:border-white/5 dark:bg-slate-800/90 dark:text-slate-400">
+                        <span>Available Accounts ({filteredClients.length})</span>
+                        <span className="text-[9px] text-slate-400 normal-case">Click to select for this policy</span>
+                      </div>
+
+                      {filteredClients.length === 0 ? (
+                        <div className="p-5 text-center">
+                          <p className="text-xs text-slate-600 dark:text-slate-400">
+                            No account found matching &ldquo;<span className="font-semibold text-slate-900 dark:text-white">{clientSearchQuery}</span>&rdquo;
+                          </p>
+                          <p className="text-[11px] text-slate-400 mt-1">
+                            Check spelling or create a client record.
+                          </p>
+                          <Link
+                            href="/broker/clients?action=add"
+                            target="_blank"
+                            className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 transition"
+                          >
+                            <Plus className="size-3.5" />
+                            <span>Add New Client</span>
+                          </Link>
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-slate-100 dark:divide-white/5">
+                          {filteredClients.map((client) => {
+                            const isSelected = client.id === policyForm.clientId
+                            const policyCount = client.policies?.length || 0
+                            return (
+                              <button
+                                key={client.id}
+                                type="button"
+                                onClick={() => handleSelectClient(client)}
+                                className={`w-full flex items-center justify-between p-3 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/80 cursor-pointer ${
+                                  isSelected ? 'bg-blue-50/80 dark:bg-blue-950/50' : ''
+                                }`}
+                              >
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <div
+                                    className={`flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
+                                      isSelected
+                                        ? 'bg-blue-600 text-white shadow-sm'
+                                        : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                                    }`}
+                                  >
+                                    {client.name
+                                      .split(' ')
+                                      .map((n) => n[0])
+                                      .join('')
+                                      .substring(0, 2)
+                                      .toUpperCase()}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                                        {client.name}
+                                      </p>
+                                      {client.businessName && (
+                                        <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                                          · {client.businessName}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-[10px] text-slate-400 truncate">
+                                      {client.email} {client.phone ? `· ${client.phone}` : ''}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 shrink-0 ml-3">
+                                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                    {policyCount} {policyCount === 1 ? 'policy' : 'policies'}
+                                  </span>
+                                  {isSelected && (
+                                    <div className="flex size-5 items-center justify-center rounded-full bg-blue-600 text-white">
+                                      <Check className="size-3 stroke-[3]" />
+                                    </div>
+                                  )}
+                                </div>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Insurance Company / Carrier */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5 dark:text-slate-300">
+                  Insurance Company / Carrier *
+                </label>
+                <select
+                  value={policyForm.carrier}
+                  onChange={(e) => setPolicyForm({ ...policyForm, carrier: e.target.value })}
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none dark:bg-slate-900 dark:border-white/10 dark:text-white"
+                  required
+                >
+                  {carrierOptions.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Policy Number & Pending Checkbox */}
@@ -1707,17 +1964,17 @@ export default function BrokerDashboardPage() {
               </div>
 
               {/* Modal Actions */}
-              <div className="flex items-center justify-end gap-2.5 border-t border-slate-100 pt-4">
+              <div className="flex items-center justify-end gap-2.5 border-t border-slate-100 pt-4 dark:border-white/5">
                 <button
                   type="button"
                   onClick={() => setIsAddPolicyModalOpen(false)}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer dark:bg-slate-900/80 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-slate-950/15 hover:bg-blue-600 transition cursor-pointer"
+                  className="rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-slate-950/15 hover:bg-blue-600 transition cursor-pointer dark:bg-blue-600 dark:hover:bg-blue-500"
                 >
                   Save &amp; Add Policy
                 </button>

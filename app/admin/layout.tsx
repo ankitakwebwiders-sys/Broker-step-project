@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -56,8 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Right Controls */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-
-
+            <ThemeToggle />
 
             {/* Admin Profile Pill */}
             <Link

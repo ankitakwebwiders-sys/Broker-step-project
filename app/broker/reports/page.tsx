@@ -724,27 +724,27 @@ function ReportsContent() {
   const activeReportMeta = REPORT_DEFINITIONS.find((r) => r.key === selectedReport)
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070d18] p-4 sm:p-6 lg:p-8">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-xl ring-1 ring-white/10 animate-in fade-in slide-in-from-bottom-2">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-slate-800 px-4 py-3 text-xs font-semibold text-white shadow-xl ring-1 ring-white/10 animate-in fade-in slide-in-from-bottom-2">
           <CheckCircle2 className="size-4 text-emerald-400" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/80 pb-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/80 dark:border-white/10 pb-6">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
               Reports &amp; Analytics
             </h1>
-            <span className="rounded-full bg-slate-950 px-2.5 py-0.5 text-xs font-semibold text-white ring-1 ring-slate-800">
+            <span className="rounded-full bg-slate-950 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-semibold text-white ring-1 ring-slate-800 dark:ring-white/10">
               15 Standard Reports
             </span>
           </div>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Export-ready production books, commission reconciliations, policy operations, and compliance audit reports.
           </p>
         </div>
@@ -754,9 +754,9 @@ function ReportsContent() {
           <button
             type="button"
             onClick={() => setScheduleModalOpen(true)}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:border-slate-300 transition"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-xs hover:border-slate-300 dark:hover:bg-slate-800 transition"
           >
-            <Clock className="size-3.5 text-slate-500" />
+            <Clock className="size-3.5 text-slate-500 dark:text-slate-400" />
             <span>Schedule Delivery</span>
           </button>
 
@@ -773,44 +773,44 @@ function ReportsContent() {
 
       {/* KPI Stats Bar */}
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:gap-4">
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
-          <p className="text-sm font-medium text-slate-500">Available Reports</p>
-          <p className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950 font-mono">15</p>
-          <p className="mt-1 text-xs text-slate-400 font-medium">Excel / CSV / PDF formats</p>
+        <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-xs">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Available Reports</p>
+          <p className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white font-mono">15</p>
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500 font-medium">Excel / CSV / PDF formats</p>
         </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
-          <p className="text-sm font-medium text-slate-500">Total Book Value</p>
-          <p className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950 font-mono">$193,500</p>
-          <p className="mt-1 text-xs text-emerald-600 font-semibold">8 active commercial policies</p>
+        <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-xs">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Book Value</p>
+          <p className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white font-mono">$193,500</p>
+          <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">8 active commercial policies</p>
         </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
-          <p className="text-sm font-medium text-slate-500">Cleared Commissions</p>
-          <p className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950 font-mono">$18,296</p>
-          <p className="mt-1 text-xs text-slate-400 font-medium">Reconciled this period</p>
+        <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-xs">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Cleared Commissions</p>
+          <p className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white font-mono">$18,296</p>
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500 font-medium">Reconciled this period</p>
         </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
-          <p className="text-sm font-medium text-slate-500">Pending Reconciliation</p>
-          <p className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-600 font-mono">$5,182</p>
-          <p className="mt-1 text-xs text-slate-400 font-medium">3 outstanding statement items</p>
+        <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-xs">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Pending Reconciliation</p>
+          <p className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-600 dark:text-amber-400 font-mono">$5,182</p>
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500 font-medium">3 outstanding statement items</p>
         </div>
       </div>
 
       {/* Main Tab Navigation Bar - Styled in BLACK (bg-slate-950) like other broker pages */}
-      <div className="mt-6 rounded-2xl border border-slate-200/80 bg-white p-2.5 shadow-xs">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-thin">
+      <div className="mt-6 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900 p-2.5 shadow-xs">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {/* 1. All Reports Catalog Pill */}
           <button
             type="button"
             onClick={() => handleSelectReport('catalog')}
             className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${selectedReport === 'catalog'
-              ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              ? 'bg-slate-950 dark:bg-blue-600 text-white shadow-sm ring-1 ring-slate-800 dark:ring-blue-500/40'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
               }`}
           >
-            <Layers className={`size-4 ${selectedReport === 'catalog' ? 'text-white' : 'text-slate-500'}`} />
+            <Layers className={`size-4 ${selectedReport === 'catalog' ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`} />
             <span>All Reports Directory</span>
             <span
-              className={`rounded-full px-2 py-0.5 text-xs font-bold ${selectedReport === 'catalog' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+              className={`rounded-full px-2 py-0.5 text-xs font-bold ${selectedReport === 'catalog' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                 }`}
             >
               15
@@ -827,11 +827,11 @@ function ReportsContent() {
                 type="button"
                 onClick={() => handleSelectReport(rep.key)}
                 className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isActive
-                  ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-slate-950 dark:bg-blue-600 text-white shadow-sm ring-1 ring-slate-800 dark:ring-blue-500/40'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                   }`}
               >
-                <Icon className={`size-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
+                <Icon className={`size-4 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`} />
                 <span>{rep.title}</span>
               </button>
             )
@@ -840,24 +840,24 @@ function ReportsContent() {
       </div>
 
       {/* Combinable Multi-Filters Toolbar */}
-      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs">
+      <div className="mt-4 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-xs">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           {/* Search bar + Preset Pills */}
           <div className="flex flex-1 flex-wrap items-center gap-2.5">
             <div className="relative min-w-[240px] flex-1 sm:max-w-xs">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by client, policy #, carrier..."
-                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#0170FE] focus:bg-white focus:ring-2 focus:ring-[#0170FE]/20"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/80 pl-9 pr-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-[#0170FE] focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-[#0170FE]/20"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                 >
                   <X className="size-3.5" />
                 </button>
@@ -868,7 +868,7 @@ function ReportsContent() {
             <select
               value={carrierFilter}
               onChange={(e) => setCarrierFilter(e.target.value)}
-              className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-[#0170FE]"
+              className="h-10 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-sm font-semibold text-slate-700 dark:text-slate-200 outline-none hover:border-slate-300 dark:hover:border-slate-700 focus:border-[#0170FE]"
             >
               <option value="All">All Carriers</option>
               <option value="Travelers Insurance">Travelers Insurance</option>
@@ -883,7 +883,7 @@ function ReportsContent() {
             <select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
-              className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-[#0170FE]"
+              className="h-10 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-sm font-semibold text-slate-700 dark:text-slate-200 outline-none hover:border-slate-300 dark:hover:border-slate-700 focus:border-[#0170FE]"
             >
               <option value="All Time">Date: All Time</option>
               <option value="This Month">This Month (Oct 2026)</option>
@@ -897,8 +897,8 @@ function ReportsContent() {
               type="button"
               onClick={() => setShowFiltersDrawer(!showFiltersDrawer)}
               className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-xs sm:text-sm font-semibold transition cursor-pointer ${showFiltersDrawer || activeFiltersCount > 0
-                ? 'border-[#0170FE] bg-blue-50/60 text-[#0170FE]'
-                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                ? 'border-[#0170FE] bg-blue-50/60 dark:bg-blue-950/40 text-[#0170FE] dark:text-blue-400'
+                : 'border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700'
                 }`}
             >
               <SlidersHorizontal className="size-3.5" />
@@ -914,7 +914,7 @@ function ReportsContent() {
               <button
                 type="button"
                 onClick={resetAllFilters}
-                className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-slate-500 hover:text-rose-600 transition cursor-pointer"
+                className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition cursor-pointer"
               >
                 <RotateCcw className="size-3.5" />
                 <span>Reset</span>
@@ -927,25 +927,25 @@ function ReportsContent() {
             <button
               type="button"
               onClick={() => triggerExport('CSV')}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-slate-300 shadow-xs"
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs"
             >
-              <FileSpreadsheet className="size-3.5 text-emerald-600" />
+              <FileSpreadsheet className="size-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>CSV</span>
             </button>
             <button
               type="button"
               onClick={() => triggerExport('Excel')}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-slate-300 shadow-xs"
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs"
             >
-              <Download className="size-3.5 text-[#0170FE]" />
+              <Download className="size-3.5 text-[#0170FE] dark:text-blue-400" />
               <span>Excel</span>
             </button>
             <button
               type="button"
               onClick={() => triggerExport('PDF')}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-slate-300 shadow-xs"
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs"
             >
-              <Printer className="size-3.5 text-slate-600" />
+              <Printer className="size-3.5 text-slate-600 dark:text-slate-400" />
               <span>PDF</span>
             </button>
           </div>
@@ -953,16 +953,16 @@ function ReportsContent() {
 
         {/* Expanded Multi-Filter Combinable Drawer */}
         {showFiltersDrawer && (
-          <div className="mt-4 pt-4 border-t border-slate-100 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 animate-in fade-in duration-150">
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/10 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 animate-in fade-in duration-150">
             {/* Line of Business */}
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                 Line of Business
               </label>
               <select
                 value={lobFilter}
                 onChange={(e) => setLobFilter(e.target.value)}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-[#0170FE]"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-sm font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-[#0170FE]"
               >
                 <option value="All">All Lines of Business</option>
                 <option value="Commercial Property">Commercial Property</option>
@@ -975,13 +975,13 @@ function ReportsContent() {
 
             {/* Policy Status */}
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                 Policy Status
               </label>
               <select
                 value={policyStatusFilter}
                 onChange={(e) => setPolicyStatusFilter(e.target.value)}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-[#0170FE]"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-sm font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-[#0170FE]"
               >
                 <option value="All">All Policy Statuses</option>
                 <option value="Active">Active</option>
@@ -993,13 +993,13 @@ function ReportsContent() {
 
             {/* Transaction Type */}
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                 Transaction Type
               </label>
               <select
                 value={transactionTypeFilter}
                 onChange={(e) => setTransactionTypeFilter(e.target.value)}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-[#0170FE]"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-sm font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-[#0170FE]"
               >
                 <option value="All">All Transaction Types</option>
                 <option value="New Business">New Business</option>
@@ -1011,13 +1011,13 @@ function ReportsContent() {
 
             {/* Payment Status */}
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                 Payment Status
               </label>
               <select
                 value={paymentStatusFilter}
                 onChange={(e) => setPaymentStatusFilter(e.target.value)}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-[#0170FE]"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-sm font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-[#0170FE]"
               >
                 <option value="All">All Payment Statuses</option>
                 <option value="Paid">Paid / Cleared</option>
@@ -1027,13 +1027,13 @@ function ReportsContent() {
 
             {/* Reconciliation Status */}
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                 Reconciliation Status
               </label>
               <select
                 value={reconciliationStatusFilter}
                 onChange={(e) => setReconciliationStatusFilter(e.target.value)}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-[#0170FE]"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-sm font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-[#0170FE]"
               >
                 <option value="All">All Reconciliation Statuses</option>
                 <option value="Reconciled">Reconciled / Matched</option>
@@ -1044,13 +1044,13 @@ function ReportsContent() {
 
             {/* Lead Status */}
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                 Lead Status
               </label>
               <select
                 value={leadStatusFilter}
                 onChange={(e) => setLeadStatusFilter(e.target.value)}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-[#0170FE]"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-sm font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-[#0170FE]"
               >
                 <option value="All">All Lead Statuses</option>
                 <option value="New Intake">New Intake</option>
@@ -1062,13 +1062,13 @@ function ReportsContent() {
 
             {/* Marketing Consent Status */}
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                 Marketing Consent Status
               </label>
               <select
                 value={marketingConsentFilter}
                 onChange={(e) => setMarketingConsentFilter(e.target.value)}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-[#0170FE]"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-sm font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-[#0170FE]"
               >
                 <option value="All">All Consent Statuses</option>
                 <option value="Consented">Consented / Active</option>
@@ -1086,14 +1086,14 @@ function ReportsContent() {
           /* =========================================================================
              VIEW 1: CLIENT-REQUESTED ALL 15 REPORTS DIRECTORY MATRIX
              ========================================================================= */
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden">
-            <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gradient-to-r from-slate-50/70 to-white">
+          <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-xs overflow-hidden">
+            <div className="p-4 sm:p-6 border-b border-slate-100 dark:border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gradient-to-r from-slate-50/70 to-white dark:from-slate-900 dark:to-slate-800/80">
               <div>
-                <h2 className="text-lg sm:text-xl font-bold text-slate-950 flex items-center gap-2">
+                <h2 className="text-lg sm:text-xl font-bold text-slate-950 dark:text-white flex items-center gap-2">
                   <FileText className="size-5 text-[#0170FE]" />
                   Standard Reports Directory &amp; SOW Filter Matrix
                 </h2>
-                <p className="text-sm text-slate-500 mt-1">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                   15 specialized insurance brokerage reports with multi-criteria combinable filtering and Excel / CSV / PDF export capabilities.
                 </p>
               </div>
@@ -1113,35 +1113,35 @@ function ReportsContent() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1160px] text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/70 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <tr className="border-b border-slate-100 dark:border-white/10 bg-slate-50/70 dark:bg-slate-950/70 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     <th className="py-4 pl-6 pr-4 whitespace-nowrap min-w-[300px]">Report</th>
                     <th className="py-4 px-4 whitespace-nowrap min-w-[240px]">Main Content / Filters</th>
                     <th className="py-4 px-4 whitespace-nowrap min-w-[360px]">Applicable SOW Filters</th>
                     <th className="py-4 px-4 whitespace-nowrap min-w-[140px]">Export Formats</th>
-                    <th className="py-3.5 pl-4 pr-6 text-right min-w-[140px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none whitespace-nowrap">Actions</th>
+                    <th className="py-3.5 pl-4 pr-6 text-right min-w-[140px] md:sticky md:right-0 md:z-20 bg-slate-50 dark:bg-slate-950 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] dark:md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.5)] select-none whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 font-medium">
+                <tbody className="divide-y divide-slate-100 dark:divide-white/10 font-medium">
                   {REPORT_DEFINITIONS.map((rep) => {
                     const Icon = rep.icon
                     return (
-                      <tr key={rep.key} className="hover:bg-slate-50/80 transition group">
+                      <tr key={rep.key} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition group">
                         {/* Report Name & Description */}
                         <td className="py-4 pl-6 pr-4 align-top min-w-[300px]">
                           <div className="flex items-start gap-3">
-                            <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 group-hover:bg-[#0170FE] group-hover:text-white transition-colors">
+                            <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-[#0170FE] group-hover:text-white transition-colors">
                               <Icon className="size-5" />
                             </div>
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <p className="text-sm font-bold text-slate-900 group-hover:text-[#0170FE] transition-colors whitespace-nowrap">
+                                <p className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#0170FE] dark:group-hover:text-blue-400 transition-colors whitespace-nowrap">
                                   {rep.title}
                                 </p>
-                                <span className="inline-block rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 whitespace-nowrap">
+                                <span className="inline-block rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[11px] font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">
                                   {rep.category}
                                 </span>
                               </div>
-                              <p className="text-xs text-slate-500 mt-1 line-clamp-2 max-w-sm">
+                              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 max-w-sm">
                                 {rep.description}
                               </p>
                             </div>
@@ -1150,8 +1150,8 @@ function ReportsContent() {
 
                         {/* Main Content / Filters */}
                         <td className="py-4 px-4 align-top min-w-[240px]">
-                          <p className="text-sm font-semibold text-slate-800 whitespace-nowrap">{rep.mainContent}</p>
-                          <p className="text-xs text-slate-400 mt-1 whitespace-nowrap">
+                          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">{rep.mainContent}</p>
+                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 whitespace-nowrap">
                             Standard Scope of Work (SOW) specification
                           </p>
                         </td>
@@ -1162,7 +1162,7 @@ function ReportsContent() {
                             {rep.sowFilters.split(', ').map((filter) => (
                               <span
                                 key={filter}
-                                className="inline-flex items-center rounded-md bg-slate-100/90 px-2 py-0.5 text-[11px] font-medium text-slate-700 border border-slate-200/60 whitespace-nowrap"
+                                className="inline-flex items-center rounded-md bg-slate-100/90 dark:bg-slate-800/80 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/10 whitespace-nowrap"
                               >
                                 {filter}
                               </span>
@@ -1176,7 +1176,7 @@ function ReportsContent() {
                             {rep.exportFormats.map((fmt) => (
                               <span
                                 key={fmt}
-                                className="rounded-lg bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200/60 whitespace-nowrap"
+                                className="rounded-lg bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/50 whitespace-nowrap"
                               >
                                 {fmt}
                               </span>
@@ -1185,12 +1185,12 @@ function ReportsContent() {
                         </td>
 
                         {/* Actions */}
-                        <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[140px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors align-top">
+                        <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[140px] md:sticky md:right-0 md:z-10 bg-white dark:bg-slate-900 group-hover:bg-[#f8fafc] dark:group-hover:bg-slate-800 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] dark:md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.5)] transition-colors align-top">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               type="button"
                               onClick={() => handleSelectReport(rep.key)}
-                              className="inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg bg-slate-950 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[#0170FE] transition"
+                              className="inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg bg-slate-950 dark:bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[#0170FE] dark:hover:bg-blue-500 transition"
                             >
                               <Eye className="size-3.5" />
                               <span>View</span>
@@ -1199,7 +1199,7 @@ function ReportsContent() {
                               type="button"
                               onClick={() => triggerExport('Excel', rep.title)}
                               title="Quick Export Excel"
-                              className="cursor-pointer rounded-lg border border-slate-200 p-1.5 text-slate-600 hover:border-[#0170FE] hover:text-[#0170FE] hover:bg-slate-50 transition"
+                              className="cursor-pointer rounded-lg border border-slate-200 dark:border-white/10 p-1.5 text-slate-600 dark:text-slate-300 hover:border-[#0170FE] hover:text-[#0170FE] dark:hover:border-blue-500 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                             >
                               <Download className="size-3.5" />
                             </button>
@@ -1218,25 +1218,25 @@ function ReportsContent() {
              ========================================================================= */
           <div className="space-y-6">
             {/* Active Report Header Card */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+            <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-xs">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-slate-900 px-3 py-0.5 text-xs font-bold text-white">
+                    <span className="rounded-full bg-slate-900 dark:bg-slate-800 dark:border dark:border-white/10 px-3 py-0.5 text-xs font-bold text-white">
                       {activeReportMeta?.category}
                     </span>
-                    <span className="text-sm font-semibold text-emerald-600">
+                    <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                       {currentRecords.length} records matching current filters
                     </span>
                   </div>
 
-                  <h2 className="mt-2 text-2xl font-bold text-slate-950 flex items-center gap-2">
+                  <h2 className="mt-2 text-2xl font-bold text-slate-950 dark:text-white flex items-center gap-2">
                     {activeReportMeta && (
-                      <activeReportMeta.icon className="size-6 text-[#0170FE]" />
+                      <activeReportMeta.icon className="size-6 text-[#0170FE] dark:text-blue-400" />
                     )}
                     {activeReportMeta?.title} Report
                   </h2>
-                  <p className="mt-1 text-sm text-slate-500 max-w-2xl leading-relaxed">
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
                     {activeReportMeta?.description}
                   </p>
                 </div>
@@ -1245,7 +1245,7 @@ function ReportsContent() {
                   <button
                     type="button"
                     onClick={() => handleSelectReport('catalog')}
-                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/80 transition"
                   >
                     <Layers className="size-4" />
                     <span>Back to Directory</span>
@@ -1263,13 +1263,13 @@ function ReportsContent() {
               </div>
 
               {/* SOW Filters Applied Tagline */}
-              <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
+              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/10 flex flex-wrap items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
                 <div>
-                  <span className="font-bold text-slate-700">Supported SOW Filters: </span>
-                  <span className="font-mono text-slate-600">{activeReportMeta?.sowFilters}</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">Supported SOW Filters: </span>
+                  <span className="font-mono text-slate-600 dark:text-slate-400">{activeReportMeta?.sowFilters}</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-400">
-                  <FileSpreadsheet className="size-4 text-emerald-600" />
+                <div className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
+                  <FileSpreadsheet className="size-4 text-emerald-600 dark:text-emerald-400" />
                   <span>Real-time CSV &amp; Excel XLSX engine enabled</span>
                 </div>
               </div>
@@ -1279,18 +1279,17 @@ function ReportsContent() {
             {selectedReport === 'book-of-business' && (
               <div className="space-y-6">
                 {/* 1. View Mode Switcher & Quick Snapshot */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 rounded-2xl p-3 sm:p-4 shadow-xs">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 mr-1">Display View:</span>
-                    <div className="inline-flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200/60">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mr-1">Display View:</span>
+                    <div className="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-800/80 p-1 border border-slate-200/60 dark:border-white/10">
                       <button
                         type="button"
                         onClick={() => setBobViewMode('split')}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
-                          bobViewMode === 'split'
-                            ? 'bg-slate-900 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900'
-                        }`}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${bobViewMode === 'split'
+                          ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                          }`}
                       >
                         <BarChart2 className="size-3.5" />
                         <span>Charts + Table</span>
@@ -1299,11 +1298,10 @@ function ReportsContent() {
                       <button
                         type="button"
                         onClick={() => setBobViewMode('charts')}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
-                          bobViewMode === 'charts'
-                            ? 'bg-slate-900 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900'
-                        }`}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${bobViewMode === 'charts'
+                          ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                          }`}
                       >
                         <PieChartIcon className="size-3.5 text-blue-400" />
                         <span>Visual Graphs Only</span>
@@ -1312,11 +1310,10 @@ function ReportsContent() {
                       <button
                         type="button"
                         onClick={() => setBobViewMode('table')}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
-                          bobViewMode === 'table'
-                            ? 'bg-slate-900 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900'
-                        }`}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${bobViewMode === 'table'
+                          ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                          }`}
                       >
                         <FileSpreadsheet className="size-3.5 text-emerald-400" />
                         <span>Policy Records Table</span>
@@ -1325,11 +1322,11 @@ function ReportsContent() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500 font-medium">Quick Total:</span>
-                    <span className="text-xs font-mono font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Quick Total:</span>
+                    <span className="text-xs font-mono font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10">
                       ${bobStats.totalPremium.toLocaleString()} Premium
                     </span>
-                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200">
+                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800/50">
                       {bobStats.policyCount} Policies
                     </span>
                   </div>
@@ -1339,18 +1336,18 @@ function ReportsContent() {
                 {bobViewMode !== 'table' && (
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                     {/* Left: Interactive Donut / Pie Chart for Line of Business */}
-                    <div className="lg:col-span-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
+                    <div className="lg:col-span-6 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-xs flex flex-col justify-between">
                       <div>
-                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
                           <div className="flex items-center gap-2">
-                            <div className="size-8 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-[#0170FE]">
+                            <div className="size-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/40 flex items-center justify-center text-[#0170FE] dark:text-blue-400">
                               <PieChartIcon className="size-4" />
                             </div>
                             <div>
-                              <h3 className="text-sm font-bold text-slate-900">
+                              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                                 Premium by Line of Business
                               </h3>
-                              <p className="text-xs text-slate-400">
+                              <p className="text-xs text-slate-400 dark:text-slate-500">
                                 Interactive portfolio mix &amp; coverage shares
                               </p>
                             </div>
@@ -1359,7 +1356,7 @@ function ReportsContent() {
                             <button
                               type="button"
                               onClick={() => setLobFilter('All')}
-                              className="text-xs font-semibold text-[#0170FE] hover:underline flex items-center gap-1"
+                              className="text-xs font-semibold text-[#0170FE] dark:text-blue-400 hover:underline flex items-center gap-1"
                             >
                               <span>Reset LOB ({lobFilter})</span>
                               <X className="size-3" />
@@ -1379,7 +1376,7 @@ function ReportsContent() {
                                   cy="50"
                                   r="36"
                                   fill="transparent"
-                                  stroke="#f1f5f9"
+                                  className="stroke-slate-100 dark:stroke-slate-800"
                                   strokeWidth="14"
                                 />
                                 {/* Segments */}
@@ -1415,11 +1412,11 @@ function ReportsContent() {
 
                               {/* Center KPI Display in donut hole */}
                               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Book Total</span>
-                                <span className="text-lg font-mono font-extrabold text-slate-900 tracking-tight">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Book Total</span>
+                                <span className="text-lg font-mono font-extrabold text-slate-900 dark:text-white tracking-tight">
                                   ${(bobStats.totalPremium / 1000).toFixed(1)}k
                                 </span>
-                                <span className="text-[11px] font-semibold text-emerald-600">
+                                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                                   {bobStats.policyCount} Policies
                                 </span>
                               </div>
@@ -1435,11 +1432,10 @@ function ReportsContent() {
                                   key={item.lob}
                                   type="button"
                                   onClick={() => setLobFilter(isSelected ? 'All' : item.lob)}
-                                  className={`w-full text-left p-2 rounded-xl transition flex items-center justify-between border cursor-pointer ${
-                                    isSelected
-                                      ? 'bg-blue-50/80 border-blue-300 ring-1 ring-blue-300'
-                                      : 'bg-slate-50/70 border-slate-100 hover:bg-slate-100/80'
-                                  }`}
+                                  className={`w-full text-left p-2 rounded-xl transition flex items-center justify-between border cursor-pointer ${isSelected
+                                    ? 'bg-blue-50/80 dark:bg-blue-950/40 border-blue-300 dark:border-blue-500/50 ring-1 ring-blue-300 dark:ring-blue-500/30'
+                                    : 'bg-slate-50/70 dark:bg-slate-800/50 border-slate-100 dark:border-white/5 hover:bg-slate-100/80 dark:hover:bg-slate-800'
+                                    }`}
                                 >
                                   <div className="flex items-center gap-2 min-w-0">
                                     <span
@@ -1447,15 +1443,15 @@ function ReportsContent() {
                                       style={{ backgroundColor: item.color }}
                                     />
                                     <div className="truncate">
-                                      <p className="text-xs font-bold text-slate-800 truncate">
+                                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
                                         {item.lob}
                                       </p>
-                                      <p className="text-[11px] text-slate-400">
+                                      <p className="text-[11px] text-slate-400 dark:text-slate-500">
                                         {item.count} {item.count === 1 ? 'policy' : 'policies'} · {item.percent}%
                                       </p>
                                     </div>
                                   </div>
-                                  <span className="text-xs font-mono font-bold text-slate-900 ml-2">
+                                  <span className="text-xs font-mono font-bold text-slate-900 dark:text-white ml-2">
                                     ${item.premium.toLocaleString()}
                                   </span>
                                 </button>
@@ -1465,26 +1461,26 @@ function ReportsContent() {
                         </div>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                         <span>💡 Tip: Click any slice or legend item to filter the list</span>
-                        <span className="font-semibold text-slate-700">Top: {bobStats.lobBreakdown[0]?.lob || 'N/A'}</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">Top: {bobStats.lobBreakdown[0]?.lob || 'N/A'}</span>
                       </div>
                     </div>
 
                     {/* Right: Carrier Market Share Horizontal Bar Graph & Status Gauge */}
                     <div className="lg:col-span-6 space-y-5">
                       {/* Carrier Distribution Horizontal Graph */}
-                      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-xs">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
                           <div className="flex items-center gap-2">
-                            <div className="size-8 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
+                            <div className="size-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                               <Building2 className="size-4" />
                             </div>
                             <div>
-                              <h3 className="text-sm font-bold text-slate-900">
+                              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                                 Premium Distribution by Carrier
                               </h3>
-                              <p className="text-xs text-slate-400">
+                              <p className="text-xs text-slate-400 dark:text-slate-500">
                                 Volume breakdown across underwriting partners
                               </p>
                             </div>
@@ -1493,7 +1489,7 @@ function ReportsContent() {
                             <button
                               type="button"
                               onClick={() => setCarrierFilter('All')}
-                              className="text-xs font-semibold text-[#0170FE] hover:underline flex items-center gap-1"
+                              className="text-xs font-semibold text-[#0170FE] dark:text-blue-400 hover:underline flex items-center gap-1"
                             >
                               <span>Reset ({carrierFilter.split(' ')[0]})</span>
                               <X className="size-3" />
@@ -1512,36 +1508,34 @@ function ReportsContent() {
                                 key={c.carrier}
                                 type="button"
                                 onClick={() => setCarrierFilter(isSelected ? 'All' : c.carrier)}
-                                className={`w-full text-left p-2.5 rounded-xl transition border cursor-pointer ${
-                                  isSelected
-                                    ? 'bg-emerald-50/80 border-emerald-300 ring-1 ring-emerald-300'
-                                    : 'bg-slate-50/50 border-slate-100 hover:bg-slate-100/60'
-                                }`}
+                                className={`w-full text-left p-2.5 rounded-xl transition border cursor-pointer ${isSelected
+                                  ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-500/50 ring-1 ring-emerald-300 dark:ring-emerald-500/30'
+                                  : 'bg-slate-50/50 dark:bg-slate-800/50 border-slate-100 dark:border-white/5 hover:bg-slate-100/60 dark:hover:bg-slate-800'
+                                  }`}
                               >
                                 <div className="flex items-center justify-between text-xs mb-1.5">
                                   <div className="flex items-center gap-1.5">
-                                    <span className="font-bold text-slate-800">{c.carrier}</span>
-                                    <span className="rounded-md bg-white border border-slate-200 px-1.5 py-0.2 text-[10px] font-semibold text-slate-600">
+                                    <span className="font-bold text-slate-800 dark:text-slate-200">{c.carrier}</span>
+                                    <span className="rounded-md bg-white dark:bg-slate-700 border border-slate-200 dark:border-white/10 px-1.5 py-0.2 text-[10px] font-semibold text-slate-600 dark:text-slate-300">
                                       {c.count} {c.count === 1 ? 'pol' : 'pols'}
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className="font-mono font-bold text-slate-900">
+                                    <span className="font-mono font-bold text-slate-900 dark:text-white">
                                       ${c.premium.toLocaleString()}
                                     </span>
-                                    <span className="text-[11px] font-semibold text-slate-400">
+                                    <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500">
                                       ({c.percent}%)
                                     </span>
                                   </div>
                                 </div>
                                 {/* Progress Meter */}
-                                <div className="h-2 w-full rounded-full bg-slate-200/70 overflow-hidden">
+                                <div className="h-2 w-full rounded-full bg-slate-200/70 dark:bg-slate-700 overflow-hidden">
                                   <div
-                                    className={`h-full rounded-full transition-all duration-500 ${
-                                      isSelected
-                                        ? 'bg-emerald-600'
-                                        : 'bg-gradient-to-r from-emerald-500 to-[#0170FE]'
-                                    }`}
+                                    className={`h-full rounded-full transition-all duration-500 ${isSelected
+                                      ? 'bg-emerald-600'
+                                      : 'bg-gradient-to-r from-emerald-500 to-[#0170FE]'
+                                      }`}
                                     style={{ width: `${barPercent}%` }}
                                   />
                                 </div>
@@ -1556,20 +1550,19 @@ function ReportsContent() {
                         <button
                           type="button"
                           onClick={() => setPolicyStatusFilter(policyStatusFilter === 'Active' ? 'All' : 'Active')}
-                          className={`p-3.5 rounded-2xl border text-left transition cursor-pointer ${
-                            policyStatusFilter === 'Active'
-                              ? 'bg-emerald-50 border-emerald-300 ring-1 ring-emerald-300'
-                              : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
-                          }`}
+                          className={`p-3.5 rounded-2xl border text-left transition cursor-pointer ${policyStatusFilter === 'Active'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-500/50 ring-1 ring-emerald-300 dark:ring-emerald-500/30'
+                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 shadow-xs'
+                            }`}
                         >
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">Active</span>
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Active</span>
                             <span className="size-2 rounded-full bg-emerald-500" />
                           </div>
-                          <p className="text-xl font-bold font-mono text-slate-900">
+                          <p className="text-xl font-bold font-mono text-slate-900 dark:text-white">
                             {bobStats.statusCounts.Active.count}
                           </p>
-                          <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                             ${bobStats.statusCounts.Active.premium.toLocaleString()}
                           </p>
                         </button>
@@ -1577,20 +1570,19 @@ function ReportsContent() {
                         <button
                           type="button"
                           onClick={() => setPolicyStatusFilter(policyStatusFilter === 'Pending' ? 'All' : 'Pending')}
-                          className={`p-3.5 rounded-2xl border text-left transition cursor-pointer ${
-                            policyStatusFilter === 'Pending'
-                              ? 'bg-amber-50 border-amber-300 ring-1 ring-amber-300'
-                              : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
-                          }`}
+                          className={`p-3.5 rounded-2xl border text-left transition cursor-pointer ${policyStatusFilter === 'Pending'
+                            ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-500/50 ring-1 ring-amber-300 dark:ring-amber-500/30'
+                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 shadow-xs'
+                            }`}
                         >
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">Pending</span>
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Pending</span>
                             <span className="size-2 rounded-full bg-amber-500" />
                           </div>
-                          <p className="text-xl font-bold font-mono text-slate-900">
+                          <p className="text-xl font-bold font-mono text-slate-900 dark:text-white">
                             {bobStats.statusCounts.Pending.count}
                           </p>
-                          <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                             ${bobStats.statusCounts.Pending.premium.toLocaleString()}
                           </p>
                         </button>
@@ -1598,20 +1590,19 @@ function ReportsContent() {
                         <button
                           type="button"
                           onClick={() => setPolicyStatusFilter(policyStatusFilter === 'Expired' ? 'All' : 'Expired')}
-                          className={`p-3.5 rounded-2xl border text-left transition cursor-pointer ${
-                            policyStatusFilter === 'Expired'
-                              ? 'bg-rose-50 border-rose-300 ring-1 ring-rose-300'
-                              : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
-                          }`}
+                          className={`p-3.5 rounded-2xl border text-left transition cursor-pointer ${policyStatusFilter === 'Expired'
+                            ? 'bg-rose-50 dark:bg-rose-950/50 border-rose-300 dark:border-rose-500/50 ring-1 ring-rose-300 dark:ring-rose-500/30'
+                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 shadow-xs'
+                            }`}
                         >
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-[11px] font-bold uppercase tracking-wider text-rose-700">Expired</span>
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400">Expired</span>
                             <span className="size-2 rounded-full bg-rose-500" />
                           </div>
-                          <p className="text-xl font-bold font-mono text-slate-900">
+                          <p className="text-xl font-bold font-mono text-slate-900 dark:text-white">
                             {bobStats.statusCounts.Expired.count}
                           </p>
-                          <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                             ${bobStats.statusCounts.Expired.premium.toLocaleString()}
                           </p>
                         </button>
@@ -1621,13 +1612,13 @@ function ReportsContent() {
                 )}
 
                 {/* 3. Dedicated Filter Options Toolbar for Book of Business */}
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs space-y-3">
+                <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 shadow-xs space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <Filter className="size-4 text-[#0170FE]" />
-                      <span className="text-sm font-bold text-slate-900">Book of Business Filters</span>
+                      <Filter className="size-4 text-[#0170FE] dark:text-blue-400" />
+                      <span className="text-sm font-bold text-slate-900 dark:text-white">Book of Business Filters</span>
                       {activeFiltersCount > 0 && (
-                        <span className="rounded-full bg-blue-100 text-[#0170FE] px-2 py-0.5 text-xs font-bold">
+                        <span className="rounded-full bg-blue-100 dark:bg-blue-950/60 text-[#0170FE] dark:text-blue-400 px-2 py-0.5 text-xs font-bold">
                           {activeFiltersCount} Active
                         </span>
                       )}
@@ -1636,18 +1627,18 @@ function ReportsContent() {
                     {/* Active Sort Pill with Reset */}
                     <div className="flex items-center gap-2">
                       {sortColumn && (
-                        <div className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 border border-blue-200/80 px-2.5 py-1 text-xs font-medium text-blue-900">
+                        <div className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 border border-blue-200/80 dark:border-blue-800/50 px-2.5 py-1 text-xs font-medium text-blue-900 dark:text-blue-300">
                           <span className="font-semibold">Sorted by:</span>
-                          <span className="font-bold text-[#0170FE] capitalize">
+                          <span className="font-bold text-[#0170FE] dark:text-blue-400 capitalize">
                             {sortColumn.replace(/([A-Z])/g, ' $1')}
                           </span>
-                          <span className="text-[10px] font-mono font-bold bg-white px-1.5 py-0.2 rounded border border-blue-200 text-blue-700">
+                          <span className="text-[10px] font-mono font-bold bg-white dark:bg-slate-800 px-1.5 py-0.2 rounded border border-blue-200 dark:border-blue-700/50 text-blue-700 dark:text-blue-400">
                             {sortDirection === 'asc' ? 'A → Z ↑' : 'Z → A ↓'}
                           </span>
                           <button
                             type="button"
                             onClick={() => setSortColumn(null)}
-                            className="text-blue-400 hover:text-blue-700 ml-1"
+                            className="text-blue-400 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-200 ml-1"
                             title="Clear sorting"
                           >
                             <X className="size-3" />
@@ -1662,7 +1653,7 @@ function ReportsContent() {
                             resetAllFilters()
                             setSortColumn(null)
                           }}
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-rose-600 transition cursor-pointer"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition cursor-pointer"
                         >
                           <RotateCcw className="size-3" />
                           <span>Reset</span>
@@ -1672,19 +1663,18 @@ function ReportsContent() {
                   </div>
 
                   {/* Filter Controls Row */}
-                  <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-slate-100">
+                  <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-slate-100 dark:border-white/10">
                     {/* Status Quick Filter Pills */}
-                    <div className="inline-flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200/60">
+                    <div className="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-800/80 p-1 border border-slate-200/60 dark:border-white/10">
                       {(['All', 'Active', 'Pending', 'Expired'] as const).map((st) => (
                         <button
                           key={st}
                           type="button"
                           onClick={() => setPolicyStatusFilter(st)}
-                          className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
-                            policyStatusFilter === st
-                              ? 'bg-slate-900 text-white shadow-xs'
-                              : 'text-slate-600 hover:text-slate-900'
-                          }`}
+                          className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${policyStatusFilter === st
+                            ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-xs'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                            }`}
                         >
                           {st === 'All' ? 'All Statuses' : st}
                         </button>
@@ -1695,7 +1685,7 @@ function ReportsContent() {
                     <select
                       value={carrierFilter}
                       onChange={(e) => setCarrierFilter(e.target.value)}
-                      className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-[#0170FE]"
+                      className="h-9 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs font-semibold text-slate-700 dark:text-slate-200 outline-none hover:border-slate-300 dark:hover:border-white/20 focus:border-[#0170FE]"
                     >
                       <option value="All">All Carriers</option>
                       <option value="Travelers Insurance">Travelers Insurance</option>
@@ -1710,7 +1700,7 @@ function ReportsContent() {
                     <select
                       value={lobFilter}
                       onChange={(e) => setLobFilter(e.target.value)}
-                      className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-[#0170FE]"
+                      className="h-9 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs font-semibold text-slate-700 dark:text-slate-200 outline-none hover:border-slate-300 dark:hover:border-white/20 focus:border-[#0170FE]"
                     >
                       <option value="All">All Coverage / LOB</option>
                       <option value="Commercial Property">Commercial Property</option>
@@ -1722,19 +1712,19 @@ function ReportsContent() {
 
                     {/* Client / Policy Search */}
                     <div className="relative flex-1 min-w-[200px]">
-                      <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
+                      <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search client, policy #..."
-                        className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-8 pr-3 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#0170FE] focus:bg-white"
+                        className="h-9 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/80 pl-8 pr-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-[#0170FE] focus:bg-white dark:focus:bg-slate-800"
                       />
                       {searchQuery && (
                         <button
                           type="button"
                           onClick={() => setSearchQuery('')}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                         >
                           <X className="size-3" />
                         </button>
@@ -1747,31 +1737,29 @@ function ReportsContent() {
 
             {/* Live Data Table Preview */}
             {(selectedReport !== 'book-of-business' || bobViewMode !== 'charts') && (
-              <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden">
-                <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
+              <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-xs overflow-hidden">
+                <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-950/40">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-bold text-slate-800">
+                    <p className="text-sm font-bold text-slate-800 dark:text-white">
                       {selectedReport === 'book-of-business' ? 'Book of Business Policy Directory' : 'Data Preview'} ({sortedRecords.length} Rows)
                     </p>
-                    <span className="text-xs text-slate-400 hidden sm:inline">
-                      · Click any column header to sort A → Z or Z → A
-                    </span>
+
                   </div>
 
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => triggerExport('CSV')}
-                      className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-[#0170FE] hover:underline"
+                      className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-[#0170FE] dark:text-blue-400 hover:underline"
                     >
                       <Download className="size-3.5" />
                       <span>Export CSV</span>
                     </button>
-                    <span className="text-slate-300">·</span>
+                    <span className="text-slate-300 dark:text-slate-700">·</span>
                     <button
                       type="button"
                       onClick={() => triggerExport('PDF')}
-                      className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-slate-600 hover:underline"
+                      className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:underline hover:text-slate-900 dark:hover:text-white"
                     >
                       <Printer className="size-3.5" />
                       <span>Print PDF</span>
@@ -1782,12 +1770,12 @@ function ReportsContent() {
                 {sortedRecords.length === 0 ? (
                   <div className="p-12 text-center">
                     <AlertTriangle className="size-8 text-amber-500 mx-auto mb-2" />
-                    <p className="text-base font-bold text-slate-800">No records found matching filters</p>
-                    <p className="text-sm text-slate-500 mt-1">Try resetting or loosening the applied search parameters.</p>
+                    <p className="text-base font-bold text-slate-800 dark:text-white">No records found matching filters</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Try resetting or loosening the applied search parameters.</p>
                     <button
                       type="button"
                       onClick={resetAllFilters}
-                      className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs sm:text-sm font-semibold text-white"
+                      className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-slate-900 dark:bg-blue-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs"
                     >
                       <RotateCcw className="size-3.5" />
                       <span>Reset All Filters</span>
@@ -1797,7 +1785,7 @@ function ReportsContent() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
                       <thead>
-                        <tr className="border-b border-slate-100 bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <tr className="border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-slate-950/70 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                           {Object.keys(sortedRecords[0]).map((colKey) => {
                             const isSorted = sortColumn === colKey
                             return (
@@ -1805,21 +1793,21 @@ function ReportsContent() {
                                 key={colKey}
                                 onClick={() => handleSort(colKey)}
                                 title={`Click to sort by ${colKey.replace(/([A-Z])/g, ' $1').trim()}`}
-                                className={`py-3.5 px-4 capitalize whitespace-nowrap cursor-pointer select-none transition-colors group ${
-                                  isSorted ? 'bg-blue-50/70 text-[#0170FE]' : 'hover:bg-slate-100/80 hover:text-slate-800'
-                                }`}
+                                className={`py-3.5 px-4 capitalize whitespace-nowrap cursor-pointer select-none transition-colors group ${isSorted
+                                  ? 'bg-blue-50/70 dark:bg-blue-950/50 text-[#0170FE] dark:text-blue-400'
+                                  : 'hover:bg-slate-100/80 dark:hover:bg-slate-800/60 hover:text-slate-800 dark:hover:text-white'
+                                  }`}
                               >
                                 <div className="flex items-center gap-1.5">
-                                  <span className={isSorted ? 'font-bold text-[#0170FE]' : 'font-semibold text-slate-600'}>
+                                  <span className={isSorted ? 'font-bold text-[#0170FE] dark:text-blue-400' : 'font-semibold text-slate-600 dark:text-slate-300'}>
                                     {colKey.replace(/([A-Z])/g, ' $1').trim()}
                                   </span>
                                   {/* Arrow Sort Button */}
                                   <span
-                                    className={`inline-flex items-center justify-center size-5 rounded-md transition ${
-                                      isSorted
-                                        ? 'bg-blue-100 text-[#0170FE] shadow-2xs'
-                                        : 'text-slate-400 group-hover:text-slate-600 group-hover:bg-slate-200/60'
-                                    }`}
+                                    className={`inline-flex items-center justify-center size-5 rounded-md transition ${isSorted
+                                      ? 'bg-blue-100 dark:bg-blue-900/60 text-[#0170FE] dark:text-blue-400 shadow-2xs'
+                                      : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300 group-hover:bg-slate-200/60 dark:group-hover:bg-slate-800'
+                                      }`}
                                   >
                                     {isSorted ? (
                                       sortDirection === 'asc' ? (
@@ -1831,20 +1819,16 @@ function ReportsContent() {
                                       <ArrowUpDown className="size-3.5" />
                                     )}
                                   </span>
-                                  {isSorted && (
-                                    <span className="text-[10px] font-bold uppercase tracking-tight text-[#0170FE] bg-white px-1.5 py-0.2 rounded border border-blue-200">
-                                      {sortDirection === 'asc' ? 'A→Z' : 'Z→A'}
-                                    </span>
-                                  )}
+
                                 </div>
                               </th>
                             )
                           })}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 font-medium">
+                      <tbody className="divide-y divide-slate-100 dark:divide-white/10 font-medium">
                         {sortedRecords.map((row, idx) => (
-                          <tr key={idx} className="hover:bg-slate-50/80 transition">
+                          <tr key={idx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
                             {Object.entries(row).map(([k, v], cellIdx) => {
                               const isSorted = sortColumn === k
                               const isAmount = typeof v === 'number' && (k.toLowerCase().includes('premium') || k.toLowerCase().includes('comm') || k.toLowerCase().includes('amount') || k.toLowerCase().includes('payout'))
@@ -1852,27 +1836,26 @@ function ReportsContent() {
                               return (
                                 <td
                                   key={cellIdx}
-                                  className={`py-3.5 px-4 whitespace-nowrap ${
-                                    isSorted ? 'bg-blue-50/20' : ''
-                                  }`}
+                                  className={`py-3.5 px-4 whitespace-nowrap ${isSorted ? 'bg-blue-50/20 dark:bg-blue-950/20' : ''
+                                    }`}
                                 >
                                   {isAmount ? (
-                                    <span className="font-mono font-bold text-slate-900">
+                                    <span className="font-mono font-bold text-slate-900 dark:text-white">
                                       ${(v as number).toLocaleString()}
                                     </span>
                                   ) : isStatus ? (
                                     <span
                                       className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${v === 'Active' || v === 'Paid' || v === 'Reconciled' || v === 'Consented' || v === 'Bound / Won'
-                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50'
                                         : v === 'Outstanding' || v === 'Pending' || v === 'In Review' || v === 'Quoted'
-                                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                          : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                          ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50'
+                                          : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/50'
                                         }`}
                                     >
                                       {String(v)}
                                     </span>
                                   ) : (
-                                    <span className={cellIdx === 0 ? 'font-semibold text-slate-900' : 'text-slate-600'}>
+                                    <span className={cellIdx === 0 ? 'font-semibold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-300'}>
                                       {String(v)}
                                     </span>
                                   )}
@@ -1893,39 +1876,39 @@ function ReportsContent() {
 
       {/* Schedule Delivery Modal */}
       {scheduleModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
-                <Clock className="size-5 text-[#0170FE]" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 dark:bg-black/75 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4 border border-transparent dark:border-white/10">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+              <h3 className="text-lg font-bold text-slate-950 dark:text-white flex items-center gap-2">
+                <Clock className="size-5 text-[#0170FE] dark:text-blue-400" />
                 Schedule Automated Delivery
               </h3>
               <button
                 type="button"
                 onClick={() => setScheduleModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
               >
                 <X className="size-4" />
               </button>
             </div>
 
-            <p className="text-sm text-slate-500 leading-relaxed">
-              Set automated delivery of the <strong>{activeReportMeta?.title || 'Selected Report'}</strong> straight to your agency email in Excel or PDF format.
+            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              Set automated delivery of the <strong className="text-slate-800 dark:text-slate-200">{activeReportMeta?.title || 'Selected Report'}</strong> straight to your agency email in Excel or PDF format.
             </p>
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1.5">Recipient Email</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 block mb-1.5">Recipient Email</label>
                 <input
                   type="email"
                   defaultValue="jordan@brokerstep.com"
-                  className="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-800 outline-none focus:border-[#0170FE]"
+                  className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-sm text-slate-800 dark:text-white outline-none focus:border-[#0170FE]"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1.5">Cadence / Frequency</label>
-                <select className="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-800 outline-none focus:border-[#0170FE]">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 block mb-1.5">Cadence / Frequency</label>
+                <select className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-sm text-slate-800 dark:text-white outline-none focus:border-[#0170FE]">
                   <option>Every Monday at 8:00 AM</option>
                   <option>First Day of Every Month</option>
                   <option>Quarterly Closing Summary</option>
@@ -1934,13 +1917,13 @@ function ReportsContent() {
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1.5">Attachment Format</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 block mb-1.5">Attachment Format</label>
                 <div className="grid grid-cols-2 gap-2">
-                  <label className="flex items-center gap-2 rounded-xl border border-slate-200 p-2.5 text-sm font-semibold text-slate-800 cursor-pointer">
+                  <label className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/60 p-2.5 text-sm font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition">
                     <input type="radio" name="format" defaultChecked className="accent-[#0170FE]" />
                     <span>Excel (.xlsx)</span>
                   </label>
-                  <label className="flex items-center gap-2 rounded-xl border border-slate-200 p-2.5 text-sm font-semibold text-slate-800 cursor-pointer">
+                  <label className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/60 p-2.5 text-sm font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition">
                     <input type="radio" name="format" className="accent-[#0170FE]" />
                     <span>PDF Document</span>
                   </label>
@@ -1952,7 +1935,7 @@ function ReportsContent() {
               <button
                 type="button"
                 onClick={() => setScheduleModalOpen(false)}
-                className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="flex-1 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -1962,7 +1945,7 @@ function ReportsContent() {
                   setScheduleModalOpen(false)
                   showToast('Automated delivery schedule saved!')
                 }}
-                className="flex-1 rounded-xl bg-[#0170FE] py-2.5 text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 hover:bg-[#0060db]"
+                className="flex-1 rounded-xl bg-[#0170FE] py-2.5 text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 hover:bg-[#0060db] transition cursor-pointer"
               >
                 Save Schedule
               </button>

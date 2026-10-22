@@ -54,7 +54,7 @@ import {
 type UploadStep = 1 | 2 | 3 | 4
 
 const STEPS = [
-  { step: 1, title: 'Upload & Carrier', desc: 'Select carrier & file' },
+  { step: 1, title: 'Upload Statement', desc: 'Select period & source file' },
   { step: 2, title: 'Processing & Extraction', desc: 'Data parsing pipeline' },
   { step: 3, title: 'Reconciliation Review', desc: 'Verify line matches' },
   { step: 4, title: 'Confirmation', desc: 'Committed to ledger' },
@@ -64,18 +64,44 @@ export default function UploadStatementPage() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState<UploadStep>(1)
 
-  // Step 1: Form state
-  const [uploadCarrier, setUploadCarrier] = useState('Travelers')
+  // Super Admin Allocated Template Profile (Every broker has 1 allocated statement template)
+  const [allocatedProfile, setAllocatedProfile] = useState({
+    templateName: 'Standard Broker Remittance Template v2.4',
+    remittanceMethod: 'Electronic ACH Remittance',
+    mappingMode: 'Dynamic Column & Multi-Carrier Auto-Detection',
+    status: 'Super Admin Allocated',
+    carrierAutoDetect: true,
+  })
+
+  // Load super admin broker allocation if set
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem('broker_statement_allocation_BRK-001')
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        setAllocatedProfile((prev) => ({
+          ...prev,
+          templateName: parsed.templateName || prev.templateName,
+          remittanceMethod: parsed.remittanceMethod || prev.remittanceMethod,
+        }))
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }, [])
+
+  // Step 1: Form state (Statement period kept, carrier is auto-detected per template)
+  const [uploadCarrier, setUploadCarrier] = useState('Multi-Carrier Remittance')
   const [uploadPeriodMonth, setUploadPeriodMonth] = useState('October')
   const [uploadPeriodYear, setUploadPeriodYear] = useState('2026')
   const [uploadMethod, setUploadMethod] = useState('Electronic ACH')
-  const [uploadTemplate, setUploadTemplate] = useState('Carrier Default Auto-Detect Template')
+  const [uploadTemplate, setUploadTemplate] = useState('Standard Broker Remittance Template v2.4')
   const [selectedFile, setSelectedFile] = useState<{
     name: string
     size: string
     type: 'xlsx' | 'csv' | 'pdf'
   } | null>({
-    name: 'Travelers_ACH_Oct2026_Remittance_Batch.xlsx',
+    name: 'Broker_Remittance_Statement_Oct2026.xlsx',
     size: '3.4 MB',
     type: 'xlsx',
   })
@@ -231,11 +257,11 @@ export default function UploadStatementPage() {
 
     const record: StatementRecord = {
       id: newId,
-      statementIdentifier: `${newId}-${uploadCarrier.toUpperCase()}-${uploadPeriodMonth.slice(0, 3).toUpperCase()}`,
-      fileName: selectedFile?.name || `${uploadCarrier}_Remittance_${uploadPeriodMonth}${uploadPeriodYear}.xlsx`,
+      statementIdentifier: `${newId}-STMT-${uploadPeriodMonth.slice(0, 3).toUpperCase()}`,
+      fileName: selectedFile?.name || `Remittance_${uploadPeriodMonth}${uploadPeriodYear}.xlsx`,
       fileType: selectedFile?.type || 'xlsx',
       fileSize: selectedFile?.size || '3.2 MB',
-      carrier: uploadCarrier,
+      carrier: 'Multi-Carrier Remittance',
       statementPeriod: `${uploadPeriodMonth.slice(0, 3)} ${uploadPeriodYear}`,
       statementPeriodDate: '2026-10-01',
       uploadDate: 'Just now',
@@ -246,13 +272,13 @@ export default function UploadStatementPage() {
       needsReviewCount: unmatchedCount,
       highConfidenceCount: matchedCount,
       totalRemittance: totalVolume,
-      paymentMethod: uploadMethod,
+      paymentMethod: allocatedProfile.remittanceMethod,
       batchReference: `BATCH-${Date.now().toString().slice(-6)}`,
-      mappingTemplate: uploadTemplate,
+      mappingTemplate: allocatedProfile.templateName,
       extractedDate: 'Just now',
       normalizedDate: 'Just now',
       reprocessedCount: 0,
-      notes: `Ingested via dedicated upload workflow using ${uploadTemplate}.`,
+      notes: `Ingested via Super Admin allocated statement template: ${allocatedProfile.templateName}.`,
       processingPipelineStep: 9,
       auditHistory: [
         {
@@ -391,15 +417,15 @@ export default function UploadStatementPage() {
         onClick={() => handleTxnSort(field)}
         className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer select-none ${
           alignRight ? 'flex-row-reverse text-right' : ''
-        } ${isActive ? 'text-blue-600 font-extrabold' : 'text-slate-500 hover:text-slate-900'} ${className}`}
+        } ${isActive ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'} ${className}`}
         title={title}
       >
         <span>{label}</span>
         <span
           className={`inline-flex items-center justify-center rounded p-0.5 transition ${
             isActive
-              ? 'bg-blue-100 text-blue-600 ring-1 ring-blue-300'
-              : 'text-slate-400 group-hover:bg-slate-200/70 group-hover:text-slate-700'
+              ? 'bg-blue-100 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-700/50'
+              : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-200'
           }`}
         >
           {isActive ? (
@@ -1165,36 +1191,36 @@ export default function UploadStatementPage() {
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(val)
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] px-4 py-6 sm:px-8">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070d18] px-4 py-6 sm:px-8">
       {/* ───── Breadcrumb & Page Header ───── */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
-            <Link href="/broker/statements" className="hover:text-blue-600 transition">
+          <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+            <Link href="/broker/statements" className="hover:text-blue-600 dark:hover:text-blue-400 transition">
               Statements
             </Link>
-            <ChevronRight className="size-3 text-slate-400" />
-            <span className="text-slate-900 font-semibold">Upload New Statement</span>
+            <ChevronRight className="size-3 text-slate-400 dark:text-slate-600" />
+            <span className="text-slate-900 dark:text-white font-semibold">Upload New Statement</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             Upload Carrier Statement
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Automated extraction, normalization, and reconciliation pipeline for commission statements.
           </p>
         </div>
 
         <Link
           href="/broker/statements"
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition self-start sm:self-auto"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800 transition self-start sm:self-auto"
         >
-          <ArrowLeft className="size-3.5 text-slate-500" />
+          <ArrowLeft className="size-3.5 text-slate-500 dark:text-slate-400" />
           <span>All Statements</span>
         </Link>
       </div>
 
       {/* ───── Stepper Progress Bar ───── */}
-      <div className="mb-8 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
+      <div className="mb-8 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-xs">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {STEPS.map((s) => {
             const isCompleted = currentStep > s.step
@@ -1203,30 +1229,30 @@ export default function UploadStatementPage() {
               <div
                 key={s.step}
                 className={`flex items-center gap-3 rounded-xl p-2.5 transition-all ${isCurrent
-                    ? 'bg-blue-50/80 ring-1 ring-blue-200'
+                    ? 'bg-blue-50/80 dark:bg-blue-950/40 ring-1 ring-blue-200 dark:ring-blue-800/60'
                     : isCompleted
-                      ? 'bg-slate-50'
+                      ? 'bg-slate-50 dark:bg-slate-800/40'
                       : 'opacity-60'
                   }`}
               >
                 <div
                   className={`flex size-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition ${isCompleted
-                      ? 'bg-emerald-600 text-white'
+                      ? 'bg-emerald-600 dark:bg-emerald-500 text-white'
                       : isCurrent
                         ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-slate-200 text-slate-600'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                     }`}
                 >
                   {isCompleted ? <Check className="size-4 stroke-[3]" /> : s.step}
                 </div>
                 <div className="min-w-0">
                   <p
-                    className={`text-xs font-bold truncate ${isCurrent ? 'text-blue-950' : isCompleted ? 'text-slate-800' : 'text-slate-500'
+                    className={`text-xs font-bold truncate ${isCurrent ? 'text-blue-950 dark:text-blue-300' : isCompleted ? 'text-slate-800 dark:text-slate-200' : 'text-slate-500 dark:text-slate-400'
                       }`}
                   >
                     {s.title}
                   </p>
-                  <p className="text-[11px] text-slate-400 truncate mt-0.5">{s.desc}</p>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate mt-0.5">{s.desc}</p>
                 </div>
               </div>
             )
@@ -1238,113 +1264,109 @@ export default function UploadStatementPage() {
           STEP 1: UPLOAD & SETUP
       ══════════════════════════════════════════════════════════════════ */}
       {currentStep === 1 && (
-        <div className="max-w-4xl mx-auto rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-xs space-y-6">
-          <div className="border-b border-slate-100 pb-4">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600 ring-1 ring-blue-100">
+        <div className="max-w-4xl mx-auto rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="border-b border-slate-100 dark:border-white/10 pb-4">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-100 dark:ring-blue-800/50">
                 <Upload className="size-4" />
               </span>
-              Step 1: Carrier &amp; Statement Specifications
+              Step 1: Statement Specifications
             </h2>
-            <p className="text-xs text-slate-500 mt-1">
-              Select the carrier remittance partner and file to begin extraction.
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Select the statement period and upload your remittance document. Template mapping &amp; remittance payment methods are configured in Super Admin.
             </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            {/* Carrier Selection */}
+          <div className="grid gap-5 sm:grid-cols-2">
+            {/* Statement Period (Kept as per client requirement) */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Carrier Partner <span className="text-rose-500">*</span>
-              </label>
-              <select
-                value={uploadCarrier}
-                onChange={(e) => setUploadCarrier(e.target.value)}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 text-xs sm:text-sm font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 cursor-pointer"
-              >
-                <option value="Travelers">Travelers Insurance</option>
-                <option value="Chubb">Chubb Commercial</option>
-                <option value="Hartford">The Hartford</option>
-                <option value="Medical Protective">Medical Protective</option>
-                <option value="AIG">AIG Canada</option>
-                <option value="CNA">CNA Financial</option>
-              </select>
-            </div>
-
-            {/* Statement Period */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                 Statement Period <span className="text-rose-500">*</span>
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <select
                   value={uploadPeriodMonth}
                   onChange={(e) => setUploadPeriodMonth(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 text-xs sm:text-sm font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 cursor-pointer"
+                  className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800 px-3 text-xs sm:text-sm font-medium text-slate-800 dark:text-white focus:border-blue-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 cursor-pointer"
                 >
                   <option value="October">October</option>
                   <option value="September">September</option>
                   <option value="August">August</option>
                   <option value="July">July</option>
+                  <option value="June">June</option>
+                  <option value="May">May</option>
                 </select>
                 <select
                   value={uploadPeriodYear}
                   onChange={(e) => setUploadPeriodYear(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 text-xs sm:text-sm font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 cursor-pointer"
+                  className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800 px-3 text-xs sm:text-sm font-medium text-slate-800 dark:text-white focus:border-blue-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 cursor-pointer"
                 >
                   <option value="2026">2026</option>
                   <option value="2025">2025</option>
                 </select>
               </div>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5">
+                Period covering your carrier commissions and ledger entries.
+              </p>
             </div>
 
-            {/* Payment Method */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Remittance Payment Method
-              </label>
-              <select
-                value={uploadMethod}
-                onChange={(e) => setUploadMethod(e.target.value)}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 text-xs sm:text-sm font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 cursor-pointer"
-              >
-                <option value="Electronic ACH">Electronic ACH Remittance</option>
-                <option value="Direct Wire">Direct Wire Remittance</option>
-                <option value="Paper Remittance Check">Paper Remittance Check</option>
-              </select>
-            </div>
+            {/* Super Admin Allocated Template & Remittance Profile (Read-only for broker) */}
+            <div className="rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/40 dark:bg-blue-950/30 p-3.5 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-blue-950 dark:text-blue-300 flex items-center gap-1.5">
+                  <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400" />
+                  <span>Broker Allocated Template</span>
+                </span>
+                <span className="text-[10px] font-bold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800/50">
+                  Super Admin Allocated
+                </span>
+              </div>
 
-            {/* Template */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Field Mapping Template
-              </label>
-              <select
-                value={uploadTemplate}
-                onChange={(e) => setUploadTemplate(e.target.value)}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 text-xs sm:text-sm font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 cursor-pointer"
-              >
-                <option value="Carrier Default Auto-Detect Template">Carrier Default Auto-Detect Template</option>
-                <option value="Standard Broker EDI-820 Format">Standard Broker EDI-820 Format</option>
-                <option value="Custom Multi-Line Table Template">Custom Multi-Line Table Template</option>
-              </select>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Statement Template:</span>
+                  <span className="font-semibold text-slate-800 dark:text-white truncate max-w-[200px]" title={allocatedProfile.templateName}>
+                    {allocatedProfile.templateName}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Remittance Method:</span>
+                  <span className="font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/50 text-[11px]">
+                    {allocatedProfile.remittanceMethod}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Carrier Partner:</span>
+                  <span className="text-slate-700 dark:text-slate-300 font-medium text-[11px]">
+                    Multi-Carrier Auto-Detect
+                  </span>
+                </div>
+              </div>
             </div>
+          </div>
+
+          {/* Dynamic Mapping Info Alert */}
+          <div className="rounded-xl border border-slate-200/90 dark:border-white/10 bg-slate-50/70 dark:bg-slate-800/40 p-3.5 flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-300">
+            <Info className="size-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+            <p className="leading-relaxed">
+              <strong>Single Statement Template Active:</strong> Every broker is allocated 1 dynamic template statement. Carrier partners (Travelers, Chubb, Hartford, etc.), remittance methods, and field mappings are configured in <strong>Super Admin</strong> and dynamically auto-mapped from your uploaded file.
+            </p>
           </div>
 
           {/* Statement File Dropzone */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
               Statement Source Document <span className="text-rose-500">*</span>
             </label>
-            <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/70 p-6 sm:p-8 text-center transition hover:border-blue-400 hover:bg-blue-50/10">
-              <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-white shadow-xs ring-1 ring-slate-200 text-blue-600 mb-3">
+            <div className="rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/20 bg-slate-50/70 dark:bg-slate-800/30 p-6 sm:p-8 text-center transition hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/10 dark:hover:bg-blue-950/20">
+              <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-xs ring-1 ring-slate-200 dark:ring-white/10 text-blue-600 dark:text-blue-400 mb-3">
                 <Upload className="size-6" />
               </div>
-              <p className="text-sm font-semibold text-slate-800">
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                 Drag and drop your statement file here, or{' '}
-                <span className="text-blue-600 underline cursor-pointer">browse file</span>
+                <span className="text-blue-600 dark:text-blue-400 underline cursor-pointer">browse file</span>
               </p>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
                 Agreed Excel (.xlsx, .xls), CSV (.csv), or structured PDF (.pdf) statements.
               </p>
 
@@ -1359,7 +1381,7 @@ export default function UploadStatementPage() {
                       type: 'xlsx',
                     })
                   }
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-100 cursor-pointer"
+                  className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition"
                 >
                   Use Sample Travelers XLSX
                 </button>
@@ -1372,7 +1394,7 @@ export default function UploadStatementPage() {
                       type: 'csv',
                     })
                   }
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-100 cursor-pointer"
+                  className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition"
                 >
                   Use Sample Chubb CSV
                 </button>
@@ -1380,18 +1402,18 @@ export default function UploadStatementPage() {
 
               {/* Selected File Card */}
               {selectedFile && (
-                <div className="mt-4 flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50/70 px-4 py-2.5 max-w-md mx-auto text-left">
+                <div className="mt-4 flex items-center justify-between rounded-xl border border-blue-200 dark:border-blue-800/50 bg-blue-50/70 dark:bg-blue-950/40 px-4 py-2.5 max-w-md mx-auto text-left">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <FileSpreadsheet className="size-5 text-blue-600 shrink-0" />
+                    <FileSpreadsheet className="size-5 text-blue-600 dark:text-blue-400 shrink-0" />
                     <div className="truncate">
-                      <p className="text-xs font-semibold text-blue-900 truncate">{selectedFile.name}</p>
-                      <p className="text-[11px] text-blue-700">{selectedFile.size} · Ingestion Ready</p>
+                      <p className="text-xs font-semibold text-blue-900 dark:text-blue-200 truncate">{selectedFile.name}</p>
+                      <p className="text-[11px] text-blue-700 dark:text-blue-300">{selectedFile.size} · Ingestion Ready</p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => setSelectedFile(null)}
-                    className="text-blue-500 hover:text-blue-700 p-1 cursor-pointer shrink-0"
+                    className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-200 p-1 cursor-pointer shrink-0"
                     title="Clear file"
                   >
                     <X className="size-4" />
@@ -1402,10 +1424,10 @@ export default function UploadStatementPage() {
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+          <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/10">
             <Link
               href="/broker/statements"
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 transition"
+              className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
             >
               Cancel
             </Link>
@@ -1413,7 +1435,7 @@ export default function UploadStatementPage() {
               type="button"
               onClick={handleStartExtraction}
               disabled={!selectedFile}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-blue-600 transition disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-950 dark:bg-blue-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-blue-600 dark:hover:bg-blue-500 transition disabled:opacity-50 cursor-pointer"
             >
               <span>Continue to Extraction Pipeline</span>
               <ArrowRight className="size-3.5" />
@@ -1426,27 +1448,27 @@ export default function UploadStatementPage() {
           STEP 2: PROCESSING & EXTRACTION PIPELINE
       ══════════════════════════════════════════════════════════════════ */}
       {currentStep === 2 && (
-        <div className="max-w-4xl mx-auto rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-xs space-y-6">
-          <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="border-b border-slate-100 dark:border-white/10 pb-4 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <span className="flex size-7 items-center justify-center rounded-lg bg-amber-50 text-amber-600 ring-1 ring-amber-100">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span className="flex size-7 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 ring-1 ring-amber-100 dark:ring-amber-800/50">
                   <GitBranch className="size-4" />
                 </span>
                 Step 2: Processing &amp; Data Normalization Pipeline
               </h2>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Parsing source line items and matching against active client &amp; policy ledgers.
               </p>
             </div>
-            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">
+            <span className="rounded-full bg-blue-50 dark:bg-blue-950/60 px-3 py-1 text-xs font-bold text-blue-700 dark:text-blue-300 ring-1 ring-blue-100 dark:ring-blue-800/50">
               {pipelineProgress}% Completed
             </span>
           </div>
 
           {/* Animated Progress Bar */}
           <div className="space-y-2">
-            <div className="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden">
+            <div className="h-2.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-500"
                 style={{ width: `${pipelineProgress}%` }}
@@ -1485,43 +1507,43 @@ export default function UploadStatementPage() {
               <div
                 key={stage.num}
                 className={`rounded-xl border p-4 transition-all ${stage.done
-                    ? 'border-emerald-200 bg-emerald-50/40'
-                    : 'border-slate-200 bg-slate-50/60 opacity-60'
+                    ? 'border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/40 dark:bg-emerald-950/30'
+                    : 'border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/30 opacity-60'
                   }`}
               >
                 <div className="flex items-center gap-2.5 mb-1.5">
                   <div
-                    className={`flex size-6 items-center justify-center rounded-full text-xs font-bold ${stage.done ? 'bg-emerald-600 text-white' : 'bg-slate-300 text-slate-700'
+                    className={`flex size-6 items-center justify-center rounded-full text-xs font-bold ${stage.done ? 'bg-emerald-600 text-white' : 'bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                       }`}
                   >
                     {stage.done ? <Check className="size-3.5 stroke-[3]" /> : stage.num}
                   </div>
-                  <h3 className="text-xs font-bold text-slate-900">{stage.title}</h3>
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-white">{stage.title}</h3>
                 </div>
-                <p className="text-[11px] text-slate-500 pl-8.5">{stage.desc}</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 pl-8.5">{stage.desc}</p>
               </div>
             ))}
           </div>
 
           {/* Raw Extraction Log Preview */}
-          <div className="rounded-xl border border-slate-200 bg-slate-950 p-4 text-emerald-400 font-mono text-[11px] space-y-1">
-            <p className="text-slate-400">// Ingestion Log Console:</p>
-            <p>+ Carrier target: {uploadCarrier} | Mapping format: {uploadTemplate}</p>
+          <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-950 dark:bg-black/80 p-4 text-emerald-400 font-mono text-[11px] space-y-1">
+            <p className="text-slate-400 dark:text-slate-500">// Ingestion Log Console:</p>
+            <p>+ Allocated Template: {allocatedProfile.templateName} | Remittance: {allocatedProfile.remittanceMethod}</p>
             <p>+ Extracted 5 raw ledger transaction line rows from source file.</p>
-            <p className={activePipelineStage >= 3 ? 'text-emerald-400' : 'text-slate-500'}>
+            <p className={activePipelineStage >= 3 ? 'text-emerald-400' : 'text-slate-500 dark:text-slate-600'}>
               + Calculated net commissions: $10,800.00 across active broker records.
             </p>
-            <p className={activePipelineStage >= 4 ? 'text-emerald-400' : 'text-slate-500'}>
+            <p className={activePipelineStage >= 4 ? 'text-emerald-400' : 'text-slate-500 dark:text-slate-600'}>
               + 4 High Confidence matches, 1 pending variance requiring review.
             </p>
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+          <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/10">
             <button
               type="button"
               onClick={() => setCurrentStep(1)}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 transition"
+              className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
             >
               Back to Setup
             </button>
@@ -1529,7 +1551,7 @@ export default function UploadStatementPage() {
               type="button"
               onClick={() => setCurrentStep(3)}
               disabled={isProcessing}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-blue-600 transition disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-950 dark:bg-blue-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-blue-600 dark:hover:bg-blue-500 transition disabled:opacity-50 cursor-pointer"
             >
               <span>Review Reconciliation Matches</span>
               <ArrowRight className="size-3.5" />
@@ -1542,28 +1564,28 @@ export default function UploadStatementPage() {
           STEP 3: RECONCILIATION REVIEW
       ══════════════════════════════════════════════════════════════════ */}
       {currentStep === 3 && (
-        <div className="max-w-6xl mx-auto rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-xs space-y-6">
-          <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="max-w-6xl mx-auto rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="border-b border-slate-100 dark:border-white/10 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <span className="flex size-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span className="flex size-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-100 dark:ring-emerald-800/50">
                   <ShieldCheck className="size-4" />
                 </span>
                 Step 3: Reconciliation &amp; Line Match Verification
               </h2>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Review extracted transaction rows before final commitment to the general ledger.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700 ring-1 ring-emerald-200">
+              <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800/50">
                 {transactions.filter((t) => t.status === 'Auto-Matched' || t.status === 'Resolved').length} Matched
               </span>
-              <span className="rounded-full bg-amber-50 px-2.5 py-1 text-amber-700 ring-1 ring-amber-200">
+              <span className="rounded-full bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 text-amber-700 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-800/50">
                 {transactions.filter((t) => t.status === 'Pending Broker Review' || t.status === 'Action Required').length} Action Req.
               </span>
               {transactions.filter((t) => t.status === 'Disputed').length > 0 && (
-                <span className="rounded-full bg-rose-50 px-2.5 py-1 text-rose-700 ring-1 ring-rose-200">
+                <span className="rounded-full bg-rose-50 dark:bg-rose-950/50 px-2.5 py-1 text-rose-700 dark:text-rose-300 ring-1 ring-rose-200 dark:ring-rose-800/50">
                   {transactions.filter((t) => t.status === 'Disputed').length} Disputed
                 </span>
               )}
@@ -1580,10 +1602,10 @@ export default function UploadStatementPage() {
                     handleOpenQuickAdd(transactions[0])
                   }
                 }}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 hover:bg-emerald-100 hover:border-emerald-400 transition cursor-pointer shadow-2xs ml-1"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-400 transition cursor-pointer shadow-2xs ml-1"
                 title="Add unmatched client directly to Book of Business in few clicks"
               >
-                <UserPlus className="size-3.5 text-emerald-600" />
+                <UserPlus className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>+ Quick Add Client</span>
               </button>
             </div>
@@ -1591,17 +1613,17 @@ export default function UploadStatementPage() {
 
           {/* Toast Notification */}
           {toastMessage && (
-            <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-xs font-medium text-emerald-800 shadow-xs animate-in fade-in slide-in-from-top-1">
-              <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
+            <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/90 dark:bg-emerald-950/80 px-4 py-3 text-xs font-medium text-emerald-800 dark:text-emerald-200 shadow-xs animate-in fade-in slide-in-from-top-1">
+              <CheckCircle2 className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
               <span>{toastMessage}</span>
             </div>
           )}
 
           {/* Transactions Table */}
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                <tr className="bg-slate-50 dark:bg-slate-950/70 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-white/10">
                   <th className="px-3 py-3">
                     {renderTxnSortHeader('policyNumber', 'Policy #')}
                   </th>
@@ -1626,29 +1648,29 @@ export default function UploadStatementPage() {
                   <th className="px-3 py-3 text-right min-w-[190px]">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                 {sortedTransactions.map((txn) => {
                   const isResolvedOrMatched = txn.status === 'Auto-Matched' || txn.status === 'Resolved'
                   const isDisputed = txn.status === 'Disputed'
 
                   return (
-                    <tr key={txn.id} className="hover:bg-slate-50/70 transition">
-                      <td className="px-3.5 py-3 font-mono font-bold text-slate-900">{txn.policyNumber}</td>
+                    <tr key={txn.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                      <td className="px-3.5 py-3 font-mono font-bold text-slate-900 dark:text-white">{txn.policyNumber}</td>
                       <td className="px-3.5 py-3">
-                        <p className="font-semibold text-slate-800">{txn.clientName}</p>
-                        <p className="text-[11px] text-slate-400">{txn.businessName}</p>
+                        <p className="font-semibold text-slate-800 dark:text-slate-200">{txn.clientName}</p>
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500">{txn.businessName}</p>
                       </td>
-                      <td className="px-3 py-3 font-medium text-slate-600">{txn.lineOfBusiness}</td>
-                      <td className="px-3 py-3 text-right font-mono text-slate-800">{fmtCurrency(txn.grossPremium)}</td>
-                      <td className="px-3 py-3 text-right font-mono font-medium text-slate-600">
+                      <td className="px-3 py-3 font-medium text-slate-600 dark:text-slate-400">{txn.lineOfBusiness}</td>
+                      <td className="px-3 py-3 text-right font-mono text-slate-800 dark:text-slate-200">{fmtCurrency(txn.grossPremium)}</td>
+                      <td className="px-3 py-3 text-right font-mono font-medium text-slate-600 dark:text-slate-400">
                         {txn.commissionRate}%
                       </td>
-                      <td className="px-3.5 py-3 text-right font-mono font-bold text-slate-900">
+                      <td className="px-3.5 py-3 text-right font-mono font-bold text-slate-900 dark:text-white">
                         {fmtCurrency(txn.paidCommission)}
                       </td>
                       <td className="px-3.5 py-3">
                         {isDisputed ? (
-                          <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold bg-rose-50 text-rose-700 ring-1 ring-rose-200">
+                          <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-400 ring-1 ring-rose-200 dark:ring-rose-800/50">
                             <AlertTriangle className="size-3" />
                             <span>Disputed</span>
                           </span>
@@ -1656,8 +1678,8 @@ export default function UploadStatementPage() {
                           <span
                             className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ring-1 ${
                               isResolvedOrMatched
-                                ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                : 'bg-amber-50 text-amber-700 ring-amber-200'
+                                ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 ring-emerald-200 dark:ring-emerald-800/50'
+                                : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 ring-amber-200 dark:ring-amber-800/50'
                             }`}
                           >
                             {isResolvedOrMatched ? (
@@ -1676,10 +1698,10 @@ export default function UploadStatementPage() {
                               id={`quick-add-btn-${txn.id}`}
                               type="button"
                               onClick={() => handleOpenQuickAdd(txn)}
-                              className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100 hover:border-emerald-400 transition cursor-pointer shadow-2xs"
+                              className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1.5 text-[11px] font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-400 transition cursor-pointer shadow-2xs"
                               title="Add client & policy to Book of Business with few clicks"
                             >
-                              <UserPlus className="size-3 text-emerald-600" />
+                              <UserPlus className="size-3 text-emerald-600 dark:text-emerald-400" />
                               <span>+ Quick Add</span>
                             </button>
                             <button
@@ -1697,14 +1719,14 @@ export default function UploadStatementPage() {
                             id={`dispute-btn-${txn.id}`}
                             type="button"
                             onClick={() => handleOpenReviewModal(txn)}
-                            className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50/70 px-2.5 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-100 transition cursor-pointer"
+                            className="inline-flex items-center gap-1 rounded-lg border border-rose-200 dark:border-rose-900/50 bg-rose-50/70 dark:bg-rose-950/40 px-2.5 py-1 text-[11px] font-semibold text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition cursor-pointer"
                           >
                             <span>Review Dispute</span>
                             <ChevronRight className="size-3" />
                           </button>
                         ) : (
                           <div className="inline-flex items-center gap-2">
-                            <span className="text-[11px] font-medium text-emerald-600 inline-flex items-center gap-1">
+                            <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-1">
                               <CheckCircle2 className="size-3" />
                               {txn.status === 'Resolved' ? 'Resolved' : 'Matched'}
                             </span>
@@ -1712,7 +1734,7 @@ export default function UploadStatementPage() {
                               id={`review-btn-${txn.id}`}
                               type="button"
                               onClick={() => handleOpenReviewModal(txn)}
-                              className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[10px] font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                              className="rounded-md border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-2 py-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
                             >
                               Review
                             </button>
@@ -1727,18 +1749,18 @@ export default function UploadStatementPage() {
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+          <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/10">
             <button
               type="button"
               onClick={() => setCurrentStep(2)}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 transition"
+              className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
             >
               Back to Pipeline
             </button>
             <button
               type="button"
               onClick={handleCommitToLedger}
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-emerald-700 transition cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-emerald-500 transition cursor-pointer"
             >
               <CheckCircle2 className="size-4" />
               <span>Commit &amp; Save to Statements Ledger</span>
@@ -1753,24 +1775,24 @@ export default function UploadStatementPage() {
             const activeCandidate = candidates.find((c) => c.id === selectedCandidateId) || candidates[0]
 
             return (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 sm:p-6 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150">
-                <div className="relative w-full max-w-4xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[92vh] flex flex-col">
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-black/75 p-3 sm:p-6 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150">
+                <div className="relative w-full max-w-4xl rounded-2xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden my-auto max-h-[92vh] flex flex-col">
                   {/* Modal Header */}
-                  <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-4">
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-950/70 px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex size-9 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                      <div className="flex size-9 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400">
                         <GitBranch className="size-5" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="text-base font-bold text-slate-900">
+                          <h3 className="text-base font-bold text-slate-900 dark:text-white">
                             Reconciliation Review &amp; Match Resolver
                           </h3>
-                          <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                          <span className="rounded-full bg-slate-200 dark:bg-slate-800 px-2 py-0.5 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                             Line #{reviewingTxn.lineIndex}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
                           Verify extracted carrier statement item against Book of Business records.
                         </p>
                       </div>
@@ -1778,14 +1800,14 @@ export default function UploadStatementPage() {
                     <button
                       type="button"
                       onClick={() => setReviewingTxn(null)}
-                      className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-200/70 hover:text-slate-700 transition cursor-pointer"
+                      className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-white transition cursor-pointer"
                     >
                       <X className="size-5" />
                     </button>
                   </div>
 
                   {/* Top Banner: Statement Extracted Item Details */}
-                  <div className="border-b border-slate-200 bg-slate-900 px-6 py-4 text-white">
+                  <div className="border-b border-slate-200 dark:border-white/10 bg-slate-900 dark:bg-slate-950 px-6 py-4 text-white">
                     <div className="flex flex-wrap items-center justify-between gap-3 text-xs mb-3">
                       <div className="flex items-center gap-2">
                         <span className="rounded-md bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-300">
@@ -1835,19 +1857,19 @@ export default function UploadStatementPage() {
                   </div>
 
                   {/* Sub-Tabs: 1) Review Matches, 2) Next Tab: Fix Discrepancy, 3) Add This Policy / Client, 4) Search CRM Ledger */}
-                  <div className="flex flex-wrap border-b border-slate-200 bg-slate-50/80 px-6 pt-3 gap-2">
+                  <div className="flex flex-wrap border-b border-slate-200 dark:border-white/10 bg-slate-50/80 dark:bg-slate-950/50 px-6 pt-3 gap-2">
                     <button
                       type="button"
                       onClick={() => setReviewTab('candidates')}
                       className={`inline-flex items-center gap-2 border-b-2 px-3 py-2 text-xs font-bold transition cursor-pointer ${
                         reviewTab === 'candidates'
-                          ? 'border-blue-600 text-blue-600'
-                          : 'border-transparent text-slate-500 hover:text-slate-800'
+                          ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                          : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                       }`}
                     >
-                      <Sparkles className="size-3.5 text-blue-500" />
+                      <Sparkles className="size-3.5 text-blue-500 dark:text-blue-400" />
                       <span>1. Review Matches</span>
-                      <span className="rounded-full bg-blue-100 px-2 py-0.2 text-[10px] font-bold text-blue-700">
+                      <span className="rounded-full bg-blue-100 dark:bg-blue-950/60 px-2 py-0.2 text-[10px] font-bold text-blue-700 dark:text-blue-300">
                         {candidates.length}
                       </span>
                     </button>
@@ -1860,13 +1882,13 @@ export default function UploadStatementPage() {
                       }}
                       className={`inline-flex items-center gap-2 border-b-2 px-3 py-2 text-xs font-bold transition cursor-pointer ${
                         reviewTab === 'fix'
-                          ? 'border-indigo-600 text-indigo-600'
-                          : 'border-transparent text-slate-500 hover:text-slate-800'
+                          ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                          : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                       }`}
                     >
-                      <Wrench className="size-3.5 text-indigo-600" />
+                      <Wrench className="size-3.5 text-indigo-600 dark:text-indigo-400" />
                       <span>2. Fix Discrepancy &amp; Adjust</span>
-                      <span className="rounded-full bg-indigo-100 px-2 py-0.2 text-[10px] font-bold text-indigo-700">
+                      <span className="rounded-full bg-indigo-100 dark:bg-indigo-950/60 px-2 py-0.2 text-[10px] font-bold text-indigo-700 dark:text-indigo-300">
                         Next Tab: Fix It
                       </span>
                     </button>
@@ -1876,13 +1898,13 @@ export default function UploadStatementPage() {
                       onClick={() => setReviewTab('create')}
                       className={`inline-flex items-center gap-2 border-b-2 px-3 py-2 text-xs font-bold transition cursor-pointer ${
                         reviewTab === 'create'
-                          ? 'border-emerald-600 text-emerald-600'
-                          : 'border-transparent text-slate-500 hover:text-slate-800'
+                          ? 'border-emerald-600 text-emerald-600 dark:text-emerald-400'
+                          : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                       }`}
                     >
-                      <PlusCircle className="size-3.5 text-emerald-600" />
+                      <PlusCircle className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                       <span>3. Add This Policy / Client</span>
-                      <span className="rounded-full bg-emerald-100 px-2 py-0.2 text-[10px] font-bold text-emerald-700">
+                      <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.2 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
                         Add This
                       </span>
                     </button>
@@ -1892,8 +1914,8 @@ export default function UploadStatementPage() {
                       onClick={() => setReviewTab('search')}
                       className={`inline-flex items-center gap-2 border-b-2 px-3 py-2 text-xs font-bold transition cursor-pointer ${
                         reviewTab === 'search'
-                          ? 'border-blue-600 text-blue-600'
-                          : 'border-transparent text-slate-500 hover:text-slate-800'
+                          ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                          : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                       }`}
                     >
                       <Search className="size-3.5 text-slate-400" />
@@ -1902,27 +1924,27 @@ export default function UploadStatementPage() {
                   </div>
 
                   {/* Modal Body / Tab Content */}
-                  <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                  <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white dark:bg-slate-900">
                     {/* TAB 1: SUGGESTED CANDIDATE MATCHES */}
                     {reviewTab === 'candidates' && (
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <p className="text-xs text-slate-600 font-medium">
-                            The matching engine found <strong className="text-slate-900">{candidates.length} potential match candidates</strong> in your CRM records. Select a policy to review concordance and link:
+                          <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                            The matching engine found <strong className="text-slate-900 dark:text-white">{candidates.length} potential match candidates</strong> in your CRM records. Select a policy to review concordance and link:
                           </p>
-                          <span className="text-[11px] text-slate-400">Click card to select</span>
+                          <span className="text-[11px] text-slate-400 dark:text-slate-500">Click card to select</span>
                         </div>
 
                         {candidates.length === 0 ? (
-                          <div className="rounded-2xl border border-emerald-300 bg-gradient-to-b from-emerald-50/90 to-slate-50 p-6 text-center space-y-4 shadow-xs">
+                          <div className="rounded-2xl border border-emerald-300 dark:border-emerald-800/60 bg-gradient-to-b from-emerald-50/90 to-slate-50 dark:from-emerald-950/40 dark:to-slate-900 p-6 text-center space-y-4 shadow-xs">
                             <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-xs">
                               <UserPlus className="size-6" />
                             </div>
                             <div>
-                              <h3 className="text-sm font-bold text-emerald-950">
+                              <h3 className="text-sm font-bold text-emerald-950 dark:text-emerald-200">
                                 No Client Found in Book of Business
                               </h3>
-                              <p className="text-xs text-emerald-800 max-w-md mx-auto mt-1">
+                              <p className="text-xs text-emerald-800 dark:text-emerald-300 max-w-md mx-auto mt-1">
                                 No matching records found for <strong>{reviewingTxn.clientName}</strong>. You can add them to your CRM right now with few clicks:
                               </p>
                             </div>
@@ -1930,7 +1952,7 @@ export default function UploadStatementPage() {
                               <button
                                 type="button"
                                 onClick={() => handleConfirmQuickAdd(reviewingTxn)}
-                                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition cursor-pointer"
+                                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-500 transition cursor-pointer"
                               >
                                 <Zap className="size-4" />
                                 <span>⚡ 1-Click Quick Add &amp; Reconcile</span>
@@ -1938,14 +1960,14 @@ export default function UploadStatementPage() {
                               <button
                                 type="button"
                                 onClick={() => setReviewTab('create')}
-                                className="rounded-xl border border-emerald-300 bg-white px-4 py-2.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-50 transition cursor-pointer"
+                                className="rounded-xl border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-slate-700 transition cursor-pointer"
                               >
                                 Open Full Client Form
                               </button>
                               <button
                                 type="button"
                                 onClick={() => setReviewTab('search')}
-                                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                                className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
                               >
                                 Search CRM Ledger
                               </button>
@@ -1954,16 +1976,16 @@ export default function UploadStatementPage() {
                         ) : (
                           <div className="space-y-3">
                             {/* Quick Add Helper if client is not in candidates */}
-                            <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+                            <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-950/30 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
                               <div className="flex items-center gap-2.5">
                                 <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold text-xs shrink-0 shadow-2xs">
                                   <Zap className="size-4" />
                                 </div>
                                 <div>
-                                  <p className="font-bold text-emerald-950">
+                                  <p className="font-bold text-emerald-950 dark:text-emerald-200">
                                     No match applies? Quick add {reviewingTxn.clientName} in few clicks
                                   </p>
-                                  <p className="text-[11px] text-emerald-800">
+                                  <p className="text-[11px] text-emerald-800 dark:text-emerald-300">
                                     Create this client and bind policy {reviewingTxn.policyNumber} instantly to your Book of Business.
                                   </p>
                                 </div>
@@ -1971,7 +1993,7 @@ export default function UploadStatementPage() {
                               <button
                                 type="button"
                                 onClick={() => handleConfirmQuickAdd(reviewingTxn)}
-                                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-emerald-700 transition cursor-pointer shrink-0"
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-emerald-500 transition cursor-pointer shrink-0"
                               >
                                 <Zap className="size-3.5" />
                                 <span>⚡ Quick Add in 1-Click</span>
@@ -1989,8 +2011,8 @@ export default function UploadStatementPage() {
                                   }}
                                   className={`rounded-xl border p-4 transition cursor-pointer ${
                                     isSelected
-                                      ? 'border-blue-600 bg-blue-50/40 ring-2 ring-blue-500/20'
-                                      : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50'
+                                      ? 'border-blue-600 bg-blue-50/40 dark:bg-blue-950/30 ring-2 ring-blue-500/20'
+                                      : 'border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/60 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50/50 dark:hover:bg-slate-800'
                                   }`}
                                 >
                                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -2000,7 +2022,7 @@ export default function UploadStatementPage() {
                                           className={`flex size-5 items-center justify-center rounded-full border ${
                                             isSelected
                                               ? 'border-blue-600 bg-blue-600 text-white'
-                                              : 'border-slate-300 bg-white'
+                                              : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'
                                           }`}
                                         >
                                           {isSelected && <Check className="size-3 stroke-[3]" />}
@@ -2008,60 +2030,60 @@ export default function UploadStatementPage() {
                                       </div>
                                       <div>
                                         <div className="flex flex-wrap items-center gap-2">
-                                          <span className="font-mono font-bold text-slate-900 text-sm">
+                                          <span className="font-mono font-bold text-slate-900 dark:text-white text-sm">
                                             {cand.policyNumber}
                                           </span>
-                                          <span className="text-xs font-bold text-slate-800">
+                                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                                             {cand.clientName}
                                           </span>
                                           {cand.businessName && (
-                                            <span className="text-xs text-slate-500">
+                                            <span className="text-xs text-slate-500 dark:text-slate-400">
                                               ({cand.businessName})
                                             </span>
                                           )}
                                           <span
                                             className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                                               cand.matchScore >= 90
-                                                ? 'bg-emerald-100 text-emerald-800'
+                                                ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300'
                                                 : cand.matchScore >= 75
-                                                ? 'bg-amber-100 text-amber-800'
-                                                : 'bg-slate-100 text-slate-700'
+                                                ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300'
+                                                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                                             }`}
                                           >
                                             {cand.matchScore}% Match · {cand.confidence}
                                           </span>
                                         </div>
-                                        <p className="text-xs text-slate-500 mt-1 font-medium">
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
                                           {cand.detail}
                                         </p>
                                       </div>
                                     </div>
 
                                     {/* Financial comparison on card */}
-                                    <div className="text-right sm:border-l sm:border-slate-200 sm:pl-4 min-w-[170px] shrink-0">
+                                    <div className="text-right sm:border-l sm:border-slate-200 dark:sm:border-white/10 sm:pl-4 min-w-[170px] shrink-0">
                                       <div className="flex justify-between sm:justify-end gap-2 text-xs">
-                                        <span className="text-slate-500">Expected:</span>
-                                        <span className="font-mono font-bold text-slate-800">
+                                        <span className="text-slate-500 dark:text-slate-400">Expected:</span>
+                                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
                                           {fmtCurrency(cand.expectedCommission)}
                                         </span>
                                       </div>
                                       <div className="flex justify-between sm:justify-end gap-2 text-xs mt-0.5">
-                                        <span className="text-slate-500">Remittance:</span>
-                                        <span className="font-mono font-bold text-blue-700">
+                                        <span className="text-slate-500 dark:text-slate-400">Remittance:</span>
+                                        <span className="font-mono font-bold text-blue-700 dark:text-blue-400">
                                           {fmtCurrency(cand.remittance)}
                                         </span>
                                       </div>
                                       <div className="mt-1">
                                         {cand.variance === 0 ? (
-                                          <span className="inline-block rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-200">
+                                          <span className="inline-block rounded-full bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800/50">
                                             Exact $0.00 Variance
                                           </span>
                                         ) : (
                                           <span
                                             className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 ${
                                               cand.variance < 0
-                                                ? 'bg-amber-50 text-amber-700 ring-amber-200'
-                                                : 'bg-blue-50 text-blue-700 ring-blue-200'
+                                                ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 ring-amber-200 dark:ring-amber-800/50'
+                                                : 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 ring-blue-200 dark:ring-blue-800/50'
                                             }`}
                                           >
                                             {cand.variance > 0 ? '+' : ''}{fmtCurrency(cand.variance)} Variance
@@ -2072,8 +2094,8 @@ export default function UploadStatementPage() {
                                   </div>
 
                                   {/* Quick link to Fix Tab */}
-                                  <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                                    <span className="text-slate-400">Match score: {cand.matchScore}%</span>
+                                  <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px]">
+                                    <span className="text-slate-400 dark:text-slate-500">Match score: {cand.matchScore}%</span>
                                     <button
                                       type="button"
                                       onClick={(e) => {
@@ -2082,7 +2104,7 @@ export default function UploadStatementPage() {
                                         populateFixForm(cand)
                                         setReviewTab('fix')
                                       }}
-                                      className="inline-flex items-center gap-1 font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
+                                      className="inline-flex items-center gap-1 font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:underline cursor-pointer"
                                     >
                                       <Wrench className="size-3" />
                                       <span>Next Tab: Fix Discrepancy &amp; Adjust →</span>
@@ -2096,64 +2118,64 @@ export default function UploadStatementPage() {
 
                         {/* Selected Candidate Concordance Breakdown */}
                         {activeCandidate && (
-                          <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
-                            <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wider">
-                              <Scale className="size-3.5 text-blue-600" />
+                          <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-slate-800/40 p-4 space-y-3">
+                            <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 uppercase tracking-wider">
+                              <Scale className="size-3.5 text-blue-600 dark:text-blue-400" />
                               <span>Side-by-Side Concordance Comparison</span>
                             </h4>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                               {/* Left: Statement */}
-                              <div className="rounded-lg border border-slate-200 bg-white p-3 space-y-1.5">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                              <div className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 p-3 space-y-1.5">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                                   Carrier Statement Line
                                 </span>
-                                <div className="flex justify-between border-b border-slate-100 pb-1">
-                                  <span className="text-slate-500">Policy #:</span>
-                                  <span className="font-mono font-bold text-slate-900">{reviewingTxn.policyNumber}</span>
+                                <div className="flex justify-between border-b border-slate-100 dark:border-white/10 pb-1">
+                                  <span className="text-slate-500 dark:text-slate-400">Policy #:</span>
+                                  <span className="font-mono font-bold text-slate-900 dark:text-white">{reviewingTxn.policyNumber}</span>
                                 </div>
-                                <div className="flex justify-between border-b border-slate-100 pb-1">
-                                  <span className="text-slate-500">Insured:</span>
-                                  <span className="font-semibold text-slate-900">{reviewingTxn.clientName}</span>
+                                <div className="flex justify-between border-b border-slate-100 dark:border-white/10 pb-1">
+                                  <span className="text-slate-500 dark:text-slate-400">Insured:</span>
+                                  <span className="font-semibold text-slate-900 dark:text-white">{reviewingTxn.clientName}</span>
                                 </div>
-                                <div className="flex justify-between border-b border-slate-100 pb-1">
-                                  <span className="text-slate-500">Coverage:</span>
-                                  <span className="font-medium text-slate-800">{reviewingTxn.lineOfBusiness}</span>
+                                <div className="flex justify-between border-b border-slate-100 dark:border-white/10 pb-1">
+                                  <span className="text-slate-500 dark:text-slate-400">Coverage:</span>
+                                  <span className="font-medium text-slate-800 dark:text-slate-200">{reviewingTxn.lineOfBusiness}</span>
                                 </div>
-                                <div className="flex justify-between border-b border-slate-100 pb-1">
-                                  <span className="text-slate-500">Gross Premium:</span>
-                                  <span className="font-mono text-slate-900">{fmtCurrency(reviewingTxn.grossPremium)}</span>
+                                <div className="flex justify-between border-b border-slate-100 dark:border-white/10 pb-1">
+                                  <span className="text-slate-500 dark:text-slate-400">Gross Premium:</span>
+                                  <span className="font-mono text-slate-900 dark:text-white">{fmtCurrency(reviewingTxn.grossPremium)}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-slate-500">Remitted Comm:</span>
-                                  <span className="font-mono font-bold text-blue-700">{fmtCurrency(reviewingTxn.paidCommission)} ({reviewingTxn.commissionRate}%)</span>
+                                  <span className="text-slate-500 dark:text-slate-400">Remitted Comm:</span>
+                                  <span className="font-mono font-bold text-blue-700 dark:text-blue-400">{fmtCurrency(reviewingTxn.paidCommission)} ({reviewingTxn.commissionRate}%)</span>
                                 </div>
                               </div>
 
                               {/* Right: Selected CRM Candidate */}
-                              <div className="rounded-lg border border-blue-200 bg-blue-50/30 p-3 space-y-1.5">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">
+                              <div className="rounded-lg border border-blue-200 dark:border-blue-800/50 bg-blue-50/30 dark:bg-blue-950/20 p-3 space-y-1.5">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
                                   Selected CRM Ledger Record
                                 </span>
-                                <div className="flex justify-between border-b border-blue-100/70 pb-1">
-                                  <span className="text-slate-500">Policy #:</span>
-                                  <span className="font-mono font-bold text-slate-900">{activeCandidate.policyNumber}</span>
+                                <div className="flex justify-between border-b border-blue-100/70 dark:border-white/10 pb-1">
+                                  <span className="text-slate-500 dark:text-slate-400">Policy #:</span>
+                                  <span className="font-mono font-bold text-slate-900 dark:text-white">{activeCandidate.policyNumber}</span>
                                 </div>
-                                <div className="flex justify-between border-b border-blue-100/70 pb-1">
-                                  <span className="text-slate-500">Insured:</span>
-                                  <span className="font-semibold text-slate-900">{activeCandidate.clientName}</span>
+                                <div className="flex justify-between border-b border-blue-100/70 dark:border-white/10 pb-1">
+                                  <span className="text-slate-500 dark:text-slate-400">Insured:</span>
+                                  <span className="font-semibold text-slate-900 dark:text-white">{activeCandidate.clientName}</span>
                                 </div>
-                                <div className="flex justify-between border-b border-blue-100/70 pb-1">
-                                  <span className="text-slate-500">Coverage:</span>
-                                  <span className="font-medium text-slate-800">{activeCandidate.coverage}</span>
+                                <div className="flex justify-between border-b border-blue-100/70 dark:border-white/10 pb-1">
+                                  <span className="text-slate-500 dark:text-slate-400">Coverage:</span>
+                                  <span className="font-medium text-slate-800 dark:text-slate-200">{activeCandidate.coverage}</span>
                                 </div>
-                                <div className="flex justify-between border-b border-blue-100/70 pb-1">
-                                  <span className="text-slate-500">Book Premium:</span>
-                                  <span className="font-mono text-slate-900">{fmtCurrency(activeCandidate.bookPremium)}</span>
+                                <div className="flex justify-between border-b border-blue-100/70 dark:border-white/10 pb-1">
+                                  <span className="text-slate-500 dark:text-slate-400">Book Premium:</span>
+                                  <span className="font-mono text-slate-900 dark:text-white">{fmtCurrency(activeCandidate.bookPremium)}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-slate-500">Expected Comm:</span>
-                                  <span className="font-mono font-bold text-slate-900">{fmtCurrency(activeCandidate.expectedCommission)} ({activeCandidate.commRate}%)</span>
+                                  <span className="text-slate-500 dark:text-slate-400">Expected Comm:</span>
+                                  <span className="font-mono font-bold text-slate-900 dark:text-white">{fmtCurrency(activeCandidate.expectedCommission)} ({activeCandidate.commRate}%)</span>
                                 </div>
                               </div>
                             </div>
@@ -2161,13 +2183,13 @@ export default function UploadStatementPage() {
                             {/* Settlement Rationale Select */}
                             <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
                               <div>
-                                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                                <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
                                   Resolution Classification
                                 </label>
                                 <select
                                   value={resolutionReason}
                                   onChange={(e) => setResolutionReason(e.target.value)}
-                                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-800 focus:border-blue-500 focus:outline-none"
+                                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-2.5 text-xs font-medium text-slate-800 dark:text-white focus:border-blue-500 focus:outline-none"
                                 >
                                   <option value="Endorsement & rate variance accepted">Endorsement &amp; rate variance accepted</option>
                                   <option value="Direct-bill policy confirmed & linked">Direct-bill policy confirmed &amp; linked</option>
@@ -2176,7 +2198,7 @@ export default function UploadStatementPage() {
                                 </select>
                               </div>
                               <div>
-                                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                                <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
                                   Broker Audit Note (Optional)
                                 </label>
                                 <input
@@ -2184,7 +2206,7 @@ export default function UploadStatementPage() {
                                   value={resolutionNotes}
                                   onChange={(e) => setResolutionNotes(e.target.value)}
                                   placeholder="e.g. Endorsement rate reduction reconciled with carrier..."
-                                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:outline-none"
+                                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-2.5 text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                                 />
                               </div>
                             </div>
@@ -2192,16 +2214,16 @@ export default function UploadStatementPage() {
                         )}
 
                         {/* Next Action Callout (Client request: "There should be a next tab. So they can fix it or add this") */}
-                        <div className="rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-slate-50 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+                        <div className="rounded-2xl border border-blue-200 dark:border-blue-800/50 bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-slate-50 dark:from-blue-950/40 dark:via-indigo-950/30 dark:to-slate-900 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
                           <div className="flex items-start gap-3">
                             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs">
                               <Wrench className="size-5" />
                             </div>
                             <div>
-                              <p className="text-xs font-bold text-slate-900">
+                              <p className="text-xs font-bold text-slate-900 dark:text-white">
                                 Discrepancy detected? Go to the Next Tab to Fix or Add this item
                               </p>
-                              <p className="text-[11px] text-slate-600 mt-0.5">
+                              <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">
                                 You can fix policy number typos, endorse rate variances, or add this policy directly to your Book of Business.
                               </p>
                             </div>
@@ -2213,7 +2235,7 @@ export default function UploadStatementPage() {
                                 if (activeCandidate) populateFixForm(activeCandidate)
                                 setReviewTab('fix')
                               }}
-                              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-indigo-700 transition cursor-pointer"
+                              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-indigo-500 transition cursor-pointer"
                             >
                               <span>Next Tab: Fix Discrepancy</span>
                               <ArrowRight className="size-3.5" />
@@ -2221,9 +2243,9 @@ export default function UploadStatementPage() {
                             <button
                               type="button"
                               onClick={() => setReviewTab('create')}
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition cursor-pointer"
+                              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/60 px-4 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition cursor-pointer"
                             >
-                              <PlusCircle className="size-3.5 text-emerald-600" />
+                              <PlusCircle className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                               <span>Or Add This Policy</span>
                             </button>
                           </div>
@@ -2235,18 +2257,18 @@ export default function UploadStatementPage() {
                     {reviewTab === 'fix' && (
                       <form onSubmit={handleApplyFix} className="space-y-5">
                         {/* Header Info Banner */}
-                        <div className="rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50/90 to-blue-50/70 p-4 flex items-start gap-3">
+                        <div className="rounded-xl border border-indigo-200 dark:border-indigo-800/50 bg-gradient-to-r from-indigo-50/90 to-blue-50/70 dark:from-indigo-950/40 dark:to-blue-950/30 p-4 flex items-start gap-3">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-xs">
                             <Wrench className="size-4" />
                           </div>
-                          <div className="text-xs text-indigo-950">
+                          <div className="text-xs text-indigo-950 dark:text-indigo-200">
                             <div className="flex items-center gap-2">
-                              <p className="font-bold text-sm text-indigo-950">Fix Discrepancy &amp; Commission Adjustment</p>
-                              <span className="rounded-full bg-indigo-200/80 px-2 py-0.5 text-[10px] font-extrabold text-indigo-800">
+                              <p className="font-bold text-sm text-indigo-950 dark:text-indigo-100">Fix Discrepancy &amp; Commission Adjustment</p>
+                              <span className="rounded-full bg-indigo-200/80 dark:bg-indigo-900/60 px-2 py-0.5 text-[10px] font-extrabold text-indigo-800 dark:text-indigo-300">
                                 Next Tab Workbench
                               </span>
                             </div>
-                            <p className="text-[11px] text-indigo-700 mt-0.5 leading-relaxed">
+                            <p className="text-[11px] text-indigo-700 dark:text-indigo-300 mt-0.5 leading-relaxed">
                               Adjust policy number typos, endorse rate differences, reconcile gross premiums, or balance variance directly against carrier remittance.
                             </p>
                           </div>
@@ -2261,16 +2283,16 @@ export default function UploadStatementPage() {
                           const isBalanced = calcVariance === 0
 
                           return (
-                            <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 space-y-2">
+                            <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/80 dark:bg-slate-800/40 p-3.5 space-y-2">
                               <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                   Live Balance &amp; Recalculation
                                 </span>
                                 <span
                                   className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold ring-1 ${
                                     isBalanced
-                                      ? 'bg-emerald-100 text-emerald-800 ring-emerald-300'
-                                      : 'bg-amber-100 text-amber-800 ring-amber-300'
+                                      ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 ring-emerald-300 dark:ring-emerald-700/50'
+                                      : 'bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 ring-amber-300 dark:ring-amber-700/50'
                                   }`}
                                 >
                                   {isBalanced ? 'Balanced ($0.00 Variance)' : `Variance: ${calcVariance > 0 ? '+' : ''}${fmtCurrency(calcVariance)}`}
@@ -2278,22 +2300,22 @@ export default function UploadStatementPage() {
                               </div>
 
                               <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                                <div className="rounded-lg bg-white border border-slate-200 p-2">
-                                  <span className="text-[10px] text-slate-400 block font-medium">Expected Comm</span>
-                                  <span className="font-mono font-bold text-slate-900 text-xs sm:text-sm">{fmtCurrency(calcExpected)}</span>
-                                  <span className="text-[10px] text-slate-400 block mt-0.5">({numRate}% of {fmtCurrency(numPrem)})</span>
+                                <div className="rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 p-2">
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium">Expected Comm</span>
+                                  <span className="font-mono font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{fmtCurrency(calcExpected)}</span>
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5">({numRate}% of {fmtCurrency(numPrem)})</span>
                                 </div>
-                                <div className="rounded-lg bg-white border border-slate-200 p-2">
-                                  <span className="text-[10px] text-slate-400 block font-medium">Carrier Remittance</span>
-                                  <span className="font-mono font-bold text-blue-700 text-xs sm:text-sm">{fmtCurrency(reviewingTxn.paidCommission)}</span>
-                                  <span className="text-[10px] text-slate-400 block mt-0.5">Received</span>
+                                <div className="rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 p-2">
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium">Carrier Remittance</span>
+                                  <span className="font-mono font-bold text-blue-700 dark:text-blue-400 text-xs sm:text-sm">{fmtCurrency(reviewingTxn.paidCommission)}</span>
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5">Received</span>
                                 </div>
-                                <div className={`rounded-lg border p-2 ${isBalanced ? 'bg-emerald-50/50 border-emerald-200' : 'bg-amber-50/50 border-amber-200'}`}>
-                                  <span className="text-[10px] text-slate-400 block font-medium">Discrepancy / Variance</span>
-                                  <span className={`font-mono font-bold text-xs sm:text-sm ${isBalanced ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                <div className={`rounded-lg border p-2 ${isBalanced ? 'bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50' : 'bg-amber-50/50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/50'}`}>
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium">Discrepancy / Variance</span>
+                                  <span className={`font-mono font-bold text-xs sm:text-sm ${isBalanced ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'}`}>
                                     {calcVariance > 0 ? '+' : ''}{fmtCurrency(calcVariance)}
                                   </span>
-                                  <span className="text-[10px] text-slate-500 block mt-0.5">{isBalanced ? 'Fully Cleared' : 'Adjustable'}</span>
+                                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">{isBalanced ? 'Fully Cleared' : 'Adjustable'}</span>
                                 </div>
                               </div>
                             </div>
@@ -2304,7 +2326,7 @@ export default function UploadStatementPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {/* Policy Number */}
                           <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Policy Number (Correct typos or suffix variants) <span className="text-rose-500">*</span>
                             </label>
                             <input
@@ -2313,14 +2335,14 @@ export default function UploadStatementPage() {
                               onChange={(e) => setFixPolicyNumber(e.target.value)}
                               required
                               placeholder="e.g. POL-1029-TRV-A"
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 font-mono text-xs font-bold text-slate-800 focus:border-indigo-500 focus:outline-none"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 font-mono text-xs font-bold text-slate-800 dark:text-white focus:border-indigo-500 focus:outline-none"
                             />
-                            <p className="text-[10px] text-slate-400 mt-0.5">Statement had: {reviewingTxn.policyNumber}</p>
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Statement had: {reviewingTxn.policyNumber}</p>
                           </div>
 
                           {/* Coverage Line */}
                           <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Coverage / Line of Business
                             </label>
                             <input
@@ -2328,14 +2350,14 @@ export default function UploadStatementPage() {
                               value={fixCoverage}
                               onChange={(e) => setFixCoverage(e.target.value)}
                               placeholder="e.g. Commercial General Liability"
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:border-indigo-500 focus:outline-none"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs font-medium text-slate-800 dark:text-white focus:border-indigo-500 focus:outline-none"
                             />
-                            <p className="text-[10px] text-slate-400 mt-0.5">Carrier: {reviewingTxn.carrier}</p>
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Carrier: {reviewingTxn.carrier}</p>
                           </div>
 
                           {/* Insured Client Name */}
                           <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Insured Contact Name
                             </label>
                             <input
@@ -2343,13 +2365,13 @@ export default function UploadStatementPage() {
                               value={fixClientName}
                               onChange={(e) => setFixClientName(e.target.value)}
                               placeholder="e.g. Marcus Vance"
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:border-indigo-500 focus:outline-none"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs font-medium text-slate-800 dark:text-white focus:border-indigo-500 focus:outline-none"
                             />
                           </div>
 
                           {/* Business Name */}
                           <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Business / Company Name
                             </label>
                             <input
@@ -2357,13 +2379,13 @@ export default function UploadStatementPage() {
                               value={fixBusinessName}
                               onChange={(e) => setFixBusinessName(e.target.value)}
                               placeholder="e.g. Vance Design Studio"
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:border-indigo-500 focus:outline-none"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs font-medium text-slate-800 dark:text-white focus:border-indigo-500 focus:outline-none"
                             />
                           </div>
 
                           {/* Gross Premium */}
                           <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Gross Premium ($)
                             </label>
                             <input
@@ -2372,14 +2394,14 @@ export default function UploadStatementPage() {
                               value={fixGrossPremium}
                               onChange={(e) => setFixGrossPremium(e.target.value)}
                               placeholder="8200"
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 font-mono text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 font-mono text-xs text-slate-800 dark:text-white focus:border-indigo-500 focus:outline-none"
                             />
-                            <p className="text-[10px] text-slate-400 mt-0.5">Used to compute expected commissions</p>
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Used to compute expected commissions</p>
                           </div>
 
                           {/* Commission Rate (%) */}
                           <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Commission Rate (%)
                             </label>
                             <input
@@ -2388,20 +2410,20 @@ export default function UploadStatementPage() {
                               value={fixCommRate}
                               onChange={(e) => setFixCommRate(e.target.value)}
                               placeholder="15.0"
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 font-mono text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 font-mono text-xs text-slate-800 dark:text-white focus:border-indigo-500 focus:outline-none"
                             />
-                            <p className="text-[10px] text-slate-400 mt-0.5">Carrier remitted at {reviewingTxn.commissionRate}%</p>
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Carrier remitted at {reviewingTxn.commissionRate}%</p>
                           </div>
 
                           {/* Variance Action / Treatment */}
                           <div className="sm:col-span-2">
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Variance Treatment / Reason
                             </label>
                             <select
                               value={fixVarianceAction}
                               onChange={(e) => setFixVarianceAction(e.target.value)}
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:border-indigo-500 focus:outline-none"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs font-medium text-slate-800 dark:text-white focus:border-indigo-500 focus:outline-none"
                             >
                               <option value="Accept endorsement variance & balance line">Accept endorsement variance &amp; balance line</option>
                               <option value="Adjust Book of Business rate to match carrier remittance">Adjust Book of Business rate to match carrier remittance</option>
@@ -2413,7 +2435,7 @@ export default function UploadStatementPage() {
 
                           {/* Broker Audit Note */}
                           <div className="sm:col-span-2">
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Audit Trail Note (Recorded in Statement Batch Ledger)
                             </label>
                             <input
@@ -2421,27 +2443,27 @@ export default function UploadStatementPage() {
                               value={fixAdjustmentNote}
                               onChange={(e) => setFixAdjustmentNote(e.target.value)}
                               placeholder="e.g. Endorsement rate reduction verified with carrier representative..."
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:outline-none"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
                             />
                           </div>
                         </div>
 
                         {/* Bottom Action Bar inside Tab 2 */}
-                        <div className="flex flex-col sm:flex-row items-center justify-between pt-3 border-t border-slate-200 gap-3">
+                        <div className="flex flex-col sm:flex-row items-center justify-between pt-3 border-t border-slate-200 dark:border-white/10 gap-3">
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
                               onClick={() => setReviewTab('candidates')}
-                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer"
+                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
                             >
                               <ArrowLeft className="size-3.5" />
                               <span>Back to Matches List</span>
                             </button>
-                            <span className="text-slate-300">|</span>
+                            <span className="text-slate-300 dark:text-slate-700">|</span>
                             <button
                               type="button"
                               onClick={() => setReviewTab('create')}
-                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-900 cursor-pointer"
+                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-300 cursor-pointer"
                             >
                               <PlusCircle className="size-3.5" />
                               <span>Or Add This Policy as New</span>
@@ -2450,7 +2472,7 @@ export default function UploadStatementPage() {
 
                           <button
                             type="submit"
-                            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-indigo-700 transition cursor-pointer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-indigo-500 transition cursor-pointer"
                           >
                             <Check className="size-4" />
                             <span>Apply Fix &amp; Resolve Statement Line</span>
@@ -2463,7 +2485,7 @@ export default function UploadStatementPage() {
                     {reviewTab === 'search' && (
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-xs font-semibold text-slate-800 mb-1.5">
+                          <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
                             Search All Clients &amp; Policies in Book of Business
                           </label>
                           <div className="relative">
@@ -2473,26 +2495,26 @@ export default function UploadStatementPage() {
                               value={clientSearchQuery}
                               onChange={(e) => setClientSearchQuery(e.target.value)}
                               placeholder="Type client name, business name, or policy # to search..."
-                              className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                              className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 pl-10 pr-4 text-xs sm:text-sm font-medium text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 focus:outline-none"
                               autoFocus
                             />
                           </div>
-                          <p className="text-[11px] text-slate-400 mt-1">
+                          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
                             Search across active, pending, and historical client policies in your CRM ledger.
                           </p>
                         </div>
 
                         {selectedSearchPolicy && (
-                          <div className="rounded-xl border border-emerald-300 bg-emerald-50/70 p-4 flex items-center justify-between gap-3">
+                          <div className="rounded-xl border border-emerald-300 dark:border-emerald-800/50 bg-emerald-50/70 dark:bg-emerald-950/30 p-4 flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3">
                               <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold">
                                 <Check className="size-4" />
                               </div>
                               <div>
-                                <p className="text-xs font-bold text-emerald-950">
+                                <p className="text-xs font-bold text-emerald-950 dark:text-emerald-200">
                                   Selected: {selectedSearchPolicy.policyNumber} — {selectedSearchPolicy.clientName}
                                 </p>
-                                <p className="text-[11px] text-emerald-800">
+                                <p className="text-[11px] text-emerald-800 dark:text-emerald-300">
                                   {selectedSearchPolicy.coverage} · {selectedSearchPolicy.carrier} · Premium: {selectedSearchPolicy.premium}
                                 </p>
                               </div>
@@ -2500,7 +2522,7 @@ export default function UploadStatementPage() {
                             <button
                               type="button"
                               onClick={handleConfirmSearchPolicyLink}
-                              className="rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-emerald-700 transition cursor-pointer"
+                              className="rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-emerald-500 transition cursor-pointer"
                             >
                               Link This Policy
                             </button>
@@ -2509,16 +2531,16 @@ export default function UploadStatementPage() {
 
                         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
                           {clientSearchQuery.trim() === '' ? (
-                            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-8 text-center text-xs text-slate-500">
+                            <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/30 p-8 text-center text-xs text-slate-500 dark:text-slate-400">
                               Start typing above to search existing policies from your Book of Business.
                             </div>
                           ) : searchedPolicies.length === 0 ? (
-                            <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center space-y-3">
+                            <div className="rounded-xl border border-dashed border-slate-300 dark:border-white/20 p-8 text-center space-y-3">
                               <AlertCircle className="size-6 text-slate-400 mx-auto" />
-                              <p className="text-xs font-semibold text-slate-700">
+                              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                                 No clients or policies matched &quot;{clientSearchQuery}&quot;
                               </p>
-                              <p className="text-[11px] text-slate-500">
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                                 If this is a newly written or direct-bill policy, you can add them to your CRM right now.
                               </p>
                               <button
@@ -2538,25 +2560,25 @@ export default function UploadStatementPage() {
                                   key={`${p.clientId}-${p.policyNumber}`}
                                   className={`rounded-xl border p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
                                     isThisSelected
-                                      ? 'border-emerald-500 bg-emerald-50/40'
-                                      : 'border-slate-200 bg-white hover:border-slate-300'
+                                      ? 'border-emerald-500 dark:border-emerald-600 bg-emerald-50/40 dark:bg-emerald-950/30'
+                                      : 'border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-white/20'
                                   }`}
                                 >
                                   <div>
                                     <div className="flex items-center gap-2">
-                                      <span className="font-mono font-bold text-slate-900 text-xs">
+                                      <span className="font-mono font-bold text-slate-900 dark:text-white text-xs">
                                         {p.policyNumber}
                                       </span>
-                                      <span className="font-semibold text-slate-800 text-xs">
+                                      <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
                                         {p.clientName}
                                       </span>
                                       {p.businessName && (
-                                        <span className="text-[11px] text-slate-400">
+                                        <span className="text-[11px] text-slate-400 dark:text-slate-500">
                                           ({p.businessName})
                                         </span>
                                       )}
                                     </div>
-                                    <p className="text-[11px] text-slate-500 mt-0.5">
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                                       {p.coverage} · {p.carrier} · Annual Premium: {p.premium}
                                     </p>
                                   </div>
@@ -2566,7 +2588,7 @@ export default function UploadStatementPage() {
                                     className={`rounded-lg px-3 py-1 text-xs font-semibold transition cursor-pointer shrink-0 ${
                                       isThisSelected
                                         ? 'bg-emerald-600 text-white'
-                                        : 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                                        : 'border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600'
                                     }`}
                                   >
                                     {isThisSelected ? 'Selected' : 'Select'}
@@ -2582,11 +2604,11 @@ export default function UploadStatementPage() {
                     {/* TAB 3: ADD NEW CLIENT & LINK */}
                     {reviewTab === 'create' && (
                       <form onSubmit={handleCreateAndLinkNewClient} className="space-y-4">
-                        <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-3.5 flex items-start gap-3">
-                          <Info className="size-4 text-blue-600 shrink-0 mt-0.5" />
-                          <div className="text-xs text-blue-900">
+                        <div className="rounded-xl border border-blue-200 dark:border-blue-800/50 bg-blue-50/50 dark:bg-blue-950/30 p-3.5 flex items-start gap-3">
+                          <Info className="size-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                          <div className="text-xs text-blue-900 dark:text-blue-200">
                             <p className="font-semibold">Client not found in Book of Business?</p>
-                            <p className="text-[11px] text-blue-700 mt-0.5">
+                            <p className="text-[11px] text-blue-700 dark:text-blue-300 mt-0.5">
                               Pre-filled below with carrier remittance data. Submitting this form will automatically create an <strong>Active client</strong> in your CRM and mark this statement transaction as <strong>Resolved</strong>.
                             </p>
                           </div>
@@ -2594,7 +2616,7 @@ export default function UploadStatementPage() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Client Full Name <span className="text-rose-500">*</span>
                             </label>
                             <input
@@ -2602,12 +2624,12 @@ export default function UploadStatementPage() {
                               value={newClientName}
                               onChange={(e) => setNewClientName(e.target.value)}
                               required
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:border-blue-500 focus:outline-none"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs font-medium text-slate-800 dark:text-white focus:border-blue-500 focus:outline-none"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Business / Company Name
                             </label>
                             <input
@@ -2615,22 +2637,22 @@ export default function UploadStatementPage() {
                               value={newBusinessName}
                               onChange={(e) => setNewBusinessName(e.target.value)}
                               placeholder="e.g. Vance Design Studio"
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:border-blue-500 focus:outline-none"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs font-medium text-slate-800 dark:text-white focus:border-blue-500 focus:outline-none"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Client Type
                             </label>
                             <div className="grid grid-cols-2 gap-2">
                               <button
                                 type="button"
                                 onClick={() => setNewClientType('Commercial')}
-                                className={`rounded-lg py-1.5 text-xs font-semibold transition ${
+                                className={`rounded-lg py-1.5 text-xs font-semibold transition cursor-pointer ${
                                   newClientType === 'Commercial'
                                     ? 'bg-blue-600 text-white'
-                                    : 'border border-slate-200 bg-slate-50 text-slate-700'
+                                    : 'border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                                 }`}
                               >
                                 Commercial
@@ -2638,10 +2660,10 @@ export default function UploadStatementPage() {
                               <button
                                 type="button"
                                 onClick={() => setNewClientType('Individual')}
-                                className={`rounded-lg py-1.5 text-xs font-semibold transition ${
+                                className={`rounded-lg py-1.5 text-xs font-semibold transition cursor-pointer ${
                                   newClientType === 'Individual'
                                     ? 'bg-blue-600 text-white'
-                                    : 'border border-slate-200 bg-slate-50 text-slate-700'
+                                    : 'border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                                 }`}
                               >
                                 Individual
@@ -2650,7 +2672,7 @@ export default function UploadStatementPage() {
                           </div>
 
                           <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Policy Number <span className="text-rose-500">*</span>
                             </label>
                             <input
@@ -2658,48 +2680,48 @@ export default function UploadStatementPage() {
                               value={newPolicyNumber}
                               onChange={(e) => setNewPolicyNumber(e.target.value)}
                               required
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-mono font-bold text-slate-800 focus:border-blue-500 focus:outline-none"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs font-mono font-bold text-slate-800 dark:text-white focus:border-blue-500 focus:outline-none"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Line of Business
                             </label>
                             <input
                               type="text"
                               value={newLineOfBusiness}
                               onChange={(e) => setNewLineOfBusiness(e.target.value)}
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:border-blue-500 focus:outline-none"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs font-medium text-slate-800 dark:text-white focus:border-blue-500 focus:outline-none"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Carrier
                             </label>
                             <input
                               type="text"
                               value={reviewingTxn.carrier}
                               disabled
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-slate-100 px-3 text-xs font-medium text-slate-500"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800/50 px-3 text-xs font-medium text-slate-500 dark:text-slate-400"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Gross Annual Premium ($)
                             </label>
                             <input
                               type="number"
                               value={newGrossPremium}
                               onChange={(e) => setNewGrossPremium(e.target.value)}
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-mono text-slate-800 focus:border-blue-500 focus:outline-none"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs font-mono text-slate-800 dark:text-white focus:border-blue-500 focus:outline-none"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                               Commission Rate (%)
                             </label>
                             <input
@@ -2707,15 +2729,15 @@ export default function UploadStatementPage() {
                               step="0.1"
                               value={newCommRate}
                               onChange={(e) => setNewCommRate(e.target.value)}
-                              className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-mono text-slate-800 focus:border-blue-500 focus:outline-none"
+                              className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs font-mono text-slate-800 dark:text-white focus:border-blue-500 focus:outline-none"
                             />
                           </div>
                         </div>
 
-                        <div className="flex justify-end pt-3 border-t border-slate-100">
+                        <div className="flex justify-end pt-3 border-t border-slate-100 dark:border-white/10">
                           <button
                             type="submit"
-                            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-emerald-700 transition cursor-pointer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-emerald-500 transition cursor-pointer"
                           >
                             <PlusCircle className="size-4" />
                             <span>Create Client &amp; Link Statement Line</span>
@@ -2726,13 +2748,13 @@ export default function UploadStatementPage() {
                   </div>
 
                   {/* Modal Footer Actions */}
-                  <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4 gap-3">
+                  <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-950/70 px-6 py-4 gap-3">
                     <div className="flex items-center gap-2 w-full sm:w-auto">
                       {reviewTab === 'candidates' ? (
                         <button
                           type="button"
                           onClick={handleFlagDispute}
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-800 hover:bg-amber-100 transition cursor-pointer w-full sm:w-auto justify-center"
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-950/50 px-3.5 py-2 text-xs font-semibold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition cursor-pointer w-full sm:w-auto justify-center"
                         >
                           <AlertTriangle className="size-3.5" />
                           <span>Flag as Carrier Dispute</span>
@@ -2741,7 +2763,7 @@ export default function UploadStatementPage() {
                         <button
                           type="button"
                           onClick={() => setReviewTab('candidates')}
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer"
                         >
                           <ArrowLeft className="size-3.5" />
                           <span>Back to Matches</span>
@@ -2753,7 +2775,7 @@ export default function UploadStatementPage() {
                       <button
                         type="button"
                         onClick={() => setReviewingTxn(null)}
-                        className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                        className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -2763,9 +2785,9 @@ export default function UploadStatementPage() {
                           <button
                             type="button"
                             onClick={() => setReviewTab('create')}
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition cursor-pointer"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/60 px-3.5 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition cursor-pointer"
                           >
-                            <PlusCircle className="size-3.5 text-emerald-600" />
+                            <PlusCircle className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                             <span>Add This Policy</span>
                           </button>
 
@@ -2775,7 +2797,7 @@ export default function UploadStatementPage() {
                               if (activeCandidate) populateFixForm(activeCandidate)
                               setReviewTab('fix')
                             }}
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition cursor-pointer"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800/50 bg-indigo-50 dark:bg-indigo-950/50 px-3.5 py-2 text-xs font-bold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition cursor-pointer"
                           >
                             <Wrench className="size-3.5" />
                             <span>Next Tab: Fix It</span>
@@ -2786,7 +2808,7 @@ export default function UploadStatementPage() {
                             type="button"
                             onClick={handleConfirmCandidateLink}
                             disabled={!selectedCandidateId && candidates.length > 0}
-                            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold text-white shadow-md hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold text-white shadow-md hover:bg-blue-500 transition disabled:opacity-50 cursor-pointer"
                           >
                             <Check className="size-4" />
                             <span>Confirm Match &amp; Link Policy</span>
@@ -2799,16 +2821,16 @@ export default function UploadStatementPage() {
                           <button
                             type="button"
                             onClick={() => setReviewTab('create')}
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition cursor-pointer"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/60 px-3.5 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition cursor-pointer"
                           >
-                            <PlusCircle className="size-3.5 text-emerald-600" />
+                            <PlusCircle className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                             <span>Or Add This Policy</span>
                           </button>
 
                           <button
                             type="button"
                             onClick={handleApplyFix}
-                            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2 text-xs font-semibold text-white shadow-md hover:bg-indigo-700 transition cursor-pointer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2 text-xs font-semibold text-white shadow-md hover:bg-indigo-500 transition cursor-pointer"
                           >
                             <Check className="size-4" />
                             <span>Apply Fix &amp; Resolve Line</span>
@@ -2820,7 +2842,7 @@ export default function UploadStatementPage() {
                         <button
                           type="button"
                           onClick={(e) => handleCreateAndLinkNewClient(e as unknown as React.FormEvent)}
-                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-md hover:bg-emerald-700 transition cursor-pointer"
+                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-md hover:bg-emerald-500 transition cursor-pointer"
                         >
                           <PlusCircle className="size-4" />
                           <span>Create Client &amp; Link</span>
@@ -2832,7 +2854,7 @@ export default function UploadStatementPage() {
                           type="button"
                           onClick={handleConfirmSearchPolicyLink}
                           disabled={!selectedSearchPolicy}
-                          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold text-white shadow-md hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer"
+                          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold text-white shadow-md hover:bg-blue-500 transition disabled:opacity-50 cursor-pointer"
                         >
                           <Check className="size-4" />
                           <span>Link Selected CRM Policy</span>
@@ -2851,22 +2873,22 @@ export default function UploadStatementPage() {
           QUICK ADD CLIENT MODAL (Client Request: Add client quickie in few clicks)
       ══════════════════════════════════════════════════════════════════ */}
       {quickAddTxn && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 dark:bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-6 py-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 bg-slate-50/80 dark:bg-slate-950/70 px-6 py-4">
               <div className="flex items-center gap-2.5">
                 <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-xs">
                   <UserPlus className="size-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <span>Quick Add Client to Book of Business</span>
-                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800">
+                    <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800 dark:text-emerald-300">
                       2 Clicks
                     </span>
                   </h3>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     Pre-filled from extracted statement line {quickAddTxn.policyNumber}.
                   </p>
                 </div>
@@ -2874,7 +2896,7 @@ export default function UploadStatementPage() {
               <button
                 type="button"
                 onClick={() => setQuickAddTxn(null)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition cursor-pointer"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-white transition cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -2888,16 +2910,16 @@ export default function UploadStatementPage() {
               }}
               className="p-6 space-y-4 text-xs"
             >
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 flex items-start gap-2.5">
-                <Zap className="size-4 text-emerald-600 shrink-0 mt-0.5" />
-                <p className="text-[11px] text-emerald-950 leading-relaxed">
+              <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-950/30 p-3 flex items-start gap-2.5">
+                <Zap className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-emerald-950 dark:text-emerald-200 leading-relaxed">
                   Clicking <strong>&quot;Create &amp; Reconcile Now&quot;</strong> will immediately create an <strong>Active client</strong> in your CRM, bind policy <strong>{quickAddPolicyNumber}</strong>, and mark this statement transaction as <strong>Resolved</strong> in 2 clicks.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Client Full Name <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -2905,12 +2927,12 @@ export default function UploadStatementPage() {
                     value={quickAddClientName}
                     onChange={(e) => setQuickAddClientName(e.target.value)}
                     required
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 font-semibold text-slate-900 focus:border-emerald-500 focus:outline-none"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 font-semibold text-slate-900 dark:text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Business / Entity Name
                   </label>
                   <input
@@ -2918,12 +2940,12 @@ export default function UploadStatementPage() {
                     value={quickAddBusinessName}
                     onChange={(e) => setQuickAddBusinessName(e.target.value)}
                     placeholder="e.g. Vance Design Studio"
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-slate-800 focus:border-emerald-500 focus:outline-none"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-slate-800 dark:text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Client Type
                   </label>
                   <div className="grid grid-cols-2 gap-1.5">
@@ -2933,7 +2955,7 @@ export default function UploadStatementPage() {
                       className={`rounded-lg py-1.5 text-xs font-bold transition cursor-pointer ${
                         quickAddClientType === 'Commercial'
                           ? 'bg-emerald-600 text-white'
-                          : 'border border-slate-200 bg-slate-50 text-slate-700'
+                          : 'border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       Commercial
@@ -2944,7 +2966,7 @@ export default function UploadStatementPage() {
                       className={`rounded-lg py-1.5 text-xs font-bold transition cursor-pointer ${
                         quickAddClientType === 'Individual'
                           ? 'bg-emerald-600 text-white'
-                          : 'border border-slate-200 bg-slate-50 text-slate-700'
+                          : 'border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       Individual
@@ -2953,7 +2975,7 @@ export default function UploadStatementPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Policy Number <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -2961,24 +2983,24 @@ export default function UploadStatementPage() {
                     value={quickAddPolicyNumber}
                     onChange={(e) => setQuickAddPolicyNumber(e.target.value)}
                     required
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 font-mono font-bold text-slate-900 focus:border-emerald-500 focus:outline-none"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 font-mono font-bold text-slate-900 dark:text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Coverage Line
                   </label>
                   <input
                     type="text"
                     value={quickAddCoverage}
                     onChange={(e) => setQuickAddCoverage(e.target.value)}
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-slate-800 focus:border-emerald-500 focus:outline-none"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-slate-800 dark:text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Gross Annual Premium ($)
                   </label>
                   <input
@@ -2986,23 +3008,23 @@ export default function UploadStatementPage() {
                     step="0.01"
                     value={quickAddPremium}
                     onChange={(e) => setQuickAddPremium(e.target.value)}
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 font-mono text-slate-800 focus:border-emerald-500 focus:outline-none"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 font-mono text-slate-800 dark:text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Carrier &amp; Remittance
                   </label>
-                  <div className="h-9 flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 text-slate-700">
+                  <div className="h-9 flex items-center justify-between rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 px-3 text-slate-700 dark:text-slate-300">
                     <span className="font-semibold">{quickAddTxn.carrier}</span>
-                    <span className="font-mono font-bold text-emerald-700">{fmtCurrency(quickAddTxn.paidCommission)}</span>
+                    <span className="font-mono font-bold text-emerald-700 dark:text-emerald-400">{fmtCurrency(quickAddTxn.paidCommission)}</span>
                   </div>
                 </div>
               </div>
 
               {/* Footer Actions */}
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100 gap-2">
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/10 gap-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -3010,7 +3032,7 @@ export default function UploadStatementPage() {
                     setQuickAddTxn(null)
                     handleOpenReviewModal(txn)
                   }}
-                  className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                  className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer"
                 >
                   Open Full Match Resolver →
                 </button>
@@ -3019,13 +3041,13 @@ export default function UploadStatementPage() {
                   <button
                     type="button"
                     onClick={() => setQuickAddTxn(null)}
-                    className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                    className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-emerald-500 transition cursor-pointer"
                   >
                     <Zap className="size-4" />
                     <span>Create Client &amp; Reconcile Now</span>
@@ -3041,47 +3063,51 @@ export default function UploadStatementPage() {
           STEP 4: CONFIRMATION & SUCCESS
       ══════════════════════════════════════════════════════════════════ */}
       {currentStep === 4 && (
-        <div className="max-w-3xl mx-auto rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-10 shadow-xs text-center space-y-6 animate-in fade-in zoom-in-95 duration-200">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 ring-8 ring-emerald-50/50 shadow-xs">
+        <div className="max-w-3xl mx-auto rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900 p-6 sm:p-10 shadow-xs text-center space-y-6 animate-in fade-in zoom-in-95 duration-200">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 ring-8 ring-emerald-50/50 dark:ring-emerald-950/30 shadow-xs">
             <CheckCircle2 className="size-8" />
           </div>
 
           <div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
               Statement Ingestion Completed!
             </h2>
-            <p className="mt-1 text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
+            <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
               Your statement has been parsed, reconciled, and successfully recorded into the broker commissions ledger.
             </p>
           </div>
 
           {/* Receipt Card */}
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 text-left max-w-lg mx-auto space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-200/80 pb-2.5">
-              <span className="text-xs text-slate-500 font-medium">Statement Identifier</span>
-              <span className="text-xs font-mono font-bold text-slate-900">
+          <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-slate-800/40 p-5 text-left max-w-lg mx-auto space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 pb-2.5">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Statement Identifier</span>
+              <span className="text-xs font-mono font-bold text-slate-900 dark:text-white">
                 {createdRecord?.statementIdentifier || 'ST-2940-TRAVELERS-OCT'}
               </span>
             </div>
-            <div className="flex items-center justify-between border-b border-slate-200/80 pb-2.5">
-              <span className="text-xs text-slate-500 font-medium">Carrier Partner</span>
-              <span className="text-xs font-semibold text-slate-800">{uploadCarrier}</span>
+            <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 pb-2.5">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Assigned Template</span>
+              <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">{allocatedProfile.templateName}</span>
             </div>
-            <div className="flex items-center justify-between border-b border-slate-200/80 pb-2.5">
-              <span className="text-xs text-slate-500 font-medium">Period / Month</span>
-              <span className="text-xs font-semibold text-slate-800">
+            <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 pb-2.5">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Remittance Method</span>
+              <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">{allocatedProfile.remittanceMethod}</span>
+            </div>
+            <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 pb-2.5">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Period / Month</span>
+              <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                 {uploadPeriodMonth} {uploadPeriodYear}
               </span>
             </div>
-            <div className="flex items-center justify-between border-b border-slate-200/80 pb-2.5">
-              <span className="text-xs text-slate-500 font-medium">Total Remittance Volume</span>
-              <span className="text-sm font-mono font-bold text-emerald-600">
+            <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 pb-2.5">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Remittance Volume</span>
+              <span className="text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400">
                 {fmtCurrency(createdRecord?.totalRemittance || 10800.0)}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-500 font-medium">Transactions Reconciled</span>
-              <span className="text-xs font-bold text-slate-900">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Transactions Reconciled</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">
                 {transactions.length} Lines ({transactions.filter((t) => t.status === 'Auto-Matched' || t.status === 'Resolved').length} Active)
               </span>
             </div>
@@ -3095,13 +3121,13 @@ export default function UploadStatementPage() {
                 setCurrentStep(1)
                 setSelectedFile(null)
               }}
-              className="w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+              className="w-full sm:w-auto rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-5 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
             >
               Upload Another Statement
             </button>
             <Link
               href="/broker/statements"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-blue-600 transition"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 dark:bg-blue-600 px-6 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-blue-600 dark:hover:bg-blue-500 transition"
             >
               <span>View in All Statements</span>
               <ArrowRight className="size-3.5" />

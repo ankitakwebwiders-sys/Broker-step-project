@@ -409,6 +409,71 @@ const BROKERS_LIST = [
   { id: 'BRK-005', name: 'Marcus Vance', agency: 'Pinnacle Assurance Group' },
 ]
 
+// Super Admin Broker Statement Template & Remittance Allocation Definition
+export interface BrokerAllocationRecord {
+  brokerId: string
+  brokerName: string
+  agencyName: string
+  allocatedTemplateId: string
+  allocatedTemplateName: string
+  remittanceMethod: string
+  dynamicMapping: boolean
+  lastAssigned: string
+}
+
+const DEFAULT_BROKER_ALLOCATIONS: BrokerAllocationRecord[] = [
+  {
+    brokerId: 'BRK-001',
+    brokerName: 'Jordan Davis',
+    agencyName: 'Apex Horizon Brokerage LLC',
+    allocatedTemplateId: 'TPL-STD-008',
+    allocatedTemplateName: 'Standard Generic Broker CSV Template',
+    remittanceMethod: 'Electronic ACH Remittance',
+    dynamicMapping: true,
+    lastAssigned: 'Oct 09, 2026',
+  },
+  {
+    brokerId: 'BRK-002',
+    brokerName: 'Morgan Reed',
+    agencyName: 'Beacon Mutual Advisory',
+    allocatedTemplateId: 'TPL-STD-004',
+    allocatedTemplateName: 'Liberty Mutual CSV Custom Parser',
+    remittanceMethod: 'Direct Wire Remittance',
+    dynamicMapping: true,
+    lastAssigned: 'Sep 25, 2026',
+  },
+  {
+    brokerId: 'BRK-003',
+    brokerName: 'Sarah Jenkins',
+    agencyName: 'Summit Crest Partners',
+    allocatedTemplateId: 'TPL-STD-003',
+    allocatedTemplateName: 'Progressive Commercial Layout',
+    remittanceMethod: 'Electronic ACH Remittance',
+    dynamicMapping: true,
+    lastAssigned: 'Sep 18, 2026',
+  },
+  {
+    brokerId: 'BRK-004',
+    brokerName: 'Alex Taylor',
+    agencyName: 'Vanguard Risk Management',
+    allocatedTemplateId: 'TPL-STD-005',
+    allocatedTemplateName: 'Chubb Commercial Multi-Tier',
+    remittanceMethod: 'Paper Remittance Check',
+    dynamicMapping: true,
+    lastAssigned: 'Aug 14, 2026',
+  },
+  {
+    brokerId: 'BRK-005',
+    brokerName: 'Marcus Vance',
+    agencyName: 'Pinnacle Assurance Group',
+    allocatedTemplateId: 'TPL-STD-001',
+    allocatedTemplateName: 'Travelers Standard Grid Parser v2.1',
+    remittanceMethod: 'Electronic ACH Remittance',
+    dynamicMapping: true,
+    lastAssigned: 'Oct 02, 2026',
+  },
+]
+
 export default function AdminStatementTemplatesPage() {
   return (
     <Suspense fallback={<div className="p-8 text-sm text-slate-500">Loading statement templates...</div>}>
@@ -435,6 +500,64 @@ function StatementTemplatesContent() {
   const [standardTemplates, setStandardTemplates] = useState<StandardTemplate[]>(INITIAL_STANDARD_TEMPLATES)
   const [brokerTemplates, setBrokerTemplates] = useState<BrokerSpecificTemplate[]>(INITIAL_BROKER_TEMPLATES)
 
+  // Super Admin Broker Allocations (1 Template & Remittance Method per Broker)
+  const [brokerAllocations, setBrokerAllocations] = useState<BrokerAllocationRecord[]>(() => {
+    try {
+      const stored = typeof window !== 'undefined' ? localStorage.getItem('all_broker_allocations') : null
+      return stored ? JSON.parse(stored) : DEFAULT_BROKER_ALLOCATIONS
+    } catch {
+      return DEFAULT_BROKER_ALLOCATIONS
+    }
+  })
+
+  // Allocation Modal State (for Super Admin to allocate template & remittance method to any broker)
+  const [allocationModalBroker, setAllocationModalBroker] = useState<BrokerAllocationRecord | null>(null)
+  const [allocFormTemplate, setAllocFormTemplate] = useState('')
+  const [allocFormRemittance, setAllocFormRemittance] = useState('Electronic ACH Remittance')
+  const [allocFormDynamicMapping, setAllocFormDynamicMapping] = useState(true)
+
+  const openAllocationModal = (record: BrokerAllocationRecord) => {
+    setAllocationModalBroker(record)
+    setAllocFormTemplate(record.allocatedTemplateName)
+    setAllocFormRemittance(record.remittanceMethod)
+    setAllocFormDynamicMapping(record.dynamicMapping)
+  }
+
+  const handleSaveAllocation = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!allocationModalBroker) return
+
+    const updated = brokerAllocations.map((b) => {
+      if (b.brokerId === allocationModalBroker.brokerId) {
+        return {
+          ...b,
+          allocatedTemplateName: allocFormTemplate,
+          remittanceMethod: allocFormRemittance,
+          dynamicMapping: allocFormDynamicMapping,
+          lastAssigned: 'Today (Just now)',
+        }
+      }
+      return b
+    })
+
+    setBrokerAllocations(updated)
+    try {
+      localStorage.setItem('all_broker_allocations', JSON.stringify(updated))
+      localStorage.setItem(
+        `broker_statement_allocation_${allocationModalBroker.brokerId}`,
+        JSON.stringify({
+          templateName: allocFormTemplate,
+          remittanceMethod: allocFormRemittance,
+        })
+      )
+    } catch (err) {
+      console.error(err)
+    }
+
+    showToast(`Allocated template "${allocFormTemplate}" and "${allocFormRemittance}" for ${allocationModalBroker.brokerName}.`)
+    setAllocationModalBroker(null)
+  }
+
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'All' | 'Active' | 'Inactive'>('All')
@@ -453,6 +576,7 @@ function StatementTemplatesContent() {
   const [formName, setFormName] = useState('')
   const [formCarrier, setFormCarrier] = useState('Travelers Insurance')
   const [formStructureType, setFormStructureType] = useState<'Standard CSV Grid' | 'Multi-Tab Excel Workbook' | 'Delimited Text / TSV' | 'EDI 835 / Fixed Width'>('Standard CSV Grid')
+  const [formRemittanceMethod, setFormRemittanceMethod] = useState('Electronic ACH Remittance')
   const [formStatus, setFormStatus] = useState<'Active' | 'Inactive'>('Active')
   const [formIsBrokerSpecific, setFormIsBrokerSpecific] = useState(false)
   const [formSelectedBrokerId, setFormSelectedBrokerId] = useState('BRK-001')
@@ -805,7 +929,7 @@ function StatementTemplatesContent() {
             { id: 'standard', label: 'Standard Templates', count: standardTemplates.length },
             { id: 'broker-specific', label: 'Broker-Specific Templates', count: brokerTemplates.length },
             { id: 'rules', label: 'Extraction & Mapping Rules', count: 6 },
-            { id: 'assignment', label: 'Template Assignment Matrix', count: BROKERS_LIST.length },
+            { id: 'assignment', label: 'Broker Allocation & Remittance', count: brokerAllocations.length },
           ].map((tab) => {
             const isActive = activeTab === tab.id
             return (
@@ -1287,76 +1411,238 @@ function StatementTemplatesContent() {
       )}
 
       {/* =========================================================================
-         TAB 4: TEMPLATE ASSIGNMENT MATRIX VIEW
+         TAB 4: BROKER TEMPLATE & REMITTANCE ALLOCATION MATRIX
          ========================================================================= */}
       {activeTab === 'assignment' && (
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
             <div>
-              <h3 className="text-base font-bold text-slate-950">Broker Template Assignment Matrix</h3>
-              <p className="text-xs text-slate-500">
-                Summary of active statement parser assignments across enrolled broker agencies.
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-slate-950">
+                  Broker Statement Template &amp; Remittance Allocation
+                </h3>
+                <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold text-blue-700 border border-blue-200">
+                  Single Template Policy Active
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Every broker is allocated exactly 1 statement template and remittance payment method. Dynamic field mappings allow handling multiple carrier schedules in that single template.
               </p>
+            </div>
+
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <span className="text-xs text-slate-400">
+                Managed strictly in Super Admin
+              </span>
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[850px] text-left text-xs">
+            <table className="w-full min-w-[900px] text-left text-xs">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/80 text-xs font-bold text-slate-500 uppercase">
-                  <th className="py-3.5 pl-4 pr-4 whitespace-nowrap min-w-[220px]">Broker / Agency</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[280px]">Assigned Standard Parsers</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[220px]">Active Custom Overrides</th>
-                  <th className="py-3.5 pl-4 pr-6 text-right whitespace-nowrap min-w-[150px]">Actions</th>
+                  <th className="py-3.5 pl-4 pr-4 whitespace-nowrap min-w-[200px]">Broker / Agency</th>
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[260px]">Allocated Statement Template (1 per broker)</th>
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[190px]">Remittance Payment Method</th>
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[200px]">Dynamic Field Mapping</th>
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[130px]">Last Assigned</th>
+                  <th className="py-3.5 pl-4 pr-6 text-right whitespace-nowrap min-w-[130px]">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {BROKERS_LIST.map((b) => {
-                  const assignedOverrides = brokerTemplates.filter((bt) => bt.brokerId === b.id)
-
-                  return (
-                    <tr key={b.id} className="hover:bg-slate-50/70">
-                      <td className="py-3.5 pl-4 pr-4 whitespace-nowrap min-w-[220px]">
-                        <span className="font-bold text-slate-900 block">{b.name}</span>
-                        <span className="text-xs text-slate-500 block">{b.agency} · {b.id}</span>
-                      </td>
-                      <td className="py-3.5 px-4 whitespace-nowrap min-w-[280px]">
-                        <span className="font-semibold text-slate-700 block">All 8 Core Standard Carrier Parsers</span>
-                        <span className="text-slate-400 text-xs block mt-0.5">Auto-detected upon statement drop</span>
-                      </td>
-                      <td className="py-3.5 px-4 whitespace-nowrap min-w-[220px]">
-                        {assignedOverrides.length > 0 ? (
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            {assignedOverrides.map((ov) => (
-                              <span
-                                key={ov.id}
-                                className="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800 border border-amber-200 whitespace-nowrap"
-                              >
-                                {ov.templateName}
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-xs text-slate-400 italic">No custom overrides (Using standard catalog)</span>
-                        )}
-                      </td>
-                      <td className="py-3.5 pl-4 pr-6 text-right whitespace-nowrap min-w-[150px]">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setFormSelectedBrokerId(b.id)
-                            openCreateFormModal(true)
-                          }}
-                          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600 transition cursor-pointer whitespace-nowrap"
-                        >
-                          + Assign Override
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })}
+                {brokerAllocations.map((b) => (
+                  <tr key={b.brokerId} className="hover:bg-slate-50/70 transition">
+                    <td className="py-3.5 pl-4 pr-4 whitespace-nowrap">
+                      <span className="font-bold text-slate-900 block">{b.brokerName}</span>
+                      <span className="text-xs text-slate-500 block">{b.agencyName} · <span className="font-mono">{b.brokerId}</span></span>
+                    </td>
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 font-bold">
+                          <FileSpreadsheet className="size-3.5" />
+                        </span>
+                        <div>
+                          <span className="font-bold text-slate-800 block text-xs">
+                            {b.allocatedTemplateName}
+                          </span>
+                          <span className="text-[10px] text-slate-400 block">
+                            Multi-Carrier Statement Parser
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border ${
+                          b.remittanceMethod.includes('ACH')
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                            : b.remittanceMethod.includes('Wire')
+                              ? 'bg-blue-50 text-blue-800 border-blue-200'
+                              : 'bg-amber-50 text-amber-800 border-amber-200'
+                        }`}
+                      >
+                        <ShieldCheck className="size-3" />
+                        <span>{b.remittanceMethod}</span>
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                        <Cpu className="size-3 text-blue-600" />
+                        <span>Dynamic Auto-Mapped</span>
+                        <Check className="size-3 text-emerald-600" />
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 whitespace-nowrap text-slate-500 font-medium text-xs">
+                      {b.lastAssigned}
+                    </td>
+                    <td className="py-3.5 pl-4 pr-6 text-right whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => openAllocationModal(b)}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50/50 transition cursor-pointer shadow-2xs"
+                      >
+                        <SlidersHorizontal className="size-3 text-slate-500" />
+                        <span>Allocate / Edit</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* SUPER ADMIN INTERACTIVE BROKER ALLOCATION MODAL */}
+      {allocationModalBroker && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4 animate-in fade-in">
+          <div
+            className="fixed inset-0"
+            onClick={() => setAllocationModalBroker(null)}
+            aria-hidden="true"
+          />
+          <div className="relative z-10 w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/80 px-6 py-4">
+              <div className="flex items-center gap-2.5">
+                <span className="flex size-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
+                  <UserCheck className="size-5" />
+                </span>
+                <div>
+                  <h3 className="text-base font-bold text-slate-950">
+                    Allocate Statement Template &amp; Remittance
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Broker: <strong className="text-slate-800">{allocationModalBroker.brokerName}</strong> ({allocationModalBroker.agencyName})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAllocationModalBroker(null)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition cursor-pointer"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleSaveAllocation} className="p-6 space-y-4">
+              <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3 text-xs text-blue-900 flex items-start gap-2">
+                <Info className="size-4 text-blue-600 shrink-0 mt-0.5" />
+                <p>
+                  Every broker has just <strong>1 template statement</strong>. In this template, carrier partners and line items will be auto-detected via dynamic field mapping.
+                </p>
+              </div>
+
+              {/* 1. Statement Template Selection */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Allocated Statement Template <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={allocFormTemplate}
+                  onChange={(e) => setAllocFormTemplate(e.target.value)}
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-semibold text-slate-900 outline-none focus:border-blue-600 cursor-pointer"
+                >
+                  <optgroup label="Standard Templates (Multi-Carrier)">
+                    {standardTemplates.map((st) => (
+                      <option key={st.id} value={st.name}>
+                        {st.name} ({st.structureType})
+                      </option>
+                    ))}
+                  </optgroup>
+                  {brokerTemplates.length > 0 && (
+                    <optgroup label="Custom Broker Templates">
+                      {brokerTemplates.map((bt) => (
+                        <option key={bt.id} value={bt.templateName}>
+                          {bt.templateName}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </select>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  The broker will only see and use this allocated template during statement upload.
+                </p>
+              </div>
+
+              {/* 2. Remittance Payment Method */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Remittance Payment Method <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={allocFormRemittance}
+                  onChange={(e) => setAllocFormRemittance(e.target.value)}
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-semibold text-slate-900 outline-none focus:border-blue-600 cursor-pointer"
+                >
+                  <option value="Electronic ACH Remittance">Electronic ACH Remittance</option>
+                  <option value="Direct Wire Remittance">Direct Wire Remittance</option>
+                  <option value="Paper Remittance Check">Paper Remittance Check</option>
+                  <option value="Carrier Direct Deposit">Carrier Direct Deposit</option>
+                </select>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Managed strictly by Super Admin — not selectable by the broker.
+                </p>
+              </div>
+
+              {/* 3. Dynamic Field Mapping Toggle */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 space-y-1.5">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={allocFormDynamicMapping}
+                    onChange={(e) => setAllocFormDynamicMapping(e.target.checked)}
+                    className="size-4 rounded text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-xs font-bold text-slate-900">
+                    Enable Dynamic Field Mapping &amp; Multi-Carrier Auto-Match
+                  </span>
+                </label>
+                <p className="text-[11px] text-slate-500 pl-6 leading-relaxed">
+                  Automatically extracts policy numbers, carrier names, written premium, and commission percentages across 1-2 statements without requiring manual carrier selection.
+                </p>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setAllocationModalBroker(null)}
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-slate-950 px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-blue-600 transition cursor-pointer"
+                >
+                  <Check className="size-4" />
+                  <span>Save Broker Allocation</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -1534,6 +1820,22 @@ function StatementTemplatesContent() {
                     <option value="Multi-Tab Excel Workbook">Multi-Tab Excel Workbook (.xlsx, .xls)</option>
                     <option value="Delimited Text / TSV">Delimited Text / TSV (.txt, .tsv)</option>
                     <option value="EDI 835 / Fixed Width">EDI 835 / Fixed Width (.dat)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">
+                    Default Remittance Payment Method <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    value={formRemittanceMethod}
+                    onChange={(e) => setFormRemittanceMethod(e.target.value)}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-900 outline-none focus:border-blue-600 cursor-pointer"
+                  >
+                    <option value="Electronic ACH Remittance">Electronic ACH Remittance</option>
+                    <option value="Direct Wire Remittance">Direct Wire Remittance</option>
+                    <option value="Paper Remittance Check">Paper Remittance Check</option>
+                    <option value="Carrier Direct Deposit">Carrier Direct Deposit</option>
                   </select>
                 </div>
 

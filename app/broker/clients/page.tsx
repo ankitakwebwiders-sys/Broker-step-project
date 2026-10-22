@@ -209,6 +209,25 @@ const SAMPLE_BULK_IMPORT_CLIENTS: BulkImportItem[] = [
   },
 ]
 
+export const SAMPLE_SINGLE_POLICY_ITEM: BulkImportItem = {
+  clientType: 'Individual',
+  businessName: '—',
+  firstName: 'Marcus',
+  lastName: 'Vance',
+  phone: '+1 (416) 555-0192',
+  email: 'marcus.vance@gmail.com',
+  street: '100 King Street West, Suite 5600',
+  city: 'Toronto',
+  province: 'ON',
+  postalCode: 'M5X 1C9',
+  insurerName: 'Travelers Insurance',
+  linesOfBusiness: ['Auto', 'Home'],
+  policyNumber: 'POL-TRV-8942-CAN',
+  yearlyPremium: '$2,850',
+  status: 'Active / Submitted',
+  paymentStatus: 'Paid',
+}
+
 function getExpiryFromEffective(effDate: string): string {
   if (!effDate) return ''
   const parts = effDate.split('-')
@@ -298,7 +317,11 @@ function AddClientFormContent() {
     }
   }
 
-  // Bulk Import Modal state
+  // Workflow Mode: Manual Entry (default, starting with Name) vs Upload Document (Single or Bulk)
+  const [activeMode, setActiveMode] = useState<'manual' | 'upload'>('manual')
+  const [uploadTargetType, setUploadTargetType] = useState<'single' | 'bulk'>('single')
+
+  // Bulk / Single Import state
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [importFileName, setImportFileName] = useState('')
   const [importFileSize, setImportFileSize] = useState('')
@@ -314,12 +337,11 @@ function AddClientFormContent() {
   const [successBanner, setSuccessBanner] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Draft Management State & Parameters
+  // Draft Management State & Parameters (always showing list at bottom)
   const searchParams = useSearchParams()
   const draftIdParam = searchParams.get('draftId')
   const [resumedDraftId, setResumedDraftId] = useState<string | null>(null)
   const [resumedDraftName, setResumedDraftName] = useState<string>('')
-  const [isDraftsModalOpen, setIsDraftsModalOpen] = useState(false)
   const [allDrafts, setAllDrafts] = useState<ClientItem[]>([])
   const [draftSearchQuery, setDraftSearchQuery] = useState('')
 
@@ -386,10 +408,51 @@ function AddClientFormContent() {
     if (draft.street && draft.street !== '—') {
       setAddressSearchQuery(`${draft.street}, ${draft.city || ''}`)
     }
+    setActiveMode('manual')
     setSuccessBanner(
-      `Resumed draft for "${draft.name}" (${draft.id}). You can finish the incomplete/half info and click "Save Client & View in My Book" to finalize.`
+      `Resumed draft for "${draft.name}" (${draft.id}). Details loaded into form above. Finish pending info and click Save Client.`
     )
-    setIsDraftsModalOpen(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Auto-apply single policy upload into the manual form directly
+  const handleApplySinglePolicyToForm = (item: BulkImportItem, sourceName?: string) => {
+    setForm((prev) => ({
+      ...prev,
+      clientType: item.clientType,
+      firstName: item.firstName,
+      lastName: item.lastName,
+      businessName: item.businessName === '—' ? '' : item.businessName,
+      phone: item.phone,
+      email: item.email,
+      street: item.street,
+      city: item.city,
+      province: item.province,
+      postalCode: item.postalCode,
+      insurerName: item.insurerName || 'Travelers Insurance',
+      linesOfBusiness: item.linesOfBusiness || ['Auto'],
+      policyNumber: item.policyNumber,
+      isPendingPolicyNumber: false,
+      yearlyPremium: item.yearlyPremium.replace(/[^0-9.]/g, ''),
+      paymentStatus: item.paymentStatus || 'Paid',
+    }))
+    if (item.street) {
+      setAddressSearchQuery(`${item.street}, ${item.city}`)
+    }
+    setActiveMode('manual')
+    setSuccessBanner(
+      `Single policy document (${sourceName || 'Uploaded Document'}) parsed successfully! Client details auto-filled in the form below. Review and click "Save Client" to finalize.`
+    )
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Load sample single policy document
+  const handleLoadSampleSinglePolicy = () => {
+    setIsImportProcessing(true)
+    setTimeout(() => {
+      handleApplySinglePolicyToForm(SAMPLE_SINGLE_POLICY_ITEM, 'Travelers_Policy_MarcusVance.pdf')
+      setIsImportProcessing(false)
+    }, 400)
   }
 
   // Save partial info as a draft without blocking on mandatory fields
@@ -506,7 +569,7 @@ function AddClientFormContent() {
     setResumedDraftName(draftName)
     refreshDrafts()
     setSuccessBanner(
-      `Draft "${draftName}" (${draftId}) saved successfully! You can resume it anytime from My Book > Drafts or the Drafts button above.`
+      `Draft "${draftName}" (${draftId}) saved successfully! It is now listed in the Saved Drafts list at the bottom of this page.`
     )
   }
 
@@ -687,23 +750,40 @@ function AddClientFormContent() {
                 })
               }
             }
-            setParsedImportRows(parsed.length > 0 ? parsed : SAMPLE_BULK_IMPORT_CLIENTS)
+            if (uploadTargetType === 'single') {
+              const singleItem = parsed.length > 0 ? parsed[0] : SAMPLE_SINGLE_POLICY_ITEM
+              handleApplySinglePolicyToForm(singleItem, file.name)
+            } else {
+              setParsedImportRows(parsed.length > 0 ? parsed : SAMPLE_BULK_IMPORT_CLIENTS)
+            }
           } else {
-            setParsedImportRows(SAMPLE_BULK_IMPORT_CLIENTS)
+            if (uploadTargetType === 'single') {
+              handleApplySinglePolicyToForm(SAMPLE_SINGLE_POLICY_ITEM, file.name)
+            } else {
+              setParsedImportRows(SAMPLE_BULK_IMPORT_CLIENTS)
+            }
           }
         } catch (err) {
           console.error(err)
-          setParsedImportRows(SAMPLE_BULK_IMPORT_CLIENTS)
+          if (uploadTargetType === 'single') {
+            handleApplySinglePolicyToForm(SAMPLE_SINGLE_POLICY_ITEM, file.name)
+          } else {
+            setParsedImportRows(SAMPLE_BULK_IMPORT_CLIENTS)
+          }
         }
         setIsImportProcessing(false)
       }
       reader.readAsText(file)
     } else {
-      // Excel or PDF simulation with smart extraction
+      // Excel or PDF smart extraction
       setTimeout(() => {
-        setParsedImportRows(SAMPLE_BULK_IMPORT_CLIENTS)
+        if (uploadTargetType === 'single') {
+          handleApplySinglePolicyToForm(SAMPLE_SINGLE_POLICY_ITEM, file.name)
+        } else {
+          setParsedImportRows(SAMPLE_BULK_IMPORT_CLIENTS)
+        }
         setIsImportProcessing(false)
-      }, 700)
+      }, 600)
     }
   }
 
@@ -1029,105 +1109,94 @@ function AddClientFormContent() {
   return (
     <div className="p-4 sm:p-7 max-w-6xl mx-auto space-y-6">
       {/* Top Breadcrumb & Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-white/5">
         <Link
           href="/broker/book-of-business"
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-[#0170FE] transition cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-[#0170FE] transition cursor-pointer dark:text-slate-400 dark:hover:text-blue-400"
         >
           <ArrowLeft className="size-4" />
           <span>Back to My Book</span>
         </Link>
-        <span className="text-xs text-slate-400 font-medium">Broker Intake · New Client Setup</span>
+        <div className="flex items-center gap-3">
+          <a
+            href="#drafts-list"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200/80 rounded-xl px-3 py-1.5 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/40 transition cursor-pointer"
+            title="Jump to saved drafts at bottom of page"
+          >
+            <FolderClock className="size-3.5 text-amber-600 dark:text-amber-400" />
+            <span>Saved Drafts ({allDrafts.length})</span>
+            <span className="text-amber-500 dark:text-amber-400 text-[10px]">↓ bottom</span>
+          </a>
+          <span className="hidden sm:inline text-xs text-slate-400 font-medium dark:text-slate-500">Broker Intake · New Client Setup</span>
+        </div>
       </div>
 
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs dark:border-white/10 dark:bg-slate-900/60">
         <div className="flex items-start gap-3.5">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-[#0170FE]/10 text-[#0170FE] shadow-xs">
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-[#0170FE]/10 text-[#0170FE] shadow-xs dark:bg-blue-950/60 dark:text-blue-400">
             <UserPlus className="size-6" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
               Add New Client
             </h1>
-            <p className="mt-1 text-xs sm:text-sm text-slate-500 leading-relaxed">
-              Complete client identity, contact information, primary policy coverage, <br />and compliance setup.
+            <p className="mt-1 text-xs sm:text-sm text-slate-500 leading-relaxed dark:text-slate-400">
+              Quick client intake starting with personal info, or upload <br />policy files (PDF/Excel/CSV).
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
-          {/* Drafts List Drawer Button */}
-          <button
-            type="button"
-            onClick={() => {
-              refreshDrafts()
-              setIsDraftsModalOpen(true)
-            }}
-            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-300 bg-amber-50/90 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-amber-900 shadow-2xs hover:bg-amber-100 transition"
-            title="View saved drafts with pending or half info"
-          >
-            <FolderClock className="size-4 text-amber-600" />
-            <span>Drafts</span>
-            <span className="rounded-full bg-amber-200 px-2 py-0.5 text-xs font-bold text-amber-950">
-              {allDrafts.length}
-            </span>
-          </button>
+        {/* Intake Workflow Mode Switcher & Top Actions */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Mode Switcher Pills */}
+          <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-white/10">
+            <button
+              type="button"
+              onClick={() => setActiveMode('manual')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${activeMode === 'manual'
+                ? 'bg-white dark:bg-slate-700 text-[#0170FE] dark:text-blue-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
+            >
+              <FileEdit className="size-3.5" />
+              <span>Quick Form</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveMode('upload')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${activeMode === 'upload'
+                ? 'bg-[#0170FE] text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
+            >
+              <UploadCloud className="size-3.5" />
+              <span>Upload Document</span>
+              <span className="text-[10px] bg-blue-100 text-[#0170FE] dark:bg-blue-950 dark:text-blue-300 font-bold px-1.5 py-0.5 rounded ml-0.5">
+                PDF / Excel
+              </span>
+            </button>
+          </div>
 
-          {/* 1-Click Save as Draft Button */}
-
-
-          <button
-            type="button"
-            onClick={() => {
-              setIsImportModalOpen(true)
-              if (parsedImportRows.length === 0) {
-                // Preload sample batch for fast demonstration
-                handleLoadSampleBatch()
-              }
-            }}
-            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50/80 px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#0170FE] shadow-2xs hover:bg-blue-100/70 transition"
-            title="Import bulk entries from PDF, Excel, or CSV"
-          >
-            <UploadCloud className="size-4" />
-            <span>Import Bulk Data</span>
-            <span className="hidden md:inline-flex text-[10px] font-bold bg-[#0170FE] text-white px-1.5 py-0.5 rounded">PDF / Excel / CSV</span>
-          </button>
-
-          <Link
-            href="/broker/book-of-business"
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition cursor-pointer"
-          >
-            Cancel
-          </Link>
-          <button
-            type="button"
-            onClick={(e) => handleSave(e, false)}
-            disabled={isSubmitting}
-            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#0170FE] px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db] disabled:opacity-50"
-          >
-            <Check className="size-4" />
-            <span>{resumedDraftId ? 'Finalize Client' : 'Save Client'}</span>
-          </button>
         </div>
       </div>
 
       {/* Resumed Draft Mode Active Banner */}
       {resumedDraftId && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50/40 to-white p-4 shadow-xs animate-in fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50/40 to-white p-4 shadow-xs animate-in fade-in dark:border-amber-500/30 dark:bg-gradient-to-r dark:from-amber-950/40 dark:via-orange-950/20 dark:to-slate-900/40">
           <div className="flex items-center gap-3">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white shadow-xs">
               <FileEdit className="size-4.5" />
             </span>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-amber-900 uppercase tracking-wider bg-amber-200/80 px-2 py-0.5 rounded-md">
+                <span className="text-xs font-bold text-amber-900 uppercase tracking-wider bg-amber-200/80 px-2 py-0.5 rounded-md dark:bg-amber-900/80 dark:text-amber-200">
                   Resumed Draft Mode
                 </span>
-                <span className="text-xs text-slate-500 font-mono">ID: {resumedDraftId}</span>
+                <span className="text-xs text-slate-500 font-mono dark:text-slate-400">ID: {resumedDraftId}</span>
               </div>
-              <p className="text-xs text-slate-700 mt-0.5">
-                Currently editing draft <strong className="font-semibold text-slate-900">&ldquo;{resumedDraftName}&rdquo;</strong>. Finish the pending/half details and click <strong className="text-blue-700 font-semibold">Finalize Client</strong> to move it to Active in My Book.
+              <p className="text-xs text-slate-700 mt-0.5 dark:text-slate-300">
+                Currently editing draft <strong className="font-semibold text-slate-900 dark:text-slate-100">&ldquo;{resumedDraftName}&rdquo;</strong>. Finish the pending/half details and click <strong className="text-blue-700 font-semibold dark:text-blue-400">Finalize Client</strong> to move it to Active in My Book.
               </p>
             </div>
           </div>
@@ -1138,228 +1207,447 @@ function AddClientFormContent() {
               setResumedDraftName('')
               setSuccessBanner('Draft mode cleared. Now creating a fresh new client entry.')
             }}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer self-start sm:self-auto shrink-0"
+            className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer self-start sm:self-auto shrink-0 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
           >
             Clear Draft / Start Fresh
           </button>
         </div>
       )}
 
-      {/* Quick Bulk Import Callout Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50/90 via-indigo-50/40 to-white p-4 sm:p-5 shadow-xs">
-        <div className="flex items-start sm:items-center gap-3.5">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#0170FE] text-white shadow-sm">
-            <FileSpreadsheet className="size-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-slate-900">Need to upload bulk entries?</h3>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-[#0170FE] px-2 py-0.5 rounded-full">
-                Bulk Onboarding
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Import multiple client records in one go from PDF policy schedules, Excel (.xlsx, .xls), or CSV spreadsheets directly into My Book.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => {
-              setIsImportModalOpen(true)
-              if (parsedImportRows.length === 0) {
-                handleLoadSampleBatch()
-              }
-            }}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#0170FE] px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#0060db] transition cursor-pointer"
-          >
-            <UploadCloud className="size-4" />
-            <span>Upload Document</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleDownloadSampleTemplate}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-            title="Download CSV / Excel Sample Template"
-          >
-            <Download className="size-3.5 text-slate-500" />
-            <span className="hidden sm:inline">Sample Template</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Success Banner if adding multiple */}
+      {/* Success Notification Banner */}
       {successBanner && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 text-xs sm:text-sm text-emerald-800 flex items-start justify-between gap-3 animate-in fade-in">
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 text-xs sm:text-sm text-emerald-800 flex items-start justify-between gap-3 animate-in fade-in dark:border-emerald-600/30 dark:bg-emerald-950/40 dark:text-emerald-300">
           <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="size-5 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="size-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>{successBanner}</span>
           </div>
           <button
             type="button"
             onClick={() => setSuccessBanner(null)}
-            className="text-emerald-600 hover:text-emerald-900 cursor-pointer"
+            className="text-emerald-600 hover:text-emerald-900 dark:text-emerald-400 dark:hover:text-emerald-200 cursor-pointer"
           >
             <X className="size-4" />
           </button>
         </div>
       )}
 
-      {/* Main Intake Form */}
-      <form onSubmit={(e) => handleSave(e, false)} className="space-y-6">
-        {/* SECTION 1: Client Identity */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-xs space-y-5">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="flex size-6 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-[#0170FE]">
-                1
-              </span>
-              <h2 className="text-base font-bold text-slate-900">Client Identity</h2>
+      {/* UPLOAD CENTER VIEW (Single Policy PDF Auto-Fill OR Bulk Roster Import) */}
+      {activeMode === 'upload' && (
+        <div className="rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-slate-900/60 p-5 sm:p-7 shadow-xs space-y-6 animate-in fade-in">
+          {/* Header & Sub-Type Toggle */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-white/5 pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="flex size-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/60 text-[#0170FE] dark:text-blue-400 font-bold text-xs">
+                  <UploadCloud className="size-4" />
+                </span>
+                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                  Upload Policy Document or Roster
+                </h2>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Upload a single policy declaration PDF/Excel to auto-fill the form, or upload bulk client spreadsheets.
+              </p>
             </div>
-            <span className="text-[11px] font-semibold text-slate-400">* Required fields</span>
+
+            {/* Target Type Selector: Single vs Bulk */}
+            <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-white/10 self-start sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setUploadTargetType('single')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${uploadTargetType === 'single'
+                  ? 'bg-white dark:bg-slate-700 text-[#0170FE] dark:text-blue-400 shadow-2xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  }`}
+              >
+                Single Policy (Auto-Fill Form)
+              </button>
+              <button
+                type="button"
+                onClick={() => setUploadTargetType('bulk')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${uploadTargetType === 'bulk'
+                  ? 'bg-[#0170FE] text-white shadow-2xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  }`}
+              >
+                Bulk Import (Multiple Records)
+              </button>
+            </div>
           </div>
 
-          {/* Row 1: Client Classification & Business / Company Name */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Client Classification <span className="text-rose-500">*</span>
-              </label>
-              <select
-                value={form.clientType}
-                onChange={(e) => setForm({ ...form, clientType: e.target.value as any })}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 font-medium outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-              >
-                <option value="Individual">Individual Policyholder</option>
-                <option value="Commercial">Commercial / Business</option>
-              </select>
-            </div>
+          {/* Drag & Drop Box */}
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault()
+              if (e.dataTransfer.files?.[0]) {
+                handleFileSelect(e.dataTransfer.files[0])
+              }
+            }}
+            className="group relative rounded-2xl border-2 border-dashed border-blue-200 dark:border-blue-500/30 bg-blue-50/25 dark:bg-blue-950/15 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 hover:border-[#0170FE] dark:hover:border-blue-400 p-6 sm:p-8 text-center transition cursor-pointer"
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls,.csv,.pdf,.txt"
+              onChange={(e) => {
+                if (e.target.files?.[0]) {
+                  handleFileSelect(e.target.files[0])
+                }
+              }}
+              className="hidden"
+            />
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Business / Company Name{' '}
-                {form.clientType === 'Commercial' ? (
-                  <span className="text-rose-500">*</span>
+            <div className="flex flex-col items-center justify-center">
+              <div className="flex size-14 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-xs border border-blue-100 dark:border-blue-900/40 group-hover:scale-105 transition">
+                <UploadCloud className="size-7 text-[#0170FE] dark:text-blue-400" />
+              </div>
+              <h4 className="mt-3 text-sm font-bold text-slate-900 dark:text-slate-100">
+                {uploadTargetType === 'single'
+                  ? 'Click to upload Single Policy PDF / Excel / CSV'
+                  : 'Click to upload Bulk Client Roster (Excel / CSV / PDF)'}
+              </h4>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-md">
+                {uploadTargetType === 'single'
+                  ? 'Parses policyholder name, insurance carrier, policy #, address, and premium directly into the manual intake form.'
+                  : 'Parses multiple client rows into a batch preview table for 1-click addition into My Book.'}
+              </p>
+
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                {uploadTargetType === 'single' ? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleLoadSampleSinglePolicy()
+                    }}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0170FE] dark:text-blue-400 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-900/50 px-3 py-1.5 rounded-xl shadow-2xs hover:bg-blue-50 dark:hover:bg-slate-700 transition cursor-pointer"
+                  >
+                    <Sparkles className="size-3.5 text-[#0170FE] dark:text-blue-400" />
+                    <span>Try Sample Single Policy (Travelers Dec Page PDF)</span>
+                  </button>
                 ) : (
-                  <span className="text-slate-400 font-normal">(optional)</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleLoadSampleBatch()
+                    }}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0170FE] dark:text-blue-400 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-900/50 px-3 py-1.5 rounded-xl shadow-2xs hover:bg-blue-50 dark:hover:bg-slate-700 transition cursor-pointer"
+                  >
+                    <Sparkles className="size-3.5 text-[#0170FE] dark:text-blue-400" />
+                    <span>Load Sample Batch (5 Clients)</span>
+                  </button>
                 )}
-              </label>
-              <div className="relative">
-                <Building2 className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                <input
-                  type="text"
-                  required={form.clientType === 'Commercial'}
-                  value={form.businessName}
-                  onChange={(e) => setForm({ ...form, businessName: e.target.value })}
-                  placeholder={form.clientType === 'Commercial' ? 'e.g. Vance Logistics LLC (Required for Commercial)' : 'e.g. Vance Logistics LLC'}
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-                />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDownloadSampleTemplate()
+                  }}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-xl shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
+                >
+                  <Download className="size-3.5 text-slate-400" />
+                  <span>Download Sample CSV Template</span>
+                </button>
               </div>
             </div>
           </div>
 
-          {/* Row 2: First Name & Last Name */}
+          {/* Processing / Spinner */}
+          {isImportProcessing && (
+            <div className="rounded-2xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-950/40 p-6 flex flex-col items-center justify-center text-center animate-in fade-in">
+              <RefreshCw className="size-8 text-[#0170FE] dark:text-blue-400 animate-spin mb-3" />
+              <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Analyzing Document &amp; Extracting Data...</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Reading policy numbers, insured entity, contact details, and coverage lines.
+              </p>
+            </div>
+          )}
+
+          {/* Bulk Batch Preview Table (Only if in bulk mode and rows extracted) */}
+          {!isImportProcessing && parsedImportRows.length > 0 && (
+            <div className="space-y-4 pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-white/10 p-3.5 rounded-2xl">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-xs">
+                    ✓
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{importFileName || 'Extracted File'}</span>
+                      {importFileSize && (
+                        <span className="text-[10px] text-slate-400">({importFileSize})</span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      {parsedImportRows.length} client records extracted ready for intake.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setParsedImportRows([])}
+                    className="text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 px-3 py-1.5"
+                  >
+                    Clear
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExecuteBulkImport}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#0170FE] hover:bg-[#0060db] text-white px-4 py-1.5 text-xs font-bold shadow-xs transition"
+                  >
+                    <Check className="size-3.5" />
+                    <span>Import {parsedImportRows.length} Clients to My Book</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xs">
+                <div className="max-h-64 overflow-y-auto">
+                  <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+                    <thead className="bg-slate-100/80 dark:bg-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider sticky top-0 border-b border-slate-200 dark:border-white/10">
+                      <tr>
+                        <th className="py-2.5 px-3">#</th>
+                        <th className="py-2.5 px-3">Client / Business</th>
+                        <th className="py-2.5 px-3">Type</th>
+                        <th className="py-2.5 px-3">Contact</th>
+                        <th className="py-2.5 px-3">Carrier</th>
+                        <th className="py-2.5 px-3">Policy #</th>
+                        <th className="py-2.5 px-3">Premium</th>
+                        <th className="py-2.5 px-3 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-white/5 bg-white dark:bg-slate-900">
+                      {parsedImportRows.map((row, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition">
+                          <td className="py-2.5 px-3 font-semibold text-slate-400">{idx + 1}</td>
+                          <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                            {row.clientType === 'Commercial'
+                              ? row.businessName || `${row.firstName} ${row.lastName}`
+                              : `${row.firstName} ${row.lastName}`}
+                          </td>
+                          <td className="py-2.5 px-3 whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${row.clientType === 'Commercial'
+                                ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/40'
+                                : 'bg-blue-50 dark:bg-blue-950/40 text-[#0170FE] dark:text-blue-300 border border-blue-200 dark:border-blue-800/40'
+                                }`}
+                            >
+                              {row.clientType}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 whitespace-nowrap">
+                            <div className="text-[11px] font-medium text-slate-800 dark:text-slate-200">{row.phone}</div>
+                            <div className="text-[10px] text-slate-400">{row.email}</div>
+                          </td>
+                          <td className="py-2.5 px-3 whitespace-nowrap font-medium text-slate-800 dark:text-slate-200">
+                            {row.insurerName}
+                          </td>
+                          <td className="py-2.5 px-3 whitespace-nowrap font-mono text-slate-700 dark:text-slate-300">
+                            {row.policyNumber}
+                          </td>
+                          <td className="py-2.5 px-3 font-bold text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
+                            {row.yearlyPremium}
+                          </td>
+                          <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                            <button
+                              type="button"
+                              onClick={() => handleApplySinglePolicyToForm(row, `Row #${idx + 1}`)}
+                              className="text-xs font-semibold text-[#0170FE] dark:text-blue-400 hover:underline"
+                            >
+                              Edit in Form
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Quick toggle to return to manual form */}
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-white/5">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              Prefer filling out client details manually?
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveMode('manual')}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0170FE] dark:text-blue-400 hover:underline cursor-pointer"
+            >
+              <span>Switch to Quick Manual Form</span>
+              <ArrowRight className="size-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Main Intake Form */}
+      <form onSubmit={(e) => handleSave(e, false)} className="space-y-6">
+        {/* SECTION 1: Client Information (Starts directly with Name as top priority) */}
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-xs space-y-5 dark:border-white/10 dark:bg-slate-900/60">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-white/5">
+            <div className="flex items-center gap-2">
+              <span className="flex size-6 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-[#0170FE] dark:bg-blue-950/60 dark:text-blue-400">
+                1
+              </span>
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Client Information</h2>
+            </div>
+            <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500">* Required fields</span>
+          </div>
+
+          {/* Row 1: Direct First Name & Last Name (Primary Focus for Fast Adding) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                {form.clientType === 'Commercial' ? 'Contact Person First Name' : 'First Name'}{' '}
-                {form.clientType === 'Individual' ? (
-                  <span className="text-rose-500">*</span>
-                ) : (
-                  <span className="text-slate-400 font-normal">(optional)</span>
-                )}
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 dark:text-slate-300">
+                First Name <span className="text-rose-500">*</span>
               </label>
               <input
                 type="text"
                 required={form.clientType === 'Individual'}
                 value={form.firstName}
                 onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                placeholder={form.clientType === 'Commercial' ? 'e.g. Marcus (optional)' : 'e.g. Marcus'}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                placeholder="e.g. Marcus"
+                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:bg-[#0b0f19] dark:border-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                {form.clientType === 'Commercial' ? 'Contact Person Last Name' : 'Last Name'}{' '}
-                {form.clientType === 'Individual' ? (
-                  <span className="text-rose-500">*</span>
-                ) : (
-                  <span className="text-slate-400 font-normal">(optional)</span>
-                )}
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 dark:text-slate-300">
+                Last Name <span className="text-rose-500">*</span>
               </label>
               <input
                 type="text"
                 required={form.clientType === 'Individual'}
                 value={form.lastName}
                 onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                placeholder={form.clientType === 'Commercial' ? 'e.g. Vance (optional)' : 'e.g. Vance'}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                placeholder="e.g. Vance"
+                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:bg-[#0b0f19] dark:border-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600"
               />
             </div>
           </div>
 
-          {/* Helper alert when Commercial is selected */}
-          {form.clientType === 'Commercial' && (
-            <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-3 text-xs text-blue-900 flex items-start gap-2.5">
-              <Building2 className="size-4 text-[#0170FE] shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-blue-950">Commercial / Business Classification Active</p>
-                <p className="text-blue-700 text-[11px] mt-0.5">
-                  Business / Company Name is primary for this account. First Name and Last Name are optional contact person fields.
-                </p>
-              </div>
-            </div>
-          )}
-
+          {/* Row 2: Account Type Selector & Business Name / Date of Birth */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Date of Birth <span className="text-slate-400 font-normal">(optional)</span>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 dark:text-slate-300">
+                Account Type
               </label>
-              <div className="relative">
-                <Calendar className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                <input
-                  type="date"
-                  value={form.dob}
-                  onChange={(e) => setForm({ ...form, dob: e.target.value })}
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
-                />
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, clientType: 'Individual' })}
+                  className={`h-10 rounded-xl text-xs font-semibold border transition cursor-pointer ${form.clientType === 'Individual'
+                    ? 'bg-blue-50 text-[#0170FE] border-blue-300 dark:bg-blue-950/60 dark:text-blue-400 dark:border-blue-700'
+                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300'
+                    }`}
+                >
+                  Individual
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, clientType: 'Commercial' })}
+                  className={`h-10 rounded-xl text-xs font-semibold border transition cursor-pointer ${form.clientType === 'Commercial'
+                    ? 'bg-purple-50 text-purple-700 border-purple-300 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-700'
+                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300'
+                    }`}
+                >
+                  Commercial / Business
+                </button>
               </div>
             </div>
 
+            {form.clientType === 'Commercial' ? (
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5 dark:text-slate-300">
+                  Business / Company Name <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <Building2 className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    required
+                    value={form.businessName}
+                    onChange={(e) => setForm({ ...form, businessName: e.target.value })}
+                    placeholder="e.g. Vance Logistics LLC"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:bg-[#0b0f19] dark:border-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5 dark:text-slate-300">
+                  Date of Birth <span className="text-slate-400 font-normal dark:text-slate-500">(optional)</span>
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <input
+                    type="date"
+                    value={form.dob}
+                    onChange={(e) => setForm({ ...form, dob: e.target.value })}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:bg-[#0b0f19] dark:border-slate-800 dark:text-slate-100"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Row 3: Initial Account Status & DOB (if Commercial) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 dark:text-slate-300">
                 Initial Account Status
               </label>
               <select
                 value={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.value })}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:bg-[#0b0f19] dark:border-slate-800 dark:text-slate-100"
               >
                 <option value="Active / Submitted">Active / Submitted</option>
                 <option value="Pending">Pending Review</option>
                 <option value="Lead">Lead Intake</option>
               </select>
             </div>
+
+            {form.clientType === 'Commercial' && (
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5 dark:text-slate-300">
+                  Contact DOB <span className="text-slate-400 font-normal dark:text-slate-500">(optional)</span>
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <input
+                    type="date"
+                    value={form.dob}
+                    onChange={(e) => setForm({ ...form, dob: e.target.value })}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:bg-[#0b0f19] dark:border-slate-800 dark:text-slate-100"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* SECTION 2: Contact Information & Location */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-xs space-y-5">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-xs space-y-5 dark:border-white/10 dark:bg-slate-900/60">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-white/5">
             <div className="flex items-center gap-2">
-              <span className="flex size-6 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-[#0170FE]">
+              <span className="flex size-6 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-[#0170FE] dark:bg-blue-950/60 dark:text-blue-400">
                 2
               </span>
-              <h2 className="text-base font-bold text-slate-900">Contact &amp; Location Details</h2>
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Contact &amp; Location Details</h2>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 dark:text-slate-300">
                 Phone Number <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
@@ -1370,13 +1658,13 @@ function AddClientFormContent() {
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   placeholder="+1 (416) 555-0192"
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:bg-[#0b0f19] dark:border-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 dark:text-slate-300">
                 Email Address <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
@@ -1387,7 +1675,7 @@ function AddClientFormContent() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="marcus.vance@gmail.com"
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:bg-[#0b0f19] dark:border-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600"
                 />
               </div>
 
@@ -1401,7 +1689,7 @@ function AddClientFormContent() {
                       const prefix = form.email.split('@')[0] || form.firstName.toLowerCase() || 'client'
                       setForm({ ...form, email: `${prefix}${domain}` })
                     }}
-                    className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition cursor-pointer"
+                    className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition cursor-pointer dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-blue-950/60 dark:hover:text-blue-400"
                   >
                     {domain}
                   </button>
@@ -1411,10 +1699,10 @@ function AddClientFormContent() {
           </div>
 
           {/* Canadian Address with autocomplete helper */}
-          <div className="space-y-3 pt-2 border-t border-slate-100">
+          <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-white/5">
             <div className="relative">
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Street Address <span className="text-slate-400 font-normal">(search Canadian address or type manually)</span>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 dark:text-slate-300">
+                Street Address <span className="text-slate-400 font-normal dark:text-slate-500">(search Canadian address or type manually)</span>
               </label>
               <div className="relative">
                 <MapPin className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -1428,13 +1716,13 @@ function AddClientFormContent() {
                   }}
                   onFocus={() => setIsAddressDropdownOpen(true)}
                   placeholder="e.g. 100 King Street West, Suite 5600"
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 dark:bg-[#0b0f19] dark:border-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600"
                 />
               </div>
 
               {/* Autocomplete Dropdown */}
               {isAddressDropdownOpen && addressSearchQuery.length > 1 && (
-                <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+                <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-white/10 dark:bg-slate-900">
                   {SAMPLE_CANADIAN_ADDRESSES.filter((a) =>
                     a.street.toLowerCase().includes(addressSearchQuery.toLowerCase()) ||
                     a.city.toLowerCase().includes(addressSearchQuery.toLowerCase())
@@ -1443,19 +1731,19 @@ function AddClientFormContent() {
                       key={idx}
                       type="button"
                       onClick={() => handleSelectAddress(addr)}
-                      className="flex w-full items-start gap-2 rounded-lg p-2 text-left text-xs hover:bg-blue-50 transition cursor-pointer"
+                      className="flex w-full items-start gap-2 rounded-lg p-2 text-left text-xs hover:bg-blue-50 transition cursor-pointer dark:hover:bg-slate-800/80"
                     >
-                      <MapPin className="size-3.5 text-blue-600 mt-0.5 shrink-0" />
+                      <MapPin className="size-3.5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
                       <div>
-                        <p className="font-semibold text-slate-800">{addr.street}</p>
-                        <p className="text-[11px] text-slate-500">{addr.city}, {addr.province} {addr.postalCode}</p>
+                        <p className="font-semibold text-slate-800 dark:text-slate-100">{addr.street}</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">{addr.city}, {addr.province} {addr.postalCode}</p>
                       </div>
                     </button>
                   ))}
                   <button
                     type="button"
                     onClick={() => setIsAddressDropdownOpen(false)}
-                    className="w-full text-center py-1 text-[11px] font-semibold text-slate-400 hover:text-slate-600 border-t border-slate-100 mt-1"
+                    className="w-full text-center py-1 text-[11px] font-semibold text-slate-400 hover:text-slate-600 border-t border-slate-100 mt-1 dark:border-white/5 dark:text-slate-500 dark:hover:text-slate-300"
                   >
                     Close suggestions
                   </button>
@@ -1503,24 +1791,24 @@ function AddClientFormContent() {
         </div>
 
         {/* SECTION 3: Primary Policy & Coverage Setup */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-xs space-y-5">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-slate-900/60 p-5 sm:p-7 shadow-xs space-y-5">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
             <div className="flex items-center gap-2">
-              <span className="flex size-6 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-[#0170FE]">
+              <span className="flex size-6 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/60 text-xs font-bold text-[#0170FE] dark:text-blue-400">
                 3
               </span>
-              <h2 className="text-base font-bold text-slate-900">Primary Policy &amp; Coverage Setup</h2>
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Primary Policy &amp; Coverage Setup</h2>
             </div>
-            <span className="text-xs text-slate-500 font-medium">Automatic contract split calculation</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Automatic contract split calculation</span>
           </div>
 
           {/* Line of Business Multi-Select Pills */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold text-slate-700">
-                Line of Business <span className="text-slate-400 font-normal">(Multiple selections supported, e.g. Auto & Home)</span> <span className="text-rose-500">*</span>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Line of Business <span className="text-slate-400 dark:text-slate-500 font-normal">(Multiple selections supported, e.g. Auto & Home)</span> <span className="text-rose-500">*</span>
               </label>
-              <span className="text-xs font-medium text-blue-600">
+              <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
                 {form.linesOfBusiness.length} selected
               </span>
             </div>
@@ -1544,8 +1832,8 @@ function AddClientFormContent() {
                       })
                     }}
                     className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${isSelected
-                      ? 'bg-slate-950 text-white shadow-xs hover:bg-slate-800'
-                      : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                      ? 'bg-slate-950 text-white shadow-xs hover:bg-slate-800 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-500'
+                      : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:bg-[#0b0f19] dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800/80 dark:hover:border-slate-700'
                       }`}
                   >
                     {isSelected && <Check className="size-3.5 text-emerald-400" />}
@@ -1560,10 +1848,10 @@ function AddClientFormContent() {
             {/* Company / Insurer Selection with Combobox, Pre-selected from Settings & Other */}
             <div className="relative">
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold text-slate-700">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Insurance Company / Carrier <span className="text-rose-500">*</span>
                 </label>
-                <span className="text-[11px] text-slate-400 font-normal">
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-normal">
                   Click anywhere to view settings carriers
                 </span>
               </div>
@@ -1578,9 +1866,9 @@ function AddClientFormContent() {
                     setIsCompanyDropdownOpen(true)
                     companyInputRef.current?.focus()
                   }}
-                  className={`relative flex items-center w-full rounded-xl border bg-white transition cursor-pointer shadow-2xs ${isCompanyDropdownOpen
+                  className={`relative flex items-center w-full rounded-xl border bg-white dark:bg-[#0b0f19] transition cursor-pointer shadow-2xs ${isCompanyDropdownOpen
                     ? 'border-[#0170FE] ring-2 ring-[#0170FE]/20'
-                    : 'border-slate-200 hover:border-slate-300'
+                    : 'border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700'
                     }`}
                 >
                   <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
@@ -1601,7 +1889,7 @@ function AddClientFormContent() {
                       setIsCompanyDropdownOpen(true)
                     }}
                     placeholder="Click or type to select insurance company..."
-                    className="h-10 w-full rounded-xl bg-transparent pl-10 pr-20 text-sm text-slate-900 font-medium outline-none cursor-text placeholder:text-slate-400"
+                    className="h-10 w-full rounded-xl bg-transparent pl-10 pr-20 text-sm text-slate-900 dark:text-slate-100 font-medium outline-none cursor-text placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   />
                   <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
                     {form.insurerName && (
@@ -1614,7 +1902,7 @@ function AddClientFormContent() {
                           setIsCompanyDropdownOpen(true)
                           companyInputRef.current?.focus()
                         }}
-                        className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+                        className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                         title="Clear company"
                       >
                         <X className="size-3.5" />
@@ -1626,7 +1914,7 @@ function AddClientFormContent() {
                         e.stopPropagation()
                         setIsCompanyDropdownOpen((prev) => !prev)
                       }}
-                      className="p-1 rounded-md text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                      className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer"
                     >
                       <ChevronDown
                         className={`size-4 transition-transform duration-200 ${isCompanyDropdownOpen ? 'rotate-180 text-[#0170FE]' : ''
@@ -1638,16 +1926,16 @@ function AddClientFormContent() {
 
                 {/* Dropdown Menu showing all companies pre-selected in Settings tab + Other */}
                 {isCompanyDropdownOpen && (
-                  <div className="absolute z-50 left-0 right-0 mt-1.5 max-h-72 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-xl animate-in fade-in zoom-in-95 duration-150">
-                    <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-slate-100 mb-1">
-                      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                        <Sliders className="size-3 text-[#0170FE]" />
+                  <div className="absolute z-50 left-0 right-0 mt-1.5 max-h-72 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+                    <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-slate-100 dark:border-white/5 mb-1">
+                      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        <Sliders className="size-3 text-[#0170FE] dark:text-blue-400" />
                         <span>Pre-selected in Settings Tab</span>
                       </div>
                       <Link
                         href="/broker/settings?tab=commissions"
                         target="_blank"
-                        className="text-[11px] font-medium text-[#0170FE] hover:underline flex items-center gap-0.5"
+                        className="text-[11px] font-medium text-[#0170FE] dark:text-blue-400 hover:underline flex items-center gap-0.5"
                       >
                         <span>Manage in Settings</span>
                         <ExternalLink className="size-2.5" />
@@ -1674,22 +1962,22 @@ function AddClientFormContent() {
                                 setCompanySearchQuery('')
                               }}
                               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-left transition cursor-pointer ${isSelected
-                                ? 'bg-blue-50 text-[#0170FE] font-semibold'
-                                : 'text-slate-800 hover:bg-slate-50'
+                                ? 'bg-blue-50 text-[#0170FE] font-semibold dark:bg-blue-950/60 dark:text-blue-400'
+                                : 'text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80'
                                 }`}
                             >
                               <div className="flex items-center gap-2.5">
                                 <Building2
-                                  className={`size-3.5 shrink-0 ${isSelected ? 'text-[#0170FE]' : 'text-slate-400'
+                                  className={`size-3.5 shrink-0 ${isSelected ? 'text-[#0170FE] dark:text-blue-400' : 'text-slate-400'
                                     }`}
                                 />
                                 <span>{c.carrier}</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+                                <span className="text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full">
                                   {c.defaultComm}% Comm · {c.brokerSplit}% Split
                                 </span>
-                                {isSelected && <Check className="size-4 text-[#0170FE]" />}
+                                {isSelected && <Check className="size-4 text-[#0170FE] dark:text-blue-400" />}
                               </div>
                             </button>
                           )
@@ -1699,7 +1987,7 @@ function AddClientFormContent() {
                       {configuredCompanies.filter((c) =>
                         c.carrier.toLowerCase().includes(companySearchQuery.toLowerCase())
                       ).length === 0 && companySearchQuery && (
-                          <div className="p-3 text-center text-xs text-slate-500 bg-slate-50 rounded-xl my-1">
+                          <div className="p-3 text-center text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 rounded-xl my-1">
                             <p className="mb-2">No settings company matches &quot;{companySearchQuery}&quot;</p>
                             <button
                               type="button"
@@ -1707,7 +1995,7 @@ function AddClientFormContent() {
                                 setIsCustomCompanyMode(true)
                                 setIsCompanyDropdownOpen(false)
                               }}
-                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-[#0170FE] px-3 py-1.5 rounded-lg hover:bg-[#0060db] transition cursor-pointer shadow-xs"
+                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-[#0170FE] dark:bg-blue-600 px-3 py-1.5 rounded-lg hover:bg-[#0060db] dark:hover:bg-blue-500 transition cursor-pointer shadow-xs"
                             >
                               <Plus className="size-3.5" />
                               <span>Use &quot;{companySearchQuery}&quot; as custom name</span>
@@ -1717,7 +2005,7 @@ function AddClientFormContent() {
                     </div>
 
                     {/* "Other" Option as explicitly requested by client */}
-                    <div className="pt-1.5 mt-1.5 border-t border-slate-100">
+                    <div className="pt-1.5 mt-1.5 border-t border-slate-100 dark:border-white/5">
                       <button
                         type="button"
                         onClick={() => {
@@ -1727,13 +2015,13 @@ function AddClientFormContent() {
                           setCompanySearchQuery('')
                           setTimeout(() => companyInputRef.current?.focus(), 50)
                         }}
-                        className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-[#0170FE] bg-blue-50/70 hover:bg-blue-100/70 transition cursor-pointer border border-blue-100"
+                        className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-[#0170FE] dark:text-blue-400 bg-blue-50/70 dark:bg-blue-950/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/50 transition cursor-pointer border border-blue-100 dark:border-blue-900/40"
                       >
                         <div className="flex items-center gap-2">
-                          <Plus className="size-4 text-[#0170FE]" />
+                          <Plus className="size-4 text-[#0170FE] dark:text-blue-400" />
                           <span>Other (Type unknown / new company name)</span>
                         </div>
-                        <span className="text-[10px] font-bold bg-white text-[#0170FE] px-2 py-0.5 rounded-md border border-blue-200">
+                        <span className="text-[10px] font-bold bg-white dark:bg-slate-900 text-[#0170FE] dark:text-blue-400 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800/40">
                           Custom
                         </span>
                       </button>
@@ -1744,15 +2032,15 @@ function AddClientFormContent() {
 
               {/* Informative helper note for custom company mode */}
               {isCustomCompanyMode && (
-                <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-amber-700 font-medium">
-                  <Sparkles className="size-3 text-amber-600 shrink-0" />
+                <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-amber-700 dark:text-amber-400 font-medium">
+                  <Sparkles className="size-3 text-amber-600 dark:text-amber-400 shrink-0" />
                   <span>Custom / Unknown company entry active. You can type any company name directly.</span>
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                 Annual Gross Premium ($ CAD)
               </label>
               <div className="relative">
@@ -1764,7 +2052,7 @@ function AddClientFormContent() {
                   value={form.yearlyPremium}
                   onChange={(e) => setForm({ ...form, yearlyPremium: e.target.value })}
                   placeholder="2450.00"
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 text-sm font-semibold text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] pl-10 pr-3.5 text-sm font-semibold text-slate-900 dark:text-slate-100 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
             </div>
@@ -1773,9 +2061,9 @@ function AddClientFormContent() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold text-slate-700">Policy Number</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Policy Number</label>
                 <div className="flex items-center gap-1.5">
-                  <label className="flex items-center gap-1.5 text-xs text-blue-600 cursor-pointer font-medium hover:text-blue-700 select-none">
+                  <label className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 cursor-pointer font-medium hover:text-blue-700 dark:hover:text-blue-300 select-none">
                     <input
                       type="checkbox"
                       checked={form.isPendingPolicyNumber}
@@ -1793,7 +2081,7 @@ function AddClientFormContent() {
                   <Link
                     href="/broker/settings?tab=commissions"
                     target="_blank"
-                    className="text-[10px] text-slate-400 hover:text-[#0170FE] transition"
+                    className="text-[10px] text-slate-400 hover:text-[#0170FE] dark:hover:text-blue-400 transition"
                     title="Change default pending behavior in Settings tab"
                   >
                     ⚙
@@ -1807,11 +2095,11 @@ function AddClientFormContent() {
                 onChange={(e) => setForm({ ...form, policyNumber: e.target.value })}
                 placeholder={form.isPendingPolicyNumber ? 'POL-PENDING' : 'Type policy number (e.g. POL-88210-TRAV)'}
                 className={`h-10 w-full rounded-xl border px-3.5 text-sm font-mono font-medium outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 transition ${form.isPendingPolicyNumber
-                  ? 'bg-amber-50/70 text-amber-700 border-amber-200 cursor-not-allowed'
-                  : 'bg-white text-slate-900 border-slate-200 hover:border-slate-300'
+                  ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/40 cursor-not-allowed'
+                  : 'bg-white dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700 placeholder:text-slate-400 dark:placeholder:text-slate-500'
                   }`}
               />
-              <p className="mt-1 text-[11px] text-slate-500 flex items-center justify-between">
+              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
                 <span>
                   {form.isPendingPolicyNumber
                     ? 'Default: Pending. Uncheck box to type a policy number.'
@@ -1821,19 +2109,19 @@ function AddClientFormContent() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Effective Date</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Effective Date</label>
               <input
                 type="date"
                 value={form.effectiveDate}
                 onChange={(e) => handleEffectiveDateChange(e.target.value)}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] px-3.5 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 scheme-light dark:scheme-dark"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold text-slate-700">Expiration Date</label>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded ring-1 ring-emerald-200">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Expiration Date</label>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded ring-1 ring-emerald-200 dark:ring-emerald-800/40">
                   +1 Yr Auto
                 </span>
               </div>
@@ -1842,45 +2130,43 @@ function AddClientFormContent() {
                 readOnly
                 value={form.expirationDate}
                 title="Expiry date is automatically linked to exact one year after effective date."
-                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-100 px-3.5 text-sm text-slate-600 outline-none cursor-not-allowed"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900/80 px-3.5 text-sm text-slate-600 dark:text-slate-400 outline-none cursor-not-allowed scheme-light dark:scheme-dark"
               />
             </div>
           </div>
 
           {/* Payment Status & Client Account Status Selection */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100 dark:border-white/5">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                 Payment Status <span className="text-rose-500">*</span>
               </label>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setForm({ ...form, paymentStatus: 'Paid' })}
-                  className={`flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2 px-3 text-xs font-semibold border transition cursor-pointer ${
-                    form.paymentStatus === 'Paid'
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-300 ring-2 ring-emerald-400/30 shadow-2xs font-bold'
-                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                  }`}
+                  className={`flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2 px-3 text-xs font-semibold border transition cursor-pointer ${form.paymentStatus === 'Paid'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-300 ring-2 ring-emerald-400/30 shadow-2xs font-bold dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-600/40'
+                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 dark:bg-[#0b0f19] dark:text-slate-300 dark:border-slate-800 dark:hover:bg-slate-800/60'
+                    }`}
                 >
-                  <CheckCircle2 className="size-3.5 text-emerald-600" />
+                  <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span>Paid</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setForm({ ...form, paymentStatus: 'Unpaid' })}
-                  className={`flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2 px-3 text-xs font-semibold border transition cursor-pointer ${
-                    form.paymentStatus === 'Unpaid'
-                      ? 'bg-rose-50 text-rose-700 border-rose-300 ring-2 ring-rose-400/30 shadow-2xs font-bold'
-                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                  }`}
+                  className={`flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-2 px-3 text-xs font-semibold border transition cursor-pointer ${form.paymentStatus === 'Unpaid'
+                    ? 'bg-rose-50 text-rose-700 border-rose-300 ring-2 ring-rose-400/30 shadow-2xs font-bold dark:bg-rose-950/50 dark:text-rose-400 dark:border-rose-600/40'
+                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 dark:bg-[#0b0f19] dark:text-slate-300 dark:border-slate-800 dark:hover:bg-slate-800/60'
+                    }`}
                 >
                   <span className="size-2 rounded-full bg-rose-500 animate-pulse" />
                   <span>Unpaid</span>
                 </button>
               </div>
-              <p className="mt-1 text-[11px] text-slate-500">
+              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
                 {form.paymentStatus === 'Paid'
                   ? 'Premium paid in full / up-to-date.'
                   : 'Payment outstanding or pending invoice settlement.'}
@@ -1888,43 +2174,43 @@ function AddClientFormContent() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                 Client Account Status
               </label>
               <select
                 value={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.value })}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] px-3 text-xs sm:text-sm font-medium text-slate-900 dark:text-slate-100 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
               >
-                <option value="Active / Submitted">Active / Submitted</option>
-                <option value="Active">Active</option>
-                <option value="Pending">Pending</option>
-                <option value="Draft">Draft</option>
-                <option value="Inactive">Inactive</option>
+                <option value="Active / Submitted" className="dark:bg-slate-900">Active / Submitted</option>
+                <option value="Active" className="dark:bg-slate-900">Active</option>
+                <option value="Pending" className="dark:bg-slate-900">Pending</option>
+                <option value="Draft" className="dark:bg-slate-900">Draft</option>
+                <option value="Inactive" className="dark:bg-slate-900">Inactive</option>
               </select>
-              <p className="mt-1 text-[11px] text-slate-500">
+              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
                 Controls the primary lifecycle state in My Book roster.
               </p>
             </div>
           </div>
 
           {/* Commission & Split Rates Preview - Auto-aligned as per Settings & Selected Company */}
-          <div className="rounded-2xl border border-blue-200/80 bg-gradient-to-br from-blue-50/70 via-indigo-50/30 to-white p-4 sm:p-5 space-y-4 shadow-2xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-100 pb-3">
+          <div className="rounded-2xl border border-blue-200/80 dark:border-white/10 bg-gradient-to-br from-blue-50/70 via-indigo-50/30 to-white dark:from-blue-950/40 dark:via-indigo-950/20 dark:to-slate-900/60 p-4 sm:p-5 space-y-4 shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-100 dark:border-white/5 pb-3">
               <div className="flex items-center gap-2">
                 <div className="flex size-7 items-center justify-center rounded-lg bg-[#0170FE] text-white">
                   <Percent className="size-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                     <span>Contract Commission Split</span>
-                    <span className="text-[10px] font-bold bg-blue-100 text-[#0170FE] px-2 py-0.5 rounded-full border border-blue-200">
+                    <span className="text-[10px] font-bold bg-blue-100 dark:bg-blue-950/60 text-[#0170FE] dark:text-blue-400 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800/50">
                       Settings Linked
                     </span>
                   </h4>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     Adjusted automatically as per pre-settings for{' '}
-                    <strong className="text-slate-800 font-semibold">{form.insurerName || 'selected company'}</strong>.
+                    <strong className="text-slate-800 dark:text-slate-200 font-semibold">{form.insurerName || 'selected company'}</strong>.
                   </p>
                 </div>
               </div>
@@ -1936,7 +2222,7 @@ function AddClientFormContent() {
                     <button
                       type="button"
                       onClick={() => applyCarrierSettings(form.insurerName)}
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0170FE] bg-white border border-blue-200 px-2.5 py-1 rounded-lg hover:bg-blue-50 transition cursor-pointer shadow-2xs"
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0170FE] dark:text-blue-400 bg-white dark:bg-slate-800 border border-blue-200 dark:border-white/10 px-2.5 py-1 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition cursor-pointer shadow-2xs"
                       title="Reset to pre-configured settings for this carrier"
                     >
                       <RefreshCw className="size-3" />
@@ -1946,10 +2232,10 @@ function AddClientFormContent() {
                 <Link
                   href="/broker/settings?tab=commissions"
                   target="_blank"
-                  className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-[#0170FE] transition"
+                  className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-slate-400 hover:text-[#0170FE] dark:hover:text-blue-400 transition"
                   title="Configure carrier commission rates and split shares in Settings"
                 >
-                  <Sliders className="size-3 text-[#0170FE]" />
+                  <Sliders className="size-3 text-[#0170FE] dark:text-blue-400" />
                   <span>Settings Tab</span>
                   <ExternalLink className="size-2.5" />
                 </Link>
@@ -1959,8 +2245,8 @@ function AddClientFormContent() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold text-slate-700">Contract Commission Rate (%)</label>
-                  <span className="text-[11px] font-mono font-bold text-[#0170FE]">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Contract Commission Rate (%)</label>
+                  <span className="text-[11px] font-mono font-bold text-[#0170FE] dark:text-blue-400">
                     {form.commissionRate}%
                   </span>
                 </div>
@@ -1972,21 +2258,21 @@ function AddClientFormContent() {
                     max="100"
                     value={form.commissionRate}
                     onChange={(e) => setForm({ ...form, commissionRate: parseFloat(e.target.value) || 0 })}
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 pr-8 text-sm font-semibold text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                    className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] px-3.5 pr-8 text-sm font-semibold text-slate-900 dark:text-slate-100 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
                     %
                   </span>
                 </div>
-                <p className="text-[10.5px] text-slate-400 mt-1">
+                <p className="text-[10.5px] text-slate-400 dark:text-slate-500 mt-1">
                   Contract default from settings for {form.insurerName || 'carrier'}.
                 </p>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold text-slate-700">Broker Share (%)</label>
-                  <span className="text-[11px] font-mono font-bold text-emerald-700">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Broker Share (%)</label>
+                  <span className="text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-400">
                     Broker: {form.brokerSplit}% · House: {100 - form.brokerSplit}%
                   </span>
                 </div>
@@ -1998,13 +2284,13 @@ function AddClientFormContent() {
                     max="100"
                     value={form.brokerSplit}
                     onChange={(e) => setForm({ ...form, brokerSplit: parseInt(e.target.value) || 0 })}
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 pr-8 text-sm font-semibold text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                    className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] px-3.5 pr-8 text-sm font-semibold text-slate-900 dark:text-slate-100 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
                     %
                   </span>
                 </div>
-                <p className="text-[10.5px] text-slate-400 mt-1">
+                <p className="text-[10.5px] text-slate-400 dark:text-slate-500 mt-1">
                   Contract broker split percentage from settings.
                 </p>
               </div>
@@ -2012,17 +2298,17 @@ function AddClientFormContent() {
 
             {/* Live calculation banner if annual premium is provided */}
             {form.yearlyPremium && parseFloat(form.yearlyPremium) > 0 && (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-emerald-900">
+              <div className="rounded-xl border border-emerald-200 dark:border-emerald-700/40 bg-emerald-50/80 dark:bg-emerald-950/40 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-emerald-900 dark:text-emerald-200">
                 <span className="font-medium">
                   Estimated Earnings on ${parseFloat(form.yearlyPremium).toLocaleString()} Annual Premium:
                 </span>
-                <span className="font-mono font-bold text-emerald-800 text-sm">
+                <span className="font-mono font-bold text-emerald-800 dark:text-emerald-300 text-sm">
                   ${(
                     parseFloat(form.yearlyPremium) *
                     (form.commissionRate / 100) *
                     (form.brokerSplit / 100)
                   ).toFixed(2)}{' '}
-                  CAD <span className="text-[11px] font-normal text-emerald-700">(Broker Net Share)</span>
+                  CAD <span className="text-[11px] font-normal text-emerald-700 dark:text-emerald-400">(Broker Net Share)</span>
                 </span>
               </div>
             )}
@@ -2030,37 +2316,37 @@ function AddClientFormContent() {
         </div>
 
         {/* SECTION 4: Marketing Consent & Compliance (CASL / PIPEDA) */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-xs space-y-5">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-slate-900/60 p-5 sm:p-7 shadow-xs space-y-5">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
             <div className="flex items-center gap-2">
-              <span className="flex size-6 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-[#0170FE]">
+              <span className="flex size-6 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/60 text-xs font-bold text-[#0170FE] dark:text-blue-400">
                 4
               </span>
-              <h2 className="text-base font-bold text-slate-900">Marketing Consent &amp; Compliance</h2>
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Marketing Consent &amp; Compliance</h2>
             </div>
-            <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200">
+            <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
               CASL Compliant
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                 Consent Status
               </label>
               <select
                 value={form.consentStatus}
                 onChange={(e) => setForm({ ...form, consentStatus: e.target.value as any })}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] px-3 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
               >
-                <option value="Granted">Granted (Opted In)</option>
-                <option value="Pending">Pending Confirmation</option>
-                <option value="Declined">Declined (Do Not Solicit)</option>
+                <option value="Granted" className="dark:bg-slate-900">Granted (Opted In)</option>
+                <option value="Pending" className="dark:bg-slate-900">Pending Confirmation</option>
+                <option value="Declined" className="dark:bg-slate-900">Declined (Do Not Solicit)</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                 Allowed Communication Channels
               </label>
               <div className="flex flex-wrap gap-2 pt-1">
@@ -2072,8 +2358,8 @@ function AddClientFormContent() {
                       type="button"
                       onClick={() => handleToggleChannel(channel)}
                       className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${isChecked
-                        ? 'bg-blue-50 text-[#0170FE] border border-blue-200'
-                        : 'bg-slate-50 text-slate-500 border border-slate-200 hover:bg-slate-100'
+                        ? 'bg-blue-50 text-[#0170FE] border border-blue-200 dark:bg-blue-950/60 dark:text-blue-400 dark:border-blue-800/50'
+                        : 'bg-slate-50 text-slate-500 border border-slate-200 hover:bg-slate-100 dark:bg-slate-900/60 dark:text-slate-400 dark:border-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200'
                         }`}
                     >
                       <Check className={`size-3.5 ${isChecked ? 'opacity-100' : 'opacity-0'}`} />
@@ -2086,37 +2372,37 @@ function AddClientFormContent() {
           </div>
 
           {/* Automated Marketing Consent Notification Banner */}
-          <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-3.5 flex items-start gap-2.5">
-            <Shield className="size-4.5 text-emerald-600 shrink-0 mt-0.5" />
+          <div className="rounded-xl border border-emerald-100 dark:border-emerald-800/30 bg-emerald-50/70 dark:bg-emerald-950/40 p-3.5 flex items-start gap-2.5">
+            <Shield className="size-4.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
             <div>
-              <p className="text-xs font-bold text-emerald-900">
+              <p className="text-xs font-bold text-emerald-900 dark:text-emerald-200">
                 Automated Consent Dispatch
               </p>
-              <p className="text-xs text-emerald-700 leading-relaxed mt-0.5">
-                A digital consent link will automatically be dispatched to the client upon saving. Once digitally authorized, their record automatically updates to <strong className="font-semibold text-emerald-900">Granted</strong> in the client file.
+              <p className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed mt-0.5">
+                A digital consent link will automatically be dispatched to the client upon saving. Once digitally authorized, their record automatically updates to <strong className="font-semibold text-emerald-900 dark:text-emerald-300">Granted</strong> in the client file.
               </p>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Initial Broker Notes <span className="text-slate-400 font-normal">(optional)</span>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              Initial Broker Notes <span className="text-slate-400 dark:text-slate-500 font-normal">(optional)</span>
             </label>
             <textarea
               rows={3}
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
               placeholder="e.g. Bound primary commercial policy during annual review. Client expressed interest in umbrella endorsement next quarter."
-              className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs sm:text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+              className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] p-3 text-xs sm:text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
           </div>
         </div>
 
         {/* Submit Actions Bar */}
-        <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs">
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-slate-900/60 p-4 sm:p-5 shadow-xs">
           <Link
             href="/broker/book-of-business"
-            className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 text-center hover:bg-slate-50 transition cursor-pointer"
+            className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 text-center hover:bg-slate-50 dark:hover:bg-slate-700/80 dark:hover:text-white transition cursor-pointer"
           >
             Cancel
           </Link>
@@ -2125,24 +2411,17 @@ function AddClientFormContent() {
             <button
               type="button"
               onClick={handleSaveDraft}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-amber-300 bg-amber-50/90 px-4 py-2.5 text-xs sm:text-sm font-semibold text-amber-900 hover:bg-amber-100 transition cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-amber-300 dark:border-amber-500/30 bg-amber-50/90 dark:bg-amber-950/40 px-4 py-2.5 text-xs sm:text-sm font-semibold text-amber-900 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition cursor-pointer"
               title="Save half or pending info without required field validation"
             >
-              <Bookmark className="size-4 text-amber-600" />
+              <Bookmark className="size-4 text-amber-600 dark:text-amber-400" />
               <span>Save as Draft</span>
             </button>
-            <button
-              type="button"
-              disabled={isSubmitting}
-              onClick={(e) => handleSave(e, true)}
-              className="w-full sm:w-auto rounded-xl border border-[#0170FE] bg-blue-50/60 px-5 py-2.5 text-xs sm:text-sm font-semibold text-[#0170FE] hover:bg-blue-100/70 transition cursor-pointer disabled:opacity-50"
-            >
-              Save &amp; Add Another
-            </button>
+
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#0170FE] px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db] cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#0170FE] dark:bg-blue-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 transition hover:bg-[#0060db] dark:hover:bg-blue-500 cursor-pointer disabled:opacity-50"
             >
               <Check className="size-4" />
               <span>{resumedDraftId ? 'Finalize Client & View in My Book' : 'Save Client & View in My Book'}</span>
@@ -2153,29 +2432,29 @@ function AddClientFormContent() {
 
       {/* BULK DATA IMPORT MODAL (PDF, EXCEL, CSV) */}
       {isImportModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
-          <div className="w-full max-w-4xl bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
+          <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto">
             {/* Modal Header */}
-            <div className="flex items-start justify-between p-5 sm:p-6 border-b border-slate-100 bg-slate-50/50">
+            <div className="flex items-start justify-between p-5 sm:p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/80">
               <div className="flex items-start gap-3.5">
                 <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#0170FE] text-white shadow-sm">
                   <UploadCloud className="size-6" />
                 </div>
                 <div>
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-900">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
                     Bulk Client Data Import
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                     Upload bulk entries from PDF policy schedules, Excel (.xlsx, .xls), or CSV files.
                   </p>
                   <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                    <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-md">
+                    <span className="text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40 px-2 py-0.5 rounded-md">
                       Excel (.xlsx, .xls)
                     </span>
-                    <span className="text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-md">
+                    <span className="text-[10px] font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/40 px-2 py-0.5 rounded-md">
                       PDF Document (.pdf)
                     </span>
-                    <span className="text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md">
+                    <span className="text-[10px] font-bold bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/40 px-2 py-0.5 rounded-md">
                       CSV Spreadsheet (.csv)
                     </span>
                   </div>
@@ -2188,7 +2467,7 @@ function AddClientFormContent() {
                   setIsImportModalOpen(false)
                   setParsedImportRows([])
                 }}
-                className="size-8 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                className="size-8 rounded-xl border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -2207,7 +2486,7 @@ function AddClientFormContent() {
                       handleFileSelect(e.dataTransfer.files[0])
                     }
                   }}
-                  className="group relative rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/30 hover:bg-blue-50/60 hover:border-[#0170FE] p-6 sm:p-8 text-center transition cursor-pointer"
+                  className="group relative rounded-2xl border-2 border-dashed border-blue-200 dark:border-blue-500/30 bg-blue-50/30 dark:bg-blue-950/20 hover:bg-blue-50/60 dark:hover:bg-blue-950/40 hover:border-[#0170FE] dark:hover:border-blue-400 p-6 sm:p-8 text-center transition cursor-pointer"
                 >
                   <input
                     ref={fileInputRef}
@@ -2222,13 +2501,13 @@ function AddClientFormContent() {
                   />
 
                   <div className="flex flex-col items-center justify-center">
-                    <div className="flex size-14 items-center justify-center rounded-2xl bg-white shadow-sm border border-blue-100 group-hover:scale-105 transition">
-                      <UploadCloud className="size-7 text-[#0170FE]" />
+                    <div className="flex size-14 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-blue-100 dark:border-blue-900/40 group-hover:scale-105 transition">
+                      <UploadCloud className="size-7 text-[#0170FE] dark:text-blue-400" />
                     </div>
-                    <h4 className="mt-3 text-sm font-bold text-slate-900">
+                    <h4 className="mt-3 text-sm font-bold text-slate-900 dark:text-slate-100">
                       Click to browse or drag and drop your document here
                     </h4>
-                    <p className="mt-1 text-xs text-slate-500 max-w-md">
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-md">
                       Accepts Microsoft Excel (.xlsx, .xls), PDF policy declarations (.pdf), or standard comma-separated (.csv) files.
                     </p>
 
@@ -2239,9 +2518,9 @@ function AddClientFormContent() {
                           e.stopPropagation()
                           handleLoadSampleBatch()
                         }}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0170FE] bg-white border border-blue-200 px-3 py-1.5 rounded-xl shadow-2xs hover:bg-blue-50 transition cursor-pointer"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0170FE] dark:text-blue-400 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-900/50 px-3 py-1.5 rounded-xl shadow-2xs hover:bg-blue-50 dark:hover:bg-slate-700 transition cursor-pointer"
                       >
-                        <Sparkles className="size-3.5 text-[#0170FE]" />
+                        <Sparkles className="size-3.5 text-[#0170FE] dark:text-blue-400" />
                         <span>Load Sample Batch (5 Clients)</span>
                       </button>
                       <button
@@ -2250,7 +2529,7 @@ function AddClientFormContent() {
                           e.stopPropagation()
                           handleDownloadSampleTemplate()
                         }}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs hover:bg-slate-50 transition cursor-pointer"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-xl shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
                       >
                         <Download className="size-3.5 text-slate-400" />
                         <span>Download Sample CSV Template</span>
@@ -2262,10 +2541,10 @@ function AddClientFormContent() {
 
               {/* Loading / Extraction State */}
               {isImportProcessing && (
-                <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-6 flex flex-col items-center justify-center text-center animate-in fade-in">
-                  <RefreshCw className="size-8 text-[#0170FE] animate-spin mb-3" />
-                  <p className="text-sm font-bold text-slate-900">Analyzing Document &amp; Extracting Client Entries...</p>
-                  <p className="text-xs text-slate-500 mt-1">
+                <div className="rounded-2xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-950/40 p-6 flex flex-col items-center justify-center text-center animate-in fade-in">
+                  <RefreshCw className="size-8 text-[#0170FE] dark:text-blue-400 animate-spin mb-3" />
+                  <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Analyzing Document &amp; Extracting Client Entries...</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     Validating classification, contacts, policy numbers, and insurance carriers.
                   </p>
                 </div>
@@ -2273,10 +2552,10 @@ function AddClientFormContent() {
 
               {/* Success Notification */}
               {isImportSuccess && (
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 flex flex-col items-center justify-center text-center animate-in fade-in">
-                  <CheckCircle2 className="size-10 text-emerald-600 mb-2" />
-                  <p className="text-base font-bold text-emerald-900">Successfully Imported {parsedImportRows.length} Clients!</p>
-                  <p className="text-xs text-emerald-700 mt-1">
+                <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-950/40 p-6 flex flex-col items-center justify-center text-center animate-in fade-in">
+                  <CheckCircle2 className="size-10 text-emerald-600 dark:text-emerald-400 mb-2" />
+                  <p className="text-base font-bold text-emerald-900 dark:text-emerald-200">Successfully Imported {parsedImportRows.length} Clients!</p>
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-1">
                     Redirecting you to My Book to view the newly registered clients...
                   </p>
                 </div>
@@ -2285,25 +2564,25 @@ function AddClientFormContent() {
               {/* Data Preview Table */}
               {!isImportProcessing && !isImportSuccess && parsedImportRows.length > 0 && (
                 <div className="space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 border border-slate-200/80 p-3 rounded-2xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-white/10 p-3 rounded-2xl">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 font-bold text-xs">
+                      <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-xs">
                         ✓
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-slate-900">{importFileName || 'Imported File'}</span>
+                          <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{importFileName || 'Imported File'}</span>
                           {importFileSize && (
                             <span className="text-[10px] text-slate-400">({importFileSize})</span>
                           )}
                         </div>
-                        <p className="text-[11px] text-slate-500">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
                           {parsedImportRows.length} valid records extracted ·{' '}
-                          <span className="text-emerald-700 font-semibold">
+                          <span className="text-emerald-700 dark:text-emerald-400 font-semibold">
                             {parsedImportRows.filter((r) => r.clientType === 'Commercial').length} Commercial
                           </span>
                           ,{' '}
-                          <span className="text-blue-700 font-semibold">
+                          <span className="text-blue-700 dark:text-blue-400 font-semibold">
                             {parsedImportRows.filter((r) => r.clientType === 'Individual').length} Individual
                           </span>
                         </p>
@@ -2313,17 +2592,17 @@ function AddClientFormContent() {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="text-xs font-semibold text-[#0170FE] hover:underline self-start sm:self-auto"
+                      className="text-xs font-semibold text-[#0170FE] dark:text-blue-400 hover:underline self-start sm:self-auto cursor-pointer"
                     >
                       Re-upload different file
                     </button>
                   </div>
 
                   {/* Preview Table */}
-                  <div className="rounded-2xl border border-slate-200 overflow-hidden shadow-2xs">
+                  <div className="rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xs">
                     <div className="max-h-60 overflow-y-auto">
-                      <table className="w-full text-left text-xs text-slate-600">
-                        <thead className="bg-slate-100/80 text-[11px] font-bold text-slate-700 uppercase tracking-wider sticky top-0 border-b border-slate-200">
+                      <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+                        <thead className="bg-slate-100/80 dark:bg-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider sticky top-0 border-b border-slate-200 dark:border-white/10">
                           <tr>
                             <th className="py-2.5 px-3">#</th>
                             <th className="py-2.5 px-3">Client / Business</th>
@@ -2336,11 +2615,11 @@ function AddClientFormContent() {
                             <th className="py-2.5 px-3 text-right">Status</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 bg-white">
+                        <tbody className="divide-y divide-slate-100 dark:divide-white/5 bg-white dark:bg-slate-900">
                           {parsedImportRows.map((row, idx) => (
-                            <tr key={idx} className="hover:bg-slate-50/80 transition">
+                            <tr key={idx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition">
                               <td className="py-2.5 px-3 font-semibold text-slate-400">{idx + 1}</td>
-                              <td className="py-2.5 px-3 font-bold text-slate-900 whitespace-nowrap">
+                              <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">
                                 {row.clientType === 'Commercial'
                                   ? row.businessName || `${row.firstName} ${row.lastName}`
                                   : `${row.firstName} ${row.lastName}`}
@@ -2348,37 +2627,37 @@ function AddClientFormContent() {
                               <td className="py-2.5 px-3 whitespace-nowrap">
                                 <span
                                   className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${row.clientType === 'Commercial'
-                                    ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                                    : 'bg-blue-50 text-[#0170FE] border border-blue-200'
+                                    ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/40'
+                                    : 'bg-blue-50 dark:bg-blue-950/40 text-[#0170FE] dark:text-blue-300 border border-blue-200 dark:border-blue-800/40'
                                     }`}
                                 >
                                   {row.clientType}
                                 </span>
                               </td>
                               <td className="py-2.5 px-3 whitespace-nowrap">
-                                <div className="text-[11px] font-medium text-slate-800">{row.phone}</div>
+                                <div className="text-[11px] font-medium text-slate-800 dark:text-slate-200">{row.phone}</div>
                                 <div className="text-[10px] text-slate-400">{row.email}</div>
                               </td>
                               <td className="py-2.5 px-3 whitespace-nowrap">
-                                <span className="font-semibold text-slate-800 flex items-center gap-1.5">
+                                <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                                   <Building2 className="size-3 text-slate-400" />
                                   <span>{row.insurerName}</span>
                                 </span>
                               </td>
                               <td className="py-2.5 px-3 whitespace-nowrap">
-                                <div className="font-semibold text-slate-800">{row.policyNumber}</div>
-                                <div className="text-[10px] text-slate-500">
+                                <div className="font-semibold text-slate-800 dark:text-slate-200">{row.policyNumber}</div>
+                                <div className="text-[10px] text-slate-500 dark:text-slate-400">
                                   {row.linesOfBusiness.join(', ')}
                                 </div>
                               </td>
-                              <td className="py-2.5 px-3 font-bold text-emerald-700 whitespace-nowrap">
+                              <td className="py-2.5 px-3 font-bold text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
                                 {row.yearlyPremium}
                               </td>
                               <td className="py-2.5 px-3 whitespace-nowrap">
                                 <span
                                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${row.paymentStatus === 'Unpaid'
-                                    ? 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
-                                    : 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                                    ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 ring-1 ring-rose-200 dark:ring-rose-800/40'
+                                    : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-200 dark:ring-emerald-800/40'
                                     }`}
                                 >
                                   {row.paymentStatus === 'Unpaid' ? (
@@ -2388,14 +2667,14 @@ function AddClientFormContent() {
                                     </>
                                   ) : (
                                     <>
-                                      <CheckCircle2 className="size-3 text-emerald-600" />
+                                      <CheckCircle2 className="size-3 text-emerald-600 dark:text-emerald-400" />
                                       <span>Paid</span>
                                     </>
                                   )}
                                 </span>
                               </td>
                               <td className="py-2.5 px-3 text-right whitespace-nowrap">
-                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
                                   <Check className="size-3" />
                                   <span>Ready</span>
                                 </span>
@@ -2411,14 +2690,14 @@ function AddClientFormContent() {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between p-4 sm:p-5 border-t border-slate-100 bg-slate-50/50">
+            <div className="flex items-center justify-between p-4 sm:p-5 border-t border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/80">
               <button
                 type="button"
                 onClick={() => {
                   setIsImportModalOpen(false)
                   setParsedImportRows([])
                 }}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -2428,7 +2707,7 @@ function AddClientFormContent() {
                   type="button"
                   disabled={parsedImportRows.length === 0 || isImportProcessing}
                   onClick={handleExecuteBulkImport}
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#0170FE] px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 hover:bg-[#0060db] transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#0170FE] dark:bg-blue-600 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0170FE]/25 hover:bg-[#0060db] dark:hover:bg-blue-500 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Check className="size-4" />
                   <span>
@@ -2441,188 +2720,178 @@ function AddClientFormContent() {
         </div>
       )}
 
-      {/* SAVED DRAFTS & INCOMPLETE / HALF INFO RECORDS MODAL */}
-      {isDraftsModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
-          <div className="w-full max-w-3xl bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto">
-            {/* Modal Header */}
-            <div className="flex items-start justify-between p-5 sm:p-6 border-b border-slate-100 bg-amber-50/50">
-              <div className="flex items-start gap-3.5">
-                <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-sm">
-                  <FolderClock className="size-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-lg sm:text-xl font-bold text-slate-900">
-                      Drafts &amp; Incomplete Records
-                    </h3>
-                    <span className="rounded-full bg-amber-200 px-2.5 py-0.5 text-xs font-bold text-amber-950">
-                      {allDrafts.length} Saved
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-                    Entries saved with pending, half info, or awaiting missing documents. Resume anytime to finish and bind.
-                  </p>
-                </div>
+      {/* ALWAYS-VISIBLE INLINE SAVED DRAFTS & INCOMPLETE RECORDS (At the bottom of the page, NOT a popup) */}
+      <section
+        id="drafts-list"
+        className="rounded-2xl border border-amber-200/90 dark:border-amber-500/25 bg-white dark:bg-slate-900/60 p-5 sm:p-7 shadow-xs space-y-4"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-100 dark:border-white/5 pb-4">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white shadow-xs">
+              <FolderClock className="size-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                  Saved Drafts &amp; Incomplete Records
+                </h3>
+                <span className="rounded-full bg-amber-100 dark:bg-amber-950/60 px-2.5 py-0.5 text-xs font-bold text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40">
+                  {allDrafts.length} Saved
+                </span>
               </div>
-
-              <button
-                type="button"
-                onClick={() => setIsDraftsModalOpen(false)}
-                className="size-8 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-
-            {/* Search Filter for Drafts */}
-            <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/40">
-              <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Filter drafts by client name, business, phone..."
-                  value={draftSearchQuery}
-                  onChange={(e) => setDraftSearchQuery(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-8 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
-                />
-                {draftSearchQuery && (
-                  <button
-                    onClick={() => setDraftSearchQuery('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-                  >
-                    <X className="size-3.5" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Drafts List Body */}
-            <div className="p-4 sm:p-5 overflow-y-auto space-y-3 divide-y divide-slate-100">
-              {allDrafts.length === 0 ? (
-                <div className="py-12 text-center text-slate-400">
-                  <FolderClock className="mx-auto size-10 text-slate-300 mb-2" />
-                  <p className="text-sm font-semibold text-slate-700">No drafts currently saved</p>
-                  <p className="text-xs text-slate-400 mt-1">
-                    When intake has partial or half info, click &ldquo;Save as Draft&rdquo; to store it here.
-                  </p>
-                </div>
-              ) : (
-                allDrafts
-                  .filter((d) => {
-                    if (!draftSearchQuery.trim()) return true
-                    const q = draftSearchQuery.toLowerCase()
-                    return (
-                      d.name.toLowerCase().includes(q) ||
-                      (d.businessName && d.businessName.toLowerCase().includes(q)) ||
-                      (d.phone && d.phone.toLowerCase().includes(q))
-                    )
-                  })
-                  .map((draft) => {
-                    const isCurrentResumed = resumedDraftId === draft.id
-                    return (
-                      <div
-                        key={draft.id}
-                        className={`pt-3 first:pt-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-2xl transition ${isCurrentResumed
-                          ? 'bg-amber-50/80 border border-amber-300 ring-2 ring-amber-400/30'
-                          : 'hover:bg-slate-50 border border-transparent'
-                          }`}
-                      >
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h4 className="text-sm font-bold text-slate-900 truncate">
-                              {draft.name}
-                            </h4>
-                            <span
-                              className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${draft.clientType === 'Commercial'
-                                ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                                : 'bg-blue-50 text-blue-700 border border-blue-200'
-                                }`}
-                            >
-                              {draft.clientType || 'Individual'}
-                            </span>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900">
-                              <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
-                              Draft / Incomplete
-                            </span>
-                            {isCurrentResumed && (
-                              <span className="rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5">
-                                Active in Editor
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Partial Info Summary */}
-                          <p className="text-xs text-amber-900 mt-1 flex items-center gap-1.5">
-                            <Clock className="size-3 text-amber-600 shrink-0" />
-                            <span>{draft.lastActivity?.description || 'Half Info saved'}</span>
-                          </p>
-
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500 mt-1.5">
-                            {draft.phone && draft.phone !== '— (Pending phone)' && (
-                              <span className="flex items-center gap-1">
-                                <Phone className="size-3 text-slate-400" />
-                                {draft.phone}
-                              </span>
-                            )}
-                            {draft.email && !draft.email.includes('Pending') && (
-                              <span className="flex items-center gap-1">
-                                <Mail className="size-3 text-slate-400" />
-                                {draft.email}
-                              </span>
-                            )}
-                            <span className="flex items-center gap-1">
-                              <Building2 className="size-3 text-slate-400" />
-                              {draft.insurerName || 'Travelers Insurance'}
-                            </span>
-                            <span>·</span>
-                            <span>{draft.policies?.[0]?.type || 'Auto'}</span>
-                            <span>·</span>
-                            <span className="font-mono text-slate-400">{draft.id}</span>
-                          </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-                          <button
-                            type="button"
-                            onClick={() => loadDraftIntoForm(draft)}
-                            className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition cursor-pointer"
-                          >
-                            <FileEdit className="size-3.5 text-amber-200" />
-                            <span>{isCurrentResumed ? 'Loaded in Form' : 'Resume Draft'}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => handleDeleteDraft(draft.id, e)}
-                            className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition cursor-pointer"
-                            title="Delete this draft"
-                          >
-                            <Trash2 className="size-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    )
-                  })
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="flex items-center justify-between p-4 sm:p-5 border-t border-slate-100 bg-slate-50/50">
-              <span className="text-xs text-slate-500">
-                Drafts are also listed in <Link href="/broker/book-of-business?tab=Draft" className="text-blue-600 hover:underline font-semibold">My Book &gt; Drafts</Link>
-              </span>
-              <button
-                type="button"
-                onClick={() => setIsDraftsModalOpen(false)}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-              >
-                Close
-              </button>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Intake entries saved with partial info or awaiting documents. Click &ldquo;Resume Draft&rdquo; to load into the form above.
+              </p>
             </div>
           </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <Link
+              href="/broker/book-of-business?tab=Draft"
+              className="text-xs font-semibold text-[#0170FE] dark:text-blue-400 hover:underline inline-flex items-center gap-1"
+            >
+              <span>View in Book of Business</span>
+              <ExternalLink className="size-3" />
+            </Link>
+          </div>
         </div>
-      )}
+
+        {/* Filter bar for drafts if multiple */}
+        {allDrafts.length > 2 && (
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Filter drafts by client name, business, phone..."
+              value={draftSearchQuery}
+              onChange={(e) => setDraftSearchQuery(e.target.value)}
+              className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#0b0f19] pl-10 pr-8 text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-500/20"
+            />
+            {draftSearchQuery && (
+              <button
+                type="button"
+                onClick={() => setDraftSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+              >
+                <X className="size-3.5" />
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Drafts List Cards */}
+        <div className="space-y-3 pt-1">
+          {allDrafts.length === 0 ? (
+            <div className="py-10 text-center rounded-xl border border-dashed border-slate-200 dark:border-white/10 bg-slate-50/40 dark:bg-slate-900/30">
+              <FolderClock className="mx-auto size-9 text-slate-300 dark:text-slate-600 mb-2" />
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No pending drafts saved</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 max-w-sm mx-auto">
+                When filling out a client with incomplete information, click &ldquo;Save as Draft&rdquo; above to keep it handy in this list.
+              </p>
+            </div>
+          ) : (
+            allDrafts
+              .filter((d) => {
+                if (!draftSearchQuery.trim()) return true
+                const q = draftSearchQuery.toLowerCase()
+                return (
+                  d.name.toLowerCase().includes(q) ||
+                  (d.businessName && d.businessName.toLowerCase().includes(q)) ||
+                  (d.phone && d.phone.toLowerCase().includes(q))
+                )
+              })
+              .map((draft) => {
+                const isCurrentResumed = resumedDraftId === draft.id
+                return (
+                  <div
+                    key={draft.id}
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border transition ${isCurrentResumed
+                      ? 'bg-amber-50/90 dark:bg-amber-950/40 border-amber-300 dark:border-amber-500/50 shadow-xs ring-2 ring-amber-400/20'
+                      : 'bg-slate-50/60 dark:bg-slate-800/40 border-slate-200/80 dark:border-white/5 hover:border-amber-300 dark:hover:border-amber-500/40'
+                      }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                          {draft.name}
+                        </h4>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${draft.clientType === 'Commercial'
+                            ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/40'
+                            : 'bg-blue-50 dark:bg-blue-950/40 text-[#0170FE] dark:text-blue-300 border border-blue-200 dark:border-blue-800/40'
+                            }`}
+                        >
+                          {draft.clientType || 'Individual'}
+                        </span>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 text-[10px] font-bold text-amber-900 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/40">
+                          <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                          Draft / Incomplete
+                        </span>
+                        {isCurrentResumed && (
+                          <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5 border border-emerald-200 dark:border-emerald-800/40">
+                            Active in Form Above
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Summary note */}
+                      <p className="text-xs text-amber-900 dark:text-amber-400 mt-1 flex items-center gap-1.5">
+                        <Clock className="size-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                        <span>{draft.lastActivity?.description || 'Partial intake saved'}</span>
+                      </p>
+
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
+                        {draft.phone && draft.phone !== '— (Pending phone)' && (
+                          <span className="flex items-center gap-1">
+                            <Phone className="size-3 text-slate-400" />
+                            {draft.phone}
+                          </span>
+                        )}
+                        {draft.email && !draft.email.includes('Pending') && (
+                          <span className="flex items-center gap-1">
+                            <Mail className="size-3 text-slate-400" />
+                            {draft.email}
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Building2 className="size-3 text-slate-400" />
+                          {draft.insurerName || 'Travelers Insurance'}
+                        </span>
+                        <span>·</span>
+                        <span>{draft.policies?.[0]?.type || 'Auto'}</span>
+                        <span>·</span>
+                        <span className="font-mono text-slate-400">{draft.id}</span>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                      <button
+                        type="button"
+                        onClick={() => loadDraftIntoForm(draft)}
+                        className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold shadow-2xs transition cursor-pointer ${isCurrentResumed
+                          ? 'bg-amber-500 text-white hover:bg-amber-600'
+                          : 'bg-amber-600 hover:bg-amber-700 dark:bg-amber-600 dark:hover:bg-amber-500 text-white'
+                          }`}
+                      >
+                        <FileEdit className="size-3.5" />
+                        <span>{isCurrentResumed ? 'Editing in Form ↑' : 'Resume Draft'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteDraft(draft.id, e)}
+                        className="p-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-800/40 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition cursor-pointer"
+                        title="Delete this draft"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )
+              })
+          )}
+        </div>
+      </section>
     </div>
   )
 }

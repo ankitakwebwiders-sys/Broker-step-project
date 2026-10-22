@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Footer } from '@/components/landing/Footer'
 import { pricingPlans } from '@/data/landing/pricing'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export default function SelectPlanPage() {
   const router = useRouter()
@@ -23,23 +24,36 @@ export default function SelectPlanPage() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2.5 lg:px-10">
           <Link href="/" className="transition-transform hover:scale-105">
+            {/* Light Mode Logo */}
             <Image
               src="/images/logos/broker-logo-removebg-preview.png"
               alt="BrokerStep Logo"
               width={220}
               height={60}
               priority
-              className="object-contain"
+              className="object-contain block dark:hidden"
+            />
+            {/* Dark Mode Logo */}
+            <Image
+              src="/images/logos/broker-dark-theme.png"
+              alt="BrokerStep Logo"
+              width={220}
+              height={60}
+              priority
+              className="object-contain hidden dark:block"
             />
           </Link>
 
-          <Link
-            href="/login"
-            className="group inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-rose-600"
-          >
-            <LogOut className="size-4 text-slate-500 transition-colors group-hover:text-rose-600" />
-            <span>Logout</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link
+              href="/login"
+              className="group inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-rose-600"
+            >
+              <LogOut className="size-4 text-slate-500 transition-colors group-hover:text-rose-600" />
+              <span>Logout</span>
+            </Link>
+          </div>
         </div>
       </header>
 

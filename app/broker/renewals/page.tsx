@@ -457,7 +457,7 @@ export default function RenewalsPage() {
     <div className="p-4 sm:p-7 max-w-[1680px] mx-auto space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-xl bg-slate-900 px-4 py-3 text-[13px] font-medium text-white shadow-2xl ring-1 ring-white/10 animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-xl bg-slate-900 dark:bg-slate-800 dark:border dark:border-white/10 px-4 py-3 text-[13px] font-medium text-white shadow-2xl ring-1 ring-white/10 animate-in fade-in slide-in-from-bottom-3 duration-200">
           <CheckCircle2 className="size-4 text-emerald-400" />
           <span>{toastMessage}</span>
         </div>
@@ -466,59 +466,58 @@ export default function RenewalsPage() {
       {/* ───── Header Bar (11. Broker – Renewals) ───── */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div className="min-w-0 max-w-xl">
-          <p className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600">
+          <p className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400">
             <span className="size-1.5 rounded-full bg-blue-500 animate-pulse" />
             Tuesday, October 8, 2026 · Renewal Management
           </p>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
             Renewals
           </h1>
-          <p className="mt-1 text-sm sm:text-[15px] text-slate-500 leading-relaxed">
+          <p className="mt-1 text-sm sm:text-[15px] text-slate-500 dark:text-slate-400 leading-relaxed">
             Policy expiration horizon tracking, broker reviews, renewal/rewrite<br /> actions, and preserved historical policy records.
           </p>
         </div>
 
         {/* Header Summary KPI */}
         <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
-          <div className="rounded-xl border border-slate-200 bg-white p-2.5 sm:px-3.5 sm:py-2 text-left sm:text-right shadow-xs">
-            <span className="text-[11px] sm:text-xs font-medium text-slate-400 block truncate">Total Horizon Premium</span>
-            <span className="text-sm sm:text-lg font-bold text-slate-900 font-mono block">
+          <div className="rounded-xl border border-slate-200 bg-white dark:bg-slate-900 dark:border-white/10 p-2.5 sm:px-3.5 sm:py-2 text-left sm:text-right shadow-xs">
+            <span className="text-[11px] sm:text-xs font-medium text-slate-400 dark:text-slate-400 block truncate">Total Horizon Premium</span>
+            <span className="text-sm sm:text-lg font-bold text-slate-900 dark:text-white font-mono block">
               ${totalHorizonPremium.toLocaleString()}
             </span>
           </div>
 
-          <div className="rounded-xl border border-blue-200 bg-blue-50/80 p-2.5 sm:px-3.5 sm:py-2 text-left sm:text-right shadow-xs">
-            <span className="text-[11px] sm:text-xs font-medium text-blue-600 block truncate">Listed Policies</span>
-            <span className="text-sm sm:text-lg font-bold text-blue-700 block">
+          <div className="rounded-xl border border-blue-200 bg-blue-50/80 dark:bg-blue-950/40 dark:border-blue-800/50 p-2.5 sm:px-3.5 sm:py-2 text-left sm:text-right shadow-xs">
+            <span className="text-[11px] sm:text-xs font-medium text-blue-600 dark:text-blue-400 block truncate">Listed Policies</span>
+            <span className="text-sm sm:text-lg font-bold text-blue-700 dark:text-blue-300 block">
               {horizonFilteredRecords.length} Policies
             </span>
           </div>
 
           <Link
             href="/broker/book-of-business"
-            className="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50"
+            className="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white dark:bg-slate-900 dark:border-white/10 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 dark:hover:border-white/20"
           >
-            <Archive className="size-4 text-slate-400" />
+            <Archive className="size-4 text-slate-400 dark:text-slate-400" />
             <span>Book of Business</span>
           </Link>
         </div>
       </div>
 
       {/* ───── 11.1 Renewal Workflow Guide Banner ───── */}
-      <div className="rounded-2xl border border-blue-200/80 bg-gradient-to-br from-blue-50/70 via-white to-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-4">
-        <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center border-b border-blue-100/80 pb-3">
+      <div className="rounded-2xl border border-blue-200/80 bg-gradient-to-br from-blue-50/70 via-white to-white dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-900 dark:border-white/10 p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-4">
+        <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center border-b border-blue-100/80 dark:border-white/10 pb-3">
           <div className="flex items-center gap-2.5">
-
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
                 Renewal Workflow
               </h3>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                 End-to-end policy lifecycle tracking from approaching expiration to final statement reconciliation.
               </p>
             </div>
           </div>
-          <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700 self-start sm:self-auto">
+          <span className="rounded-full bg-blue-100 dark:bg-blue-950/60 dark:text-blue-400 dark:border dark:border-blue-800/40 px-3 py-1 text-xs font-bold text-blue-700 self-start sm:self-auto">
             Automated Pipeline
           </span>
         </div>
@@ -530,76 +529,76 @@ export default function RenewalsPage() {
               title: 'Existing Policy',
               desc: 'Active policy in Book of Business with in-force terms and contracted commission.',
               icon: Shield,
-              color: 'text-blue-600 bg-blue-50',
+              color: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/60',
             },
             {
               step: '2',
               title: 'Expiry Approaching',
               desc: 'Threshold alert triggered at 90, 60, 30, or 7 days prior to term expiration.',
               icon: Clock,
-              color: 'text-amber-600 bg-amber-50',
+              color: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/60',
             },
             {
               step: '3',
               title: 'Policy in Renewal View',
               desc: 'Account automatically routed to the broker renewal horizon dashboard for review.',
               icon: CalendarDays,
-              color: 'text-indigo-600 bg-indigo-50',
+              color: 'text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-950/60',
             },
             {
               step: '4',
               title: 'Broker Reviews',
               desc: 'Broker evaluates client risk profile, claims history, and new carrier rate quotes.',
               icon: Eye,
-              color: 'text-violet-600 bg-violet-50',
+              color: 'text-violet-600 bg-violet-50 dark:text-violet-400 dark:bg-violet-950/60',
             },
             {
               step: '5',
               title: 'Outcome Decision',
               desc: 'Broker executes decision: Renew, Rewrite, Non-Renew, or Mark Lost Business.',
               icon: RefreshCw,
-              color: 'text-emerald-600 bg-emerald-50',
+              color: 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/60',
             },
             {
               step: '6',
               title: 'History Preserved',
               desc: 'Expiring policy term archived in Historical Book for permanent audit integrity.',
               icon: Archive,
-              color: 'text-slate-700 bg-slate-100',
+              color: 'text-slate-700 bg-slate-100 dark:text-slate-300 dark:bg-slate-800',
             },
             {
               step: '7',
               title: 'New Term Recorded',
               desc: 'Renewal/rewrite binder created with updated premium and expected commission.',
               icon: Layers,
-              color: 'text-blue-600 bg-blue-50',
+              color: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/60',
             },
             {
               step: '8',
               title: 'Statement Reconciled',
               desc: 'Remittance statement matched and reconciled against expected commission.',
               icon: CheckCircle2,
-              color: 'text-emerald-600 bg-emerald-50',
+              color: 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/60',
             },
           ].map((s) => {
             const IconComponent = s.icon
             return (
               <div
                 key={s.step}
-                className="group rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs transition-all hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md"
+                className="group rounded-xl border border-slate-200/90 bg-white dark:bg-slate-950/60 dark:border-white/10 p-4 shadow-xs transition-all hover:-translate-y-0.5 hover:border-blue-400 dark:hover:border-blue-500/50 hover:shadow-md"
               >
                 <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-bold font-mono text-blue-700 ring-1 ring-blue-100">
+                  <span className="inline-flex items-center rounded-lg bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 text-xs font-bold font-mono text-blue-700 dark:text-blue-400 ring-1 ring-blue-100 dark:ring-blue-800/40">
                     Step {s.step}
                   </span>
                   <div className={`flex size-7.5 items-center justify-center rounded-lg ${s.color}`}>
                     <IconComponent className="size-4" />
                   </div>
                 </div>
-                <h4 className="font-bold text-slate-900 text-sm mt-2.5 group-hover:text-blue-600 transition">
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm mt-2.5 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
                   {s.title}
                 </h4>
-                <p className="text-xs sm:text-[13px] text-slate-600 mt-1 leading-relaxed">
+                <p className="text-xs sm:text-[13px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
                   {s.desc}
                 </p>
               </div>
@@ -609,7 +608,7 @@ export default function RenewalsPage() {
       </div>
 
       {/* ───── Horizon Filter Tabs Bar (7 Days, 30 Days, 60 Days, 90 Days, Custom Date Range) ───── */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-3.5">
+      <div className="rounded-2xl border border-slate-200/80 bg-white dark:bg-slate-900 dark:border-white/10 p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-3.5">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-thin">
           {[
             { id: '7-days', label: '7 Days', count: horizonCounts['7-days'] },
@@ -624,13 +623,13 @@ export default function RenewalsPage() {
                 key={tab.id}
                 onClick={() => handleHorizonSelect(tab.id as RenewalHorizon)}
                 className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isActive
-                  ? 'bg-slate-950 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-slate-950 text-white shadow-sm dark:bg-blue-600'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
                   }`}
               >
                 <span>{tab.label}</span>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                  className={`rounded-full px-2 py-0.5 text-xs font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
                     }`}
                 >
                   {tab.count}
@@ -642,47 +641,47 @@ export default function RenewalsPage() {
 
         {/* Custom Date Range Picker (Visible only when 'Custom Date Range' tab is active) */}
         {selectedHorizon === 'custom' && (
-          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-blue-200 bg-blue-50/50 p-3 text-xs sm:text-sm">
-            <span className="font-semibold text-blue-900 flex items-center gap-1.5">
-              <Calendar className="size-4 text-blue-600" />
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-blue-200 bg-blue-50/50 dark:border-blue-900/40 dark:bg-blue-950/30 p-3 text-xs sm:text-sm">
+            <span className="font-semibold text-blue-900 dark:text-blue-300 flex items-center gap-1.5">
+              <Calendar className="size-4 text-blue-600 dark:text-blue-400" />
               Custom Date Range:
             </span>
             <div className="flex items-center gap-2">
-              <label className="text-slate-500 text-xs font-medium">From:</label>
+              <label className="text-slate-500 dark:text-slate-400 text-xs font-medium">From:</label>
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+                className="rounded-lg border border-slate-200 bg-white dark:bg-slate-800 dark:border-white/10 dark:text-white dark:focus:border-blue-400 px-2.5 py-1 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
               />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-slate-500 text-xs font-medium">To:</label>
+              <label className="text-slate-500 dark:text-slate-400 text-xs font-medium">To:</label>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
+                className="rounded-lg border border-slate-200 bg-white dark:bg-slate-800 dark:border-white/10 dark:text-white dark:focus:border-blue-400 px-2.5 py-1 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none"
               />
             </div>
           </div>
         )}
 
         {/* Search & Secondary Filter Dropdowns */}
-        <div className="flex flex-col gap-3 border-t border-slate-100 pt-3.5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 border-t border-slate-100 dark:border-white/10 pt-3.5 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               type="text"
               placeholder="Search by client, policy #, carrier, or line of business..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9.5 pr-8 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/70 dark:bg-slate-800/80 dark:border-white/10 dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-slate-800 dark:focus:ring-blue-500/20 pl-9.5 pr-8 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
               >
                 <X className="size-3.5" />
               </button>
@@ -692,11 +691,11 @@ export default function RenewalsPage() {
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Carrier Filter */}
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-slate-500">Carrier:</span>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Carrier:</span>
               <select
                 value={carrierFilter}
                 onChange={(e) => setCarrierFilter(e.target.value)}
-                className="h-9.5 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none cursor-pointer"
+                className="h-9.5 rounded-xl border border-slate-200 bg-white dark:bg-slate-800 dark:border-white/10 dark:text-slate-200 px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none cursor-pointer"
               >
                 <option value="All">All Carriers</option>
                 <option value="Travelers">Travelers</option>
@@ -711,11 +710,11 @@ export default function RenewalsPage() {
 
             {/* Renewal Status Filter */}
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-slate-500">Status:</span>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Status:</span>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="h-9.5 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none cursor-pointer"
+                className="h-9.5 rounded-xl border border-slate-200 bg-white dark:bg-slate-800 dark:border-white/10 dark:text-slate-200 px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none cursor-pointer"
               >
                 <option value="All">All Statuses</option>
                 <option value="Pending Review">Pending Review</option>
@@ -737,7 +736,7 @@ export default function RenewalsPage() {
                   setStatusFilter('All')
                   setSearchQuery('')
                 }}
-                className="inline-flex h-9.5 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 cursor-pointer"
+                className="inline-flex h-9.5 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-700 px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 cursor-pointer"
               >
                 <RotateCcw className="size-3.5" />
                 <span>Reset</span>
@@ -748,11 +747,11 @@ export default function RenewalsPage() {
       </div>
 
       {/* ───── Listing Columns Table (Client, Policy Number, Carrier, Line of Business, Expiry Date, Premium, Policy Status, Renewal Status | Actions) ───── */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden">
+      <div className="rounded-2xl border border-slate-200/80 bg-white dark:bg-slate-900 dark:border-white/10 shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden">
         <div className="overflow-x-auto scrollbar-thin">
           <table className="w-full min-w-[1440px] text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold uppercase tracking-wider text-slate-500 select-none">
+              <tr className="border-b border-slate-200/80 bg-slate-50/70 dark:border-white/10 dark:bg-slate-950/70 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 select-none">
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[210px]">Client</th>
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[160px]">Policy Number</th>
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[130px]">Carrier</th>
@@ -761,18 +760,18 @@ export default function RenewalsPage() {
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[130px] text-right">Premium</th>
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[140px]">Policy Status</th>
                 <th className="px-4 py-3.5 whitespace-nowrap min-w-[150px]">Renewal Status</th>
-                <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">Actions</th>
+                <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 dark:bg-slate-950 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] dark:md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.5)] select-none">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-medium">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/10 font-medium">
               {horizonFilteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-slate-400">
-                    <Clock className="mx-auto size-8 text-slate-300 mb-2" />
-                    <p className="text-sm font-semibold text-slate-700">
+                  <td colSpan={9} className="py-12 text-center text-slate-400 dark:text-slate-500">
+                    <Clock className="mx-auto size-8 text-slate-300 dark:text-slate-600 mb-2" />
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                       No policies found in {selectedHorizon.replace('-', ' ')}
                     </p>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
                       Try selecting another horizon tab or resetting your filter criteria.
                     </p>
                   </td>
@@ -780,37 +779,37 @@ export default function RenewalsPage() {
               ) : (
                 horizonFilteredRecords.map((policy) => {
                   return (
-                    <tr key={policy.id} className="group hover:bg-slate-50/70 transition-colors">
+                    <tr key={policy.id} className="group hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
                       {/* 1. Client */}
                       <td className="px-4 py-3.5 whitespace-nowrap">
-                        <p className="font-semibold text-slate-900 leading-snug">{policy.client}</p>
-                        <p className="text-xs text-slate-500 leading-snug">{policy.businessName}</p>
+                        <p className="font-semibold text-slate-900 dark:text-white leading-snug">{policy.client}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">{policy.businessName}</p>
                       </td>
 
                       {/* 2. Policy Number */}
-                      <td className="px-4 py-3.5 whitespace-nowrap font-semibold text-slate-900 font-mono text-sm">
+                      <td className="px-4 py-3.5 whitespace-nowrap font-semibold text-slate-900 dark:text-white font-mono text-sm">
                         {policy.policyNumber}
                       </td>
 
                       {/* 3. Carrier */}
                       <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span className="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-800">
+                        <span className="inline-flex items-center rounded-lg bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-800 dark:text-slate-200">
                           {policy.carrier}
                         </span>
                       </td>
 
                       {/* 4. Line of Business */}
-                      <td className="px-4 py-3.5 whitespace-nowrap text-slate-700 font-medium text-xs sm:text-sm">{policy.lineOfBusiness}</td>
+                      <td className="px-4 py-3.5 whitespace-nowrap text-slate-700 dark:text-slate-300 font-medium text-xs sm:text-sm">{policy.lineOfBusiness}</td>
 
                       {/* 5. Expiry Date */}
                       <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs">
-                        <p className="font-semibold text-slate-900 leading-snug">{policy.expiryDate}</p>
+                        <p className="font-semibold text-slate-900 dark:text-white leading-snug">{policy.expiryDate}</p>
                         <span
                           className={`inline-block text-xs font-bold leading-snug ${policy.daysUntilExpiry <= 7
-                            ? 'text-rose-600'
+                            ? 'text-rose-600 dark:text-rose-400'
                             : policy.daysUntilExpiry <= 30
-                              ? 'text-amber-600'
-                              : 'text-slate-400'
+                              ? 'text-amber-600 dark:text-amber-400'
+                              : 'text-slate-400 dark:text-slate-500'
                             }`}
                         >
                           {policy.daysUntilExpiry} days remaining
@@ -818,7 +817,7 @@ export default function RenewalsPage() {
                       </td>
 
                       {/* 6. Premium */}
-                      <td className="px-4 py-3.5 whitespace-nowrap text-right font-bold text-slate-900 font-mono text-sm">
+                      <td className="px-4 py-3.5 whitespace-nowrap text-right font-bold text-slate-900 dark:text-white font-mono text-sm">
                         ${policy.premium.toLocaleString()}
                       </td>
 
@@ -826,10 +825,10 @@ export default function RenewalsPage() {
                       <td className="px-4 py-3.5 whitespace-nowrap">
                         <span
                           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${policy.policyStatus === 'Expiring Soon'
-                            ? 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
+                            ? 'bg-rose-50 text-rose-700 ring-1 ring-rose-200 dark:bg-rose-950/60 dark:text-rose-400 dark:ring-rose-800/40'
                             : policy.policyStatus === 'Pending Renewal'
-                              ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
-                              : 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                              ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:ring-amber-800/40'
+                              : 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:ring-emerald-800/40'
                             }`}
                         >
                           {policy.policyStatus}
@@ -840,16 +839,16 @@ export default function RenewalsPage() {
                       <td className="px-4 py-3.5 whitespace-nowrap">
                         <span
                           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${policy.renewalStatus === 'Renewed'
-                            ? 'bg-emerald-100 text-emerald-800'
+                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
                             : policy.renewalStatus === 'Rewritten'
-                              ? 'bg-blue-100 text-blue-800'
+                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300'
                               : policy.renewalStatus === 'Non-Renewed'
-                                ? 'bg-slate-200 text-slate-700'
+                                ? 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                                 : policy.renewalStatus === 'Lost Business'
-                                  ? 'bg-rose-100 text-rose-800'
+                                  ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
                                   : policy.renewalStatus === 'Needs Attention'
-                                    ? 'bg-amber-100 text-amber-800'
-                                    : 'bg-slate-100 text-slate-700'
+                                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                                    : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                             }`}
                         >
                           {policy.renewalStatus}
@@ -857,12 +856,12 @@ export default function RenewalsPage() {
                       </td>
 
                       {/* Actions: Review; Renew; Rewrite; Non-Renew; Mark Lost Business */}
-                      <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
+                      <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] dark:bg-slate-900 dark:group-hover:bg-slate-800 dark:md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.5)] transition-colors">
                         <div className="flex items-center justify-center gap-1.5 flex-nowrap">
                           {/* Review Action */}
                           <button
                             onClick={() => handleOpenAction('review', policy)}
-                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg bg-slate-950 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
+                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg bg-slate-950 dark:bg-slate-800 dark:border dark:border-white/10 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[11.5px] font-semibold text-white shadow-xs hover:bg-blue-600 dark:hover:bg-blue-600 transition cursor-pointer whitespace-nowrap"
                             title="Review Policy (Step 41)"
                           >
                             <Eye className="size-3.5" />
@@ -872,7 +871,7 @@ export default function RenewalsPage() {
                           {/* Renew Action */}
                           <button
                             onClick={() => handleOpenAction('renew', policy)}
-                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-emerald-700 transition cursor-pointer"
+                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-emerald-700 dark:hover:bg-emerald-500 transition cursor-pointer"
                             title="Renew Policy (Step 42)"
                           >
                             <Check className="size-3.5" />
@@ -882,17 +881,17 @@ export default function RenewalsPage() {
                           {/* Rewrite Action */}
                           <button
                             onClick={() => handleOpenAction('rewrite', policy)}
-                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition cursor-pointer"
+                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/60 dark:border-blue-800/50 dark:text-blue-400 dark:hover:bg-blue-900/60 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition cursor-pointer"
                             title="Rewrite to Carrier (Step 42)"
                           >
-                            <RefreshCw className="size-3.5 text-blue-600" />
+                            <RefreshCw className="size-3.5 text-blue-600 dark:text-blue-400" />
                             <span>Rewrite</span>
                           </button>
 
                           {/* Non-Renew Action */}
                           <button
                             onClick={() => handleOpenAction('non-renew', policy)}
-                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-slate-200 bg-slate-50 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-700 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 transition cursor-pointer"
                             title="Non-Renew Policy (Step 42)"
                           >
                             <Ban className="size-3.5 text-slate-400" />
@@ -902,7 +901,7 @@ export default function RenewalsPage() {
                           {/* Mark Lost Business Action */}
                           <button
                             onClick={() => handleOpenAction('lost', policy)}
-                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-100 transition cursor-pointer"
+                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-rose-200 bg-rose-50 dark:bg-rose-950/60 dark:border-rose-900/50 dark:text-rose-400 dark:hover:bg-rose-900/60 px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-100 transition cursor-pointer"
                             title="Mark Lost Business (Step 42)"
                           >
                             <XCircle className="size-3.5 text-rose-500" />
@@ -925,64 +924,64 @@ export default function RenewalsPage() {
 
       {/* 1. REVIEW MODAL (Step 41) */}
       {activeModalAction === 'review' && selectedPolicyForAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 dark:bg-black/75 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
                   Step 41: Broker Reviews Policy
                 </span>
-                <h3 className="text-[17px] font-bold text-slate-900 mt-0.5">
+                <h3 className="text-[17px] font-bold text-slate-900 dark:text-white mt-0.5">
                   Renewal Audit for {selectedPolicyForAction.policyNumber}
                 </h3>
               </div>
               <button
                 onClick={() => setActiveModalAction(null)}
-                className="text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
               >
                 <X className="size-5" />
               </button>
             </div>
 
-            <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 space-y-2.5 text-[12.5px]">
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 dark:bg-slate-800/60 dark:border-white/10 p-4 space-y-2.5 text-[12.5px]">
               <div className="flex justify-between">
-                <span className="text-slate-500">Client / Insured:</span>
-                <span className="font-semibold text-slate-900">{selectedPolicyForAction.client} ({selectedPolicyForAction.businessName})</span>
+                <span className="text-slate-500 dark:text-slate-400">Client / Insured:</span>
+                <span className="font-semibold text-slate-900 dark:text-white">{selectedPolicyForAction.client} ({selectedPolicyForAction.businessName})</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Carrier:</span>
-                <span className="font-semibold text-slate-900">{selectedPolicyForAction.carrier}</span>
+                <span className="text-slate-500 dark:text-slate-400">Carrier:</span>
+                <span className="font-semibold text-slate-900 dark:text-white">{selectedPolicyForAction.carrier}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Line of Business:</span>
-                <span className="font-semibold text-slate-900">{selectedPolicyForAction.lineOfBusiness}</span>
+                <span className="text-slate-500 dark:text-slate-400">Line of Business:</span>
+                <span className="font-semibold text-slate-900 dark:text-white">{selectedPolicyForAction.lineOfBusiness}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Current Expiry Date:</span>
-                <span className="font-mono font-bold text-rose-600">{selectedPolicyForAction.expiryDate} ({selectedPolicyForAction.daysUntilExpiry} days left)</span>
+                <span className="text-slate-500 dark:text-slate-400">Current Expiry Date:</span>
+                <span className="font-mono font-bold text-rose-600 dark:text-rose-400">{selectedPolicyForAction.expiryDate} ({selectedPolicyForAction.daysUntilExpiry} days left)</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Expiring Term Premium:</span>
-                <span className="font-mono font-bold text-slate-900">${selectedPolicyForAction.premium.toLocaleString()}</span>
+                <span className="text-slate-500 dark:text-slate-400">Expiring Term Premium:</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white">${selectedPolicyForAction.premium.toLocaleString()}</span>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[12px] font-semibold text-slate-700">Broker Review Notes &amp; Action Plan:</label>
+              <label className="text-[12px] font-semibold text-slate-700 dark:text-slate-300">Broker Review Notes &amp; Action Plan:</label>
               <textarea
                 value={actionNotes}
                 onChange={(e) => setActionNotes(e.target.value)}
                 placeholder="Enter client coverage notes, carrier terms, and decision rationale..."
-                className="w-full rounded-xl border border-slate-200 p-3 text-[12px] text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 p-3 text-[12px] text-slate-800 placeholder:text-slate-400 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
                 rows={3}
               />
             </div>
 
-            <div className="pt-2 flex items-center justify-between border-t border-slate-100">
+            <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-white/10">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setActiveModalAction(null)}
-                  className="rounded-xl border border-slate-200 px-3.5 py-2 text-[12px] font-medium text-slate-700 hover:bg-slate-50"
+                  className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2 text-[12px] font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                 >
                   Close
                 </button>
@@ -998,7 +997,7 @@ export default function RenewalsPage() {
                     showToast('Review notes saved. Policy marked In Negotiation.')
                     setActiveModalAction(null)
                   }}
-                  className="rounded-xl bg-slate-950 px-4 py-2 text-[12px] font-semibold text-white hover:bg-blue-600"
+                  className="rounded-xl bg-slate-950 dark:bg-blue-600 px-4 py-2 text-[12px] font-semibold text-white hover:bg-blue-600 dark:hover:bg-blue-500"
                 >
                   Save Review Notes
                 </button>
@@ -1010,70 +1009,70 @@ export default function RenewalsPage() {
 
       {/* 2. RENEW MODAL (Step 42 & 43 & 44) */}
       {activeModalAction === 'renew' && selectedPolicyForAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 dark:bg-black/75 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   Step 42: Renew Policy
                 </span>
-                <h3 className="text-[17px] font-bold text-slate-900 mt-0.5">
+                <h3 className="text-[17px] font-bold text-slate-900 dark:text-white mt-0.5">
                   Execute Renewal for {selectedPolicyForAction.policyNumber}
                 </h3>
               </div>
               <button
                 onClick={() => setActiveModalAction(null)}
-                className="text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
               >
                 <X className="size-5" />
               </button>
             </div>
 
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 space-y-2 text-[12px] text-emerald-950">
-              <p className="font-semibold flex items-center gap-1.5 text-emerald-800">
-                <CheckCircle2 className="size-4 text-emerald-600" />
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 dark:bg-emerald-950/30 dark:border-emerald-800/40 p-4 space-y-2 text-[12px] text-emerald-950 dark:text-emerald-300">
+              <p className="font-semibold flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300">
+                <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
                 Workflow Compliance:
               </p>
-              <ul className="list-disc list-inside space-y-1 text-slate-600 text-[11.5px]">
-                <li><strong>Step 43:</strong> Historical policy term will be preserved in Book of Business.</li>
-                <li><strong>Step 44:</strong> New renewal transaction will be recorded with carrier {selectedPolicyForAction.carrier}.</li>
-                <li><strong>Step 45:</strong> Later carrier statement will be matched &amp; reconciled automatically.</li>
+              <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-400 text-[11.5px]">
+                <li><strong className="text-slate-800 dark:text-slate-200">Step 43:</strong> Historical policy term will be preserved in Book of Business.</li>
+                <li><strong className="text-slate-800 dark:text-slate-200">Step 44:</strong> New renewal transaction will be recorded with carrier {selectedPolicyForAction.carrier}.</li>
+                <li><strong className="text-slate-800 dark:text-slate-200">Step 45:</strong> Later carrier statement will be matched &amp; reconciled automatically.</li>
               </ul>
             </div>
 
             <div className="space-y-3 text-[12px]">
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">New Renewal Term Premium ($):</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">New Renewal Term Premium ($):</label>
                 <input
                   type="number"
                   value={newRenewalPremium}
                   onChange={(e) => setNewRenewalPremium(Number(e.target.value))}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-[13px] font-mono font-bold text-slate-900 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 dark:text-white px-3 py-2 text-[13px] font-mono font-bold text-slate-900 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Renewal Notes &amp; Binding Remarks:</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">Renewal Notes &amp; Binding Remarks:</label>
                 <textarea
                   value={actionNotes}
                   onChange={(e) => setActionNotes(e.target.value)}
                   placeholder="Terms accepted by insured. Standard renewal binder issued."
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-[12px] text-slate-800 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 p-2.5 text-[12px] text-slate-800 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
                   rows={2}
                 />
               </div>
             </div>
 
-            <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
+            <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-white/10">
               <button
                 onClick={() => setActiveModalAction(null)}
-                className="rounded-xl border border-slate-200 px-3.5 py-2 text-[12px] font-medium text-slate-700 hover:bg-slate-50"
+                className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2 text-[12px] font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
               >
                 Cancel
               </button>
               <button
                 onClick={handleExecuteRenewal}
-                className="rounded-xl bg-emerald-600 px-4 py-2 text-[12.5px] font-semibold text-white shadow-md hover:bg-emerald-700"
+                className="rounded-xl bg-emerald-600 px-4 py-2 text-[12.5px] font-semibold text-white shadow-md hover:bg-emerald-700 dark:hover:bg-emerald-500"
               >
                 Confirm Renewal &amp; Bind New Term
               </button>
@@ -1084,39 +1083,39 @@ export default function RenewalsPage() {
 
       {/* 3. REWRITE MODAL (Step 42 & 43 & 44) */}
       {activeModalAction === 'rewrite' && selectedPolicyForAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 dark:bg-black/75 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
                   Step 42: Rewrite Policy
                 </span>
-                <h3 className="text-[17px] font-bold text-slate-900 mt-0.5">
+                <h3 className="text-[17px] font-bold text-slate-900 dark:text-white mt-0.5">
                   Rewrite Policy to New Carrier
                 </h3>
               </div>
               <button
                 onClick={() => setActiveModalAction(null)}
-                className="text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
               >
                 <X className="size-5" />
               </button>
             </div>
 
-            <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-4 space-y-1 text-[11.5px] text-slate-600">
-              <p className="font-semibold text-blue-900">
+            <div className="rounded-xl border border-blue-200 bg-blue-50/40 dark:bg-blue-950/30 dark:border-blue-800/40 p-4 space-y-1 text-[11.5px] text-slate-600 dark:text-slate-300">
+              <p className="font-semibold text-blue-900 dark:text-blue-300">
                 Rewriting expiring {selectedPolicyForAction.carrier} contract for {selectedPolicyForAction.client}.
               </p>
-              <p>Expiring contract will be preserved in Historical Book (Step 43) and rewrite recorded (Step 44).</p>
+              <p className="dark:text-slate-400">Expiring contract will be preserved in Historical Book (Step 43) and rewrite recorded (Step 44).</p>
             </div>
 
             <div className="space-y-3 text-[12px]">
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Select New Target Carrier:</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">Select New Target Carrier:</label>
                 <select
                   value={newRewriteCarrier}
                   onChange={(e) => setNewRewriteCarrier(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12px] font-semibold text-slate-800 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 py-2 text-[12px] font-semibold text-slate-800 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
                 >
                   <option value="Chubb">Chubb</option>
                   <option value="Travelers">Travelers</option>
@@ -1129,37 +1128,37 @@ export default function RenewalsPage() {
               </div>
 
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Rewrite Premium ($):</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">Rewrite Premium ($):</label>
                 <input
                   type="number"
                   value={newRenewalPremium}
                   onChange={(e) => setNewRenewalPremium(Number(e.target.value))}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-[13px] font-mono font-bold text-slate-900 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 dark:text-white px-3 py-2 text-[13px] font-mono font-bold text-slate-900 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Rewrite Justification:</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">Rewrite Justification:</label>
                 <textarea
                   value={actionNotes}
                   onChange={(e) => setActionNotes(e.target.value)}
                   placeholder="Carrier restructuring / competitive terms offered by replacement carrier."
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-[12px] text-slate-800 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 p-2.5 text-[12px] text-slate-800 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
                   rows={2}
                 />
               </div>
             </div>
 
-            <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
+            <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-white/10">
               <button
                 onClick={() => setActiveModalAction(null)}
-                className="rounded-xl border border-slate-200 px-3.5 py-2 text-[12px] font-medium text-slate-700 hover:bg-slate-50"
+                className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2 text-[12px] font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
               >
                 Cancel
               </button>
               <button
                 onClick={handleExecuteRewrite}
-                className="rounded-xl bg-blue-600 px-4 py-2 text-[12.5px] font-semibold text-white shadow-md hover:bg-blue-700"
+                className="rounded-xl bg-blue-600 px-4 py-2 text-[12.5px] font-semibold text-white shadow-md hover:bg-blue-700 dark:hover:bg-blue-500"
               >
                 Confirm Rewrite Contract
               </button>
@@ -1170,52 +1169,52 @@ export default function RenewalsPage() {
 
       {/* 4. NON-RENEW MODAL (Step 42 & 43) */}
       {activeModalAction === 'non-renew' && selectedPolicyForAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 dark:bg-black/75 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                   Step 42: Non-Renew Policy
                 </span>
-                <h3 className="text-[17px] font-bold text-slate-900 mt-0.5">
+                <h3 className="text-[17px] font-bold text-slate-900 dark:text-white mt-0.5">
                   Confirm Non-Renewal for {selectedPolicyForAction.policyNumber}
                 </h3>
               </div>
               <button
                 onClick={() => setActiveModalAction(null)}
-                className="text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
               >
                 <X className="size-5" />
               </button>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-[12px] text-slate-600">
+            <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/60 p-4 text-[12px] text-slate-600 dark:text-slate-300">
               <p>
-                Marking this policy as Non-Renewed will discontinue expiration alarms. Historical policy lifecycle will remain <strong>Preserved</strong> in the Historical Book (Step 43).
+                Marking this policy as Non-Renewed will discontinue expiration alarms. Historical policy lifecycle will remain <strong className="text-slate-800 dark:text-white">Preserved</strong> in the Historical Book (Step 43).
               </p>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[12px] font-semibold text-slate-700">Non-Renewal Reason &amp; Underwriting Notice:</label>
+              <label className="text-[12px] font-semibold text-slate-700 dark:text-slate-300">Non-Renewal Reason &amp; Underwriting Notice:</label>
               <textarea
                 value={actionNotes}
                 onChange={(e) => setActionNotes(e.target.value)}
                 placeholder="Notice of non-renewal issued by carrier / insured discontinued business entity."
-                className="w-full rounded-xl border border-slate-200 p-3 text-[12px] text-slate-800 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 p-3 text-[12px] text-slate-800 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
                 rows={3}
               />
             </div>
 
-            <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+            <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-white/10">
               <button
                 onClick={() => setActiveModalAction(null)}
-                className="rounded-xl border border-slate-200 px-3.5 py-2 text-[12px] font-medium text-slate-700 hover:bg-slate-50"
+                className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2 text-[12px] font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
               >
                 Cancel
               </button>
               <button
                 onClick={handleExecuteNonRenew}
-                className="rounded-xl bg-slate-900 px-4 py-2 text-[12.5px] font-semibold text-white hover:bg-slate-800"
+                className="rounded-xl bg-slate-900 dark:bg-slate-800 dark:border dark:border-white/10 px-4 py-2 text-[12.5px] font-semibold text-white hover:bg-slate-800 dark:hover:bg-slate-700"
               >
                 Confirm Non-Renewal
               </button>
@@ -1226,39 +1225,39 @@ export default function RenewalsPage() {
 
       {/* 5. MARK LOST BUSINESS MODAL (Step 42 & 43) */}
       {activeModalAction === 'lost' && selectedPolicyForAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 dark:bg-black/75 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-rose-600">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
                   Step 42: Mark Lost Business
                 </span>
-                <h3 className="text-[17px] font-bold text-slate-900 mt-0.5">
+                <h3 className="text-[17px] font-bold text-slate-900 dark:text-white mt-0.5">
                   Record Lost Business on {selectedPolicyForAction.policyNumber}
                 </h3>
               </div>
               <button
                 onClick={() => setActiveModalAction(null)}
-                className="text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
               >
                 <X className="size-5" />
               </button>
             </div>
 
-            <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-4 text-[12px] text-rose-900 space-y-1">
+            <div className="rounded-xl border border-rose-200 bg-rose-50/50 dark:bg-rose-950/30 dark:border-rose-900/40 p-4 text-[12px] text-rose-900 dark:text-rose-300 space-y-1">
               <p className="font-semibold">Historical Policy Preserved (Step 43)</p>
-              <p className="text-[11.5px] text-slate-600">
+              <p className="text-[11.5px] text-slate-600 dark:text-slate-400">
                 This account will be marked as lost to track broker retention leakage and win-loss ratios.
               </p>
             </div>
 
             <div className="space-y-3 text-[12px]">
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Primary Reason for Lost Business:</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">Primary Reason for Lost Business:</label>
                 <select
                   value={lostReason}
                   onChange={(e) => setLostReason(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12px] font-medium text-slate-800 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 py-2 text-[12px] font-medium text-slate-800 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
                 >
                   <option value="Price / Premium Increase">Price / Premium Increase</option>
                   <option value="Lost to Direct Competitor">Lost to Direct Competitor / Broker</option>
@@ -1270,27 +1269,27 @@ export default function RenewalsPage() {
               </div>
 
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Additional Observations:</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">Additional Observations:</label>
                 <textarea
                   value={actionNotes}
                   onChange={(e) => setActionNotes(e.target.value)}
                   placeholder="Notes regarding competitor rate or client decision..."
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-[12px] text-slate-800 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 p-2.5 text-[12px] text-slate-800 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
                   rows={2}
                 />
               </div>
             </div>
 
-            <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
+            <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-white/10">
               <button
                 onClick={() => setActiveModalAction(null)}
-                className="rounded-xl border border-slate-200 px-3.5 py-2 text-[12px] font-medium text-slate-700 hover:bg-slate-50"
+                className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2 text-[12px] font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
               >
                 Cancel
               </button>
               <button
                 onClick={handleExecuteMarkLost}
-                className="rounded-xl bg-rose-600 px-4 py-2 text-[12.5px] font-semibold text-white shadow-md hover:bg-rose-700"
+                className="rounded-xl bg-rose-600 px-4 py-2 text-[12.5px] font-semibold text-white shadow-md hover:bg-rose-700 dark:hover:bg-rose-500"
               >
                 Confirm Lost Business
               </button>

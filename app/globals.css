@@ -402,3 +402,405 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(59, 130, 246, 0.45) #f1f5f9;
 }
+
+/* =========================================================================
+   COMPREHENSIVE DARK THEME RULES
+   Applies high-contrast, professional, and accessible dark mode styling
+   across all pages, sidebars, headers, cards, tables, forms, modals, and text.
+   ========================================================================= */
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0b0f19;
+  color: #f1f5f9;
+}
+
+/* Page background containers (e.g. min-h-screen bg-[#f8fafc]) */
+html.dark .bg-\[\#f8fafc\],
+html.dark .bg-\[\#f5f8fc\] {
+  background-color: #0b0f19 !important;
+}
+
+/* Sidebar background */
+html.dark aside,
+html.dark .bg-\[\#F1F5F9\],
+html.dark aside.bg-\[\#F1F5F9\] {
+  background-color: #0d131f !important;
+  border-color: #1e293b !important;
+}
+
+/* Top Header for Portal and Landing Layouts */
+html.dark header.sticky,
+html.dark header.fixed:not(.auth-header):not(.bg-transparent),
+html.dark header.border-b:not(.border-transparent):not(.auth-header),
+html.dark header.bg-white\/95,
+html.dark header.bg-white\/90,
+html.dark header.bg-white\/80,
+html.dark header.bg-white\/70 {
+  background-color: rgba(13, 19, 31, 0.95) !important;
+  border-color: #1e293b !important;
+}
+
+/* Explicitly keep Auth and Transparent Headers transparent */
+html.dark header.auth-header,
+html.dark header.bg-transparent,
+html.dark main.h-screen header,
+html.dark main.max-h-screen header,
+html.dark header.shrink-0:not(.sticky):not(.fixed) {
+  background-color: transparent !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Footer in Dark Mode (matches Header background, blur, and border) */
+html.dark footer:not(.auth-footer):not(.shrink-0),
+html.dark footer.relative,
+html.dark footer.border-t {
+  background-color: rgba(13, 19, 31, 0.95) !important;
+  border-color: #1e293b !important;
+}
+
+/* Explicitly keep Auth and transparent single-line Footers transparent */
+html.dark footer.auth-footer,
+html.dark main footer.shrink-0,
+html.dark main footer.py-1 {
+  background-color: transparent !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Landing Page CTA Section in Dark Mode */
+html.dark section#about .from-blue-50.via-white.to-violet-50 {
+  background-image: linear-gradient(135deg, #0d1629 0%, #111c35 50%, #0b1220 100%) !important;
+  border-color: #1e293b !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Gradient Banners in Dark Mode (Client onboarding and promo banners) */
+html.dark .from-blue-50\/90.via-indigo-50\/40.to-white,
+html.dark .from-blue-50\/70.via-indigo-50\/30.to-white {
+  background-image: linear-gradient(135deg, rgba(13, 22, 41, 0.9) 0%, rgba(17, 28, 53, 0.8) 50%, rgba(11, 18, 32, 0.95) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .from-amber-50.via-orange-50\/40.to-white {
+  background-image: linear-gradient(135deg, rgba(45, 26, 12, 0.8) 0%, rgba(35, 20, 10, 0.6) 50%, rgba(17, 24, 39, 0.95) 100%) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Cards, Modals, Panels, and White containers */
+html.dark .bg-white {
+  background-color: #111827 !important;
+}
+
+html.dark .bg-white\/95,
+html.dark .bg-white\/90,
+html.dark .bg-white\/80 {
+  background-color: rgba(17, 24, 39, 0.95) !important;
+}
+
+/* Secondary & inner container backgrounds (slate-50, slate-100) */
+html.dark .bg-slate-50,
+html.dark .bg-slate-50\/50,
+html.dark .bg-slate-50\/60,
+html.dark .bg-slate-50\/70,
+html.dark .bg-slate-50\/80 {
+  background-color: #1e293b !important;
+}
+
+html.dark .bg-slate-100,
+html.dark .bg-slate-100\/90,
+html.dark .bg-slate-100\/80,
+html.dark .bg-slate-100\/70 {
+  background-color: #1f293d !important;
+}
+
+html.dark .bg-slate-200\/60,
+html.dark .bg-slate-200\/70 {
+  background-color: #334155 !important;
+}
+
+/* Borders - Low opacity for subtle, modern contrast in dark mode */
+html.dark .border-slate-200,
+html.dark .border-slate-200\/95,
+html.dark .border-slate-200\/90,
+html.dark .border-slate-200\/85,
+html.dark .border-slate-200\/80,
+html.dark .border-slate-200\/70,
+html.dark .border-slate-200\/60,
+html.dark .border-slate-200\/50,
+html.dark .border-slate-200\/40,
+html.dark .border-slate-100,
+html.dark .border-slate-100\/90,
+html.dark .border-slate-100\/80,
+html.dark .border-slate-100\/70,
+html.dark .border-slate-100\/60,
+html.dark .border-slate-100\/50,
+html.dark .border-slate-300,
+html.dark .border-slate-300\/80,
+html.dark .border-slate-300\/60,
+html.dark .border-blue-200\/80,
+html.dark .border-blue-100 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Headings & High-contrast Text */
+html.dark .text-slate-950,
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-\[\#0F172A\] {
+  color: #f8fafc !important;
+}
+
+/* Body & Medium-contrast Text */
+html.dark .text-slate-700,
+html.dark .text-slate-600,
+html.dark .text-\[\#334155\] {
+  color: #cbd5e1 !important;
+}
+
+/* Secondary & Muted Text */
+html.dark .text-slate-500,
+html.dark .text-slate-400,
+html.dark .text-\[\#64748B\] {
+  color: #94a3b8 !important;
+}
+
+/* Form inputs, textareas, selects */
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="range"]):not(.bg-transparent),
+html.dark select,
+html.dark textarea {
+  background-color: #0b0f19 !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+/* Transparent inputs inside input containers (search bars, auth inputs) */
+html.dark input.bg-transparent,
+html.dark input[type="text"].bg-transparent,
+html.dark input[type="email"].bg-transparent,
+html.dark input[type="password"].bg-transparent,
+html.dark input[type="tel"].bg-transparent {
+  background-color: transparent !important;
+  color: #f8fafc !important;
+}
+
+/* Containers wrapping transparent inputs */
+html.dark div:has(> input.bg-transparent),
+html.dark .auth-input-container {
+  background-color: #0b0f19 !important;
+  border-color: #1e293b !important;
+}
+
+/* Autofill in Dark Mode (Removes white autofill box completely) */
+html.dark input:-webkit-autofill,
+html.dark input:-webkit-autofill:hover,
+html.dark input:-webkit-autofill:focus,
+html.dark input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #0b0f19 inset !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  caret-color: #f8fafc !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+html.dark select option {
+  background-color: #0d131f !important;
+  color: #f8fafc !important;
+}
+
+html.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+html.dark input:focus,
+html.dark select:focus,
+html.dark textarea:focus {
+  border-color: #0170FE !important;
+  box-shadow: 0 0 0 2px rgba(1, 112, 254, 0.25) !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Tables */
+html.dark table thead tr,
+html.dark table thead th {
+  background-color: #0b0f19 !important;
+  color: #94a3b8 !important;
+  border-color: #1e293b !important;
+}
+
+html.dark table tbody tr {
+  border-color: #1e293b !important;
+}
+
+html.dark table tbody tr:hover,
+html.dark .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-slate-50\/40:hover,
+html.dark .hover\:bg-slate-50\/50:hover,
+html.dark .hover\:bg-slate-50\/60:hover,
+html.dark .hover\:bg-slate-50\/70:hover,
+html.dark .hover\:bg-slate-50\/80:hover,
+html.dark .hover\:bg-slate-50\/90:hover,
+html.dark .hover\:bg-slate-50\/95:hover,
+html.dark .hover\:bg-slate-100:hover,
+html.dark .hover\:bg-white\/60:hover,
+html.dark .hover\:bg-white:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .hover\:border-slate-300:hover {
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+html.dark .hover\:border-blue-300:hover {
+  border-color: rgba(59, 130, 246, 0.45) !important;
+}
+
+html.dark .hover\:border-emerald-300:hover {
+  border-color: rgba(16, 185, 129, 0.45) !important;
+}
+
+html.dark .hover\:border-amber-300:hover {
+  border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
+html.dark .hover\:border-rose-300:hover {
+  border-color: rgba(244, 63, 94, 0.45) !important;
+}
+
+html.dark .hover\:border-violet-300:hover {
+  border-color: rgba(139, 92, 246, 0.45) !important;
+}
+
+html.dark .hover\:text-slate-900:hover,
+html.dark .hover\:text-slate-950:hover,
+html.dark .hover\:text-slate-800:hover,
+html.dark .hover\:text-slate-700:hover {
+  color: #f8fafc !important;
+}
+
+/* Sticky table columns in dark mode */
+html.dark td.bg-white,
+html.dark th.bg-slate-50 {
+  background-color: #111827 !important;
+}
+
+html.dark tr:hover td.bg-white,
+html.dark tr.group:hover td.bg-white {
+  background-color: #1e293b !important;
+}
+
+/* Status Badges & Pills in Dark Mode */
+html.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+html.dark .bg-amber-50,
+html.dark .bg-amber-100 {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+html.dark .bg-rose-50 {
+  background-color: rgba(244, 63, 94, 0.15) !important;
+  color: #fb7185 !important;
+  border-color: rgba(244, 63, 94, 0.3) !important;
+}
+
+html.dark .bg-blue-50,
+html.dark .bg-blue-100 {
+  background-color: rgba(1, 112, 254, 0.15) !important;
+  color: #60a5fa !important;
+  border-color: rgba(1, 112, 254, 0.3) !important;
+}
+
+html.dark .bg-indigo-50 {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+  color: #818cf8 !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+/* Active navigation item in dark mode */
+html.dark .bg-\[\#DBEAFE\] {
+  background-color: rgba(36, 107, 253, 0.2) !important;
+  color: #60a5fa !important;
+}
+
+/* Modals & Dialog overlays */
+html.dark .fixed.inset-0.bg-slate-950\/60,
+html.dark .fixed.inset-0.bg-slate-900\/60 {
+  background-color: rgba(3, 7, 18, 0.82) !important;
+}
+
+/* Interactive hover utility states */
+html.dark .hover\:bg-slate-100:hover,
+html.dark .hover\:bg-slate-200\/60:hover,
+html.dark .hover\:bg-slate-200\/70:hover {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+/* Shadows in dark mode */
+html.dark .shadow-xs,
+html.dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.45) !important;
+}
+
+html.dark .shadow-md,
+html.dark .shadow-lg,
+html.dark .shadow-xl,
+html.dark .shadow-2xl {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.65), 0 8px 10px -6px rgba(0, 0, 0, 0.65) !important;
+}
+
+/* Dark mode scrollbars */
+html.dark ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+html.dark .custom-scrollbar-table::-webkit-scrollbar-track {
+  background: #0b0f19;
+}
+
+html.dark * {
+  scrollbar-color: rgba(59, 130, 246, 0.45) #0b0f19;
+}
+
+/* SVG Chart Rings in Dark Mode */
+html.dark svg circle[stroke="#f1f5f9"] {
+  stroke: #1e293b !important;
+}
+
+html.dark .fill-slate-900 {
+  fill: #f8fafc !important;
+}
+
+html.dark .fill-slate-400 {
+  fill: #94a3b8 !important;
+}
+
+/* Explicit dark mode logo switcher rules */
+html.dark .dark\:hidden {
+  display: none !important;
+}
+
+html.dark .dark\:block {
+  display: block !important;
+}
+

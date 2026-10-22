@@ -153,13 +153,24 @@ export const adminNavSections: AdminNavSectionDef[] = [
 export function AdminLogo() {
   return (
     <Link href="/admin/dashboard" className="inline-flex items-center transition-opacity hover:opacity-90">
+      {/* Light Mode Logo */}
       <Image
         src="/images/logos/broker-logo-removebg-preview.png"
         alt="BrokerStep Logo"
         width={360}
         height={100}
-        style={{ width: 'auto', }}
-        className="object-contain"
+        style={{ width: 'auto' }}
+        className="object-contain block dark:hidden"
+        priority
+      />
+      {/* Dark Mode Logo */}
+      <Image
+        src="/images/logos/broker-dark-theme.png"
+        alt="BrokerStep Logo"
+        width={360}
+        height={100}
+        style={{ width: 'auto' }}
+        className="object-contain hidden dark:block"
         priority
       />
     </Link>

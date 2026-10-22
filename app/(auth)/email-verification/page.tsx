@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, Mail, RefreshCw, LogOut } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import Image from 'next/image'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export default function EmailVerificationPage() {
   const router = useRouter()
@@ -43,7 +44,7 @@ export default function EmailVerificationPage() {
       <div className="relative z-10 flex h-full w-full flex-col justify-between px-4 py-3 sm:px-8 sm:py-4">
 
         {/* Top Header Bar with Larger Logo */}
-        <header className="flex shrink-0 items-center justify-between">
+        <header className="auth-header flex shrink-0 items-center justify-between bg-transparent border-none">
           <Link href="/" className="inline-flex items-center gap-2 transition-transform hover:scale-[1.02]">
             <Image
               src="/images/logos/broker-dark-theme.png"
@@ -57,6 +58,7 @@ export default function EmailVerificationPage() {
           </Link>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <button
               onClick={handleLogout}
               className="group inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:border-rose-400 hover:bg-rose-600/25 hover:text-white sm:px-4 sm:py-2"
@@ -69,30 +71,30 @@ export default function EmailVerificationPage() {
 
         {/* Center White Card */}
         <div className="flex flex-1 items-center justify-center py-2">
-          <div className="w-full max-w-[420px] rounded-2xl border border-white/20 bg-white p-5 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] sm:rounded-3xl sm:p-7 text-slate-900">
+          <div className="w-full max-w-[420px] rounded-2xl border border-white/20 bg-white dark:bg-[#0e1726]/95 dark:border-slate-800/80 p-5 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] sm:rounded-3xl sm:p-7 text-slate-900 dark:text-slate-100">
 
             {/* Header */}
             <div className="mb-4 text-center sm:text-left">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0170FE]/20 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#0170FE]">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0170FE]/20 bg-blue-50 dark:bg-blue-950/60 dark:border-blue-800/50 dark:text-blue-400 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#0170FE]">
                 <Mail className="size-3" />
                 Verification
               </div>
 
-              <h1 className="mt-2 text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
+              <h1 className="mt-2 text-xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-2xl">
                 Email verification
               </h1>
 
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Please check your inbox for the verification link to proceed to your workspace.
               </p>
             </div>
 
             {/* Info banner */}
-            <div className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50/80 p-3.5">
+            <div className="flex items-start gap-3 rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/80 dark:bg-blue-950/30 p-3.5">
               <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-blue-500/15 ring-1 ring-blue-400/40">
                 <Mail className="size-3 text-[#0170FE]" />
               </span>
-              <p className="text-xs leading-5 text-blue-950">
+              <p className="text-xs leading-5 text-blue-950 dark:text-blue-200">
                 Verification email sent! If you don&apos;t see it, check your spam or junk folder.
               </p>
             </div>
@@ -110,17 +112,17 @@ export default function EmailVerificationPage() {
               <button
                 onClick={handleResend}
                 disabled={resending}
-                className="cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200/90 bg-white px-5 text-xs sm:text-sm font-semibold text-slate-700 shadow-xs transition hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE] disabled:opacity-50"
+                className="cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200/90 bg-white px-5 text-xs sm:text-sm font-semibold text-slate-700 shadow-xs transition hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE] dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700 disabled:opacity-50"
               >
                 <RefreshCw className={`size-3.5 ${resending ? 'animate-spin' : ''}`} />
                 {resending ? 'Sending…' : 'Resend email'}
               </button>
             </div>
 
-            <div className="mt-4 border-t border-slate-100 pt-4 text-center">
+            <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-4 text-center">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 transition hover:text-[#0170FE]"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 transition hover:text-[#0170FE]"
               >
                 <ArrowLeft className="size-3.5" />
                 Back to sign in

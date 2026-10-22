@@ -48,7 +48,10 @@ import {
   Trash2,
   Pencil,
   RotateCcw,
+  Sun,
+  Moon,
 } from 'lucide-react'
+import { useTheme } from '@/components/theme-provider'
 
 // Tabs definition
 type TabId =
@@ -116,27 +119,27 @@ function SettingsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070d18] p-4 sm:p-6 lg:p-8">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/80 pb-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/80 dark:border-white/10 pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
               Settings &amp; Configuration
             </h1>
-            <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
+            <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
               Active Account
             </span>
           </div>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Manage your broker profile, subscriptions, carrier relationships, commission splits, and lead engine.
           </p>
         </div>
       </div>
 
       {/* Modern Tabs Bar */}
-      <div className="mt-6 rounded-2xl border border-slate-200/80 bg-white p-2.5 shadow-xs">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-thin">
+      <div className="mt-6 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-2.5 shadow-xs">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {TABS.map((tab) => {
             const Icon = tab.icon
             const isActive = activeTab === tab.id
@@ -146,15 +149,15 @@ function SettingsContent() {
                 type="button"
                 onClick={() => handleTabChange(tab.id)}
                 className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isActive
-                  ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-slate-950 text-white shadow-sm ring-1 ring-slate-800 dark:bg-blue-600 dark:text-white dark:ring-blue-500/40'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                   }`}
               >
-                <Icon className={`size-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
+                <Icon className={`size-4 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`} />
                 <span>{tab.label}</span>
                 {tab.badge && (
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                    className={`rounded-full px-2 py-0.5 text-xs font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                       }`}
                   >
                     {tab.badge}
@@ -210,28 +213,29 @@ function MyProfileTab({
   return (
     <div className="space-y-6">
       {/* Profile Overview Card */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-xs">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-          <div className="relative flex size-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-2xl font-extrabold text-white shadow-md">
+          <div className="relative flex size-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-700 text-2xl font-extrabold text-white shadow-md">
             JD
-            <span className="absolute -bottom-1 -right-1 size-4 rounded-full border-2 border-white bg-emerald-500" />
+            <span className="absolute -bottom-1 -right-1 size-4 rounded-full border-2 border-white dark:border-slate-900 bg-emerald-500" />
           </div>
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-2xl font-bold tracking-tight text-slate-950">{profile.name}</h2>
-
+              <h2 className="text-2xl font-bold tracking-tight text-slate-950 dark:text-white">{profile.name}</h2>
             </div>
-            <p className="mt-1 text-sm sm:text-base font-semibold text-slate-700">{profile.businessName}</p>
-            <p className="mt-0.5 text-xs sm:text-sm text-slate-500">BrokerStep ID: <span className="font-mono font-medium text-slate-700">{profile.brokerCode}</span> · Licensed in NY, NJ, CT</p>
+            <p className="mt-1 text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">{profile.businessName}</p>
+            <p className="mt-0.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              BrokerStep ID: <span className="font-mono font-medium text-slate-700 dark:text-slate-300">{profile.brokerCode}</span> · Licensed in NY, NJ, CT
+            </p>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => onCopy(profile.brokerCode, 'bcode')}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-xs hover:border-[#0170FE]/40 hover:text-[#0170FE]"
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-xs hover:border-[#0170FE]/40 hover:text-[#0170FE] dark:hover:bg-slate-750 dark:hover:text-blue-400 transition"
             >
-              {copiedKey === 'bcode' ? <Check className="size-4 text-emerald-600" /> : <Copy className="size-4" />}
+              {copiedKey === 'bcode' ? <Check className="size-4 text-emerald-600 dark:text-emerald-400" /> : <Copy className="size-4" />}
               <span>{copiedKey === 'bcode' ? 'Copied Code' : 'Copy Broker Code'}</span>
             </button>
           </div>
@@ -241,102 +245,100 @@ function MyProfileTab({
       {/* Main Details Grid */}
       <div className="grid gap-6">
         {/* Personal & Business Info */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
-          <h3 className="text-lg font-bold text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-            <User className="size-5 text-[#0170FE]" />
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-4">
+          <h3 className="text-lg font-bold text-slate-950 dark:text-white border-b border-slate-100 dark:border-white/10 pb-3 flex items-center gap-2">
+            <User className="size-5 text-[#0170FE] dark:text-blue-400" />
             Personal &amp; Business Information
           </h3>
 
           <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">Full Name</label>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Full Name</label>
             <input
               type="text"
               value={profile.name}
               onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-              className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+              className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
             />
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">Business Name</label>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Business Name</label>
             <input
               type="text"
               value={profile.businessName}
               onChange={(e) => setProfile({ ...profile, businessName: e.target.value })}
-              className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+              className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">Phone Number</label>
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Phone Number</label>
               <div className="relative flex items-center">
                 <Phone className="absolute left-3 size-4 text-slate-400 pointer-events-none" />
                 <input
                   type="tel"
                   value={profile.phone}
                   onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9.5 pr-3 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 pl-9.5 pr-3 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
                 />
               </div>
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">Email Address</label>
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Email Address</label>
               <div className="relative flex items-center">
                 <Mail className="absolute left-3 size-4 text-slate-400 pointer-events-none" />
                 <input
                   type="email"
                   value={profile.email}
                   onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9.5 pr-3 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 pl-9.5 pr-3 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
                 />
               </div>
             </div>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">Street Address</label>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Street Address</label>
             <input
               type="text"
               value={profile.street}
               onChange={(e) => setProfile({ ...profile, street: e.target.value })}
-              className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+              className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
             />
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">City</label>
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">City</label>
               <input
                 type="text"
                 value={profile.city}
                 onChange={(e) => setProfile({ ...profile, city: e.target.value })}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">State</label>
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">State</label>
               <input
                 type="text"
                 value={profile.state}
                 onChange={(e) => setProfile({ ...profile, state: e.target.value })}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">Zip</label>
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Zip</label>
               <input
                 type="text"
                 value={profile.zip}
                 onChange={(e) => setProfile({ ...profile, zip: e.target.value })}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
               />
             </div>
           </div>
         </div>
-
-
       </div>
     </div>
   )
@@ -346,76 +348,181 @@ function MyProfileTab({
    2. TAB: ACCOUNT & SECURITY
    ========================================================================= */
 function AccountTab({ onSave }: { onSave: () => void }) {
+  const { theme, setTheme } = useTheme()
   const [passwords, setPasswords] = useState({ current: '', newPass: '', confirm: '' })
   const [showPass, setShowPass] = useState(false)
   const [twoFactor, setTwoFactor] = useState(true)
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
+      {/* Theme & Visual Appearance Preference */}
+      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-5 lg:col-span-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 dark:border-white/10 pb-3 gap-2">
+          <div>
+            <h3 className="text-lg font-bold text-slate-950 dark:text-white flex items-center gap-2">
+              <Sun className="size-5 text-[#0170FE] dark:text-blue-400" />
+              Appearance &amp; Theme Mode
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              Choose your interface color scheme. The selected theme applies across the platform and persists on your device.
+            </p>
+          </div>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-950/50 text-[#0170FE] dark:text-blue-400 self-start sm:self-auto capitalize">
+            Active: {theme} Mode
+          </span>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          {/* Light Mode Card */}
+          <button
+            type="button"
+            onClick={() => {
+              setTheme('light')
+              onSave()
+            }}
+            className={`group rounded-2xl border-2 p-4 text-left transition-all cursor-pointer ${theme === 'light'
+              ? 'border-[#0170FE] bg-blue-50/40 shadow-xs ring-1 ring-[#0170FE]/30'
+              : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 bg-white dark:bg-slate-800/80'
+              }`}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-500 border border-amber-200 dark:border-amber-800/60">
+                  <Sun className="size-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Light Mode</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Clean white &amp; soft slate styling</p>
+                </div>
+              </div>
+              {theme === 'light' && (
+                <span className="flex size-6 items-center justify-center rounded-full bg-[#0170FE] text-white shadow-xs">
+                  <Check className="size-3.5" />
+                </span>
+              )}
+            </div>
+
+            {/* Mini Light UI Preview */}
+            <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-[#f8fafc] dark:bg-slate-900 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="h-2 w-16 rounded bg-slate-300 dark:bg-slate-600" />
+                <div className="h-2 w-8 rounded bg-[#0170FE]" />
+              </div>
+              <div className="rounded-lg bg-white dark:bg-slate-800 p-2 border border-slate-200 dark:border-white/10 space-y-1.5 shadow-2xs">
+                <div className="h-1.5 w-full rounded bg-slate-200 dark:bg-slate-700" />
+                <div className="h-1.5 w-3/4 rounded bg-slate-200 dark:bg-slate-700" />
+              </div>
+            </div>
+          </button>
+
+          {/* Dark Mode Card */}
+          <button
+            type="button"
+            onClick={() => {
+              setTheme('dark')
+              onSave()
+            }}
+            className={`group rounded-2xl border-2 p-4 text-left transition-all cursor-pointer ${theme === 'dark'
+              ? 'border-[#0170FE] bg-slate-900 dark:bg-blue-950/40 shadow-xs ring-1 ring-[#0170FE]/30'
+              : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 bg-white dark:bg-slate-800/80'
+              }`}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-950 text-indigo-400 border border-indigo-800">
+                  <Moon className="size-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">Dark Mode</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Sleek dark contrast for low-light work</p>
+                </div>
+              </div>
+              {theme === 'dark' && (
+                <span className="flex size-6 items-center justify-center rounded-full bg-[#0170FE] text-white shadow-xs">
+                  <Check className="size-3.5" />
+                </span>
+              )}
+            </div>
+
+            {/* Mini Dark UI Preview */}
+            <div className="rounded-xl border border-slate-800 bg-[#0b0f19] p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="h-2 w-16 rounded bg-slate-700" />
+                <div className="h-2 w-8 rounded bg-[#0170FE]" />
+              </div>
+              <div className="rounded-lg bg-[#1e293b] p-2 border border-slate-700 space-y-1.5 shadow-2xs">
+                <div className="h-1.5 w-full rounded bg-slate-600" />
+                <div className="h-1.5 w-3/4 rounded bg-slate-600" />
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+
       {/* Account Status & Management */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
-        <h3 className="text-lg font-bold text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-          <ShieldCheck className="size-5 text-[#0170FE]" />
+      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-5">
+        <h3 className="text-lg font-bold text-slate-950 dark:text-white border-b border-slate-100 dark:border-white/10 pb-3 flex items-center gap-2">
+          <ShieldCheck className="size-5 text-[#0170FE] dark:text-blue-400" />
           Account Status &amp; Security Controls
         </h3>
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-slate-800/60 p-4 space-y-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-500 font-medium">Account Status:</span>
-            <span className="inline-flex items-center gap-1.5 font-bold text-emerald-600">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Account Status:</span>
+            <span className="inline-flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400">
               <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
               Active · Verified Principal
             </span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-500 font-medium">Primary Email:</span>
-            <span className="font-semibold text-slate-800">jordan.davis@apexhorizon.com</span>
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Primary Email:</span>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">jordan.davis@apexhorizon.com</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-500 font-medium">Member Since:</span>
-            <span className="font-semibold text-slate-800">January 12, 2025</span>
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Member Since:</span>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">January 12, 2025</span>
           </div>
         </div>
       </div>
 
       {/* Password Management */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
-        <h3 className="text-lg font-bold text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-          <Lock className="size-5 text-[#0170FE]" />
+      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-5">
+        <h3 className="text-lg font-bold text-slate-950 dark:text-white border-b border-slate-100 dark:border-white/10 pb-3 flex items-center gap-2">
+          <Lock className="size-5 text-[#0170FE] dark:text-blue-400" />
           Password &amp; Reset Access
         </h3>
 
         <div className="space-y-3.5">
           <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">Current Password</label>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Current Password</label>
             <input
               type={showPass ? 'text' : 'password'}
               value={passwords.current}
               onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
               placeholder="••••••••••••"
-              className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+              className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
             />
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">New Password</label>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">New Password</label>
             <input
               type={showPass ? 'text' : 'password'}
               value={passwords.newPass}
               onChange={(e) => setPasswords({ ...passwords, newPass: e.target.value })}
               placeholder="Min. 8 characters"
-              className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+              className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
             />
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">Confirm New Password</label>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Confirm New Password</label>
             <input
               type={showPass ? 'text' : 'password'}
               value={passwords.confirm}
               onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
               placeholder="Repeat new password"
-              className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+              className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
             />
           </div>
 
@@ -423,24 +530,24 @@ function AccountTab({ onSave }: { onSave: () => void }) {
             <button
               type="button"
               onClick={() => setShowPass(!showPass)}
-              className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-800"
+              className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer"
             >
               {showPass ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               <span>{showPass ? 'Hide' : 'Show'} passwords</span>
             </button>
 
-            <Link href="/forgot-password" className="text-xs sm:text-sm font-semibold text-[#0170FE] hover:underline">
+            <Link href="/forgot-password" className="text-xs sm:text-sm font-semibold text-[#0170FE] dark:text-blue-400 hover:underline">
               Send reset email instead?
             </Link>
           </div>
         </div>
 
-        <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
-          <p className="text-xs text-slate-400">Password last changed: 42 days ago</p>
+        <div className="border-t border-slate-100 dark:border-white/10 pt-4 flex items-center justify-between">
+          <p className="text-xs text-slate-400 dark:text-slate-500">Password last changed: 42 days ago</p>
           <button
             type="button"
             onClick={onSave}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#0170FE] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-[#0060db]"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#0170FE] px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-[#0060db] transition"
           >
             Update Password
           </button>
@@ -466,35 +573,35 @@ function MembershipTab({ onSave }: { onSave: () => void }) {
   return (
     <div className="space-y-6">
       {/* Current Plan Overview Banner */}
-      <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-blue-50/40 p-6 shadow-xs">
+      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-gradient-to-br from-white to-blue-50/40 dark:from-slate-900 dark:to-blue-950/40 p-6 shadow-xs">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-[#0170FE]">
+              <span className="rounded-full bg-blue-100 dark:bg-blue-950/80 px-3 py-1 text-xs font-bold text-[#0170FE] dark:text-blue-400 dark:border dark:border-blue-800/60">
                 CURRENT MEMBERSHIP
               </span>
-              <span className="text-sm font-semibold text-emerald-600 flex items-center gap-1.5">
+              <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
                 <CheckCircle2 className="size-4" />
                 Active Subscription
               </span>
             </div>
 
-            <h2 className="mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950">Professional Workspace</h2>
-            <p className="mt-1.5 text-sm sm:text-[15px] text-slate-600 leading-relaxed max-w-2xl">
+            <h2 className="mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white">Professional Workspace</h2>
+            <p className="mt-1.5 text-sm sm:text-[15px] text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
               Unlimited client records, automated statement reconciliation, multi-carrier splits, and QR lead capture.
             </p>
           </div>
 
           <div className="flex flex-col items-start sm:items-end">
             <div className="flex items-baseline gap-1.5">
-              <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-950 font-mono">
+              <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-950 dark:text-white font-mono">
                 {billingCycle === 'monthly' ? '$79' : '$790'}
               </span>
-              <span className="text-sm font-medium text-slate-500">
+              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
                 {billingCycle === 'monthly' ? '/ month' : '/ year'}
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-1">Next renewal: November 1, 2026</p>
+            <p className="text-xs text-slate-400 dark:text-slate-400 mt-1">Next renewal: November 1, 2026</p>
           </div>
         </div>
       </div>
@@ -502,26 +609,26 @@ function MembershipTab({ onSave }: { onSave: () => void }) {
       {/* Plan Details & Billing Settings Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Billing Method & Renewal Status */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
-          <h3 className="text-lg font-bold text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-            <CreditCard className="size-5 text-[#0170FE]" />
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-4">
+          <h3 className="text-lg font-bold text-slate-950 dark:text-white border-b border-slate-100 dark:border-white/10 pb-3 flex items-center gap-2">
+            <CreditCard className="size-5 text-[#0170FE] dark:text-blue-400" />
             Payment Method &amp; Billing Cycle
           </h3>
 
-          <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
+          <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-white/10 dark:bg-slate-800/50 p-4">
             <div className="flex items-center gap-3">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-slate-900 text-white font-bold text-xs tracking-wider">
+              <div className="flex size-11 items-center justify-center rounded-xl bg-slate-900 dark:bg-slate-800 dark:border dark:border-white/10 text-white font-bold text-xs tracking-wider">
                 VISA
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-900">Visa ending in 4242</p>
-                <p className="text-xs text-slate-500 mt-0.5">Expires 08/2028 · Default method</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">Visa ending in 4242</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Expires 08/2028 · Default method</p>
               </div>
             </div>
             <button
               type="button"
               onClick={onSave}
-              className="cursor-pointer text-xs sm:text-sm font-semibold text-[#0170FE] hover:underline"
+              className="cursor-pointer text-xs sm:text-sm font-semibold text-[#0170FE] dark:text-blue-400 hover:underline"
             >
               Update Card
             </button>
@@ -529,50 +636,50 @@ function MembershipTab({ onSave }: { onSave: () => void }) {
 
           {/* Billing Cycle Switcher */}
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-2">Billing Frequency</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-2">Billing Frequency</label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setBillingCycle('monthly')}
                 className={`cursor-pointer rounded-xl border p-3.5 text-left transition ${billingCycle === 'monthly'
-                  ? 'border-[#0170FE] bg-blue-50/50 ring-1 ring-[#0170FE]'
-                  : 'border-slate-200 hover:border-slate-300'
+                  ? 'border-[#0170FE] bg-blue-50/50 dark:bg-blue-950/50 ring-1 ring-[#0170FE]'
+                  : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 dark:bg-slate-800/40'
                   }`}
               >
-                <p className="text-sm font-bold text-slate-900">Monthly Billing</p>
-                <p className="text-xs text-slate-500 mt-0.5">$79 / month</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">Monthly Billing</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">$79 / month</p>
               </button>
 
               <button
                 type="button"
                 onClick={() => setBillingCycle('yearly')}
                 className={`cursor-pointer rounded-xl border p-3.5 text-left transition relative ${billingCycle === 'yearly'
-                  ? 'border-[#0170FE] bg-blue-50/50 ring-1 ring-[#0170FE]'
-                  : 'border-slate-200 hover:border-slate-300'
+                  ? 'border-[#0170FE] bg-blue-50/50 dark:bg-blue-950/50 ring-1 ring-[#0170FE]'
+                  : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 dark:bg-slate-800/40'
                   }`}
               >
                 <span className="absolute -top-2 right-2 rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-bold text-white">
                   Save 17%
                 </span>
-                <p className="text-sm font-bold text-slate-900">Annual Billing</p>
-                <p className="text-xs text-slate-500 mt-0.5">$790 / year ($65.80/mo)</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">Annual Billing</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">$790 / year ($65.80/mo)</p>
               </button>
             </div>
           </div>
 
           {/* Actions */}
-          <div className="border-t border-slate-100 pt-3 flex items-center justify-between">
+          <div className="border-t border-slate-100 dark:border-white/10 pt-3 flex items-center justify-between">
             <button
               type="button"
               onClick={onSave}
-              className="text-xs sm:text-sm font-semibold text-rose-600 hover:underline cursor-pointer"
+              className="text-xs sm:text-sm font-semibold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
             >
               Cancel Subscription
             </button>
             <button
               type="button"
               onClick={onSave}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs sm:text-sm font-semibold text-slate-800 hover:border-[#0170FE] hover:text-[#0170FE]"
+              className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 hover:border-[#0170FE] dark:hover:bg-slate-700 transition"
             >
               Change Tier / Enterprise
             </button>
@@ -580,30 +687,30 @@ function MembershipTab({ onSave }: { onSave: () => void }) {
         </div>
 
         {/* Subscription History / Invoices */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
-          <h3 className="text-lg font-bold text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-            <Calendar className="size-5 text-[#0170FE]" />
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-4">
+          <h3 className="text-lg font-bold text-slate-950 dark:text-white border-b border-slate-100 dark:border-white/10 pb-3 flex items-center gap-2">
+            <Calendar className="size-5 text-[#0170FE] dark:text-blue-400" />
             Subscription &amp; Invoicing History
           </h3>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
+                <tr className="border-b border-slate-100 dark:border-white/10 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <th className="pb-3">Date</th>
                   <th className="pb-3">Invoice #</th>
                   <th className="pb-3">Amount</th>
                   <th className="pb-3 text-right">Receipt</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                 {invoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-slate-50/50">
-                    <td className="py-3 font-semibold text-slate-900">{inv.date}</td>
-                    <td className="py-3 text-slate-500 font-mono text-xs">{inv.id}</td>
+                  <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                    <td className="py-3 font-semibold text-slate-900 dark:text-slate-200">{inv.date}</td>
+                    <td className="py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">{inv.id}</td>
                     <td className="py-3">
-                      <span className="font-mono font-bold text-slate-900">{inv.amount}</span>
-                      <span className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700 border border-emerald-200 font-semibold">
+                      <span className="font-mono font-bold text-slate-900 dark:text-white">{inv.amount}</span>
+                      <span className="ml-2 rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-xs text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 font-semibold">
                         {inv.status}
                       </span>
                     </td>
@@ -611,7 +718,7 @@ function MembershipTab({ onSave }: { onSave: () => void }) {
                       <button
                         type="button"
                         onClick={onSave}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#0170FE] hover:underline cursor-pointer"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#0170FE] dark:text-blue-400 hover:underline cursor-pointer"
                       >
                         <Download className="size-3.5" />
                         PDF
@@ -975,34 +1082,34 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
   return (
     <div className="space-y-6">
       {/* Client Intake & Policy Workflow Defaults */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-2">
+      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 dark:border-white/10 pb-3 gap-2">
           <div>
-            <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
-              <FileCheck2 className="size-5 text-[#0170FE]" />
+            <h3 className="text-lg font-bold text-slate-950 dark:text-white flex items-center gap-2">
+              <FileCheck2 className="size-5 text-[#0170FE] dark:text-blue-400" />
               Client Intake &amp; Policy Workflow Defaults
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
               Customize default behavior when adding new clients and binding policies in your brokerage.
             </p>
           </div>
-          <span className="text-xs font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200 self-start sm:self-auto">
+          <span className="text-xs font-semibold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-800/60 self-start sm:self-auto">
             Intake Workflow
           </span>
         </div>
 
-        <div className="rounded-xl border border-slate-200 p-4 sm:p-5 bg-slate-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 p-4 sm:p-5 bg-slate-50/60 dark:bg-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1 max-w-xl">
             <div className="flex items-center gap-2">
-              <label htmlFor="default-policy-pending-toggle" className="text-sm font-bold text-slate-900 cursor-pointer">
+              <label htmlFor="default-policy-pending-toggle" className="text-sm font-bold text-slate-900 dark:text-white cursor-pointer">
                 Always mark Policy Number as &quot;Pending&quot; by default
               </label>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-200">
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/60">
                 POL-PENDING
               </span>
             </div>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              When enabled, opening the Add Client form will automatically pre-select <strong className="text-slate-700 font-semibold">Pending</strong> for the policy number. Brokers can uncheck it whenever they have a policy number ready to type. When disabled, the policy number input starts blank and editable.
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              When enabled, opening the Add Client form will automatically pre-select <strong className="text-slate-700 dark:text-slate-200 font-semibold">Pending</strong> for the policy number. Brokers can uncheck it whenever they have a policy number ready to type. When disabled, the policy number input starts blank and editable.
             </p>
           </div>
 
@@ -1022,7 +1129,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                 }
                 onSave()
               }}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0170FE] focus:ring-offset-2 ${defaultPolicyPending ? 'bg-[#0170FE]' : 'bg-slate-300'
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0170FE] focus:ring-offset-2 ${defaultPolicyPending ? 'bg-[#0170FE]' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
             >
               <span
@@ -1030,21 +1137,21 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                   }`}
               />
             </button>
-            <span className="text-xs font-bold text-slate-700 min-w-[70px]">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 min-w-[70px]">
               {defaultPolicyPending ? 'Always On' : 'Unmarked'}
             </span>
           </div>
         </div>
       </div>
       {/* Commission Splits by Carrier */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-2">
+      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 dark:border-white/10 pb-3 gap-2">
           <div>
-            <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
-              <Percent className="size-5 text-[#0170FE]" />
+            <h3 className="text-lg font-bold text-slate-950 dark:text-white flex items-center gap-2">
+              <Percent className="size-5 text-[#0170FE] dark:text-blue-400" />
               Carrier Commission &amp; Split Rates
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
               Set default contract commission percentages and broker/brokerage split shares for each active carrier.
             </p>
           </div>
@@ -1062,23 +1169,23 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[840px] text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
+              <tr className="border-b border-slate-100 dark:border-white/10 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 <th className="py-3.5 pr-6 whitespace-nowrap">Carrier Name</th>
                 <th className="py-3.5 px-4 whitespace-nowrap">Policy Prefix</th>
                 <th className="py-3.5 px-4 whitespace-nowrap">Default Commission %</th>
                 <th className="py-3.5 px-4 whitespace-nowrap">Broker Share %</th>
                 <th className="py-3.5 px-4 whitespace-nowrap">Brokerage (House) %</th>
                 <th className="py-3.5 px-4 whitespace-nowrap">Renewal Commission %</th>
-                <th className="py-3.5 pl-4 pr-6 text-right min-w-[120px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none whitespace-nowrap">Actions</th>
+                <th className="py-3.5 pl-4 pr-6 text-right min-w-[120px] md:sticky md:right-0 md:z-20 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-300 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] dark:md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.6)] select-none whitespace-nowrap">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
               {splits.map((row, idx) => (
-                <tr key={`${row.carrier}-${idx}`} className="group hover:bg-slate-50/50">
-                  <td className="py-3.5 pr-6 font-semibold text-slate-900 whitespace-nowrap">{row.carrier}</td>
+                <tr key={`${row.carrier}-${idx}`} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                  <td className="py-3.5 pr-6 font-semibold text-slate-900 dark:text-white whitespace-nowrap">{row.carrier}</td>
                   <td className="py-3.5 px-4 whitespace-nowrap">
                     {row.policyPrefix ? (
-                      <span className="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-mono font-bold text-slate-700 border border-slate-200">
+                      <span className="inline-flex items-center rounded-lg bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-xs font-mono font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10">
                         {row.policyPrefix}
                       </span>
                     ) : (
@@ -1086,18 +1193,18 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                     )}
                   </td>
                   <td className="py-3.5 px-4 whitespace-nowrap">
-                    <span className="rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-mono font-bold text-[#0170FE]">
+                    <span className="rounded-lg bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 text-xs font-mono font-bold text-[#0170FE] dark:text-blue-400 dark:border dark:border-blue-800/40">
                       {row.defaultComm}%
                     </span>
                   </td>
-                  <td className="py-3.5 px-4 font-mono font-bold text-slate-900 whitespace-nowrap">{row.brokerSplit}%</td>
-                  <td className="py-3.5 px-4 font-mono font-medium text-slate-500 whitespace-nowrap">{row.houseSplit}%</td>
-                  <td className="py-3.5 px-4 font-mono font-semibold text-slate-700 whitespace-nowrap">{row.renewalRate}%</td>
-                  <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[120px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
+                  <td className="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white whitespace-nowrap">{row.brokerSplit}%</td>
+                  <td className="py-3.5 px-4 font-mono font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">{row.houseSplit}%</td>
+                  <td className="py-3.5 px-4 font-mono font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">{row.renewalRate}%</td>
+                  <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[120px] md:sticky md:right-0 md:z-10 bg-white dark:bg-slate-900 group-hover:bg-[#f8fafc] dark:group-hover:bg-slate-800 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] dark:md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.6)] transition-colors">
                     <button
                       type="button"
                       onClick={() => handleOpenEdit(idx)}
-                      className="cursor-pointer text-xs sm:text-sm font-semibold text-[#0170FE] hover:underline"
+                      className="cursor-pointer text-xs sm:text-sm font-semibold text-[#0170FE] dark:text-blue-400 hover:underline"
                     >
                       Edit Rule
                     </button>
@@ -1112,17 +1219,17 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
       {/* Add / Edit Override Modal */}
       {modalMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-4">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-[#0170FE]/10 text-[#0170FE]">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-[#0170FE]/10 text-[#0170FE] dark:text-blue-400">
                   <Percent className="size-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-950">
+                  <h3 className="text-lg font-bold text-slate-950 dark:text-white">
                     {modalMode === 'add' ? 'Add Commission Override' : 'Edit Commission Rule'}
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     {modalMode === 'add'
                       ? 'Set custom commission contract percentages for a carrier'
                       : `Update commission and split structure for ${formData.carrier}`}
@@ -1132,7 +1239,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
               <button
                 type="button"
                 onClick={handleCloseModal}
-                className="cursor-pointer rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                className="cursor-pointer rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition"
               >
                 <X className="size-5" />
               </button>
@@ -1141,7 +1248,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
             <form onSubmit={handleSaveRule} className="mt-5 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                     Carrier Name <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -1150,16 +1257,16 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                     value={formData.carrier}
                     onChange={(e) => setFormData({ ...formData, carrier: e.target.value })}
                     placeholder="e.g. Hanover Insurance / AIG"
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                    className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
                   />
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-xs font-semibold text-slate-700 whitespace-nowrap">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
                       Policy No Prefix <span className="text-gray-400">(optional)</span><span className="text-rose-500">*</span>
                     </label>
-                    <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md whitespace-nowrap">
+                    <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md whitespace-nowrap">
                       max 3 words
                     </span>
                   </div>
@@ -1175,14 +1282,14 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                       })
                     }
                     placeholder="e.g. POL"
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-mono font-bold uppercase tracking-wider text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400"
+                    className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 text-sm font-mono font-bold uppercase tracking-wider text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                     Default Commission (%)
                   </label>
                   <div className="relative">
@@ -1196,7 +1303,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                       onChange={(e) =>
                         setFormData({ ...formData, defaultComm: parseFloat(e.target.value) || 0 })
                       }
-                      className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-3.5 pr-8 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                      className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 pl-3.5 pr-8 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
                       %
@@ -1205,7 +1312,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                     Renewal Commission (%)
                   </label>
                   <div className="relative">
@@ -1219,7 +1326,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                       onChange={(e) =>
                         setFormData({ ...formData, renewalRate: parseFloat(e.target.value) || 0 })
                       }
-                      className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-3.5 pr-8 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                      className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 pl-3.5 pr-8 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
                       %
@@ -1229,19 +1336,19 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
               </div>
 
               {/* Commission Split Allocation */}
-              <div className="rounded-xl border border-slate-200/90 bg-slate-50/60 p-4 space-y-3">
+              <div className="rounded-xl border border-slate-200/90 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/50 p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                     Split Allocation (Total 100%)
                   </label>
-                  <span className="text-xs font-semibold text-slate-500">
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                     {formData.brokerSplit}% / {formData.houseSplit}%
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                       Broker Share (%)
                     </label>
                     <input
@@ -1250,11 +1357,11 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                       max="100"
                       value={formData.brokerSplit}
                       onChange={(e) => handleBrokerSplitChange(parseInt(e.target.value) || 0)}
-                      className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#0170FE]"
+                      className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-700 px-3 text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-[#0170FE]"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                       Brokerage (House) %
                     </label>
                     <input
@@ -1263,14 +1370,14 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                       max="100"
                       value={formData.houseSplit}
                       onChange={(e) => handleHouseSplitChange(parseInt(e.target.value) || 0)}
-                      className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#0170FE]"
+                      className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-700 px-3 text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-[#0170FE]"
                     />
                   </div>
                 </div>
 
                 {/* Visual Ratio Bar */}
                 <div className="space-y-1">
-                  <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
+                  <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
                     <div
                       style={{ width: `${formData.brokerSplit}%` }}
                       className="bg-[#0170FE] transition-all duration-200"
@@ -1278,29 +1385,29 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                     />
                     <div
                       style={{ width: `${formData.houseSplit}%` }}
-                      className="bg-slate-400 transition-all duration-200"
+                      className="bg-slate-400 dark:bg-slate-600 transition-all duration-200"
                       title={`House: ${formData.houseSplit}%`}
                     />
                   </div>
-                  <div className="flex justify-between text-[11px] text-slate-500 font-medium">
+                  <div className="flex justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                     <span className="flex items-center gap-1">
                       <span className="inline-block size-2 rounded-full bg-[#0170FE]" />
                       Broker: {formData.brokerSplit}%
                     </span>
                     <span className="flex items-center gap-1">
-                      <span className="inline-block size-2 rounded-full bg-slate-400" />
+                      <span className="inline-block size-2 rounded-full bg-slate-400 dark:bg-slate-600" />
                       House: {formData.houseSplit}%
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100 pt-4">
+              <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100 dark:border-white/10 pt-4">
                 {modalMode === 'edit' ? (
                   <button
                     type="button"
                     onClick={handleDeleteRule}
-                    className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-rose-600 hover:bg-rose-50 transition w-full sm:w-auto"
+                    className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition w-full sm:w-auto"
                   >
                     <Trash2 className="size-4" />
                     <span>Delete Rule</span>
@@ -1313,7 +1420,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className="flex-1 sm:flex-none cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition text-center"
+                    className="flex-1 sm:flex-none cursor-pointer rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition text-center"
                   >
                     Cancel
                   </button>
@@ -1334,17 +1441,17 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
       {/* Add / Edit LOB & Transaction Rule Modal */}
       {lobModalMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-4">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-[#0170FE]/10 text-[#0170FE]">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-[#0170FE]/10 text-[#0170FE] dark:text-blue-400">
                   <Sliders className="size-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-950">
+                  <h3 className="text-lg font-bold text-slate-950 dark:text-white">
                     {lobModalMode === 'add' ? 'Add Line of Business Rule' : 'Edit Line of Business Rule'}
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     {lobModalMode === 'add'
                       ? 'Configure commission rates and broker splits for a line of business'
                       : `Update commission schedule for ${lobFormData.lob}`}
@@ -1354,7 +1461,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
               <button
                 type="button"
                 onClick={handleCloseLobModal}
-                className="cursor-pointer rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                className="cursor-pointer rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition"
               >
                 <X className="size-5" />
               </button>
@@ -1362,7 +1469,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
 
             <form onSubmit={handleSaveLobRule} className="mt-5 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                   Line of Business / Coverage Name <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -1371,7 +1478,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                   value={lobFormData.lob}
                   onChange={(e) => setLobFormData({ ...lobFormData, lob: e.target.value })}
                   placeholder="e.g. Commercial Property, Cyber & Tech E&O..."
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
                 />
                 {/* Quick suggestions */}
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -1389,7 +1496,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                       key={sug}
                       type="button"
                       onClick={() => setLobFormData({ ...lobFormData, lob: sug })}
-                      className="text-[11px] font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-0.5 rounded-md transition cursor-pointer"
+                      className="text-[11px] font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-transparent dark:border-white/10 px-2 py-0.5 rounded-md transition cursor-pointer"
                     >
                       {sug}
                     </button>
@@ -1398,13 +1505,13 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                   Applicable Transaction Type
                 </label>
                 <select
                   value={lobFormData.transType || 'All Transactions'}
                   onChange={(e) => setLobFormData({ ...lobFormData, transType: e.target.value })}
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
+                  className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20"
                 >
                   <option value="All Transactions">All Transactions (New, Renewal, Endorsements)</option>
                   <option value="New Business Only">New Business Only</option>
@@ -1417,7 +1524,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                     Base Commission Rate (%) <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
@@ -1431,7 +1538,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                       onChange={(e) =>
                         setLobFormData({ ...lobFormData, baseComm: parseFloat(e.target.value) || 0 })
                       }
-                      className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-3.5 pr-8 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 font-mono font-bold"
+                      className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 pl-3.5 pr-8 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 font-mono font-bold"
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
                       %
@@ -1440,7 +1547,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                     Split Ratio (Broker / House)
                   </label>
                   <div className="flex items-center gap-2">
@@ -1451,7 +1558,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                         max="100"
                         value={lobFormData.brokerSplit}
                         onChange={(e) => handleLobBrokerSplitChange(parseFloat(e.target.value))}
-                        className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-2.5 pr-7 text-sm font-mono font-bold text-slate-900 outline-none focus:border-[#0170FE]"
+                        className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 pl-2.5 pr-7 text-sm font-mono font-bold text-slate-900 dark:text-white outline-none focus:border-[#0170FE]"
                       />
                       <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 pointer-events-none">
                         % Brk
@@ -1465,7 +1572,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                         max="100"
                         value={lobFormData.houseSplit}
                         onChange={(e) => handleLobHouseSplitChange(parseFloat(e.target.value))}
-                        className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-2.5 pr-7 text-sm font-mono font-bold text-slate-900 outline-none focus:border-[#0170FE]"
+                        className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 pl-2.5 pr-7 text-sm font-mono font-bold text-slate-900 dark:text-white outline-none focus:border-[#0170FE]"
                       />
                       <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 pointer-events-none">
                         % Hse
@@ -1476,7 +1583,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                   Schedule Notes &amp; Guidelines
                 </label>
                 <textarea
@@ -1484,16 +1591,16 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                   value={lobFormData.note}
                   onChange={(e) => setLobFormData({ ...lobFormData, note: e.target.value })}
                   placeholder="e.g. Standard rating schedule, applies to direct bill statements..."
-                  className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-900 outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 resize-none"
+                  className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 p-3 text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE] focus:ring-2 focus:ring-[#0170FE]/20 resize-none"
                 />
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/10">
                 {lobModalMode === 'edit' ? (
                   <button
                     type="button"
                     onClick={handleDeleteLobRule}
-                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition"
+                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 transition"
                   >
                     <Trash2 className="size-3.5" />
                     <span>Delete Rule</span>
@@ -1506,7 +1613,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                   <button
                     type="button"
                     onClick={handleCloseLobModal}
-                    className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                    className="cursor-pointer rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
                   >
                     Cancel
                   </button>
@@ -1525,19 +1632,19 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
       )}
 
       {/* Policy / Transaction-Specific Commission Information (DYNAMIC) */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-3">
+      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 dark:border-white/10 pb-3 gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
-                <Sliders className="size-5 text-[#0170FE]" />
+              <h3 className="text-lg font-bold text-slate-950 dark:text-white flex items-center gap-2">
+                <Sliders className="size-5 text-[#0170FE] dark:text-blue-400" />
                 Line of Business &amp; Transaction-Specific Information
               </h3>
-              <span className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs font-bold text-[#0170FE]">
+              <span className="rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/60 px-2.5 py-0.5 text-xs font-bold text-[#0170FE] dark:text-blue-400">
                 {lobRules.length} Rules Active
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
               Rules apply automatically during reconciliation when matching carrier statement records. Click any rule to edit, add new coverage lines, or adjust broker split rates dynamically.
             </p>
           </div>
@@ -1547,7 +1654,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
               type="button"
               onClick={handleResetLobDefaults}
               title="Reset to default standard schedule"
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
             >
               <RotateCcw className="size-3.5" />
               <span className="hidden sm:inline">Reset Defaults</span>
@@ -1564,14 +1671,14 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
         </div>
 
         {lobRules.length === 0 ? (
-          <div className="p-8 text-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50">
+          <div className="p-8 text-center rounded-xl border border-dashed border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/40">
             <Sliders className="size-8 text-slate-400 mx-auto mb-2" />
-            <p className="text-sm font-bold text-slate-800">No Line of Business rules configured</p>
-            <p className="text-xs text-slate-500 mt-1">Add custom rules or restore default schedules.</p>
+            <p className="text-sm font-bold text-slate-800 dark:text-slate-200">No Line of Business rules configured</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Add custom rules or restore default schedules.</p>
             <button
               type="button"
               onClick={handleResetLobDefaults}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white cursor-pointer"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-slate-900 dark:bg-blue-600 px-3.5 py-1.5 text-xs font-semibold text-white cursor-pointer hover:bg-slate-800 dark:hover:bg-blue-500 transition"
             >
               <RotateCcw className="size-3.5" />
               <span>Restore Defaults</span>
@@ -1582,51 +1689,51 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
             {lobRules.map((rule, idx) => (
               <div
                 key={rule.id || `${rule.lob}-${idx}`}
-                className="group rounded-xl border border-slate-200 hover:border-blue-300 bg-white p-4 space-y-3 transition shadow-xs hover:shadow-sm"
+                className="group rounded-xl border border-slate-200 dark:border-white/10 hover:border-blue-300 dark:hover:border-blue-500/50 bg-white dark:bg-slate-850 p-4 space-y-3 transition shadow-xs hover:shadow-sm"
               >
                 {/* Header: Title + Base Comm Pill */}
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <span className="text-sm font-bold text-slate-900 group-hover:text-[#0170FE] transition">
+                    <span className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#0170FE] dark:group-hover:text-blue-400 transition">
                       {rule.lob}
                     </span>
                     {rule.transType && (
-                      <span className="block text-[11px] font-medium text-slate-500 mt-0.5">
+                      <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
                         {rule.transType}
                       </span>
                     )}
                   </div>
-                  <span className="rounded-lg bg-blue-50 border border-blue-200/80 px-2.5 py-1 text-xs font-mono font-bold text-[#0170FE] shrink-0">
+                  <span className="rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-800/40 px-2.5 py-1 text-xs font-mono font-bold text-[#0170FE] dark:text-blue-400 shrink-0">
                     {rule.baseComm}%
                   </span>
                 </div>
 
                 {/* Broker Split & House Share */}
-                <div className="space-y-1.5 bg-slate-50/70 p-2.5 rounded-lg border border-slate-100">
+                <div className="space-y-1.5 bg-slate-50/70 dark:bg-slate-900/60 p-2.5 rounded-lg border border-slate-100 dark:border-white/5">
                   <div className="flex justify-between text-xs">
-                    <span className="text-slate-500">Broker Split Share:</span>
-                    <span className="font-mono font-bold text-slate-900">
+                    <span className="text-slate-500 dark:text-slate-400">Broker Split Share:</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white">
                       {rule.brokerSplit}% <span className="text-slate-400 font-normal">/ {rule.houseSplit}% house</span>
                     </span>
                   </div>
                   {/* Visual Ratio Bar */}
-                  <div className="h-1.5 w-full rounded-full bg-slate-200 overflow-hidden flex">
+                  <div className="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden flex">
                     <div className="bg-[#0170FE] h-full" style={{ width: `${rule.brokerSplit}%` }} />
-                    <div className="bg-slate-400 h-full" style={{ width: `${rule.houseSplit}%` }} />
+                    <div className="bg-slate-400 dark:bg-slate-600 h-full" style={{ width: `${rule.houseSplit}%` }} />
                   </div>
                 </div>
 
                 {/* Description Note */}
-                <p className="text-xs text-slate-500 leading-relaxed min-h-[32px]">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed min-h-[32px]">
                   {rule.note || 'Standard schedule applies during statement reconciliation.'}
                 </p>
 
                 {/* Action footer */}
-                <div className="flex items-center justify-between border-t border-slate-100 pt-2.5">
+                <div className="flex items-center justify-between border-t border-slate-100 dark:border-white/10 pt-2.5">
                   <button
                     type="button"
                     onClick={() => handleOpenEditLob(idx)}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#0170FE] hover:underline cursor-pointer"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#0170FE] dark:text-blue-400 hover:underline cursor-pointer"
                   >
                     <Pencil className="size-3" />
                     <span>Edit Rule</span>
@@ -1636,7 +1743,7 @@ function CommissionSettingsTab({ onSave }: { onSave: () => void }) {
                     type="button"
                     onClick={() => handleDeleteLobRuleByIndex(idx)}
                     title={`Delete ${rule.lob} rule`}
-                    className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                    className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition cursor-pointer"
                   >
                     <Trash2 className="size-3.5" />
                   </button>
@@ -1712,18 +1819,18 @@ function MarketingConsentTab({
       {/* 2. Consent Form Suite: Form Customizer & Live Interactive Form */}
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Left Column: Form Builder & Disclosures Customizer */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5 lg:col-span-5">
-          <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-5 lg:col-span-5">
+          <div className="border-b border-slate-100 dark:border-white/10 pb-3 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-slate-950 dark:text-white flex items-center gap-2">
                 <Sliders className="size-5 text-[#0170FE]" />
                 Consent Form Builder
               </h3>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                 Customize disclosure terms, signature requirements, and communication channels.
               </p>
             </div>
-            <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">
+            <span className="rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-1 text-xs font-semibold text-slate-600 dark:text-slate-400">
               Form v3.2
             </span>
           </div>
@@ -1731,37 +1838,37 @@ function MarketingConsentTab({
           {/* Agency & License Details */}
           <div className="space-y-3">
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
                 Agency Name on Consent Agreement
               </label>
               <input
                 type="text"
                 value={formSettings.agencyName}
                 onChange={(e) => setFormSettings({ ...formSettings, agencyName: e.target.value })}
-                className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm text-slate-900 outline-none focus:border-[#0170FE]"
+                className="h-9 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE]"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
                 Broker License / NPN Number
               </label>
               <input
                 type="text"
                 value={formSettings.licenseNumber}
                 onChange={(e) => setFormSettings({ ...formSettings, licenseNumber: e.target.value })}
-                className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm text-slate-900 outline-none focus:border-[#0170FE]"
+                className="h-9 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:border-[#0170FE]"
               />
             </div>
           </div>
 
           {/* Toggle Switches */}
-          <div className="space-y-3 pt-2 border-t border-slate-100">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-600">
+          <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-white/10">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
               Consent Channels to Request
             </p>
 
-            <label className="flex items-start gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+            <label className="flex items-start gap-3 p-2.5 rounded-xl border border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 cursor-pointer">
               <input
                 type="checkbox"
                 checked={formSettings.allowSms}
@@ -1769,12 +1876,12 @@ function MarketingConsentTab({
                 className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
               />
               <div className="text-xs">
-                <span className="font-bold text-slate-900 block">Automated SMS &amp; Text Alerts</span>
-                <span className="text-slate-500">Requires explicit TCPA 10DLC disclosure with STOP reply support</span>
+                <span className="font-bold text-slate-900 dark:text-white block">Automated SMS &amp; Text Alerts</span>
+                <span className="text-slate-500 dark:text-slate-400">Requires explicit TCPA 10DLC disclosure with STOP reply support</span>
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+            <label className="flex items-start gap-3 p-2.5 rounded-xl border border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 cursor-pointer">
               <input
                 type="checkbox"
                 checked={formSettings.allowEmail}
@@ -1782,12 +1889,12 @@ function MarketingConsentTab({
                 className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
               />
               <div className="text-xs">
-                <span className="font-bold text-slate-900 block">Electronic Policy &amp; Email Marketing</span>
-                <span className="text-slate-500">Covers email proposals, rate changes, and policy delivery</span>
+                <span className="font-bold text-slate-900 dark:text-white block">Electronic Policy &amp; Email Marketing</span>
+                <span className="text-slate-500 dark:text-slate-400">Covers email proposals, rate changes, and policy delivery</span>
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+            <label className="flex items-start gap-3 p-2.5 rounded-xl border border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 cursor-pointer">
               <input
                 type="checkbox"
                 checked={formSettings.allowVoice}
@@ -1795,12 +1902,12 @@ function MarketingConsentTab({
                 className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
               />
               <div className="text-xs">
-                <span className="font-bold text-slate-900 block">Direct Broker Calls &amp; Voicemails</span>
-                <span className="text-slate-500">Permits agent calls regarding renewal quotes and bound policies</span>
+                <span className="font-bold text-slate-900 dark:text-white block">Direct Broker Calls &amp; Voicemails</span>
+                <span className="text-slate-500 dark:text-slate-400">Permits agent calls regarding renewal quotes and bound policies</span>
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 cursor-pointer">
+            <label className="flex items-start gap-3 p-2.5 rounded-xl border border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 cursor-pointer">
               <input
                 type="checkbox"
                 checked={formSettings.requireSignature}
@@ -1808,29 +1915,29 @@ function MarketingConsentTab({
                 className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
               />
               <div className="text-xs">
-                <span className="font-bold text-slate-900 block">Require E-Signature &amp; Timestamp</span>
-                <span className="text-slate-500">Creates legally binding electronic signature record</span>
+                <span className="font-bold text-slate-900 dark:text-white block">Require E-Signature &amp; Timestamp</span>
+                <span className="text-slate-500 dark:text-slate-400">Creates legally binding electronic signature record</span>
               </div>
             </label>
           </div>
 
           {/* Legal Disclaimer Box */}
-          <div className="space-y-1.5 pt-2 border-t border-slate-100">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
+          <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-white/10">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block">
               Mandatory Legal Disclaimer Text
             </label>
             <textarea
               rows={3}
               value={formSettings.disclaimerText}
               onChange={(e) => setFormSettings({ ...formSettings, disclaimerText: e.target.value })}
-              className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs text-slate-700 outline-none focus:border-[#0170FE]"
+              className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 p-2.5 text-xs text-slate-700 dark:text-white outline-none focus:border-[#0170FE]"
             />
           </div>
 
           <button
             type="button"
             onClick={onSave}
-            className="w-full inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-slate-950 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-slate-800 transition"
+            className="w-full inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-slate-950 dark:bg-blue-600 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-slate-800 dark:hover:bg-blue-500 transition"
           >
             <Save className="size-4" />
             <span>Submit</span>
@@ -1838,54 +1945,43 @@ function MarketingConsentTab({
         </div>
 
         {/* Right Column: Live Client-Facing Consent Form Preview */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5 lg:col-span-7">
-          <div className="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-5 lg:col-span-7">
+          <div className="border-b border-slate-100 dark:border-white/10 pb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-slate-950">Live Client Consent Form Preview</h3>
-                <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200">
+                <h3 className="text-lg font-bold text-slate-950 dark:text-white">Live Client Consent Form Preview</h3>
+                <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
                   Interactive
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                 Exact form your policyholder views and signs when opening your consent link.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setClientName('Jane M. Vance')
-                setClientBusiness('Apex Logistics Inc.')
-                setPreviewSubmitted(false)
-              }}
-              className="text-xs text-[#0170FE] font-semibold hover:underline cursor-pointer"
-            >
-              Reset Sample Data
-            </button>
           </div>
 
           {/* The Actual Rendered Form Card */}
           <form
             onSubmit={handleTestSubmit}
-            className="rounded-2xl border-2 border-slate-200 bg-slate-50/30 p-5 sm:p-6 shadow-sm space-y-5"
+            className="rounded-2xl border-2 border-slate-200 dark:border-white/10 bg-slate-50/30 dark:bg-slate-950/50 p-5 sm:p-6 shadow-sm space-y-5"
           >
             {/* Form Agency Header */}
-            <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4">
+            <div className="rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/50 dark:bg-blue-950/30 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span className="size-2 rounded-full bg-[#0170FE]" />
-                    <h4 className="text-sm sm:text-base font-bold text-slate-950">{formSettings.agencyName}</h4>
+                    <h4 className="text-sm sm:text-base font-bold text-slate-950 dark:text-white">{formSettings.agencyName}</h4>
                   </div>
-                  <p className="text-xs text-slate-600 mt-0.5">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
                     Licensed Broker ID: <span className="font-mono font-medium">{formSettings.licenseNumber}</span>
                   </p>
                 </div>
-                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 shrink-0">
+                <span className="rounded-full bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 shrink-0">
                   Form 10DLC-A
                 </span>
               </div>
-              <p className="text-xs text-slate-600 mt-2.5 pt-2 border-t border-blue-100/80">
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-2.5 pt-2 border-t border-blue-100/80 dark:border-blue-900/40">
                 <strong>Authorization Agreement:</strong> Please verify your preferred contact channels to receive official policy notices,
                 claim updates, and insurance quotes.
               </p>
@@ -1893,51 +1989,51 @@ function MarketingConsentTab({
 
             {/* Step 1: Policyholder Identification */}
             <div className="space-y-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
                 1. Policyholder / Business Contact Info
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
                 <div>
-                  <label className="text-xs font-medium text-slate-600 block mb-1">Full Legal Name</label>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 block mb-1">Full Legal Name</label>
                   <input
                     type="text"
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
                     required
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-slate-900 outline-none focus:border-[#0170FE]"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3 text-slate-900 dark:text-white outline-none focus:border-[#0170FE]"
                     placeholder="e.g. John Doe"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-600 block mb-1">Business / Company Name</label>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 block mb-1">Business / Company Name</label>
                   <input
                     type="text"
                     value={clientBusiness}
                     onChange={(e) => setClientBusiness(e.target.value)}
                     required
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-slate-900 outline-none focus:border-[#0170FE]"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3 text-slate-900 dark:text-white outline-none focus:border-[#0170FE]"
                     placeholder="e.g. Acme Corp LLC"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-600 block mb-1">Mobile Phone (for SMS)</label>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 block mb-1">Mobile Phone (for SMS)</label>
                   <input
                     type="text"
                     value={clientPhone}
                     onChange={(e) => setClientPhone(e.target.value)}
                     required
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-slate-900 outline-none focus:border-[#0170FE]"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3 text-slate-900 dark:text-white outline-none focus:border-[#0170FE]"
                     placeholder="(555) 000-0000"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-600 block mb-1">Email Address</label>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 block mb-1">Email Address</label>
                   <input
                     type="email"
                     value={clientEmail}
                     onChange={(e) => setClientEmail(e.target.value)}
                     required
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-slate-900 outline-none focus:border-[#0170FE]"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3 text-slate-900 dark:text-white outline-none focus:border-[#0170FE]"
                     placeholder="john@example.com"
                   />
                 </div>
@@ -1945,13 +2041,13 @@ function MarketingConsentTab({
             </div>
 
             {/* Step 2: Communication Channel Consent Toggles */}
-            <div className="space-y-2.5 pt-2 border-t border-slate-200/80">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+            <div className="space-y-2.5 pt-2 border-t border-slate-200/80 dark:border-white/10">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
                 2. Communication Permissions &amp; Authorizations
               </span>
 
               {formSettings.allowSms && (
-                <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-[#0170FE]/50 transition cursor-pointer">
+                <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/60 hover:border-[#0170FE]/50 transition cursor-pointer">
                   <input
                     type="checkbox"
                     checked={smsOptIn}
@@ -1959,10 +2055,10 @@ function MarketingConsentTab({
                     className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
                   />
                   <div className="text-xs">
-                    <span className="font-bold text-slate-900 block">
+                    <span className="font-bold text-slate-900 dark:text-white block">
                       Authorize Automated SMS Policy &amp; Renewal Notifications
                     </span>
-                    <span className="text-slate-600 mt-0.5 block leading-relaxed">
+                    <span className="text-slate-600 dark:text-slate-400 mt-0.5 block leading-relaxed">
                       I agree to receive automated policy renewal alerts, payment reminders, and quote status messages via SMS from{' '}
                       {formSettings.agencyName}. Msg &amp; data rates may apply. Reply STOP to cancel anytime.
                     </span>
@@ -1971,7 +2067,7 @@ function MarketingConsentTab({
               )}
 
               {formSettings.allowEmail && (
-                <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-[#0170FE]/50 transition cursor-pointer">
+                <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/60 hover:border-[#0170FE]/50 transition cursor-pointer">
                   <input
                     type="checkbox"
                     checked={emailOptIn}
@@ -1979,10 +2075,10 @@ function MarketingConsentTab({
                     className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
                   />
                   <div className="text-xs">
-                    <span className="font-bold text-slate-900 block">
+                    <span className="font-bold text-slate-900 dark:text-white block">
                       Electronic Delivery &amp; Marketing Disclosures
                     </span>
-                    <span className="text-slate-600 mt-0.5 block leading-relaxed">
+                    <span className="text-slate-600 dark:text-slate-400 mt-0.5 block leading-relaxed">
                       I consent to receive electronic policy binders, insurance rate revisions, coverage advisory summaries, and promotional
                       quotes at my provided email.
                     </span>
@@ -1991,7 +2087,7 @@ function MarketingConsentTab({
               )}
 
               {formSettings.allowVoice && (
-                <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-[#0170FE]/50 transition cursor-pointer">
+                <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/60 hover:border-[#0170FE]/50 transition cursor-pointer">
                   <input
                     type="checkbox"
                     checked={voiceOptIn}
@@ -1999,10 +2095,10 @@ function MarketingConsentTab({
                     className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
                   />
                   <div className="text-xs">
-                    <span className="font-bold text-slate-900 block">
+                    <span className="font-bold text-slate-900 dark:text-white block">
                       Direct Voice Follow-ups &amp; Claims Consultation
                     </span>
-                    <span className="text-slate-600 mt-0.5 block leading-relaxed">
+                    <span className="text-slate-600 dark:text-slate-400 mt-0.5 block leading-relaxed">
                       I authorize agency brokers and account managers to contact me by phone regarding open claims or policy binding questions.
                     </span>
                   </div>
@@ -2011,9 +2107,9 @@ function MarketingConsentTab({
             </div>
 
             {/* Step 3: Legal Disclaimer Notice Box */}
-            <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3 text-xs text-amber-900 leading-relaxed">
+            <div className="rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/60 dark:bg-amber-950/20 p-3 text-xs text-amber-900 dark:text-amber-300 leading-relaxed">
               <div className="flex items-center gap-1.5 font-bold mb-1">
-                <AlertCircle className="size-3.5 text-amber-700" />
+                <AlertCircle className="size-3.5 text-amber-700 dark:text-amber-400" />
                 <span>TCPA &amp; Regulatory Disclosure Notice</span>
               </div>
               <p>{formSettings.disclaimerText}</p>
@@ -2021,26 +2117,26 @@ function MarketingConsentTab({
 
             {/* Step 4: Electronic Signature Canvas / Field */}
             {formSettings.requireSignature && (
-              <div className="space-y-3 pt-2 border-t border-slate-200/80">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+              <div className="space-y-3 pt-2 border-t border-slate-200/80 dark:border-white/10">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
                   3. Digital Electronic Signature
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="text-xs font-medium text-slate-600 block mb-1">Type Full Name as E-Signature</label>
+                    <label className="text-xs font-medium text-slate-600 dark:text-slate-400 block mb-1">Type Full Name as E-Signature</label>
                     <input
                       type="text"
                       value={signature}
                       onChange={(e) => setSignature(e.target.value)}
                       required
                       placeholder="Jane M. Vance"
-                      className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 font-serif italic text-base font-bold text-slate-900 outline-none focus:border-[#0170FE]"
+                      className="h-10 w-full rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 px-3 font-serif italic text-base font-bold text-slate-900 dark:text-white outline-none focus:border-[#0170FE]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-slate-600 block mb-1">Timestamp / Date</label>
-                    <div className="h-10 rounded-lg border border-slate-200 bg-slate-100/70 px-3 flex items-center font-mono text-xs text-slate-600">
+                    <label className="text-xs font-medium text-slate-600 dark:text-slate-400 block mb-1">Timestamp / Date</label>
+                    <div className="h-10 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-100/70 dark:bg-slate-800/40 px-3 flex items-center font-mono text-xs text-slate-600 dark:text-slate-400">
                       <Clock className="size-3.5 mr-1.5 text-slate-400" />
                       Oct 12, 2026 · 17:30 UTC (Auto-Logged)
                     </div>
@@ -2054,7 +2150,7 @@ function MarketingConsentTab({
                     onChange={(e) => setAcknowledged(e.target.checked)}
                     className="mt-0.5 size-4 rounded text-[#0170FE] focus:ring-[#0170FE]"
                   />
-                  <span className="text-xs text-slate-700 font-medium leading-relaxed">
+                  <span className="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
                     I declare that I am the authorized contact or officer for the named business and agree that this digital signature has
                     the same legal validity as a handwritten signature under the ESIGN Act.
                   </span>
@@ -2064,11 +2160,11 @@ function MarketingConsentTab({
 
             {/* Success state feedback on submit test */}
             {previewSubmitted && (
-              <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-900 flex items-center gap-3">
+              <div className="rounded-xl border border-emerald-300 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/40 p-4 text-emerald-900 dark:text-emerald-200 flex items-center gap-3">
                 <CheckCircle2 className="size-6 text-emerald-600 shrink-0" />
                 <div className="text-xs sm:text-sm">
                   <p className="font-bold">Digital Consent Successfully Verified &amp; Logged!</p>
-                  <p className="text-xs text-emerald-700 font-mono mt-0.5">
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400 font-mono mt-0.5">
                     Audit Verification Hash: SHA256:7f3b8901ac9941a · IP: 127.0.0.1
                   </p>
                 </div>
@@ -2084,7 +2180,7 @@ function MarketingConsentTab({
                 <Fingerprint className="size-4" />
                 <span>Authorize &amp; Submit Digital Consent</span>
               </button>
-              <p className="text-[11px] text-center text-slate-400 mt-2">
+              <p className="text-[11px] text-center text-slate-400 dark:text-slate-500 mt-2">
                 256-Bit SSL Encrypted Verification · Immediate TCPA 10DLC Registry Logging
               </p>
             </div>
@@ -2098,25 +2194,25 @@ function MarketingConsentTab({
       {/* 5. MODAL: Full Public Client View Preview Modal */}
       {isPreviewModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
-          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-white/10 animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+            <div className="sticky top-0 z-10 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/10 px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="size-8 rounded-lg bg-blue-50 text-[#0170FE] flex items-center justify-center">
+                <div className="size-8 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-[#0170FE] flex items-center justify-center">
                   <Eye className="size-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-950">Public Client Consent Portal Preview</h3>
-                  <p className="text-xs text-slate-500">How your clients view this form on their browser</p>
+                  <h3 className="text-base font-bold text-slate-950 dark:text-white">Public Client Consent Portal Preview</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">How your clients view this form on their browser</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="flex items-center rounded-lg border border-slate-200 p-0.5 bg-slate-50 text-xs">
+                <div className="flex items-center rounded-lg border border-slate-200 dark:border-white/10 p-0.5 bg-slate-50 dark:bg-slate-800 text-xs">
                   <button
                     type="button"
                     onClick={() => setPreviewDevice('desktop')}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-medium cursor-pointer ${previewDevice === 'desktop' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500'
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-medium cursor-pointer ${previewDevice === 'desktop' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500 dark:text-slate-400'
                       }`}
                   >
                     <Laptop className="size-3.5" />
@@ -2125,7 +2221,7 @@ function MarketingConsentTab({
                   <button
                     type="button"
                     onClick={() => setPreviewDevice('mobile')}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-medium cursor-pointer ${previewDevice === 'mobile' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500'
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-medium cursor-pointer ${previewDevice === 'mobile' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500 dark:text-slate-400'
                       }`}
                   >
                     <Smartphone className="size-3.5" />
@@ -2136,7 +2232,7 @@ function MarketingConsentTab({
                 <button
                   type="button"
                   onClick={() => setIsPreviewModalOpen(false)}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
                 >
                   <X className="size-5" />
                 </button>
@@ -2144,35 +2240,35 @@ function MarketingConsentTab({
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 bg-slate-100/50 flex justify-center">
-              <div className={`w-full ${previewDevice === 'mobile' ? 'max-w-sm border-4 border-slate-800 rounded-3xl p-3 bg-white shadow-xl' : 'max-w-2xl bg-white rounded-2xl p-6 shadow-sm border border-slate-200'}`}>
-                <div className="text-center pb-4 border-b border-slate-100">
-                  <span className="inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#0170FE] border border-blue-200 mb-2">
+            <div className="p-6 bg-slate-100/50 dark:bg-slate-950/60 flex justify-center">
+              <div className={`w-full ${previewDevice === 'mobile' ? 'max-w-sm border-4 border-slate-800 dark:border-slate-700 rounded-3xl p-3 bg-white dark:bg-slate-900 shadow-xl' : 'max-w-2xl bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-white/10'}`}>
+                <div className="text-center pb-4 border-b border-slate-100 dark:border-white/10">
+                  <span className="inline-block rounded-full bg-blue-50 dark:bg-blue-950/50 px-3 py-1 text-xs font-semibold text-[#0170FE] border border-blue-200 dark:border-blue-800/60 mb-2">
                     Official Agency Consent Portal
                   </span>
-                  <h4 className="text-lg font-bold text-slate-950">{formSettings.agencyName}</h4>
-                  <p className="text-xs text-slate-500 mt-0.5">Insurance License: {formSettings.licenseNumber}</p>
+                  <h4 className="text-lg font-bold text-slate-950 dark:text-white">{formSettings.agencyName}</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Insurance License: {formSettings.licenseNumber}</p>
                 </div>
 
                 <div className="mt-4 space-y-4 text-xs">
-                  <div className="rounded-xl bg-slate-50 p-3 border border-slate-200 text-slate-700 leading-relaxed">
+                  <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 leading-relaxed">
                     Under the Federal Telephone Consumer Protection Act (TCPA) and GLBA Privacy rules, {formSettings.agencyName} requires
                     your authorization to communicate via electronic text messages and digital proposals.
                   </div>
 
                   <div className="space-y-2">
-                    <label className="font-bold text-slate-900 block">Your Contact Details</label>
-                    <div className="h-9 rounded-lg border border-slate-200 bg-white px-3 flex items-center text-slate-800 font-medium">
+                    <label className="font-bold text-slate-900 dark:text-white block">Your Contact Details</label>
+                    <div className="h-9 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 flex items-center text-slate-800 dark:text-slate-200 font-medium">
                       {clientName} · {clientBusiness}
                     </div>
-                    <div className="h-9 rounded-lg border border-slate-200 bg-white px-3 flex items-center text-slate-800 font-mono text-xs">
+                    <div className="h-9 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 flex items-center text-slate-800 dark:text-slate-200 font-mono text-xs">
                       {clientPhone} · {clientEmail}
                     </div>
                   </div>
 
-                  <div className="space-y-2 pt-2 border-t border-slate-100">
-                    <label className="font-bold text-slate-900 block">Authorized Communication Channels</label>
-                    <div className="space-y-1.5 text-xs text-slate-700">
+                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-white/10">
+                    <label className="font-bold text-slate-900 dark:text-white block">Authorized Communication Channels</label>
+                    <div className="space-y-1.5 text-xs text-slate-700 dark:text-slate-300">
                       <div className="flex items-center gap-2">
                         <Check className="size-4 text-emerald-600" />
                         <span>Automated Renewal Reminders &amp; Policy Expiration Alerts</span>
@@ -2188,7 +2284,7 @@ function MarketingConsentTab({
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-amber-900 text-[11px] leading-relaxed">
+                  <div className="rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/70 dark:bg-amber-950/30 p-3 text-amber-900 dark:text-amber-300 text-[11px] leading-relaxed">
                     {formSettings.disclaimerText}
                   </div>
 
@@ -2205,7 +2301,7 @@ function MarketingConsentTab({
             </div>
 
             {/* Modal Footer */}
-            <div className="border-t border-slate-200 bg-white px-6 py-3 flex items-center justify-between text-xs text-slate-500">
+            <div className="border-t border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 px-6 py-3 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
               <span>Public intake link: <span className="font-mono">{consentLink}</span></span>
               <button
                 type="button"
@@ -2336,24 +2432,24 @@ function QrLeadSettingsTab({
   return (
     <div className="grid gap-6 lg:grid-cols-12">
       {/* Left: Broker QR Code Card */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-5 lg:col-span-5">
-        <div className="border-b border-slate-100 pb-3 flex items-start justify-between gap-2">
+      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-xs space-y-5 lg:col-span-5">
+        <div className="border-b border-slate-100 dark:border-white/10 pb-3 flex items-start justify-between gap-2">
           <div>
-            <h3 className="text-lg font-bold text-slate-950 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-slate-950 dark:text-white flex items-center gap-2">
               <QrCode className="size-5 text-[#0170FE]" />
               Broker Dynamic QR Code
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
               Unique QR code permanently associated with your Broker account.
             </p>
           </div>
-          <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200 whitespace-nowrap">
+          <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 whitespace-nowrap">
             Active Pro
           </span>
         </div>
 
         {/* QR Code Canvas */}
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/50 p-6 text-center">
           <div className="rounded-2xl border-4 border-[#0170FE] bg-white p-4 shadow-md transition hover:shadow-lg">
             {/* Ultra-Crisp Scalable Vector QR Code */}
             <svg
@@ -2398,11 +2494,11 @@ function QrLeadSettingsTab({
           </div>
 
           <div className="mt-4 space-y-1">
-            <p className="text-sm font-bold text-slate-900">{businessName}</p>
-            <p className="text-xs text-slate-500">
-              Assigned Broker: <span className="font-semibold text-slate-700">{brokerName}</span>
+            <p className="text-sm font-bold text-slate-900 dark:text-white">{businessName}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Assigned Broker: <span className="font-semibold text-slate-700 dark:text-slate-300">{brokerName}</span>
             </p>
-            <span className="inline-block rounded-md bg-slate-200/80 px-2 py-0.5 text-[11px] font-mono font-semibold text-slate-800">
+            <span className="inline-block rounded-md bg-slate-200/80 dark:bg-slate-700 px-2 py-0.5 text-[11px] font-mono font-semibold text-slate-800 dark:text-slate-200">
               Account ID: {brokerCode}
             </span>
           </div>
@@ -2411,7 +2507,7 @@ function QrLeadSettingsTab({
             <button
               type="button"
               onClick={handleDownloadPng}
-              className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-800 shadow-xs hover:border-[#0170FE] hover:text-[#0170FE] transition"
+              className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-xs hover:border-[#0170FE] hover:text-[#0170FE] dark:hover:border-blue-500 dark:hover:text-blue-400 transition"
             >
               <Download className="size-3.5" />
               <span>PNG</span>
@@ -2419,7 +2515,7 @@ function QrLeadSettingsTab({
             <button
               type="button"
               onClick={handleDownloadSvg}
-              className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-800 shadow-xs hover:border-[#0170FE] hover:text-[#0170FE] transition"
+              className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-xs hover:border-[#0170FE] hover:text-[#0170FE] dark:hover:border-blue-500 dark:hover:text-blue-400 transition"
             >
               <Download className="size-3.5" />
               <span>SVG</span>
@@ -2441,12 +2537,12 @@ function QrLeadSettingsTab({
                   onCopy(leadUrl, 'qrshare')
                 }
               }}
-              className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-800 shadow-xs hover:border-[#0170FE] hover:text-[#0170FE] transition"
+              className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-xs hover:border-[#0170FE] hover:text-[#0170FE] dark:hover:border-blue-500 dark:hover:text-blue-400 transition"
             >
               {copiedKey === 'qrshare' ? (
                 <>
                   <Check className="size-3.5 text-emerald-600" />
-                  <span className="text-emerald-700">Copied</span>
+                  <span className="text-emerald-700 dark:text-emerald-400">Copied</span>
                 </>
               ) : (
                 <>
@@ -2460,12 +2556,12 @@ function QrLeadSettingsTab({
 
 
         {/* Requirement 10.1 Compliance Safeguards Notice */}
-        <div className="rounded-xl border border-blue-200/80 bg-blue-50/60 p-4 space-y-2.5">
-          <div className="flex items-center gap-2 text-xs font-bold text-blue-950">
+        <div className="rounded-xl border border-blue-200/80 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-950/20 p-4 space-y-2.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-blue-950 dark:text-blue-200">
             <ShieldCheck className="size-4.5 text-[#0170FE]" />
             <span>Broker Attribution &amp; Privacy Safeguards</span>
           </div>
-          <ul className="text-xs text-blue-900/80 space-y-1.5">
+          <ul className="text-xs text-blue-900/80 dark:text-blue-300/80 space-y-1.5">
             <li className="flex items-start gap-2">
               <Check className="size-3.5 text-emerald-600 shrink-0 mt-0.5" />
               <span>
@@ -2489,23 +2585,23 @@ function QrLeadSettingsTab({
       </div>
 
       {/* Right: Public Form Preview & Embed Code */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs space-y-5 lg:col-span-7">
-        <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-xs space-y-5 lg:col-span-7">
+        <div className="border-b border-slate-100 dark:border-white/10 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h3 className="text-lg font-bold text-slate-950">Public Form Preview &amp; Embed</h3>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            <h3 className="text-lg font-bold text-slate-950 dark:text-white">Public Form Preview &amp; Embed</h3>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
               Live prospective client view when scanning your Broker-specific QR code
             </p>
           </div>
 
           {/* Device Switcher */}
-          <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 self-start sm:self-auto">
+          <div className="flex items-center gap-1 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 p-1 self-start sm:self-auto">
             <button
               type="button"
               onClick={() => setPreviewDevice('mobile')}
               className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${previewDevice === 'mobile'
-                ? 'bg-white text-[#0170FE] shadow-xs'
-                : 'text-slate-500 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-900 text-[#0170FE] shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
             >
               <Smartphone className="size-3.5" />
@@ -2515,8 +2611,8 @@ function QrLeadSettingsTab({
               type="button"
               onClick={() => setPreviewDevice('desktop')}
               className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${previewDevice === 'desktop'
-                ? 'bg-white text-[#0170FE] shadow-xs'
-                : 'text-slate-500 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-900 text-[#0170FE] shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
             >
               <Laptop className="size-3.5" />
@@ -2526,59 +2622,59 @@ function QrLeadSettingsTab({
         </div>
 
         {/* Dynamic Frame Preview Box */}
-        <div className="rounded-2xl border border-slate-200 bg-slate-100/60 p-2.5 sm:p-6 overflow-hidden">
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-100/60 dark:bg-slate-950/60 p-2.5 sm:p-6 overflow-hidden">
           <div
-            className={`mx-auto bg-white transition-all duration-300 ${previewDevice === 'mobile'
-              ? 'max-w-[390px] rounded-[32px] border-[5px] border-slate-900 shadow-2xl p-4 sm:p-5'
-              : 'w-full rounded-2xl border border-slate-200 shadow-md p-4 sm:p-6'
+            className={`mx-auto bg-white dark:bg-slate-900 transition-all duration-300 ${previewDevice === 'mobile'
+              ? 'max-w-[390px] rounded-[32px] border-[5px] border-slate-900 dark:border-slate-700 shadow-2xl p-4 sm:p-5'
+              : 'w-full rounded-2xl border border-slate-200 dark:border-white/10 shadow-md p-4 sm:p-6'
               }`}
           >
             {/* Mobile Notch Bar if in Mobile Mode */}
             {previewDevice === 'mobile' && (
-              <div className="flex items-center justify-between pb-3 px-2 border-b border-slate-100 mb-3 text-[10px] font-semibold text-slate-500">
+              <div className="flex items-center justify-between pb-3 px-2 border-b border-slate-100 dark:border-white/10 mb-3 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
                 <span>9:41 AM</span>
-                <div className="h-3.5 w-20 rounded-full bg-slate-900 mx-auto" />
+                <div className="h-3.5 w-20 rounded-full bg-slate-900 dark:bg-slate-700 mx-auto" />
                 <span>5G · 100%</span>
               </div>
             )}
 
             {/* Desktop Mock Browser Bar if in Desktop Mode */}
             {previewDevice === 'desktop' && (
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4 text-xs min-w-0">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-white/10 mb-4 text-xs min-w-0">
                 <div className="flex gap-1.5 shrink-0">
                   <div className="size-2.5 rounded-full bg-rose-400" />
                   <div className="size-2.5 rounded-full bg-amber-400" />
                   <div className="size-2.5 rounded-full bg-emerald-400" />
                 </div>
-                <div className="flex-1 min-w-0 rounded-lg bg-slate-100 px-2.5 py-1 text-[10.5px] sm:text-[11px] font-mono text-slate-600 truncate">
+                <div className="flex-1 min-w-0 rounded-lg bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-[10.5px] sm:text-[11px] font-mono text-slate-600 dark:text-slate-300 truncate">
                   {leadUrl}
                 </div>
               </div>
             )}
 
             {/* Branded Form Header (Direct Broker Association) */}
-            <div className="space-y-3 border-b border-slate-100 pb-4">
+            <div className="space-y-3 border-b border-slate-100 dark:border-white/10 pb-4">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <div className="flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-xs sm:text-sm font-bold text-white shadow-xs">
                     JD
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-sm sm:text-base font-bold text-slate-950 leading-tight truncate">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-950 dark:text-white leading-tight truncate">
                       {businessName}
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-500 truncate">
-                      Assigned Broker: <span className="font-semibold text-slate-800">{brokerName}</span>
+                    <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
+                      Assigned Broker: <span className="font-semibold text-slate-800 dark:text-slate-300">{brokerName}</span>
                     </p>
                   </div>
                 </div>
-                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9.5px] sm:text-[10px] font-bold text-[#0170FE] border border-blue-200 shrink-0">
+                <span className="rounded-full bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 text-[9.5px] sm:text-[10px] font-bold text-[#0170FE] border border-blue-200 dark:border-blue-800/60 shrink-0">
                   Verified Broker
                 </span>
               </div>
 
               {/* Attribution Banner */}
-              <div className="rounded-lg bg-emerald-50/80 px-2.5 sm:px-3 py-1.5 text-[10.5px] sm:text-[11px] font-medium text-emerald-800 border border-emerald-200/70 flex items-center gap-1.5">
+              <div className="rounded-lg bg-emerald-50/80 dark:bg-emerald-950/30 px-2.5 sm:px-3 py-1.5 text-[10.5px] sm:text-[11px] font-medium text-emerald-800 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800/60 flex items-center gap-1.5">
                 <Check className="size-3.5 text-emerald-600 shrink-0" />
                 <span className="break-words leading-tight">
                   Quote request is directly routed to <strong>{brokerName}</strong> ({brokerCode}).
@@ -2590,18 +2686,18 @@ function QrLeadSettingsTab({
             <div className="mt-4 space-y-3 sm:space-y-3.5 text-xs sm:text-sm">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 <div className="min-w-0">
-                  <label className="block text-xs font-medium text-slate-600 mb-1 truncate">
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 truncate">
                     Contact Full Name <span className="text-rose-500">*</span>
                   </label>
-                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs truncate">
+                  <div className="h-9 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/60 px-3 py-2 text-slate-700 dark:text-slate-200 font-medium text-xs truncate">
                     Jane Smith
                   </div>
                 </div>
                 <div className="min-w-0">
-                  <label className="block text-xs font-medium text-slate-600 mb-1 truncate">
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 truncate">
                     Company / Business Name
                   </label>
-                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs truncate">
+                  <div className="h-9 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/60 px-3 py-2 text-slate-700 dark:text-slate-200 font-medium text-xs truncate">
                     Smith Logistics LLC
                   </div>
                 </div>
@@ -2609,50 +2705,50 @@ function QrLeadSettingsTab({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 <div className="min-w-0">
-                  <label className="block text-xs font-medium text-slate-600 mb-1 truncate">
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 truncate">
                     Email Address <span className="text-rose-500">*</span>
                   </label>
-                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs truncate">
+                  <div className="h-9 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/60 px-3 py-2 text-slate-700 dark:text-slate-200 font-medium text-xs truncate">
                     jane@smithlogistics.com
                   </div>
                 </div>
                 <div className="min-w-0">
-                  <label className="block text-xs font-medium text-slate-600 mb-1 truncate">
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 truncate">
                     Phone Number <span className="text-rose-500">*</span>
                   </label>
-                  <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs truncate">
+                  <div className="h-9 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/60 px-3 py-2 text-slate-700 dark:text-slate-200 font-medium text-xs truncate">
                     +1 (555) 234-8890
                   </div>
                 </div>
               </div>
 
               <div className="min-w-0">
-                <label className="block text-xs font-medium text-slate-600 mb-1 truncate">
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 truncate">
                   Coverage Requested <span className="text-rose-500">*</span>
                 </label>
-                <div className="h-9 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-slate-700 font-medium text-xs truncate">
+                <div className="h-9 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/60 px-3 py-2 text-slate-700 dark:text-slate-200 font-medium text-xs truncate">
                   Commercial Property &amp; General Liability
                 </div>
               </div>
 
               <div className="min-w-0">
-                <label className="block text-xs font-medium text-slate-600 mb-1">
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                   Message / Inquiries
                 </label>
-                <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-2.5 text-xs text-slate-700 leading-relaxed">
+                <div className="rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/60 p-2.5 text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
                   Looking to review existing warehouse coverage and request quote options.
                 </div>
               </div>
 
               {/* Express Consent & Client Privacy Shield */}
-              <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3 space-y-2">
+              <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/80 dark:bg-slate-800/40 p-3 space-y-2">
                 <div className="flex items-start gap-2">
                   <CheckSquare className="size-4 text-[#0170FE] shrink-0 mt-0.5" />
-                  <p className="text-[11px] text-slate-600 leading-tight">
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-tight">
                     I authorize <strong>{brokerName} ({businessName})</strong> to review my insurance request and contact me with competitive quotes. Client information is encrypted and never shared.
                   </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-slate-400 border-t border-slate-200/80 pt-1.5 leading-snug">
+                <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500 border-t border-slate-200/80 dark:border-white/10 pt-1.5 leading-snug">
                   <Lock className="size-3 text-emerald-600 shrink-0" />
                   <span className="break-words">256-bit Encrypted SSL · TCPA &amp; ESIGN Compliant · Attribution token: {brokerCode}</span>
                 </div>
@@ -2671,7 +2767,7 @@ function QrLeadSettingsTab({
 
         {/* Website Embed Code */}
         <div className="space-y-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
+          <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block">
             Embed Code for Your Brokerage Website (HTML iFrame)
           </label>
           <div className="flex flex-col sm:flex-row gap-2">
@@ -2679,12 +2775,12 @@ function QrLeadSettingsTab({
               type="text"
               readOnly
               value={iframeSnippet}
-              className="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-xs font-mono text-slate-600 outline-none truncate"
+              className="h-10 w-full min-w-0 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/80 px-3.5 text-xs font-mono text-slate-600 dark:text-slate-300 outline-none truncate"
             />
             <button
               type="button"
               onClick={() => onCopy(iframeSnippet, 'iframe')}
-              className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 sm:py-0 text-xs sm:text-sm font-semibold hover:border-[#0170FE] hover:text-[#0170FE] shrink-0"
+              className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 sm:py-0 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 hover:border-[#0170FE] hover:text-[#0170FE] dark:hover:border-blue-500 dark:hover:text-blue-400 shrink-0"
             >
               {copiedKey === 'iframe' ? (
                 <Check className="size-4 text-emerald-600" />

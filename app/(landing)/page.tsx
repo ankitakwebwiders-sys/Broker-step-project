@@ -205,25 +205,36 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-white text-slate-950 antialiased selection:bg-blue-200/60 selection:text-slate-900">
+    <main className="relative min-h-screen overflow-x-hidden bg-white text-slate-950 antialiased selection:bg-blue-200/60 selection:text-slate-900 dark:bg-[#070b14] dark:text-slate-100">
 
       {/* Scroll progress bar */}
-      <div className="fixed top-0 left-0 z-[100] h-[2px] w-full bg-slate-100">
+      <div className="fixed top-0 left-0 z-[100] h-[2px] w-full bg-slate-100 dark:bg-slate-800/60">
         <div
           className="h-full bg-gradient-to-r from-blue-500 via-cyan-400 to-violet-500 shadow-[0_0_12px_rgba(59,130,246,0.5)]"
           style={{ width: `${scrollProgress}%`, transition: 'width 100ms linear' }}
         />
       </div>
 
-      {/* Fixed aurora background — soft pastel orbs */}
+      {/* Fixed aurora background — soft pastel orbs in light, cosmic glow in dark */}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-blue-300/40 blur-[120px] animate-pulse" />
-        <div className="absolute top-1/3 -right-40 h-[500px] w-[500px] rounded-full bg-violet-300/40 blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
-        <div className="absolute bottom-0 left-1/3 h-[500px] w-[500px] rounded-full bg-cyan-200/50 blur-[120px] animate-pulse" style={{ animationDelay: '4s' }} />
+        <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-blue-300/40 blur-[120px] animate-pulse dark:bg-blue-600/15" />
+        <div className="absolute top-1/3 -right-40 h-[500px] w-[500px] rounded-full bg-violet-300/40 blur-[120px] animate-pulse dark:bg-violet-600/15" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-0 left-1/3 h-[500px] w-[500px] rounded-full bg-cyan-200/50 blur-[120px] animate-pulse dark:bg-cyan-600/15" style={{ animationDelay: '4s' }} />
+        {/* Light Mode Grid */}
         <div
-          className="absolute inset-0 opacity-[0.5]"
+          className="absolute inset-0 opacity-[0.5] dark:hidden"
           style={{
             backgroundImage: `linear-gradient(rgba(15,23,42,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.045) 1px, transparent 1px)`,
+            backgroundSize: '64px 64px',
+            maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 78%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 78%)',
+          }}
+        />
+        {/* Dark Mode Grid */}
+        <div
+          className="absolute inset-0 opacity-[0.35] hidden dark:block"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)`,
             backgroundSize: '64px 64px',
             maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 78%)',
             WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 78%)',
@@ -242,7 +253,7 @@ export default function LandingPage() {
             {/* LEFT */}
             <div>
               <Reveal delay={0}>
-                <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50/80 px-3 py-1.5 text-xs font-medium text-blue-700 backdrop-blur-sm shadow-sm">
+                <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50/80 px-3 py-1.5 text-xs font-medium text-blue-700 backdrop-blur-sm shadow-sm dark:border-blue-500/30 dark:bg-blue-950/50 dark:text-blue-300">
                   <span className="relative flex size-1.5">
                     <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
                     <span className="relative inline-flex size-1.5 rounded-full bg-emerald-500" />
@@ -253,7 +264,7 @@ export default function LandingPage() {
               </Reveal>
 
               <Reveal delay={80}>
-                <h1 className="mt-8 text-[clamp(2.5rem,6.5vw,4.75rem)] font-semibold leading-[1.03] tracking-[-0.045em] text-slate-950">
+                <h1 className="mt-8 text-[clamp(2.5rem,6.5vw,4.75rem)] font-semibold leading-[1.03] tracking-[-0.045em] text-slate-950 dark:text-white">
                   The clear next step
                   for your{' '}
                   <span className="relative inline-block">
@@ -265,7 +276,7 @@ export default function LandingPage() {
               </Reveal>
 
               <Reveal delay={160}>
-                <p className="mt-7 max-w-xl text-lg leading-relaxed text-slate-600">
+                <p className="mt-7 max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300">
                   BrokerStep brings clients, renewals, policies, and commissions into one calm, intelligent workspace so you can spend more time growing relationships.
                 </p>
               </Reveal>
@@ -283,7 +294,7 @@ export default function LandingPage() {
                   </Magnetic>
                   <Link
                     href="/login"
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white px-7 py-3.5 text-sm font-semibold text-slate-800 shadow-xs backdrop-blur-sm transition-all hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE]"
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white px-7 py-3.5 text-sm font-semibold text-slate-800 shadow-xs backdrop-blur-sm transition-all hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE] dark:border-white/10 dark:bg-slate-900/90 dark:text-white dark:hover:bg-slate-800 dark:hover:border-white/20"
                   >
                     Sign In
                   </Link>
@@ -294,11 +305,11 @@ export default function LandingPage() {
             {/* RIGHT — Product Hero Image */}
             <Reveal delay={200} y={40}>
               <div className="relative w-full max-w-[570px] xl:max-w-[600px] mx-auto lg:ml-auto">
-                <div className="absolute -inset-10 rounded-full bg-gradient-to-r from-blue-300/50 via-violet-300/50 to-cyan-200/60 blur-3xl" />
+                <div className="absolute -inset-10 rounded-full bg-gradient-to-r from-blue-300/50 via-violet-300/50 to-cyan-200/60 blur-3xl dark:from-blue-600/20 dark:via-violet-600/20 dark:to-cyan-600/20" />
 
-                <div className="relative rounded-2xl border border-slate-200/90 bg-white/95 p-2 sm:p-2.5 shadow-[0_22px_80px_-20px_rgba(59,130,246,0.35)] backdrop-blur-xl">
+                <div className="relative rounded-2xl border border-slate-200/90 bg-white/95 p-2 sm:p-2.5 shadow-[0_22px_80px_-20px_rgba(59,130,246,0.35)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90 dark:shadow-[0_22px_80px_-20px_rgba(0,0,0,0.8)]">
                   {/* Real Hero Image from public/images/hero-section.png */}
-                  <div className="overflow-hidden rounded-xl ">
+                  <div className="overflow-hidden rounded-xl">
                     <Image
                       src="/images/hero-section12.png"
                       alt="BrokerStep Insurance Brokerage Platform"
@@ -311,26 +322,26 @@ export default function LandingPage() {
                 </div>
 
                 {/* floating chips (PRESERVED) */}
-                <div className="absolute -left-6 lg:-left-8 top-1/3 z-20 hidden animate-[float_5s_ease-in-out_infinite] rounded-xl border border-slate-200 bg-white/95 px-4 py-3 shadow-xl backdrop-blur-xl lg:block">
+                <div className="absolute -left-6 lg:-left-8 top-1/3 z-20 hidden animate-[float_5s_ease-in-out_infinite] rounded-xl border border-slate-200 bg-white/95 px-4 py-3 shadow-xl backdrop-blur-xl lg:block dark:border-white/10 dark:bg-slate-900/95">
                   <div className="flex items-center gap-2.5">
                     <div className="flex size-8.5 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 shadow-xs">
                       <TrendingUp className="size-4 text-white" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-medium text-slate-500">Commission</p>
-                      <p className="text-xs font-bold text-slate-950">+$12,480</p>
+                      <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Commission</p>
+                      <p className="text-xs font-bold text-slate-950 dark:text-white">+$12,480</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="absolute -right-4 lg:-right-6 bottom-1/4 z-20 hidden animate-[float_6s_ease-in-out_infinite_1s] rounded-xl border border-slate-200 bg-white/95 px-4 py-3 shadow-xl backdrop-blur-xl lg:block">
+                <div className="absolute -right-4 lg:-right-6 bottom-1/4 z-20 hidden animate-[float_6s_ease-in-out_infinite_1s] rounded-xl border border-slate-200 bg-white/95 px-4 py-3 shadow-xl backdrop-blur-xl lg:block dark:border-white/10 dark:bg-slate-900/95">
                   <div className="flex items-center gap-2.5">
                     <div className="flex size-8.5 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-500 shadow-xs">
                       <Users className="size-4 text-white" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-medium text-slate-500">New clients</p>
-                      <p className="text-xs font-bold text-slate-950">+24 this month</p>
+                      <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">New clients</p>
+                      <p className="text-xs font-bold text-slate-950 dark:text-white">+24 this month</p>
                     </div>
                   </div>
                 </div>
@@ -346,14 +357,14 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl">
           <Reveal>
             <div className="mx-auto max-w-2xl text-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-300">
                 <Sparkles className="size-3.5 text-blue-500" />
                 Product Benefits
               </span>
-              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
+              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-white sm:text-5xl">
                 Everything your brokerage needs.
               </h2>
-              <p className="mt-5 text-base leading-relaxed text-slate-600">
+              <p className="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
                 Replace disconnected tools with a focused workspace that makes the important work visible and actionable.
               </p>
             </div>
@@ -364,13 +375,13 @@ export default function LandingPage() {
               <Reveal key={b.title} delay={i * 120}>
                 <SpotlightCard
                   glow={b.glow}
-                  className="group h-full rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/60"
+                  className="group h-full rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/60 dark:border-white/10 dark:bg-slate-900/60 dark:hover:border-blue-500/30 dark:hover:bg-slate-900 dark:hover:shadow-black/60"
                 >
                   <div className={`inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br ${b.color} text-white shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6`}>
                     <b.icon className="size-6" />
                   </div>
-                  <h3 className="mt-6 text-xl font-semibold text-slate-950">{b.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{b.description}</p>
+                  <h3 className="mt-6 text-xl font-semibold text-slate-950 dark:text-white">{b.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{b.description}</p>
 
                 </SpotlightCard>
               </Reveal>
@@ -384,14 +395,14 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl">
           <Reveal>
             <div className="mx-auto max-w-2xl text-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-300">
                 <FileCheck2 className="size-3.5 text-emerald-500" />
                 Key Features
               </span>
-              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
+              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-white sm:text-5xl">
                 The tools behind a better brokerage.
               </h2>
-              <p className="mt-5 text-base leading-relaxed text-slate-600">
+              <p className="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
                 Purpose-built workflows replace scattered spreadsheets and give your team one reliable source of truth.
               </p>
             </div>
@@ -400,12 +411,12 @@ export default function LandingPage() {
           <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {features.map((f, i) => (
               <Reveal key={f.title} delay={i * 80} className={i === 4 ? 'lg:col-span-1 sm:col-span-2' : ''}>
-                <SpotlightCard className="group h-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-slate-300 hover:shadow-lg">
+                <SpotlightCard className="group h-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-slate-300 hover:shadow-lg dark:border-white/10 dark:bg-slate-900/60 dark:hover:border-blue-500/30 dark:hover:bg-slate-900 dark:hover:shadow-black/60">
                   <div className={`inline-flex size-11 items-center justify-center rounded-xl bg-gradient-to-br ${f.color} text-white shadow-md transition-transform duration-500 group-hover:scale-110`}>
                     <f.icon className="size-5" />
                   </div>
-                  <h3 className="mt-5 text-sm font-semibold text-slate-950">{f.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{f.text}</p>
+                  <h3 className="mt-5 text-sm font-semibold text-slate-950 dark:text-white">{f.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{f.text}</p>
                 </SpotlightCard>
               </Reveal>
             ))}
@@ -418,14 +429,14 @@ export default function LandingPage() {
         <div className="mx-auto grid max-w-6xl gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <Reveal>
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-300">
                 <BarChart3 className="size-3.5 text-violet-500" />
                 Why Choose BrokerStep
               </span>
-              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
+              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-white sm:text-5xl">
                 Make decisions from the whole picture.
               </h2>
-              <p className="mt-5 text-base leading-relaxed text-slate-600">
+              <p className="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
                 A live view of production, renewals, commissions, and pipeline helps every person know what to do next.
               </p>
               <Magnetic strength={12}>
@@ -441,8 +452,8 @@ export default function LandingPage() {
 
           <Reveal delay={200} y={40}>
             <div className="relative w-full">
-              <div className="absolute -inset-8 rounded-3xl bg-gradient-to-r from-violet-200/60 to-blue-200/60 blur-3xl" />
-              <div className="relative rounded-2xl border border-slate-200/90 bg-white/95 p-2 sm:p-2.5 shadow-xl shadow-slate-200/50 backdrop-blur-xl">
+              <div className="absolute -inset-8 rounded-3xl bg-gradient-to-r from-violet-200/60 to-blue-200/60 blur-3xl dark:from-violet-600/20 dark:to-blue-600/20" />
+              <div className="relative rounded-2xl border border-slate-200/90 bg-white/95 p-2 sm:p-2.5 shadow-xl shadow-slate-200/50 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90 dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)]">
                 <div className="overflow-hidden rounded-xl">
                   <Image
                     src="/images/why-choose-brokerStep.png"
@@ -463,14 +474,14 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl">
           <Reveal>
             <div className="mx-auto max-w-2xl text-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-300">
                 <Award className="size-3.5 text-rose-500" />
                 Membership Information
               </span>
-              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
+              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-white sm:text-5xl">
                 A plan that grows with your brokerage.
               </h2>
-              <p className="mt-5 text-base leading-relaxed text-slate-600">
+              <p className="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
                 Start with the essentials, then bring your whole team into one shared operating system as your book grows.
               </p>
             </div>
@@ -483,9 +494,9 @@ export default function LandingPage() {
               return (
                 <Reveal key={plan.name} delay={i * 120} className="h-full">
                   <div
-                    className={`relative flex h-full flex-col justify-between rounded-2xl bg-white p-7 sm:p-8 transition-all duration-300 hover:-translate-y-1 ${isPopular
-                      ? 'border-2 border-[#0170FE] shadow-xl shadow-[#0170FE]/10'
-                      : 'border border-slate-200/90 shadow-sm hover:shadow-md'
+                    className={`relative flex h-full flex-col justify-between rounded-2xl bg-white p-7 sm:p-8 transition-all duration-300 hover:-translate-y-1 dark:bg-slate-900/70 ${isPopular
+                      ? 'border-2 border-[#0170FE] shadow-xl shadow-[#0170FE]/10 dark:shadow-[#0170FE]/20'
+                      : 'border border-slate-200/90 shadow-sm hover:shadow-md dark:border-white/10 dark:hover:border-white/20'
                       }`}
                   >
                     {isPopular && (
@@ -497,44 +508,44 @@ export default function LandingPage() {
                     <div>
                       {/* Plan Title & Subtitle (Centered) */}
                       <div className="text-center">
-                        <h3 className="text-2xl font-bold tracking-tight text-slate-900">
+                        <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                           {plan.name}
                         </h3>
-                        <p className="mt-2 text-sm text-slate-500 min-h-[40px] flex items-center justify-center">
+                        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 min-h-[40px] flex items-center justify-center">
                           {plan.subtitle}
                         </p>
                       </div>
 
                       {/* Price (Centered) */}
                       <div className="mt-6 flex items-baseline justify-center">
-                        <span className="text-xs font-bold text-slate-800 mr-1.5">
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-300 mr-1.5">
                           {plan.currency}
                         </span>
-                        <span className="text-4xl font-extrabold tracking-tight text-slate-950">
+                        <span className="text-4xl font-extrabold tracking-tight text-slate-950 dark:text-white">
                           {plan.price}
                         </span>
-                        <span className="text-sm font-medium text-slate-500 ml-1.5">
+                        <span className="text-sm font-medium text-slate-500 dark:text-slate-400 ml-1.5">
                           {plan.period}
                         </span>
                       </div>
 
                       {/* Trial Badge Pill (Centered) */}
                       <div className="mt-5">
-                        <div className="rounded-xl bg-blue-50/80 py-2.5 px-4 text-center text-xs font-semibold text-[#0170FE] ring-1 ring-[#0170FE]/20">
+                        <div className="rounded-xl bg-blue-50/80 py-2.5 px-4 text-center text-xs font-semibold text-[#0170FE] ring-1 ring-[#0170FE]/20 dark:bg-blue-950/60 dark:text-blue-300 dark:ring-blue-500/30">
                           {plan.trial}
                         </div>
                       </div>
 
                       {/* Features (Left-aligned) */}
                       <div className="mt-7">
-                        <p className="text-xs font-bold text-slate-900 mb-3.5">
+                        <p className="text-xs font-bold text-slate-900 dark:text-white mb-3.5">
                           {plan.includesTitle}
                         </p>
                         <div className="space-y-3">
                           {plan.features.map((feature) => (
                             <div
                               key={feature}
-                              className="flex items-center gap-3 text-xs sm:text-[13px] text-slate-700"
+                              className="flex items-center gap-3 text-xs sm:text-[13px] text-slate-700 dark:text-slate-300"
                             >
                               <Check className="size-4 shrink-0 text-[#0170FE] stroke-[2.5]" />
                               <span>{feature}</span>
@@ -550,7 +561,7 @@ export default function LandingPage() {
                         href={`/register?plan=${plan.name.toLowerCase()}`}
                         className={`inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-xl text-sm font-semibold transition-all ${isPopular
                           ? 'bg-[#0170FE] text-white shadow-md shadow-[#0170FE]/25 hover:bg-[#0061e0]'
-                          : 'border border-slate-200/90 bg-white text-slate-800 shadow-xs hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE]'
+                          : 'border border-slate-200/90 bg-white text-slate-800 shadow-xs hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE] dark:border-white/10 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700 dark:hover:border-white/20'
                           }`}
                       >
                         Start Free Trial
@@ -569,34 +580,34 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl">
           <Reveal>
             <div className="mx-auto max-w-2xl text-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-300">
                 <Target className="size-3.5 text-cyan-500" />
                 How It Works
               </span>
-              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
+              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-white sm:text-5xl">
                 Make every next step obvious.
               </h2>
-              <p className="mt-5 text-base leading-relaxed text-slate-600">
+              <p className="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
                 Follow these simple steps to transform your brokerage operations.
               </p>
             </div>
           </Reveal>
 
           <div className="relative mt-20">
-            <div className="absolute left-0 right-0 top-7 hidden h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent lg:block" />
+            <div className="absolute left-0 right-0 top-7 hidden h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent lg:block dark:via-slate-700" />
             <div className="grid gap-8 lg:grid-cols-4">
               {workflowSteps.map((step, i) => (
                 <Reveal key={step.title} delay={i * 150}>
                   <div className="group relative">
-                    <div className="relative mx-auto flex size-14 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-500 group-hover:border-blue-300 group-hover:shadow-[0_0_30px_rgba(59,130,246,0.25)]">
+                    <div className="relative mx-auto flex size-14 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-500 group-hover:border-blue-300 group-hover:shadow-[0_0_30px_rgba(59,130,246,0.25)] dark:border-white/10 dark:bg-slate-900 dark:group-hover:border-blue-500/50">
                       <step.icon className="size-6 text-[#0170FE]" />
                       <div className="absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full bg-[#0170FE] text-[10px] font-bold text-white shadow-md">
                         {i + 1}
                       </div>
                     </div>
                     <div className="mt-6 text-center">
-                      <h3 className="text-base font-semibold text-slate-950">{step.title}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-slate-600">{step.desc}</p>
+                      <h3 className="text-base font-semibold text-slate-950 dark:text-white">{step.title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{step.desc}</p>
                     </div>
                   </div>
                 </Reveal>
@@ -611,14 +622,14 @@ export default function LandingPage() {
         <div className="mx-auto max-w-4xl">
           <Reveal>
             <div className="text-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-300">
                 <HelpCircle className="size-3.5 text-[#0170FE]" />
                 Frequently Asked Questions
               </span>
-              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
+              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-white sm:text-5xl">
                 Everything you need to know.
               </h2>
-              <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-600">
+              <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
                 Have questions about BrokerStep? Find clear answers below or reach out to our team anytime.
               </p>
             </div>
@@ -631,23 +642,23 @@ export default function LandingPage() {
                 <Reveal key={faq.question} delay={i * 60}>
                   <div
                     className={`overflow-hidden rounded-2xl border transition-all duration-300 ${isOpen
-                      ? 'border-[#0170FE]/60 bg-white shadow-lg shadow-[#0170FE]/5 ring-2 ring-[#0170FE]/20'
-                      : 'border-slate-200/90 bg-white/90 hover:border-slate-300 hover:bg-white'
+                      ? 'border-[#0170FE]/60 bg-white shadow-lg shadow-[#0170FE]/5 ring-2 ring-[#0170FE]/20 dark:bg-slate-900 dark:border-blue-500/60 dark:ring-blue-500/20'
+                      : 'border-slate-200/90 bg-white/90 hover:border-slate-300 hover:bg-white dark:border-white/10 dark:bg-slate-900/60 dark:hover:border-white/20 dark:hover:bg-slate-900'
                       }`}
                   >
                     <button
                       type="button"
                       onClick={() => setOpenFaqIndex(isOpen ? null : i)}
-                      className="flex w-full items-center justify-between gap-4 p-6 text-left transition-colors"
+                      className="flex w-full items-center justify-between gap-4 p-6 text-left transition-colors cursor-pointer"
                       aria-expanded={isOpen}
                     >
-                      <span className="text-base font-semibold text-slate-900 sm:text-lg">
+                      <span className="text-base font-semibold text-slate-900 dark:text-white sm:text-lg">
                         {faq.question}
                       </span>
                       <span
                         className={`flex size-8 shrink-0 items-center justify-center rounded-full transition-transform duration-300 ${isOpen
                           ? 'rotate-180 bg-[#0170FE] text-white'
-                          : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                          : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
                           }`}
                       >
                         <ChevronDown className="size-4" />
@@ -659,7 +670,7 @@ export default function LandingPage() {
                         }`}
                     >
                       <div className="overflow-hidden">
-                        <div className="border-t border-slate-100 px-6 pb-6 pt-4 text-sm leading-relaxed text-slate-600 sm:text-[15px]">
+                        <div className="border-t border-slate-100 px-6 pb-6 pt-4 text-sm leading-relaxed text-slate-600 dark:border-white/10 dark:text-slate-300 sm:text-[15px]">
                           {faq.answer}
                         </div>
                       </div>
@@ -679,14 +690,14 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl">
           <Reveal>
             <div className="text-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-300">
                 <Mail className="size-3.5 text-[#0170FE]" />
                 Direct Contact Channels
               </span>
-              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
+              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-white sm:text-5xl">
                 Get in touch with our team.
               </h2>
-              <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-600">
+              <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
                 Reach out directly to the right department or visit our dedicated contact hub for immediate assistance.
               </p>
             </div>
@@ -697,25 +708,25 @@ export default function LandingPage() {
               const Icon = item.icon
               return (
                 <Reveal key={item.email} delay={i * 80}>
-                  <div className="group flex h-full flex-col justify-between rounded-2xl border border-slate-200/90 bg-white/95 p-6 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0170FE]/40 hover:shadow-xl hover:shadow-blue-500/5">
+                  <div className="group flex h-full flex-col justify-between rounded-2xl border border-slate-200/90 bg-white/95 p-6 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0170FE]/40 hover:shadow-xl hover:shadow-blue-500/5 dark:border-white/10 dark:bg-slate-900/60 dark:hover:border-blue-500/40 dark:hover:bg-slate-900 dark:hover:shadow-black/60">
                     <div>
                       <div className="flex items-center justify-between">
                         <div className={`flex size-11 items-center justify-center rounded-xl bg-gradient-to-br ${item.color} text-white shadow-md transition-transform duration-300 group-hover:scale-105`}>
                           <Icon className="size-5" />
                         </div>
-                        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
+                        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                           {item.badge}
                         </span>
                       </div>
 
-                      <h3 className="mt-4 text-base font-bold text-slate-950">{item.title}</h3>
-                      <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{item.desc}</p>
+                      <h3 className="mt-4 text-base font-bold text-slate-950 dark:text-white">{item.title}</h3>
+                      <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{item.desc}</p>
                     </div>
 
-                    <div className="mt-6 border-t border-slate-100 pt-4">
+                    <div className="mt-6 border-t border-slate-100 pt-4 dark:border-white/10">
                       <a
                         href={item.mailto}
-                        className="group/link inline-flex items-center gap-1.5 text-xs font-semibold text-[#0170FE] transition-colors hover:text-[#0060db]"
+                        className="group/link inline-flex items-center gap-1.5 text-xs font-semibold text-[#0170FE] transition-colors hover:text-[#0060db] dark:text-blue-400 dark:hover:text-blue-300"
                       >
                         <span className="truncate">{item.email}</span>
                         <ArrowRight className="size-3 transition-transform group-hover/link:translate-x-0.5" />
@@ -729,10 +740,10 @@ export default function LandingPage() {
 
           <Reveal delay={300}>
             <div className="mt-12 flex flex-col items-center justify-center gap-4 text-center sm:flex-row">
-              <span className="text-xs text-slate-500">Need to send a direct message or custom request?</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Need to send a direct message or custom request?</span>
               <Link
                 href="/contact"
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200/90 bg-white px-5 py-2.5 text-xs font-semibold text-slate-800 shadow-xs transition-all hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE]"
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200/90 bg-white px-5 py-2.5 text-xs font-semibold text-slate-800 shadow-xs transition-all hover:border-[#0170FE]/40 hover:bg-slate-50 hover:text-[#0170FE] dark:border-white/10 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 dark:hover:border-white/20"
               >
                 <span>Open Full Contact Page</span>
                 <ArrowRight className="size-3.5" />

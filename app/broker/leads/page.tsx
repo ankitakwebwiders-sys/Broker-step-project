@@ -37,6 +37,9 @@ import {
   Sparkles,
   ArrowUpRight,
   ArrowLeftRight,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
   QrCode,
   Share2,
   Copy,
@@ -48,6 +51,7 @@ import {
   HelpCircle,
   Briefcase,
   Lock,
+  Trash2,
 } from 'lucide-react'
 import {
   initialLeads,
@@ -160,6 +164,47 @@ export default function LeadsPage() {
   const [convertTarget, setConvertTarget] = useState<LeadItem | null>(null)
   const [conversionSuccessToast, setConversionSuccessToast] = useState<string | null>(null)
 
+  // Selection & Bulk Actions state
+  const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([])
+  const [deleteModalState, setDeleteModalState] = useState<{
+    type: 'single'
+    lead: LeadItem
+  } | {
+    type: 'bulk'
+    count: number
+    ids: string[]
+  } | null>(null)
+  const [deleteSuccessToast, setDeleteSuccessToast] = useState<string | null>(null)
+
+  // Load leads from localStorage on initial render
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('broker_custom_leads')
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setLeads(parsed)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load leads from localStorage', err)
+    }
+  }, [])
+
+  // Persist leads whenever they change
+  const isFirstRender = useRef(true)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    try {
+      localStorage.setItem('broker_custom_leads', JSON.stringify(leads))
+    } catch (err) {
+      console.error('Failed to persist leads to localStorage', err)
+    }
+  }, [leads])
+
   // Quick Add Note state
   const [newNoteText, setNewNoteText] = useState('')
 
@@ -228,9 +273,33 @@ export default function LeadsPage() {
     }
   }, [leads])
 
-  // Filtered Leads
+  // Sorting state for Lead Listing Table
+  type LeadSortField =
+    | 'name'
+    | 'businessName'
+    | 'phone'
+    | 'email'
+    | 'insuranceType'
+    | 'renewalDate'
+    | 'status'
+    | 'consent'
+    | 'createdDate'
+  type SortDirection = 'asc' | 'desc'
+  const [sortField, setSortField] = useState<LeadSortField>('name')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+
+  const handleSort = (field: LeadSortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }
+
+  // Filtered & Sorted Leads
   const filteredLeads = useMemo(() => {
-    return leads.filter(lead => {
+    const list = leads.filter(lead => {
       // Tab filter
       if (activeTab !== 'All' && lead.status !== activeTab) return false
 
@@ -255,7 +324,52 @@ export default function LeadsPage() {
 
       return true
     })
-  }, [leads, activeTab, insuranceTypeFilter, consentFilter, searchQuery])
+
+    list.sort((a, b) => {
+      let comparison = 0
+      switch (sortField) {
+        case 'name':
+          comparison = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+          break
+        case 'businessName':
+          comparison = (a.businessName === '—' ? '' : a.businessName).localeCompare(
+            b.businessName === '—' ? '' : b.businessName,
+            undefined,
+            { sensitivity: 'base' }
+          )
+          break
+        case 'phone':
+          comparison = (a.phone || '').localeCompare(b.phone || '', undefined, { numeric: true })
+          break
+        case 'email':
+          comparison = (a.email || '').localeCompare(b.email || '', undefined, { sensitivity: 'base' })
+          break
+        case 'insuranceType':
+          comparison = (a.insuranceType || '').localeCompare(b.insuranceType || '')
+          break
+        case 'renewalDate': {
+          const dateA = a.renewalDate === '—' ? '' : a.renewalDate
+          const dateB = b.renewalDate === '—' ? '' : b.renewalDate
+          comparison = dateA.localeCompare(dateB)
+          break
+        }
+        case 'status':
+          comparison = a.status.localeCompare(b.status)
+          break
+        case 'consent':
+          comparison = a.marketingConsent.status.localeCompare(b.marketingConsent.status)
+          break
+        case 'createdDate':
+          comparison = (a.createdDate || '').localeCompare(b.createdDate || '')
+          break
+        default:
+          comparison = 0
+      }
+      return sortDirection === 'asc' ? comparison : -comparison
+    })
+
+    return list
+  }, [leads, activeTab, insuranceTypeFilter, consentFilter, searchQuery, sortField, sortDirection])
 
   // Table Drag-to-Scroll state
   const tableContainerRef = useRef<HTMLDivElement>(null)
@@ -286,6 +400,24 @@ export default function LeadsPage() {
   const [selectedAuditRecord, setSelectedAuditRecord] = useState<ConsentRecordItem | null>(null)
   const [copiedConsentHash, setCopiedConsentHash] = useState(false)
 
+  // Consent sorting state
+  const [consentSortField, setConsentSortField] = useState<'client' | 'contact' | 'channel' | 'date' | 'status' | 'hash' | null>(null)
+  const [consentSortDirection, setConsentSortDirection] = useState<'asc' | 'desc'>('asc')
+
+  const handleConsentSort = (field: 'client' | 'contact' | 'channel' | 'date' | 'status' | 'hash') => {
+    if (consentSortField === field) {
+      if (consentSortDirection === 'asc') {
+        setConsentSortDirection('desc')
+      } else {
+        setConsentSortField(null)
+        setConsentSortDirection('asc')
+      }
+    } else {
+      setConsentSortField(field)
+      setConsentSortDirection('asc')
+    }
+  }
+
   const handleCopyConsentHash = (text: string) => {
     navigator.clipboard.writeText(text)
     setCopiedConsentHash(true)
@@ -293,7 +425,7 @@ export default function LeadsPage() {
   }
 
   const filteredConsentRecords = useMemo(() => {
-    return consentRecords.filter((r) => {
+    const list = consentRecords.filter((r) => {
       const matchesFilter = consentFilterStatus === 'All' || r.status === consentFilterStatus
       const matchesSearch =
         r.client.toLowerCase().includes(consentSearchQuery.toLowerCase()) ||
@@ -302,7 +434,36 @@ export default function LeadsPage() {
         r.id.toLowerCase().includes(consentSearchQuery.toLowerCase())
       return matchesFilter && matchesSearch
     })
-  }, [consentRecords, consentFilterStatus, consentSearchQuery])
+
+    if (!consentSortField) return list
+
+    return [...list].sort((a, b) => {
+      let comparison = 0
+      switch (consentSortField) {
+        case 'client':
+          comparison = a.client.localeCompare(b.client, undefined, { sensitivity: 'base' })
+          break
+        case 'contact':
+          comparison = a.contact.localeCompare(b.contact, undefined, { sensitivity: 'base' })
+          break
+        case 'channel':
+          comparison = a.channel.localeCompare(b.channel, undefined, { sensitivity: 'base' })
+          break
+        case 'date':
+          comparison = a.date.localeCompare(b.date)
+          break
+        case 'status':
+          comparison = a.status.localeCompare(b.status)
+          break
+        case 'hash':
+          comparison = a.hash.localeCompare(b.hash)
+          break
+        default:
+          comparison = 0
+      }
+      return consentSortDirection === 'asc' ? comparison : -comparison
+    })
+  }, [consentRecords, consentFilterStatus, consentSearchQuery, consentSortField, consentSortDirection])
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement
@@ -688,6 +849,84 @@ export default function LeadsPage() {
     setTimeout(() => setCopiedLink(false), 2500)
   }
 
+  // Selection helpers
+  const isAllSelected = filteredLeads.length > 0 && filteredLeads.every(l => selectedLeadIds.includes(l.id))
+  const isSomeSelected = filteredLeads.some(l => selectedLeadIds.includes(l.id)) && !isAllSelected
+
+  function handleSelectAll() {
+    if (isAllSelected) {
+      setSelectedLeadIds(prev => prev.filter(id => !filteredLeads.some(l => l.id === id)))
+    } else {
+      const visibleIds = filteredLeads.map(l => l.id)
+      setSelectedLeadIds(prev => Array.from(new Set([...prev, ...visibleIds])))
+    }
+  }
+
+  function handleToggleLead(leadId: string) {
+    setSelectedLeadIds(prev =>
+      prev.includes(leadId) ? prev.filter(id => id !== leadId) : [...prev, leadId]
+    )
+  }
+
+  // Deletion execution
+  function handleConfirmDelete() {
+    if (!deleteModalState) return
+
+    if (deleteModalState.type === 'single') {
+      const leadId = deleteModalState.lead.id
+      const leadName = deleteModalState.lead.name
+      setLeads(prev => prev.filter(l => l.id !== leadId))
+      setSelectedLeadIds(prev => prev.filter(id => id !== leadId))
+      if (selectedLeadForView?.id === leadId) {
+        setSelectedLeadForView(null)
+      }
+      setDeleteSuccessToast(`Lead "${leadName}" was permanently removed.`)
+    } else if (deleteModalState.type === 'bulk') {
+      const idsToDelete = new Set(deleteModalState.ids)
+      const count = deleteModalState.count
+      setLeads(prev => prev.filter(l => !idsToDelete.has(l.id)))
+      setSelectedLeadIds(prev => prev.filter(id => !idsToDelete.has(id)))
+      if (selectedLeadForView && idsToDelete.has(selectedLeadForView.id)) {
+        setSelectedLeadForView(null)
+      }
+      setDeleteSuccessToast(`${count} leads were permanently removed.`)
+    }
+
+    setDeleteModalState(null)
+    setTimeout(() => {
+      setDeleteSuccessToast(null)
+    }, 4000)
+  }
+
+  // Bulk Status change
+  function handleBulkStatusChange(status: LeadStatus) {
+    if (selectedLeadIds.length === 0) return
+    const idsSet = new Set(selectedLeadIds)
+    setLeads(prev =>
+      prev.map(l => {
+        if (!idsSet.has(l.id)) return l
+        return {
+          ...l,
+          status,
+          timeline: [
+            {
+              id: `LT-${Date.now()}-${Math.random()}`,
+              title: `Bulk Status Update to ${status}`,
+              date: 'Today, Just now',
+              detail: `Status updated via bulk action.`,
+              actor: 'Jordan Davis',
+              type: 'status',
+            },
+            ...l.timeline,
+          ],
+        }
+      })
+    )
+    setConversionSuccessToast(`Updated status to "${status}" for ${selectedLeadIds.length} lead(s).`)
+    setTimeout(() => setConversionSuccessToast(null), 4000)
+  }
+
+
   // Helper for Status Badges
   function getLeadStatusBadge(status: LeadStatus) {
     switch (status) {
@@ -781,19 +1020,36 @@ export default function LeadsPage() {
 
         {/* ───── Toast Notification for Conversion ───── */}
         {conversionSuccessToast && (
-          <div className="mb-4 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-900 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="mb-4 flex items-center justify-between rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/50 px-4 py-3 text-emerald-900 dark:text-emerald-200 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center gap-2.5">
-              <BadgeCheck className="size-5 text-emerald-600" />
+              <BadgeCheck className="size-5 text-emerald-600 dark:text-emerald-400" />
               <span className="text-[13px] font-medium">{conversionSuccessToast}</span>
             </div>
             <Link
               href="/broker/clients"
-              className="inline-flex items-center gap-1 text-[12px] font-semibold text-emerald-700 hover:text-emerald-900 hover:underline"
+              className="inline-flex items-center gap-1 text-[12px] font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-300 hover:underline"
             >
               Go to Client Directory &rarr;
             </Link>
           </div>
         )}
+
+        {/* ───── Toast Notification for Deletion ───── */}
+        {deleteSuccessToast && (
+          <div className="mb-4 flex items-center justify-between rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/50 px-4 py-3 text-rose-900 dark:text-rose-200 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex items-center gap-2.5">
+              <Trash2 className="size-5 text-rose-600 dark:text-rose-400" />
+              <span className="text-[13px] font-medium">{deleteSuccessToast}</span>
+            </div>
+            <button
+              onClick={() => setDeleteSuccessToast(null)}
+              className="text-rose-600 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-200 p-1 cursor-pointer"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+        )}
+
 
         {/* ───── Header ───── */}
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -1010,8 +1266,40 @@ export default function LeadsPage() {
           </div>
         </div>
 
+        {/* ───── Bulk Actions Bar ───── */}
+        {selectedLeadIds.length > 0 && (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/90 dark:bg-blue-950/40 px-4 py-3 shadow-xs animate-in fade-in slide-in-from-top-1">
+            <div className="flex items-center gap-2.5">
+              <span className="flex size-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                {selectedLeadIds.length}
+              </span>
+              <span className="text-xs sm:text-sm font-semibold text-blue-950 dark:text-blue-100">
+                {selectedLeadIds.length === 1 ? '1 lead selected' : `${selectedLeadIds.length} leads selected`}
+              </span>
+              <span className="text-xs text-blue-600/70 dark:text-blue-400">
+                (across current filtered view)
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSelectedLeadIds([])}
+                className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-xs hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
+              >
+                Deselect All
+              </button>
+              <button
+                onClick={() => setDeleteModalState({ type: 'bulk', count: selectedLeadIds.length, ids: selectedLeadIds })}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-rose-700 transition cursor-pointer"
+              >
+                <Trash2 className="size-3.5" />
+                <span>Delete Selected ({selectedLeadIds.length})</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ───── 5.1 Common Lead Listing Table ───── */}
-        <div className="mt-6 rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden">
+        <div className="mt-6 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/60 shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden">
           <div
             ref={tableContainerRef}
             onMouseDown={handleMouseDown}
@@ -1022,25 +1310,294 @@ export default function LeadsPage() {
             className={`overflow-x-auto custom-scrollbar-table ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'
               }`}
           >
-            <table className="w-full min-w-[1240px] text-left border-collapse">
+            <table className="w-full min-w-[1280px] text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold uppercase tracking-wider text-slate-500 select-none">
-                  <th className="px-4 py-3.5 min-w-[200px]">Lead Name</th>
-                  <th className="px-4 py-3.5 min-w-[170px]">Business Name</th>
-                  <th className="px-4 py-3.5 min-w-[130px] whitespace-nowrap">Phone</th>
-                  <th className="px-4 py-3.5 min-w-[185px]">Email</th>
-                  <th className="px-3 py-3.5 min-w-[165px]">Insurance Type / Line</th>
-                  <th className="px-3 py-3.5 min-w-[115px] whitespace-nowrap">Renewal Date</th>
-                  <th className="px-3 py-3.5 min-w-[130px] whitespace-nowrap">Lead Status</th>
-                  <th className="px-3 py-3.5 min-w-[115px] whitespace-nowrap">Marketing Consent</th>
-                  <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Created Date</th>
-                  <th className="py-3.5 pl-4 pr-6 text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none">Actions</th>
+                <tr className="border-b border-slate-200/80 dark:border-white/10 bg-slate-50/70 dark:bg-slate-900 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 select-none">
+                  {/* Select All Checkbox */}
+                  <th className="py-3 px-4 w-[48px] select-none text-center">
+                    <input
+                      type="checkbox"
+                      checked={isAllSelected}
+                      ref={(el) => {
+                        if (el) el.indeterminate = isSomeSelected
+                      }}
+                      onChange={handleSelectAll}
+                      className="size-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500/20 cursor-pointer accent-blue-600"
+                      title={isAllSelected ? 'Deselect all visible' : 'Select all visible'}
+                    />
+                  </th>
+
+                  {/* 1. Lead Name */}
+                  <th className="px-4 py-3 min-w-[200px]">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('name')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${sortField === 'name' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Lead Name (${sortField === 'name' && sortDirection === 'asc' ? 'Z to A' : 'A to Z'})`}
+                    >
+                      <span>Lead Name</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${sortField === 'name'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {sortField === 'name' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* 2. Business Name */}
+                  <th className="px-4 py-3 min-w-[170px]">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('businessName')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${sortField === 'businessName' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Business Name (${sortField === 'businessName' && sortDirection === 'asc' ? 'Z to A' : 'A to Z'})`}
+                    >
+                      <span>Business Name</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${sortField === 'businessName'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {sortField === 'businessName' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* 3. Phone */}
+                  <th className="px-4 py-3 min-w-[130px] whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('phone')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${sortField === 'phone' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Phone (${sortField === 'phone' && sortDirection === 'asc' ? 'Descending' : 'Ascending'})`}
+                    >
+                      <span>Phone</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${sortField === 'phone'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {sortField === 'phone' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* 4. Email */}
+                  <th className="px-4 py-3 min-w-[185px]">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('email')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${sortField === 'email' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Email (${sortField === 'email' && sortDirection === 'asc' ? 'Z to A' : 'A to Z'})`}
+                    >
+                      <span>Email</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${sortField === 'email'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {sortField === 'email' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* 5. Insurance Type / Line */}
+                  <th className="px-3 py-3 min-w-[185px]">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('insuranceType')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${sortField === 'insuranceType' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Insurance Type (${sortField === 'insuranceType' && sortDirection === 'asc' ? 'Z to A' : 'A to Z'})`}
+                    >
+                      <span>Insurance Type / Line</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${sortField === 'insuranceType'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {sortField === 'insuranceType' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* 6. Renewal Date */}
+                  <th className="px-3 py-3 min-w-[135px] whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('renewalDate')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${sortField === 'renewalDate' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Renewal Date (${sortField === 'renewalDate' && sortDirection === 'asc' ? 'Latest first' : 'Earliest first'})`}
+                    >
+                      <span>Renewal Date</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${sortField === 'renewalDate'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {sortField === 'renewalDate' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* 7. Lead Status */}
+                  <th className="px-3 py-3 min-w-[135px] whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('status')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${sortField === 'status' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Lead Status (${sortField === 'status' && sortDirection === 'asc' ? 'Z to A' : 'A to Z'})`}
+                    >
+                      <span>Lead Status</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${sortField === 'status'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {sortField === 'status' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* 8. Marketing Consent */}
+                  <th className="px-3 py-3 min-w-[145px] whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('consent')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${sortField === 'consent' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Marketing Consent (${sortField === 'consent' && sortDirection === 'asc' ? 'Z to A' : 'A to Z'})`}
+                    >
+                      <span>Marketing Consent</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${sortField === 'consent'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {sortField === 'consent' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* 9. Created Date */}
+                  <th className="px-3 py-3 min-w-[130px] whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('createdDate')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${sortField === 'createdDate' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Created Date (${sortField === 'createdDate' && sortDirection === 'asc' ? 'Oldest first' : 'Newest first'})`}
+                    >
+                      <span>Created Date</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${sortField === 'createdDate'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {sortField === 'createdDate' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* 10. Actions (Sticky) */}
+                  <th className="py-3.5 pl-4 pr-6 text-right min-w-[250px] w-[250px] md:sticky md:right-0 md:z-20 bg-slate-50 dark:bg-slate-900 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] dark:md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.5)] select-none">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filteredLeads.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="py-12 text-center text-slate-400">
+                    <td colSpan={11} className="py-12 text-center text-slate-400">
                       <Zap className="mx-auto size-8 text-slate-300 mb-2" />
                       <p className="text-sm font-semibold text-slate-700">No leads matched your criteria</p>
                       <p className="text-xs text-slate-400 mt-1">Try selecting another status tab or resetting the search filter.</p>
@@ -1049,11 +1606,24 @@ export default function LeadsPage() {
                 ) : (
                   filteredLeads.map((lead) => {
                     const initials = `${lead.firstName[0] || ''}${lead.lastName[0] || ''}`
+                    const isSelected = selectedLeadIds.includes(lead.id)
                     return (
                       <tr
                         key={lead.id}
-                        className="group border-b border-slate-100 transition-colors last:border-0 hover:bg-slate-50/80"
+                        className={`group border-b border-slate-100 dark:border-white/5 transition-colors last:border-0 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 ${isSelected ? 'bg-blue-50/40 dark:bg-blue-950/20' : ''
+                          }`}
                       >
+                        {/* Selection Checkbox */}
+                        <td className="py-3.5 px-4 w-[48px] text-center" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleToggleLead(lead.id)}
+                            className="size-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500/20 cursor-pointer accent-blue-600"
+                            title={`Select ${lead.name}`}
+                          />
+                        </td>
+
                         {/* 1. Lead Name */}
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-3">
@@ -1066,14 +1636,14 @@ export default function LeadsPage() {
                                   setSelectedLeadForView(lead)
                                   setLeadDetailTab('overview')
                                 }}
-                                className="text-sm font-semibold text-slate-900 transition hover:text-blue-600 text-left truncate block cursor-pointer"
+                                className="text-sm font-semibold text-slate-900 dark:text-white transition hover:text-blue-600 dark:hover:text-blue-400 text-left truncate block cursor-pointer"
                               >
                                 {lead.name}
                               </button>
                               <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-0.5">
-                                <span className="font-mono text-slate-500">{lead.id}</span>
+                                <span className="font-mono text-slate-500 dark:text-slate-400">{lead.id}</span>
                                 <span>·</span>
-                                <span className="text-blue-600 font-medium">{lead.source}</span>
+                                <span className="text-blue-600 dark:text-blue-400 font-medium">{lead.source}</span>
                               </div>
                             </div>
                           </div>
@@ -1082,7 +1652,7 @@ export default function LeadsPage() {
                         {/* 2. Business Name */}
                         <td className="px-4 py-3.5">
                           {lead.businessName !== '—' ? (
-                            <div className="flex items-center gap-1.5 text-sm font-medium text-slate-800">
+                            <div className="flex items-center gap-1.5 text-sm font-medium text-slate-800 dark:text-slate-200">
                               <Building2 className="size-3.5 text-slate-400 shrink-0" />
                               <span className="truncate max-w-[160px]">{lead.businessName}</span>
                             </div>
@@ -1095,7 +1665,7 @@ export default function LeadsPage() {
                         <td className="px-4 py-3.5 whitespace-nowrap">
                           <a
                             href={`tel:${lead.phone}`}
-                            className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 hover:text-blue-600 transition whitespace-nowrap font-medium"
+                            className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition whitespace-nowrap font-medium"
                           >
                             <Phone className="size-3 text-slate-400 shrink-0" />
                             {lead.phone}
@@ -1106,7 +1676,7 @@ export default function LeadsPage() {
                         <td className="px-4 py-3.5">
                           <a
                             href={`mailto:${lead.email}`}
-                            className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 hover:text-blue-600 transition truncate max-w-[180px] font-medium"
+                            className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition truncate max-w-[180px] font-medium"
                             title={lead.email}
                           >
                             <Mail className="size-3 text-slate-400 shrink-0" />
@@ -1117,7 +1687,7 @@ export default function LeadsPage() {
                         {/* 5. Insurance Type / Line */}
                         <td className="px-3 py-3.5">
                           <div className="flex flex-col">
-                            <span className="text-sm font-semibold text-slate-800">
+                            <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                               {lead.insuranceType}
                             </span>
                             <span className="text-xs text-slate-400 truncate max-w-[150px]" title={lead.currentInsurance}>
@@ -1127,7 +1697,7 @@ export default function LeadsPage() {
                         </td>
 
                         {/* 6. Renewal Date */}
-                        <td className="px-3 py-3.5 whitespace-nowrap text-xs sm:text-sm text-slate-700 font-medium">
+                        <td className="px-3 py-3.5 whitespace-nowrap text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-medium">
                           {lead.renewalDate !== '—' ? (
                             <div className="flex items-center gap-1">
                               <Calendar className="size-3.5 text-slate-400 shrink-0" />
@@ -1160,12 +1730,12 @@ export default function LeadsPage() {
                         </td>
 
                         {/* 9. Created Date */}
-                        <td className="px-3 py-3.5 whitespace-nowrap text-xs text-slate-500">
+                        <td className="px-3 py-3.5 whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">
                           {lead.createdDate}
                         </td>
 
                         {/* 10. Actions */}
-                        <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
+                        <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[250px] w-[250px] md:sticky md:right-0 md:z-10 bg-white dark:bg-slate-900 group-hover:bg-[#f8fafc] dark:group-hover:bg-slate-800 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] dark:md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.5)] transition-colors">
                           <div className="inline-flex items-center justify-end gap-1.5 whitespace-nowrap">
                             {/* View */}
                             <button
@@ -1182,7 +1752,7 @@ export default function LeadsPage() {
                             {/* Edit */}
                             <button
                               onClick={() => openEditLeadModal(lead)}
-                              className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 shrink-0 cursor-pointer"
+                              className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 p-1.5 text-slate-500 dark:text-slate-400 shadow-xs transition hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white shrink-0 cursor-pointer"
                               title="Edit Lead"
                             >
                               <Edit3 className="size-3.5" />
@@ -1194,7 +1764,7 @@ export default function LeadsPage() {
                                 setStatusChangeTarget(lead)
                                 setNewStatusValue(lead.status)
                               }}
-                              className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 shrink-0 cursor-pointer"
+                              className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-xs transition hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-slate-700 shrink-0 cursor-pointer"
                               title="Change Lead Status"
                             >
                               Status
@@ -1213,12 +1783,21 @@ export default function LeadsPage() {
                             ) : (
                               <Link
                                 href="/broker/clients"
-                                className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 whitespace-nowrap shrink-0"
+                                className="inline-flex items-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-800 px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap shrink-0"
                               >
                                 <span>Client</span>
                                 <ArrowUpRight className="size-3 text-slate-400" />
                               </Link>
                             )}
+
+                            {/* Delete Lead */}
+                            <button
+                              onClick={() => setDeleteModalState({ type: 'single', lead })}
+                              className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 p-1.5 text-slate-400 dark:text-slate-500 shadow-xs transition hover:border-rose-300 dark:hover:border-rose-900/60 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 shrink-0 cursor-pointer"
+                              title="Delete Lead"
+                            >
+                              <Trash2 className="size-3.5" />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -1231,11 +1810,11 @@ export default function LeadsPage() {
         </div>
 
         {/* Consent History & Client Registry Table */}
-        <div className="mt-8 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3">
+        <div className="mt-8 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/60 p-4 sm:p-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 dark:border-white/10 pb-3">
             <div>
-              <h3 className="text-lg font-bold text-slate-950">Consent History &amp; Client Registry</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <h3 className="text-lg font-bold text-slate-950 dark:text-white">Consent History &amp; Client Registry</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Complete verifiable registry of all policyholder opt-in agreements with cryptographic audit fingerprints.
               </p>
             </div>
@@ -1247,15 +1826,17 @@ export default function LeadsPage() {
                 placeholder="Search client or contact..."
                 value={consentSearchQuery}
                 onChange={(e) => setConsentSearchQuery(e.target.value)}
-                className="h-8.5 w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none focus:border-[#0170FE]"
+                className="h-8.5 w-full sm:w-auto rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 text-xs text-slate-900 dark:text-white outline-none focus:border-[#0170FE]"
               />
-              <div className="flex items-center overflow-x-auto rounded-lg border border-slate-200 p-0.5 bg-slate-50 shrink-0">
+              <div className="flex items-center overflow-x-auto rounded-lg border border-slate-200 dark:border-white/10 p-0.5 bg-slate-50 dark:bg-slate-800 shrink-0">
                 {['All', 'Consented', 'Pending', 'Withdrawn'].map((st) => (
                   <button
                     key={st}
                     type="button"
                     onClick={() => setConsentFilterStatus(st)}
-                    className={`px-2.5 py-1 text-xs font-semibold rounded-md transition cursor-pointer whitespace-nowrap ${consentFilterStatus === st ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                    className={`px-2.5 py-1 text-xs font-semibold rounded-md transition cursor-pointer whitespace-nowrap ${consentFilterStatus === st
+                      ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                       }`}
                   >
                     {st}
@@ -1266,62 +1847,235 @@ export default function LeadsPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[960px] text-left text-sm">
+            <table className="w-full min-w-[960px] text-left text-sm border-collapse">
               <thead>
-                <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-500">
-                  <th className="py-3.5 pl-4 pr-4 whitespace-nowrap min-w-[200px]">Client / Business</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[150px]">Contact</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[160px]">Channel Authorized</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[120px]">Date</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[120px]">Status</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[200px]">Audit Verification Hash</th>
-                  <th className="py-3.5 pl-4 pr-6 text-right min-w-[120px] md:sticky md:right-0 md:z-20 bg-slate-50 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] select-none whitespace-nowrap">Actions</th>
+                <tr className="border-b border-slate-200/80 dark:border-white/10 bg-slate-50/70 dark:bg-slate-900 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 select-none">
+                  {/* Client / Business */}
+                  <th className="py-3.5 pl-4 pr-4 whitespace-nowrap min-w-[200px]">
+                    <button
+                      type="button"
+                      onClick={() => handleConsentSort('client')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${consentSortField === 'client' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Client / Business (${consentSortField === 'client' && consentSortDirection === 'asc' ? 'Descending' : 'Ascending'})`}
+                    >
+                      <span>Client / Business</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${consentSortField === 'client'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {consentSortField === 'client' ? (
+                          consentSortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* Contact */}
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[150px]">
+                    <button
+                      type="button"
+                      onClick={() => handleConsentSort('contact')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${consentSortField === 'contact' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Contact (${consentSortField === 'contact' && consentSortDirection === 'asc' ? 'Descending' : 'Ascending'})`}
+                    >
+                      <span>Contact</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${consentSortField === 'contact'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {consentSortField === 'contact' ? (
+                          consentSortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* Channel Authorized */}
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[160px]">
+                    <button
+                      type="button"
+                      onClick={() => handleConsentSort('channel')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${consentSortField === 'channel' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Channel Authorized (${consentSortField === 'channel' && consentSortDirection === 'asc' ? 'Descending' : 'Ascending'})`}
+                    >
+                      <span>Channel Authorized</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${consentSortField === 'channel'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {consentSortField === 'channel' ? (
+                          consentSortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* Date */}
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[120px]">
+                    <button
+                      type="button"
+                      onClick={() => handleConsentSort('date')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${consentSortField === 'date' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Date (${consentSortField === 'date' && consentSortDirection === 'asc' ? 'Descending' : 'Ascending'})`}
+                    >
+                      <span>Date</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${consentSortField === 'date'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {consentSortField === 'date' ? (
+                          consentSortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* Status */}
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[120px]">
+                    <button
+                      type="button"
+                      onClick={() => handleConsentSort('status')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${consentSortField === 'status' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Status (${consentSortField === 'status' && consentSortDirection === 'asc' ? 'Descending' : 'Ascending'})`}
+                    >
+                      <span>Status</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${consentSortField === 'status'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {consentSortField === 'status' ? (
+                          consentSortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* Audit Verification Hash */}
+                  <th className="py-3.5 px-4 whitespace-nowrap min-w-[200px]">
+                    <button
+                      type="button"
+                      onClick={() => handleConsentSort('hash')}
+                      className={`group inline-flex items-center gap-1.5 transition-colors cursor-pointer ${consentSortField === 'hash' ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      title={`Sort by Audit Verification Hash (${consentSortField === 'hash' && consentSortDirection === 'asc' ? 'Descending' : 'Ascending'})`}
+                    >
+                      <span>Audit Verification Hash</span>
+                      <span
+                        className={`inline-flex items-center justify-center rounded p-0.5 transition ${consentSortField === 'hash'
+                          ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/40'
+                          : 'text-slate-400 dark:text-slate-500 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          }`}
+                      >
+                        {consentSortField === 'hash' ? (
+                          consentSortDirection === 'asc' ? (
+                            <ArrowUp className="size-3.5 stroke-[2.5]" />
+                          ) : (
+                            <ArrowDown className="size-3.5 stroke-[2.5]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-60 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </button>
+                  </th>
+
+                  {/* Actions (Sticky) */}
+                  <th className="py-3.5 pl-4 pr-6 text-right min-w-[120px] md:sticky md:right-0 md:z-20 bg-slate-50 dark:bg-slate-900 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] dark:md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.5)] select-none whitespace-nowrap">
+                    Actions
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                 {filteredConsentRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-xs text-slate-500">
+                    <td colSpan={7} className="py-8 text-center text-xs text-slate-500 dark:text-slate-400">
                       No matching consent records found.
                     </td>
                   </tr>
                 ) : (
                   filteredConsentRecords.map((r) => (
-                    <tr key={r.id} className="group hover:bg-slate-50/60 transition">
-                      <td className="py-3.5 pl-4 pr-4 whitespace-nowrap font-semibold text-slate-900">
+                    <tr key={r.id} className="group hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                      <td className="py-3.5 pl-4 pr-4 whitespace-nowrap font-semibold text-slate-900 dark:text-white">
                         <div>{r.client}</div>
-                        <span className="text-[11px] font-mono text-slate-400 font-normal">{r.id}</span>
+                        <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 font-normal">{r.id}</span>
                       </td>
-                      <td className="py-3.5 px-4 whitespace-nowrap text-slate-700">{r.contact}</td>
-                      <td className="py-3.5 px-4 whitespace-nowrap text-slate-600 text-xs font-medium">
-                        <span className="rounded-md bg-slate-100 px-2 py-0.5 text-slate-700">{r.channel}</span>
+                      <td className="py-3.5 px-4 whitespace-nowrap text-slate-700 dark:text-slate-300">{r.contact}</td>
+                      <td className="py-3.5 px-4 whitespace-nowrap text-slate-600 dark:text-slate-300 text-xs font-medium">
+                        <span className="rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-slate-700 dark:text-slate-300 border border-transparent dark:border-white/5">
+                          {r.channel}
+                        </span>
                       </td>
-                      <td className="py-3.5 px-4 whitespace-nowrap text-slate-500 text-xs">{r.date}</td>
+                      <td className="py-3.5 px-4 whitespace-nowrap text-slate-500 dark:text-slate-400 text-xs">{r.date}</td>
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <span
                           className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${r.status === 'Consented'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40'
                             : r.status === 'Pending'
-                              ? 'bg-blue-50 text-[#0170FE] border border-blue-200'
+                              ? 'bg-blue-50 dark:bg-blue-950/50 text-[#0170FE] dark:text-blue-400 border border-blue-200 dark:border-blue-800/40'
                               : r.status === 'Withdrawn'
-                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40'
+                                : 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800/40'
                             }`}
                         >
                           {r.status}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 whitespace-nowrap font-mono text-xs text-slate-400">
+                      <td className="py-3.5 px-4 whitespace-nowrap font-mono text-xs text-slate-400 dark:text-slate-500">
                         <span className="inline-flex items-center gap-1">
-                          <Lock className="size-3 text-slate-400" />
+                          <Lock className="size-3 text-slate-400 dark:text-slate-500" />
                           {r.hash}
                         </span>
                       </td>
-                      <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[120px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors">
+                      <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[120px] md:sticky md:right-0 md:z-10 bg-white dark:bg-slate-900 group-hover:bg-[#f8fafc] dark:group-hover:bg-slate-800/90 md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] dark:md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.5)] transition-colors">
                         <button
                           type="button"
                           onClick={() => setSelectedAuditRecord(r)}
-                          className="cursor-pointer text-xs sm:text-sm font-semibold text-[#0170FE] hover:underline"
+                          className="cursor-pointer text-xs sm:text-sm font-semibold text-[#0170FE] dark:text-blue-400 hover:underline"
                         >
                           Audit Log
                         </button>
@@ -1388,13 +2142,7 @@ export default function LeadsPage() {
                     View Client File &rarr;
                   </Link>
                 )}
-                <button
-                  onClick={() => openEditLeadModal(selectedLeadForView)}
-                  className="inline-flex items-center gap-1 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 py-1.5 text-[11px] font-medium text-slate-700 dark:text-slate-300 shadow-xs hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
-                >
-                  <Edit3 className="size-3.5 text-slate-500 dark:text-slate-400" />
-                  Edit
-                </button>
+
                 <button
                   onClick={() => setSelectedLeadForView(null)}
                   className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition cursor-pointer"
@@ -2240,57 +2988,57 @@ export default function LeadsPage() {
 
       {/* MODAL: Audit Verification Hash Details */}
       {selectedAuditRecord && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 dark:bg-black/75 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-2xl border border-slate-200 dark:border-white/10 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div className="flex items-center gap-2">
-                <div className="rounded-xl bg-emerald-50 p-2 text-emerald-600">
+                <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/50 p-2 text-emerald-600 dark:text-emerald-400">
                   <ShieldCheck className="size-5" />
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-bold text-slate-950">Cryptographic Audit Certificate</h3>
-                  <p className="text-xs text-slate-500">TCPA &amp; ESIGN Act Digital Compliance Record</p>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-950 dark:text-white">Cryptographic Audit Certificate</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">TCPA &amp; ESIGN Act Digital Compliance Record</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedAuditRecord(null)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
               >
                 <X className="size-5" />
               </button>
             </div>
 
             <div className="mt-4 space-y-3.5 text-xs">
-              <div className="rounded-xl bg-slate-50 p-3.5 border border-slate-200 space-y-2">
+              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3.5 border border-slate-200 dark:border-white/10 space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Registry ID:</span>
-                  <span className="font-mono font-bold text-slate-900">{selectedAuditRecord.id}</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Registry ID:</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-white">{selectedAuditRecord.id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Client / Insured:</span>
-                  <span className="font-semibold text-slate-900">{selectedAuditRecord.client}</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Client / Insured:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{selectedAuditRecord.client}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Authorized Contact:</span>
-                  <span className="text-slate-800">{selectedAuditRecord.contact}</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Authorized Contact:</span>
+                  <span className="text-slate-800 dark:text-slate-200">{selectedAuditRecord.contact}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Consent Status:</span>
-                  <span className="font-bold text-emerald-700">{selectedAuditRecord.status}</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Consent Status:</span>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400">{selectedAuditRecord.status}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Timestamp:</span>
-                  <span className="text-slate-800">{selectedAuditRecord.date}</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Timestamp:</span>
+                  <span className="text-slate-800 dark:text-slate-200">{selectedAuditRecord.date}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">IP Address / Geo:</span>
-                  <span className="font-mono text-slate-700">{selectedAuditRecord.ip}</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">IP Address / Geo:</span>
+                  <span className="font-mono text-slate-700 dark:text-slate-300">{selectedAuditRecord.ip}</span>
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
                   SHA-256 Checksum Signature
                 </label>
                 <div className="flex items-center gap-2">
@@ -2298,12 +3046,12 @@ export default function LeadsPage() {
                     type="text"
                     readOnly
                     value={selectedAuditRecord.hash}
-                    className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 font-mono text-xs text-slate-800 outline-none"
+                    className="h-9 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 px-3 font-mono text-xs text-slate-800 dark:text-slate-200 outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => handleCopyConsentHash(selectedAuditRecord.hash)}
-                    className="h-9 px-3 rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 hover:border-[#0170FE] cursor-pointer"
+                    className="h-9 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 font-semibold text-slate-700 dark:text-slate-200 hover:border-[#0170FE] cursor-pointer"
                   >
                     {copiedConsentHash ? 'Copied' : 'Copy'}
                   </button>
@@ -2311,19 +3059,19 @@ export default function LeadsPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block">
                   Authorized Scope of Consent
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedAuditRecord.scope.map((s) => (
-                    <span key={s} className="rounded-lg bg-blue-50 border border-blue-200 px-2.5 py-1 text-xs font-semibold text-[#0170FE]">
+                    <span key={s} className="rounded-lg bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800/40 px-2.5 py-1 text-xs font-semibold text-[#0170FE] dark:text-blue-400">
                       {s}
                     </span>
                   ))}
                 </div>
               </div>
 
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-emerald-950 text-[11px] leading-relaxed">
+              <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/70 dark:bg-emerald-950/30 p-3 text-emerald-950 dark:text-emerald-300 text-[11px] leading-relaxed">
                 This record provides admissible proof of express written consent under 47 U.S.C. § 227 (TCPA) and federal ESIGN Act.
               </div>
 
@@ -2331,7 +3079,7 @@ export default function LeadsPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedAuditRecord(null)}
-                  className="w-full rounded-xl bg-slate-900 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 cursor-pointer"
+                  className="w-full rounded-xl bg-slate-900 dark:bg-blue-600 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 dark:hover:bg-blue-500 transition cursor-pointer"
                 >
                   Close Audit Record
                 </button>

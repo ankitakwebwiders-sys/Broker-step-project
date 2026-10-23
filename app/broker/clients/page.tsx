@@ -39,6 +39,7 @@ import {
   Clock,
 } from 'lucide-react'
 import { type ClientItem, initialClients } from '@/data/broker/clients'
+import { initialLeads, type LeadItem } from '@/data/broker/leads'
 
 const QUICK_EMAIL_DOMAINS = ['@gmail.com', '@hotmail.com', '@outlook.com', '@yahoo.com', '@icloud.com']
 
@@ -340,6 +341,8 @@ function AddClientFormContent() {
   // Draft Management State & Parameters (always showing list at bottom)
   const searchParams = useSearchParams()
   const draftIdParam = searchParams.get('draftId')
+  const fromLeadParam = searchParams.get('fromLead') || searchParams.get('leadId')
+  const [convertedLeadSource, setConvertedLeadSource] = useState<{ id: string; name: string; businessName?: string } | null>(null)
   const [resumedDraftId, setResumedDraftId] = useState<string | null>(null)
   const [resumedDraftName, setResumedDraftName] = useState<string>('')
   const [allDrafts, setAllDrafts] = useState<ClientItem[]>([])
@@ -411,6 +414,68 @@ function AddClientFormContent() {
     setActiveMode('manual')
     setSuccessBanner(
       `Resumed draft for "${draft.name}" (${draft.id}). Details loaded into form above. Finish pending info and click Save Client.`
+    )
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Auto-fill form from an existing Lead (Convert Lead -> Client)
+  const populateFromLead = (lead: LeadItem) => {
+    const isCommercial = Boolean(lead.businessName && lead.businessName !== '—')
+    const primaryLOB = lead.insuranceType || 'Commercial Property'
+    const cleanPremium = (lead.estimatedPremium || '').replace(/[^0-9.]/g, '')
+
+    let fName = lead.firstName || ''
+    let lName = lead.lastName || ''
+    if (!fName && lead.name) {
+      const parts = lead.name.trim().split(' ')
+      fName = parts[0] || ''
+      lName = parts.slice(1).join(' ') || ''
+    }
+
+    const carrierToUse = (lead.currentInsurance && lead.currentInsurance !== 'None reported' && lead.currentInsurance !== '—')
+      ? lead.currentInsurance
+      : 'Travelers Insurance'
+
+    const validProvinces = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT']
+    const stateVal = (lead.state || 'ON').toUpperCase()
+    const resolvedProvince = validProvinces.includes(stateVal) ? stateVal : 'ON'
+
+    setForm((prev) => ({
+      ...prev,
+      firstName: fName,
+      lastName: lName,
+      businessName: lead.businessName !== '—' ? (lead.businessName || '') : '',
+      clientType: isCommercial ? 'Commercial' : 'Individual',
+      dob: lead.dob || '',
+      phone: lead.phone || '',
+      email: lead.email || '',
+      street: lead.street || '',
+      city: lead.city || '',
+      province: resolvedProvince,
+      postalCode: lead.zip || '',
+      status: 'Active / Submitted',
+      linesOfBusiness: primaryLOB ? [primaryLOB] : prev.linesOfBusiness,
+      insurerName: carrierToUse,
+      yearlyPremium: cleanPremium || prev.yearlyPremium,
+      consentStatus: lead.marketingConsent?.status === 'Granted' ? 'Granted' : lead.marketingConsent?.status === 'Declined' ? 'Declined' : 'Pending',
+      consentChannels: lead.marketingConsent?.channel ? [lead.marketingConsent.channel] : prev.consentChannels,
+      consentNotes: `Marketing consent transferred from Lead record ${lead.id} (${lead.marketingConsent?.status || 'Granted'}).`,
+      notes: lead.additionalInfo || (lead.notes?.[0]?.text ? `Lead notes: ${lead.notes[0].text}` : ''),
+    }))
+
+    if (lead.street) {
+      setAddressSearchQuery(`${lead.street}, ${lead.city || ''}`)
+    }
+
+    setConvertedLeadSource({
+      id: lead.id,
+      name: lead.name || `${fName} ${lName}`.trim() || lead.businessName || 'Lead',
+      businessName: lead.businessName,
+    })
+
+    setActiveMode('manual')
+    setSuccessBanner(
+      `Pre-populated from Lead "${lead.name || lead.businessName}" (${lead.id}). Review details below, assign policy number & splits, and click "Save Client" to complete conversion.`
     )
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -606,6 +671,27 @@ function AddClientFormContent() {
       }
     }
   }, [draftIdParam, allDrafts])
+
+  useEffect(() => {
+    if (fromLeadParam && (!convertedLeadSource || convertedLeadSource.id !== fromLeadParam)) {
+      try {
+        let foundLead: LeadItem | null = null
+        const stored = localStorage.getItem('broker_custom_leads')
+        if (stored) {
+          const list: LeadItem[] = JSON.parse(stored)
+          foundLead = list.find((l: LeadItem) => l.id === fromLeadParam) || null
+        }
+        if (!foundLead) {
+          foundLead = (initialLeads as LeadItem[]).find((l: LeadItem) => l.id === fromLeadParam) || null
+        }
+        if (foundLead) {
+          populateFromLead(foundLead)
+        }
+      } catch (err) {
+        console.error('Failed to parse lead for client intake:', err)
+      }
+    }
+  }, [fromLeadParam])
 
   // Sync workflow default setting for policy pending from Settings tab (localStorage)
   useEffect(() => {
@@ -1064,6 +1150,49 @@ function AddClientFormContent() {
       setResumedDraftId(null)
       setResumedDraftName('')
       refreshDrafts()
+
+      // If converted from an existing Lead, update the Lead's status to 'Won / Converted'
+      if (convertedLeadSource) {
+        try {
+          const storedLeads = localStorage.getItem('broker_custom_leads')
+          const leadsList: LeadItem[] = storedLeads ? JSON.parse(storedLeads) : [...(initialLeads as LeadItem[])]
+          let found = false
+          const updatedLeads = leadsList.map((l) => {
+            if (l.id === convertedLeadSource.id) {
+              found = true
+              return {
+                ...l,
+                status: 'Won / Converted' as const,
+                pipelineStage: 'Bound & Won' as const,
+                lastActivity: {
+                  type: 'system',
+                  description: `Converted to active client ${newId} (${fullName})`,
+                  time: 'Just now',
+                },
+              }
+            }
+            return l
+          })
+          if (!found) {
+            const sample = (initialLeads as LeadItem[]).find((l: LeadItem) => l.id === convertedLeadSource.id)
+            if (sample) {
+              updatedLeads.unshift({
+                ...sample,
+                status: 'Won / Converted',
+                pipelineStage: 'Bound & Won',
+                lastActivity: {
+                  type: 'system',
+                  description: `Converted to active client ${newId} (${fullName})`,
+                  time: 'Just now',
+                },
+              })
+            }
+          }
+          localStorage.setItem('broker_custom_leads', JSON.stringify(updatedLeads))
+        } catch (leadErr) {
+          console.error('Failed to update lead status upon conversion:', leadErr)
+        }
+      }
     } catch (err) {
       console.error(err)
     }
@@ -1210,6 +1339,38 @@ function AddClientFormContent() {
             className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer self-start sm:self-auto shrink-0 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
           >
             Clear Draft / Start Fresh
+          </button>
+        </div>
+      )}
+
+      {/* Converting from Lead Mode Banner */}
+      {convertedLeadSource && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-blue-300 bg-gradient-to-r from-blue-50 via-indigo-50/40 to-white p-4 shadow-xs animate-in fade-in dark:border-blue-500/30 dark:bg-gradient-to-r dark:from-blue-950/40 dark:via-indigo-950/20 dark:to-slate-900/40">
+          <div className="flex items-center gap-3">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs">
+              <Sparkles className="size-4.5" />
+            </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-blue-900 uppercase tracking-wider bg-blue-200/80 px-2 py-0.5 rounded-md dark:bg-blue-900/80 dark:text-blue-200">
+                  Lead Conversion Intake
+                </span>
+                <span className="text-xs text-slate-500 font-mono dark:text-slate-400">Lead ID: {convertedLeadSource.id}</span>
+              </div>
+              <p className="text-xs text-slate-700 mt-0.5 dark:text-slate-300">
+                Converting lead <strong className="font-semibold text-slate-900 dark:text-slate-100">&ldquo;{convertedLeadSource.businessName && convertedLeadSource.businessName !== '—' ? convertedLeadSource.businessName : convertedLeadSource.name}&rdquo;</strong>. Review/fill the insurance details below and click <strong className="text-blue-700 font-semibold dark:text-blue-400">Save Client</strong> to register in Book of Business and automatically mark lead as <em>Won / Converted</em>.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setConvertedLeadSource(null)
+              setSuccessBanner('Lead conversion detached. You are now creating a standard client entry.')
+            }}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer self-start sm:self-auto shrink-0 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+          >
+            Detach Lead
           </button>
         </div>
       )}

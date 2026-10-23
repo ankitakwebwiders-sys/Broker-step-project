@@ -653,6 +653,15 @@ export default function PoliciesPage() {
             <Zap className="size-4 text-blue-600 dark:text-blue-400" />
             <span>Quick-Entry</span>
           </button>
+
+          {/* 6.3 Add New Policy */}
+          <button
+            onClick={handleOpenCreate}
+            className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-slate-950 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600 cursor-pointer dark:bg-blue-600 dark:hover:bg-blue-700"
+          >
+            <Plus className="size-4" />
+            <span>Add Policy</span>
+          </button>
         </div>
       </div>
 
@@ -948,7 +957,7 @@ export default function PoliciesPage() {
 
                       {/* Actions */}
                       <td
-                        className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors dark:bg-slate-900 dark:group-hover:bg-slate-850 dark:md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.5)]"
+                        className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[210px] w-[210px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] transition-colors dark:bg-slate-900 dark:group-hover:bg-slate-800 dark:md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.5)]"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="flex items-center justify-center gap-1.5">

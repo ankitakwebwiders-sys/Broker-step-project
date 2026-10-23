@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Zap,
   Search,
@@ -52,6 +53,7 @@ import {
   Briefcase,
   Lock,
   Trash2,
+  Percent,
 } from 'lucide-react'
 import {
   initialLeads,
@@ -160,9 +162,41 @@ export default function LeadsPage() {
   const [statusChangeTarget, setStatusChangeTarget] = useState<LeadItem | null>(null)
   const [newStatusValue, setNewStatusValue] = useState<LeadStatus>('New')
 
-  // Convert to Client Modal
+  const router = useRouter()
+
+  // Convert to Client Modal & Form State
   const [convertTarget, setConvertTarget] = useState<LeadItem | null>(null)
   const [conversionSuccessToast, setConversionSuccessToast] = useState<string | null>(null)
+  const [isSubmittingConversion, setIsSubmittingConversion] = useState(false)
+  const [convertClientForm, setConvertClientForm] = useState({
+    clientType: 'Individual' as 'Individual' | 'Commercial',
+    firstName: '',
+    lastName: '',
+    businessName: '',
+    dob: '',
+    phone: '',
+    email: '',
+    street: '',
+    city: '',
+    state: 'ON',
+    zip: '',
+    insuranceType: 'Commercial Property',
+    insurerName: 'Travelers Insurance',
+    policyNumber: 'POL-PENDING',
+    isPendingPolicyNumber: true,
+    yearlyPremium: '$15,000',
+    paymentStatus: 'Paid' as 'Paid' | 'Unpaid',
+    commissionRate: 15.0,
+    brokerSplit: 80,
+    effectiveDate: new Date().toISOString().split('T')[0],
+    expirationDate: '',
+    status: 'Active / Submitted',
+    marketingConsentStatus: 'Granted' as 'Granted' | 'Pending' | 'Declined',
+    marketingConsentChannels: ['Email', 'Phone'],
+    notes: '',
+    duplicateWarning: null as string | null,
+    matchedClientId: null as string | null,
+  })
 
   // Selection & Bulk Actions state
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([])
@@ -722,32 +756,321 @@ export default function LeadsPage() {
     setStatusChangeTarget(null)
   }
 
-  // Convert to Client Handler (Won / Converted)
-  function handleConvertToClient(lead: LeadItem) {
-    const generatedClientId = `CL-${Math.floor(1050 + Math.random() * 8000)}`
-    const updated: LeadItem = {
-      ...lead,
+  // Open Add Client Form Modal pre-filled with all details from selected lead
+  function openConvertModal(lead: LeadItem) {
+    const isCommercial = Boolean(lead.businessName && lead.businessName !== '—')
+    let fName = lead.firstName || ''
+    let lName = lead.lastName || ''
+    if (!fName && lead.name) {
+      const parts = lead.name.trim().split(' ')
+      fName = parts[0] || ''
+      lName = parts.slice(1).join(' ') || ''
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0]
+    const expDate = new Date()
+    expDate.setFullYear(expDate.getFullYear() + 1)
+    const expStr = expDate.toISOString().split('T')[0]
+
+    const carrierToUse = (lead.currentInsurance && lead.currentInsurance !== 'None reported' && lead.currentInsurance !== '—')
+      ? lead.currentInsurance
+      : 'Travelers Insurance'
+
+    const combinedNotes = [
+      lead.additionalInfo ? `Lead Scope: ${lead.additionalInfo}` : '',
+      lead.notes?.[0]?.text ? `Lead Notes: ${lead.notes[0].text}` : '',
+    ].filter(Boolean).join('\n')
+
+    // Duplicate detection check
+    let dupMsg: string | null = null
+    let matchedId: string | null = null
+    try {
+      const storedClients = localStorage.getItem('broker_custom_clients')
+      if (storedClients) {
+        const clientList = JSON.parse(storedClients)
+        const matched = clientList.find((c: any) =>
+          c.convertedFromLeadId === lead.id ||
+          (lead.convertedClientId && c.id === lead.convertedClientId) ||
+          (lead.email && c.email && c.email.trim().toLowerCase() === lead.email.trim().toLowerCase())
+        )
+        if (matched) {
+          matchedId = matched.id
+          dupMsg = `Existing client record found: "${matched.name}" (${matched.id}). Saving will update their profile with converted details rather than creating a duplicate.`
+        }
+      }
+    } catch (err) {
+      console.error('Error checking duplicate clients', err)
+    }
+
+    setConvertClientForm({
+      clientType: isCommercial ? 'Commercial' : 'Individual',
+      firstName: fName,
+      lastName: lName,
+      businessName: lead.businessName !== '—' ? (lead.businessName || '') : '',
+      dob: lead.dob || '',
+      phone: lead.phone || '',
+      email: lead.email || '',
+      street: lead.street || '',
+      city: lead.city || '',
+      state: lead.state || 'ON',
+      zip: lead.zip || '',
+      insuranceType: lead.insuranceType || 'Commercial Property',
+      insurerName: carrierToUse,
+      policyNumber: 'POL-PENDING',
+      isPendingPolicyNumber: true,
+      yearlyPremium: lead.estimatedPremium || '$15,000',
+      paymentStatus: 'Paid',
+      commissionRate: 15.0,
+      brokerSplit: 80,
+      effectiveDate: todayStr,
+      expirationDate: expStr,
+      status: 'Active / Submitted',
+      marketingConsentStatus: lead.marketingConsent?.status || 'Granted',
+      marketingConsentChannels: lead.marketingConsent?.channel ? [lead.marketingConsent.channel] : ['Email', 'Phone'],
+      notes: combinedNotes,
+      duplicateWarning: dupMsg,
+      matchedClientId: matchedId,
+    })
+
+    // Store in session and local as fallback
+    try {
+      sessionStorage.setItem('broker_lead_to_convert', JSON.stringify(lead))
+      localStorage.setItem('broker_custom_leads', JSON.stringify(leads))
+    } catch (e) {
+      console.error(e)
+    }
+
+    setConvertTarget(lead)
+  }
+
+  function handleNavigateToFullClientIntake(lead: LeadItem) {
+    try {
+      sessionStorage.setItem('broker_lead_to_convert', JSON.stringify(lead))
+      localStorage.setItem('broker_custom_leads', JSON.stringify(leads))
+    } catch (e) {
+      console.error(e)
+    }
+    setConvertTarget(null)
+    router.push(`/broker/clients?fromLead=${lead.id}`)
+  }
+
+  // Handle Save Client from Conversion Modal (prevents duplicates)
+  function handleSaveConvertedClient(e: React.FormEvent) {
+    e.preventDefault()
+    if (!convertTarget) return
+
+    if (convertClientForm.clientType === 'Individual' && !convertClientForm.firstName.trim() && !convertClientForm.lastName.trim()) {
+      alert('Please enter a Client Name.')
+      return
+    }
+
+    if (convertClientForm.clientType === 'Commercial' && !convertClientForm.businessName.trim()) {
+      alert('Please enter a Business Name for Commercial client.')
+      return
+    }
+
+    if (!convertClientForm.email.trim() || !convertClientForm.phone.trim()) {
+      alert('Please provide an Email Address and Phone Number.')
+      return
+    }
+
+    setIsSubmittingConversion(true)
+
+    let existingClients: any[] = []
+    try {
+      const stored = localStorage.getItem('broker_custom_clients')
+      if (stored) {
+        existingClients = JSON.parse(stored)
+      }
+    } catch (err) {
+      console.error('Error reading broker_custom_clients', err)
+    }
+
+    // Check for duplicate client records:
+    const dupIdx = existingClients.findIndex(
+      (c) =>
+        c.convertedFromLeadId === convertTarget.id ||
+        (convertTarget.convertedClientId && c.id === convertTarget.convertedClientId) ||
+        (convertClientForm.matchedClientId && c.id === convertClientForm.matchedClientId) ||
+        (c.email && c.email.trim().toLowerCase() === convertClientForm.email.trim().toLowerCase() && c.email.trim() !== '')
+    )
+
+    const personFullName = `${convertClientForm.firstName.trim()} ${convertClientForm.lastName.trim()}`.trim()
+    const clientFullName = convertClientForm.clientType === 'Commercial'
+      ? (convertClientForm.businessName.trim() || personFullName || 'Commercial Client')
+      : (personFullName || convertClientForm.businessName.trim() || 'Client')
+
+    const cleanPrem = convertClientForm.yearlyPremium.startsWith('$')
+      ? convertClientForm.yearlyPremium
+      : `$${convertClientForm.yearlyPremium}`
+
+    const numPremium = parseFloat(convertClientForm.yearlyPremium.replace(/[^0-9.]/g, '')) || 0
+    const expectedComm = Math.round(numPremium * (convertClientForm.commissionRate / 100) * (convertClientForm.brokerSplit / 100))
+
+    let finalClientId = ''
+    let wasUpdated = false
+
+    if (dupIdx >= 0) {
+      // Update existing record rather than creating a duplicate!
+      const existing = existingClients[dupIdx]
+      finalClientId = existing.id
+      wasUpdated = true
+
+      existingClients[dupIdx] = {
+        ...existing,
+        firstName: convertClientForm.firstName.trim() || existing.firstName,
+        lastName: convertClientForm.lastName.trim() || existing.lastName,
+        name: clientFullName,
+        businessName: convertClientForm.businessName.trim() || existing.businessName,
+        clientType: convertClientForm.clientType,
+        dob: convertClientForm.dob || existing.dob,
+        phone: convertClientForm.phone.trim() || existing.phone,
+        email: convertClientForm.email.trim() || existing.email,
+        street: convertClientForm.street.trim() || existing.street,
+        city: convertClientForm.city.trim() || existing.city,
+        state: convertClientForm.state.trim() || existing.state,
+        province: convertClientForm.state.trim() || existing.province,
+        zip: convertClientForm.zip.trim() || existing.zip,
+        postalCode: convertClientForm.zip.trim() || existing.postalCode,
+        status: convertClientForm.status,
+        linesOfBusiness: [convertClientForm.insuranceType],
+        yearlyPremium: cleanPrem,
+        insurerName: convertClientForm.insurerName,
+        convertedFromLeadId: convertTarget.id,
+        marketingConsent: {
+          status: convertClientForm.marketingConsentStatus,
+          channels: convertClientForm.marketingConsentChannels,
+          consentDate: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+          notes: `Marketing consent transferred from Lead ${convertTarget.id} (${convertClientForm.marketingConsentStatus})`,
+        },
+        lastActivity: {
+          description: `Lead ${convertTarget.id} profile converted & updated into client file`,
+          time: 'Just now',
+        },
+      }
+    } else {
+      // Create new client record
+      finalClientId = `CL-${Math.floor(1000 + Math.random() * 9000)}`
+      const newClientRecord = {
+        id: finalClientId,
+        firstName: convertClientForm.firstName.trim() || (convertClientForm.clientType === 'Commercial' ? convertClientForm.businessName.trim() : 'Client'),
+        lastName: convertClientForm.lastName.trim(),
+        name: clientFullName,
+        businessName: convertClientForm.businessName.trim() || (convertClientForm.clientType === 'Commercial' ? clientFullName : '—'),
+        clientType: convertClientForm.clientType,
+        clientSince: 'Today',
+        dob: convertClientForm.dob || '—',
+        phone: convertClientForm.phone.trim(),
+        email: convertClientForm.email.trim(),
+        street: convertClientForm.street.trim() || '—',
+        city: convertClientForm.city.trim() || '—',
+        state: convertClientForm.state.trim() || 'ON',
+        province: convertClientForm.state.trim() || 'ON',
+        zip: convertClientForm.zip.trim() || '—',
+        postalCode: convertClientForm.zip.trim() || '—',
+        brokerCode: 'BRK-8821',
+        otherIdentifier: `ID-${Math.floor(10000 + Math.random() * 90000)}`,
+        status: convertClientForm.status,
+        linesOfBusiness: [convertClientForm.insuranceType],
+        yearlyPremium: cleanPrem,
+        paymentStatus: convertClientForm.paymentStatus,
+        insurerName: convertClientForm.insurerName,
+        convertedFromLeadId: convertTarget.id,
+        marketingConsent: {
+          status: convertClientForm.marketingConsentStatus,
+          channels: convertClientForm.marketingConsentChannels,
+          consentDate: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+          notes: `Marketing consent transferred from Lead record ${convertTarget.id}`,
+        },
+        notes: convertClientForm.notes.trim() ? [
+          {
+            id: `note-${Date.now()}`,
+            date: 'Today',
+            author: 'Jordan Davis',
+            text: convertClientForm.notes.trim(),
+          }
+        ] : [],
+        lastActivity: {
+          description: `Converted from Lead ${convertTarget.id} (${convertTarget.name})`,
+          time: 'Just now',
+        },
+        policies: [
+          {
+            id: `pol-${Date.now()}`,
+            policyNumber: convertClientForm.isPendingPolicyNumber ? 'POL-PENDING' : (convertClientForm.policyNumber || 'POL-PENDING'),
+            type: convertClientForm.insuranceType,
+            carrier: convertClientForm.insurerName,
+            premium: cleanPrem,
+            effectiveDate: convertClientForm.effectiveDate,
+            expirationDate: convertClientForm.expirationDate,
+            status: 'Active',
+            policyNumberPending: convertClientForm.isPendingPolicyNumber,
+            rateSplit: `${convertClientForm.commissionRate}% / ${convertClientForm.brokerSplit}%`,
+            expectedCommission: `$${expectedComm || 294}`,
+            commissionStatus: 'Pending',
+          }
+        ],
+        commissions: [],
+        timeline: [
+          {
+            id: `tl-${Date.now()}`,
+            title: 'Lead Converted to Active Client',
+            type: 'system',
+            date: 'Today',
+            detail: `Converted from Lead ${convertTarget.id} with ${convertClientForm.insurerName} coverage.`,
+            actor: 'Jordan Davis',
+          }
+        ],
+      }
+      existingClients.unshift(newClientRecord)
+    }
+
+    try {
+      localStorage.setItem('broker_custom_clients', JSON.stringify(existingClients))
+    } catch (err) {
+      console.error('Error saving broker_custom_clients', err)
+    }
+
+    // Update the Lead record to Won / Converted and link the client ID
+    const updatedLead: LeadItem = {
+      ...convertTarget,
       status: 'Won / Converted',
-      convertedClientId: generatedClientId,
+      convertedClientId: finalClientId,
       timeline: [
         {
           id: `LT-${Date.now()}`,
-          title: `Converted to Active Client #${generatedClientId}`,
+          title: `Converted to Active Client #${finalClientId}`,
           date: 'Today, Just now',
-          detail: `Lead officially won and converted to active client record #${generatedClientId}.`,
+          detail: `Lead converted to active client record #${finalClientId} (${clientFullName}).`,
           actor: 'Jordan Davis',
           type: 'conversion',
         },
-        ...lead.timeline,
+        ...convertTarget.timeline,
       ],
     }
-    setLeads(prev => prev.map(l => l.id === updated.id ? updated : l))
-    if (selectedLeadForView?.id === updated.id) {
-      setSelectedLeadForView(updated)
+
+    setLeads((prev) => {
+      const next = prev.map((l) => (l.id === updatedLead.id ? updatedLead : l))
+      try {
+        localStorage.setItem('broker_custom_leads', JSON.stringify(next))
+      } catch (e) {
+        console.error(e)
+      }
+      return next
+    })
+
+    if (selectedLeadForView?.id === updatedLead.id) {
+      setSelectedLeadForView(updatedLead)
     }
+
+    setIsSubmittingConversion(false)
     setConvertTarget(null)
-    setConversionSuccessToast(`Successfully converted ${lead.name} to Client #${generatedClientId}!`)
-    setTimeout(() => setConversionSuccessToast(null), 5000)
+    setConversionSuccessToast(
+      wasUpdated
+        ? `Existing client profile #${finalClientId} updated & linked to Lead "${convertTarget.name}" (Duplicate record avoided!)`
+        : `Successfully converted "${convertTarget.name}" to Client #${finalClientId}!`
+    )
+    setTimeout(() => setConversionSuccessToast(null), 7000)
   }
 
   // Add Note Handler inside drawer
@@ -1773,17 +2096,18 @@ export default function LeadsPage() {
                             {/* Convert to Client (Won / Converted) */}
                             {lead.status !== 'Won / Converted' ? (
                               <button
-                                onClick={() => setConvertTarget(lead)}
-                                className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-emerald-700 whitespace-nowrap shrink-0 cursor-pointer"
+                                onClick={() => openConvertModal(lead)}
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-emerald-700 whitespace-nowrap shrink-0 cursor-pointer"
                                 title="Convert Lead to Active Client"
                               >
                                 <UserCheck className="size-3.5 shrink-0" />
-                                <span>Convert</span>
+                                <span>Convert Lead</span>
                               </button>
                             ) : (
                               <Link
-                                href="/broker/clients"
+                                href={lead.convertedClientId ? `/broker/book-of-business?view=details&id=${lead.convertedClientId}` : '/broker/book-of-business'}
                                 className="inline-flex items-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-800 px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap shrink-0"
+                                title="View Active Client Profile in My Book"
                               >
                                 <span>Client</span>
                                 <ArrowUpRight className="size-3 text-slate-400" />
@@ -2128,15 +2452,15 @@ export default function LeadsPage() {
               <div className="flex items-center gap-2">
                 {selectedLeadForView.status !== 'Won / Converted' ? (
                   <button
-                    onClick={() => setConvertTarget(selectedLeadForView)}
-                    className="inline-flex items-center gap-1 rounded-xl bg-emerald-600 px-3 py-1.5 text-[11px] font-semibold text-white shadow-xs hover:bg-emerald-700 transition cursor-pointer"
+                    onClick={() => openConvertModal(selectedLeadForView)}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-1.5 text-[11px] font-semibold text-white shadow-xs hover:bg-emerald-700 transition cursor-pointer"
                   >
                     <UserCheck className="size-3.5" />
-                    Convert to Client
+                    <span>Convert Lead</span>
                   </button>
                 ) : (
                   <Link
-                    href="/broker/clients"
+                    href={selectedLeadForView.convertedClientId ? `/broker/book-of-business?view=details&id=${selectedLeadForView.convertedClientId}` : '/broker/book-of-business'}
                     className="inline-flex items-center gap-1 rounded-xl bg-slate-900 dark:bg-blue-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-blue-600 dark:hover:bg-blue-500 transition"
                   >
                     View Client File &rarr;
@@ -2940,49 +3264,518 @@ export default function LeadsPage() {
       )}
 
       {/* ─────────────────────────────────────────────────────────────
-          CONVERT TO CLIENT CONFIRMATION MODAL
+          CONVERT LEAD TO CLIENT: ADD CLIENT FORM MODAL
       ─────────────────────────────────────────────────────────────── */}
       {convertTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 mb-4">
-              <UserCheck className="size-6" />
-            </div>
-            <h3 className="text-[17px] font-bold text-slate-900 dark:text-slate-100">Convert Lead to Client</h3>
-            <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-              Converting <strong>{convertTarget.name}</strong> will create a new Active Client profile in your Book of Business and mark this lead as <strong>Won / Converted</strong>.
-            </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-4">
+          <div className="w-full max-w-3xl max-h-[92vh] flex flex-col rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
 
-            <div className="mt-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3.5 text-[12px] space-y-1.5 border border-slate-200/60 dark:border-white/5">
-              <div className="flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">Business</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">{convertTarget.businessName}</span>
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 px-5 sm:px-6 py-4 bg-slate-50/70 dark:bg-slate-800/40">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold">
+                  <UserCheck className="size-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                      Convert Lead to Client
+                    </h3>
+                    <span className="rounded-md bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40">
+                      Add Client Form
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Pre-filled with information from Lead <strong>{convertTarget.name}</strong> ({convertTarget.id}). Review, edit, and save to Book of Business.
+                  </p>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">Coverage Line</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">{convertTarget.insuranceType}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">Estimated Annual Premium</span>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400">{convertTarget.estimatedPremium}</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleNavigateToFullClientIntake(convertTarget)}
+                  className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
+                  title="Open full page intake (/broker/clients)"
+                >
+                  <ExternalLink className="size-3.5 text-slate-400" />
+                  <span>Full Page</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConvertTarget(null)}
+                  className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition cursor-pointer"
+                >
+                  <X className="size-5" />
+                </button>
               </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-end gap-2.5">
-              <button
-                onClick={() => setConvertTarget(null)}
-                className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 text-[12px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleConvertToClient(convertTarget)}
-                className="rounded-xl bg-emerald-600 px-5 py-2 text-[12px] font-semibold text-white shadow-md hover:bg-emerald-700 transition cursor-pointer"
-              >
-                Confirm Conversion
-              </button>
-            </div>
+            {/* Scrollable Form Body */}
+            <form onSubmit={handleSaveConvertedClient} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
+              {/* Duplicate Detection Alert Banner */}
+              {convertClientForm.duplicateWarning ? (
+                <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/40 p-3.5 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5">
+                  <AlertCircle className="size-4.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold">Existing Client Profile Detected</p>
+                    <p className="mt-0.5 text-[11px] leading-relaxed opacity-90">{convertClientForm.duplicateWarning}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-emerald-200/80 dark:border-emerald-900/40 bg-emerald-50/60 dark:bg-emerald-950/30 p-3 text-xs text-emerald-900 dark:text-emerald-300 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span className="font-medium text-[11.5px]">
+                      All details pre-filled from Lead <strong>{convertTarget.id}</strong>. You can edit any fields before saving. No duplicates will be created.
+                    </span>
+                  </div>
+                  <span className="rounded-md bg-white dark:bg-slate-800 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40 shrink-0">
+                    Safe Conversion
+                  </span>
+                </div>
+              )}
+
+              {/* Section 1: Client Classification & Identity */}
+              <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/40 dark:bg-slate-800/30 p-4 space-y-3.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                  <Building2 className="size-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>1. Client Identity &amp; Classification</span>
+                </div>
+
+                <div className="grid gap-3.5 sm:grid-cols-2">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                      Client Classification
+                    </label>
+                    <select
+                      value={convertClientForm.clientType}
+                      onChange={(e) => setConvertClientForm({ ...convertClientForm, clientType: e.target.value as any })}
+                      className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12.5px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-medium cursor-pointer"
+                    >
+                      <option value="Individual">Individual Policyholder</option>
+                      <option value="Commercial">Commercial / Business</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                      Business / Company Name {convertClientForm.clientType === 'Commercial' ? <span className="text-rose-500">*</span> : <span className="text-slate-400 dark:text-slate-500 font-normal">(optional)</span>}
+                    </label>
+                    <input
+                      type="text"
+                      required={convertClientForm.clientType === 'Commercial'}
+                      value={convertClientForm.businessName}
+                      onChange={(e) => setConvertClientForm({ ...convertClientForm, businessName: e.target.value })}
+                      placeholder="e.g. Patel Hospitality Group"
+                      className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12.5px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-3.5 sm:grid-cols-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                      Contact First Name {convertClientForm.clientType === 'Individual' ? <span className="text-rose-500">*</span> : ''}
+                    </label>
+                    <input
+                      type="text"
+                      required={convertClientForm.clientType === 'Individual'}
+                      value={convertClientForm.firstName}
+                      onChange={(e) => setConvertClientForm({ ...convertClientForm, firstName: e.target.value })}
+                      placeholder="e.g. Maya"
+                      className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12.5px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                      Contact Last Name
+                    </label>
+                    <input
+                      type="text"
+                      value={convertClientForm.lastName}
+                      onChange={(e) => setConvertClientForm({ ...convertClientForm, lastName: e.target.value })}
+                      placeholder="e.g. Patel"
+                      className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12.5px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                      Date of Birth <span className="text-slate-400 dark:text-slate-500 font-normal">(optional)</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={convertClientForm.dob}
+                      onChange={(e) => setConvertClientForm({ ...convertClientForm, dob: e.target.value })}
+                      className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12.5px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Contact Information & Location */}
+              <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/40 dark:bg-slate-800/30 p-4 space-y-3.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                  <Phone className="size-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>2. Contact Information &amp; Address</span>
+                </div>
+
+                <div className="grid gap-3.5 sm:grid-cols-2">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                      Phone Number <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="tel"
+                        required
+                        value={convertClientForm.phone}
+                        onChange={(e) => setConvertClientForm({ ...convertClientForm, phone: e.target.value })}
+                        placeholder="(555) 749-1029"
+                        className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 pl-9.5 pr-3 text-[12.5px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                      Email Address <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="email"
+                        required
+                        value={convertClientForm.email}
+                        onChange={(e) => setConvertClientForm({ ...convertClientForm, email: e.target.value })}
+                        placeholder="client@business.com"
+                        className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 pl-9.5 pr-3 text-[12.5px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-3.5 sm:grid-cols-4">
+                  <div className="sm:col-span-2">
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">Street Address</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={convertClientForm.street}
+                        onChange={(e) => setConvertClientForm({ ...convertClientForm, street: e.target.value })}
+                        placeholder="820 Grand Avenue, Suite 12"
+                        className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 pl-9.5 pr-3 text-[12.5px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">City</label>
+                    <input
+                      type="text"
+                      value={convertClientForm.city}
+                      onChange={(e) => setConvertClientForm({ ...convertClientForm, city: e.target.value })}
+                      placeholder="San Jose"
+                      className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12.5px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">State &amp; Zip</label>
+                    <div className="flex gap-1.5">
+                      <input
+                        type="text"
+                        value={convertClientForm.state}
+                        onChange={(e) => setConvertClientForm({ ...convertClientForm, state: e.target.value })}
+                        placeholder="CA"
+                        className="h-9.5 w-16 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-2 text-center font-bold text-[12px] uppercase outline-none transition focus:border-blue-500"
+                      />
+                      <input
+                        type="text"
+                        value={convertClientForm.zip}
+                        onChange={(e) => setConvertClientForm({ ...convertClientForm, zip: e.target.value })}
+                        placeholder="95112"
+                        className="h-9.5 flex-1 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-2.5 text-[12px] outline-none transition focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Policy, Carrier & Coverage */}
+              <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/40 dark:bg-slate-800/30 p-4 space-y-3.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                  <FileText className="size-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>3. Insurance Line &amp; Coverage Setup</span>
+                </div>
+
+                <div className="grid gap-3.5 sm:grid-cols-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">Insurance Line (LOB)</label>
+                    <select
+                      value={convertClientForm.insuranceType}
+                      onChange={(e) => setConvertClientForm({ ...convertClientForm, insuranceType: e.target.value })}
+                      className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12px] outline-none transition focus:border-blue-500 cursor-pointer"
+                    >
+                      <option>Commercial Property</option>
+                      <option>Commercial Auto</option>
+                      <option>General Liability</option>
+                      <option>Cyber Liability</option>
+                      <option>Workers Comp</option>
+                      <option>Business Owners (BOP)</option>
+                      <option>Professional Liability</option>
+                      <option>Auto</option>
+                      <option>Home</option>
+                      <option>Travel</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">Carrier / Insurer</label>
+                    <select
+                      value={convertClientForm.insurerName}
+                      onChange={(e) => setConvertClientForm({ ...convertClientForm, insurerName: e.target.value })}
+                      className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12px] outline-none transition focus:border-blue-500 cursor-pointer"
+                    >
+                      <option>Travelers Insurance</option>
+                      <option>Intact Insurance</option>
+                      <option>The Hartford</option>
+                      <option>Chubb Commercial</option>
+                      <option>Aviva Canada</option>
+                      <option>Liberty Mutual</option>
+                      <option>Progressive Commercial</option>
+                      <option>Wawanesa Mutual Insurance</option>
+                      <option>Economical / Definity Insurance</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">Annual Premium</label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={convertClientForm.yearlyPremium}
+                        onChange={(e) => setConvertClientForm({ ...convertClientForm, yearlyPremium: e.target.value })}
+                        placeholder="$15,000"
+                        className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 pl-8 pr-3 text-[12.5px] font-semibold outline-none transition focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-3.5 sm:grid-cols-3 pt-1">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Policy Number</label>
+                      <label className="flex items-center gap-1.5 text-[10.5px] text-blue-600 dark:text-blue-400 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={convertClientForm.isPendingPolicyNumber}
+                          onChange={(e) =>
+                            setConvertClientForm({
+                              ...convertClientForm,
+                              isPendingPolicyNumber: e.target.checked,
+                              policyNumber: e.target.checked ? 'POL-PENDING' : '',
+                            })
+                          }
+                          className="rounded text-blue-600 focus:ring-blue-500 size-3"
+                        />
+                        <span>Pending</span>
+                      </label>
+                    </div>
+                    <input
+                      type="text"
+                      disabled={convertClientForm.isPendingPolicyNumber}
+                      value={convertClientForm.isPendingPolicyNumber ? 'POL-PENDING' : convertClientForm.policyNumber}
+                      onChange={(e) => setConvertClientForm({ ...convertClientForm, policyNumber: e.target.value })}
+                      placeholder="POL-10829"
+                      className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12px] font-mono outline-none disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:text-slate-400"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">Effective Date</label>
+                    <input
+                      type="date"
+                      value={convertClientForm.effectiveDate}
+                      onChange={(e) => setConvertClientForm({ ...convertClientForm, effectiveDate: e.target.value })}
+                      className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12px] outline-none cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">Expiration Date</label>
+                    <input
+                      type="date"
+                      value={convertClientForm.expirationDate}
+                      onChange={(e) => setConvertClientForm({ ...convertClientForm, expirationDate: e.target.value })}
+                      className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12px] outline-none cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 4: Broker Splits & Financials */}
+              <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/40 dark:bg-slate-800/30 p-4 space-y-3.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                    <Percent className="size-3.5 text-blue-600 dark:text-blue-400" />
+                    <span>4. Splits &amp; Revenue Projection</span>
+                  </div>
+                  <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                    Est. Commission: $
+                    {Math.round(
+                      (parseFloat(convertClientForm.yearlyPremium.replace(/[^0-9.]/g, '')) || 0) *
+                      (convertClientForm.commissionRate / 100) *
+                      (convertClientForm.brokerSplit / 100)
+                    ).toLocaleString()}
+                  </span>
+                </div>
+
+                <div className="grid gap-3.5 sm:grid-cols-2">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">Carrier Commission Rate (%)</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="0.5"
+                        min="0"
+                        max="100"
+                        value={convertClientForm.commissionRate}
+                        onChange={(e) => setConvertClientForm({ ...convertClientForm, commissionRate: parseFloat(e.target.value) || 0 })}
+                        className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12.5px] font-semibold outline-none focus:border-blue-500"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">%</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">Broker Split (%)</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="1"
+                        min="0"
+                        max="100"
+                        value={convertClientForm.brokerSplit}
+                        onChange={(e) => setConvertClientForm({ ...convertClientForm, brokerSplit: parseFloat(e.target.value) || 0 })}
+                        className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12.5px] font-semibold outline-none focus:border-blue-500"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 5: Compliance Consent & Internal Notes */}
+              <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/40 dark:bg-slate-800/30 p-4 space-y-3.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                  <ShieldCheck className="size-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>5. Compliance Consent &amp; Lead Remarks</span>
+                </div>
+
+                <div className="grid gap-3.5 sm:grid-cols-2">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">Marketing Consent Status</label>
+                    <select
+                      value={convertClientForm.marketingConsentStatus}
+                      onChange={(e) => setConvertClientForm({ ...convertClientForm, marketingConsentStatus: e.target.value as any })}
+                      className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12px] outline-none cursor-pointer"
+                    >
+                      <option value="Granted">Granted / Consented</option>
+                      <option value="Pending">Pending Verification</option>
+                      <option value="Declined">Declined</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">Account Intake Status</label>
+                    <select
+                      value={convertClientForm.status}
+                      onChange={(e) => setConvertClientForm({ ...convertClientForm, status: e.target.value })}
+                      className="h-9.5 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 px-3 text-[12px] outline-none cursor-pointer"
+                    >
+                      <option value="Active / Submitted">Active / Submitted</option>
+                      <option value="Pending">Pending Review</option>
+                      <option value="Active">Active</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    Transferred Notes &amp; Scope Remarks
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={convertClientForm.notes}
+                    onChange={(e) => setConvertClientForm({ ...convertClientForm, notes: e.target.value })}
+                    placeholder="Remarks from lead intake..."
+                    className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950/60 text-slate-900 dark:text-slate-100 p-2.5 text-[12px] outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Modal Actions */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-white/10">
+                <button
+                  type="button"
+                  onClick={() => handleNavigateToFullClientIntake(convertTarget)}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0170FE] hover:underline cursor-pointer"
+                >
+                  <ExternalLink className="size-3.5" />
+                  <span>Open in Full Intake Page (/broker/clients)</span>
+                </button>
+
+                <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setConvertTarget(null)}
+                    className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmittingConversion}
+                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-md hover:bg-emerald-700 transition cursor-pointer disabled:opacity-60"
+                  >
+                    <UserCheck className="size-4" />
+                    <span>{isSubmittingConversion ? 'Saving Client...' : 'Save & Convert Client'}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+
           </div>
+        </div>
+      )}
+
+      {/* Toast Notification: Conversion Success */}
+      {conversionSuccessToast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-emerald-200 dark:border-emerald-800/60 bg-white dark:bg-slate-900 p-4 shadow-2xl animate-in slide-in-from-bottom-5 duration-200 max-w-md">
+          <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-600 text-white font-bold shrink-0">
+            <CheckCircle2 className="size-5" />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{conversionSuccessToast}</p>
+            <Link
+              href="/broker/book-of-business"
+              className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline mt-0.5"
+            >
+              <span>View Client in Book of Business</span>
+              <ArrowUpRight className="size-3" />
+            </Link>
+          </div>
+          <button
+            type="button"
+            onClick={() => setConversionSuccessToast(null)}
+            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer"
+          >
+            <X className="size-4" />
+          </button>
         </div>
       )}
 

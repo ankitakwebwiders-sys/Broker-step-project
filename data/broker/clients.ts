@@ -103,6 +103,7 @@ export interface ClientItem {
   outstanding?: string
   paymentStatus?: 'Paid' | 'Unpaid'
   effectiveDate?: string
+  convertedFromLeadId?: string
 }
 
 export function getClientPaymentStatus(client: ClientItem): 'Paid' | 'Unpaid' {

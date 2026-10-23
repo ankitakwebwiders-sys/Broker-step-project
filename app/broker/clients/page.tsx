@@ -436,9 +436,9 @@ function AddClientFormContent() {
       ? lead.currentInsurance
       : 'Travelers Insurance'
 
-    const validProvinces = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT', 'CA', 'NY', 'TX', 'FL', 'IL', 'PA', 'OH', 'GA', 'NC', 'MI', 'NJ', 'VA', 'WA', 'AZ', 'MA', 'TN', 'IN', 'MO', 'MD', 'WI', 'CO', 'MN', 'SC', 'AL', 'LA', 'KY', 'OR', 'OK', 'CT', 'UT', 'IA', 'NV', 'AR', 'MS', 'KS', 'NM', 'NE', 'ID', 'WV', 'HI', 'NH', 'ME', 'MT', 'RI', 'DE', 'SD', 'ND', 'AK', 'DC', 'VT', 'WY']
+    const validProvinces = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT']
     const stateVal = (lead.state || 'ON').toUpperCase()
-    const resolvedProvince = validProvinces.includes(stateVal) ? stateVal : (lead.state || 'ON')
+    const resolvedProvince = validProvinces.includes(stateVal) ? stateVal : 'ON'
 
     setForm((prev) => ({
       ...prev,
@@ -680,15 +680,6 @@ function AddClientFormContent() {
         if (stored) {
           const list: LeadItem[] = JSON.parse(stored)
           foundLead = list.find((l: LeadItem) => l.id === fromLeadParam) || null
-        }
-        if (!foundLead) {
-          const sessionLead = typeof window !== 'undefined' ? sessionStorage.getItem('broker_lead_to_convert') : null
-          if (sessionLead) {
-            const parsed = JSON.parse(sessionLead)
-            if (parsed && (parsed.id === fromLeadParam || !fromLeadParam)) {
-              foundLead = parsed
-            }
-          }
         }
         if (!foundLead) {
           foundLead = (initialLeads as LeadItem[]).find((l: LeadItem) => l.id === fromLeadParam) || null
@@ -1149,38 +1140,13 @@ function AddClientFormContent() {
           actor: 'Broker Intake',
         },
       ],
-      convertedFromLeadId: convertedLeadSource?.id,
     }
-
-    let finalClientId = newId
 
     try {
       const existing = localStorage.getItem('broker_custom_clients')
       const currentList: ClientItem[] = existing ? JSON.parse(existing) : []
       const cleaned = resumedDraftId ? currentList.filter(c => c.id !== resumedDraftId) : currentList
-
-      // Duplicate prevention: Check if client already exists from this lead or matching email
-      const dupIdx = cleaned.findIndex((c) =>
-        (convertedLeadSource && c.convertedFromLeadId === convertedLeadSource.id) ||
-        (convertedLeadSource && c.id === convertedLeadSource.id) ||
-        (c.email && form.email && c.email.trim().toLowerCase() === form.email.trim().toLowerCase())
-      )
-
-      let savedList: ClientItem[]
-      if (dupIdx >= 0) {
-        finalClientId = cleaned[dupIdx].id
-        cleaned[dupIdx] = {
-          ...cleaned[dupIdx],
-          ...newClient,
-          id: finalClientId,
-          convertedFromLeadId: convertedLeadSource?.id || cleaned[dupIdx].convertedFromLeadId,
-        }
-        savedList = cleaned
-      } else {
-        savedList = [newClient, ...cleaned]
-      }
-
-      localStorage.setItem('broker_custom_clients', JSON.stringify(savedList))
+      localStorage.setItem('broker_custom_clients', JSON.stringify([newClient, ...cleaned]))
       setResumedDraftId(null)
       setResumedDraftName('')
       refreshDrafts()
@@ -1197,11 +1163,10 @@ function AddClientFormContent() {
               return {
                 ...l,
                 status: 'Won / Converted' as const,
-                convertedClientId: finalClientId,
                 pipelineStage: 'Bound & Won' as const,
                 lastActivity: {
                   type: 'system',
-                  description: `Converted to active client ${finalClientId} (${fullName})`,
+                  description: `Converted to active client ${newId} (${fullName})`,
                   time: 'Just now',
                 },
               }
@@ -1214,11 +1179,10 @@ function AddClientFormContent() {
               updatedLeads.unshift({
                 ...sample,
                 status: 'Won / Converted',
-                convertedClientId: finalClientId,
                 pipelineStage: 'Bound & Won',
                 lastActivity: {
                   type: 'system',
-                  description: `Converted to active client ${finalClientId} (${fullName})`,
+                  description: `Converted to active client ${newId} (${fullName})`,
                   time: 'Just now',
                 },
               })
@@ -1267,7 +1231,7 @@ function AddClientFormContent() {
       })
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } else {
-      router.push(`/broker/book-of-business?view=details&id=${finalClientId}`)
+      router.push(`/broker/book-of-business?view=details&id=${newId}`)
     }
   }
 

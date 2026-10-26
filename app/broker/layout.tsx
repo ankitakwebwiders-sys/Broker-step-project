@@ -15,11 +15,13 @@ import {
   Zap,
   Upload,
   List,
+  Trash2,
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { getRecycledItems } from '@/data/broker/recycleBin'
 
 interface NavSubItemDef {
   label: string
@@ -32,6 +34,7 @@ interface NavItemDef {
   icon: React.ComponentType<{ className?: string }>
   href: string
   subItems?: NavSubItemDef[]
+  badge?: number | string
 }
 
 const navItems: NavItemDef[] = [
@@ -76,6 +79,11 @@ const navItems: NavItemDef[] = [
     label: 'Reports',
     icon: BarChart3,
     href: '/broker/reports',
+  },
+  {
+    label: 'Recycle Bin',
+    icon: Trash2,
+    href: '/broker/recycle-bin',
   },
   {
     label: 'Settings',
@@ -191,6 +199,17 @@ function NavItem({
               }`}
           />
           <span className="flex-1 truncate tracking-wide">{item.label}</span>
+          {item.badge !== undefined && Number(item.badge) > 0 && (
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10px] font-bold transition ${
+                active
+                  ? 'bg-white text-blue-600 dark:bg-slate-900 dark:text-blue-300 shadow-xs'
+                  : 'bg-rose-100 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300'
+              }`}
+            >
+              {item.badge}
+            </span>
+          )}
         </Link>
 
         {hasSubItems && (
@@ -255,7 +274,33 @@ function NavItem({
 
 export default function BrokerLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [recycleCount, setRecycleCount] = useState<number>(0)
   const pathname = usePathname()
+
+  useEffect(() => {
+    const updateRecycleCount = () => {
+      try {
+        const items = getRecycledItems()
+        setRecycleCount(items.length)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    updateRecycleCount()
+    window.addEventListener('broker_recycle_bin_updated', updateRecycleCount)
+    window.addEventListener('storage', updateRecycleCount)
+    return () => {
+      window.removeEventListener('broker_recycle_bin_updated', updateRecycleCount)
+      window.removeEventListener('storage', updateRecycleCount)
+    }
+  }, [])
+
+  const itemsWithBadges = navItems.map((item) => {
+    if (item.label === 'Recycle Bin') {
+      return { ...item, badge: recycleCount }
+    }
+    return item
+  })
 
   const isItemActive = (item: NavItemDef) => {
     if (item.href === '/login') return false
@@ -295,6 +340,9 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
     if (item.label === 'Reports') {
       return pathname === '/broker/reports'
     }
+    if (item.label === 'Recycle Bin') {
+      return pathname.startsWith('/broker/recycle-bin')
+    }
     if (item.label === 'Settings') {
       return (
         pathname === '/broker/settings' ||
@@ -330,7 +378,7 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
 
         {/* Navigation Items (No Submenus) */}
         <div className="flex flex-1 flex-col space-y-1.5 overflow-y-auto pr-1 custom-scrollbar pt-2">
-          {navItems.map((item) => (
+          {itemsWithBadges.map((item) => (
             <NavItem
               key={item.label}
               item={item}

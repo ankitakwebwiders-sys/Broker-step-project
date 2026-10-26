@@ -53,6 +53,7 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
+  Trash2,
 } from 'lucide-react'
 import {
   initialClients,
@@ -66,6 +67,7 @@ import {
   type ClientNote,
   type ClientTimelineEvent,
 } from '@/data/broker/clients'
+import { addRecycledItem } from '@/data/broker/recycleBin'
 
 const QUICK_EMAIL_DOMAINS = ['@gmail.com', '@hotmail.com', '@outlook.com', '@yahoo.com', '@icloud.com']
 
@@ -159,27 +161,55 @@ function BookOfBusinessContent() {
     })
   })
 
-  // Load custom clients added via Add Client form with deduplication
+  // Load custom clients added via Add Client form with deduplication (UI-only mode: refresh restores full roster)
   useEffect(() => {
     try {
+      // Clear any previous session deleted IDs so refreshing restores all data
+      localStorage.removeItem('broker_deleted_client_ids')
+
       const stored = localStorage.getItem('broker_custom_clients')
-      if (stored) {
-        const parsed: ClientItem[] = JSON.parse(stored)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setClients((prev) => {
-            const clientMap = new Map<string, ClientItem>()
-            // First load existing
-            prev.forEach((c) => clientMap.set(c.id, c))
-            // Overwrite/prepend custom ones
-            parsed.forEach((c) => clientMap.set(c.id, c))
-            return Array.from(clientMap.values())
+      const parsed: ClientItem[] = stored ? JSON.parse(stored) : []
+
+      setClients(() => {
+        const clientMap = new Map<string, ClientItem>()
+        // 1. Initial clients
+        initialClients.forEach((c) => {
+          clientMap.set(c.id, c)
+        })
+        // 2. Custom clients
+        if (Array.isArray(parsed)) {
+          parsed.forEach((c) => {
+            clientMap.set(c.id, c)
           })
         }
-      }
+        return Array.from(clientMap.values())
+      })
     } catch (e) {
       console.error(e)
     }
+
+    const handleRestored = (e: any) => {
+      const item = e.detail?.item
+      if (item && item.type === 'client' && item.originalData) {
+        setClients(prev => {
+          if (prev.some(c => c.id === item.originalData.id)) return prev
+          return [item.originalData, ...prev]
+        })
+      }
+    }
+    window.addEventListener('broker_recycle_bin_restored', handleRestored)
+    return () => window.removeEventListener('broker_recycle_bin_restored', handleRestored)
   }, [])
+
+  // Multi-select & Deletion State
+  const [selectedClientIds, setSelectedClientIds] = useState<string[]>([])
+  const [deleteModalState, setDeleteModalState] = useState<{
+    type: 'single' | 'bulk'
+    client?: ClientItem
+    ids: string[]
+    count?: number
+  } | null>(null)
+  const [deleteSuccessToast, setDeleteSuccessToast] = useState<string | null>(null)
 
   // Status Filter Tabs
   const [activeTab, setActiveTab] = useState<string>(() => tabParam || 'All')
@@ -464,6 +494,97 @@ function BookOfBusinessContent() {
 
     return list
   }, [clients, activeTab, statusFilter, policyLineFilter, consentFilter, searchQuery, sortField, sortDirection])
+
+  // Selection helpers for batch/multiple client operations
+  const isAllSelected = filteredClients.length > 0 && filteredClients.every(c => selectedClientIds.includes(c.id))
+  const isSomeSelected = filteredClients.some(c => selectedClientIds.includes(c.id)) && !isAllSelected
+
+  function handleSelectAll() {
+    if (isAllSelected) {
+      const visibleIdsSet = new Set(filteredClients.map(c => c.id))
+      setSelectedClientIds(prev => prev.filter(id => !visibleIdsSet.has(id)))
+    } else {
+      const visibleIds = filteredClients.map(c => c.id)
+      setSelectedClientIds(prev => Array.from(new Set([...prev, ...visibleIds])))
+    }
+  }
+
+  function handleToggleClient(clientId: string) {
+    setSelectedClientIds(prev =>
+      prev.includes(clientId) ? prev.filter(id => id !== clientId) : [...prev, clientId]
+    )
+  }
+
+  // Deletion execution for Single & Multiple Clients (Step 1: Move to Recycle Bin)
+  function handleConfirmDelete() {
+    if (!deleteModalState) return
+
+    let idsToDelete: string[] = []
+    let message = ''
+
+    if (deleteModalState.type === 'single' && deleteModalState.client) {
+      const target = deleteModalState.client
+      idsToDelete = [target.id]
+
+      // Add to Recycle Bin
+      addRecycledItem({
+        originalId: target.id,
+        type: 'client',
+        title: target.name,
+        subtitle: target.businessName !== '—' ? target.businessName : undefined,
+        details: `${target.linesOfBusiness?.join(', ') || target.policies[0]?.type || 'Commercial Policy'} · ${target.yearlyPremium || target.policies[0]?.premium || '$0'}`,
+        email: target.email,
+        phone: target.phone,
+        originalData: target,
+      })
+
+      message = `Client "${target.name}" moved to Recycle Bin. (30 days to recover or purge)`
+    } else if (deleteModalState.type === 'bulk') {
+      idsToDelete = deleteModalState.ids
+      const count = idsToDelete.length
+      const idsSet = new Set(idsToDelete)
+
+      // Add each to Recycle Bin
+      clients.forEach(c => {
+        if (idsSet.has(c.id)) {
+          addRecycledItem({
+            originalId: c.id,
+            type: 'client',
+            title: c.name,
+            subtitle: c.businessName !== '—' ? c.businessName : undefined,
+            details: `${c.linesOfBusiness?.join(', ') || c.policies[0]?.type || 'Commercial Policy'} · ${c.yearlyPremium || c.policies[0]?.premium || '$0'}`,
+            email: c.email,
+            phone: c.phone,
+            originalData: c,
+          })
+        }
+      })
+
+      message = `${count} clients moved to Recycle Bin (30-day retention buffer).`
+    }
+
+    if (idsToDelete.length === 0) {
+      setDeleteModalState(null)
+      return
+    }
+
+    const idsSet = new Set(idsToDelete)
+
+    // 1. Update component clients state (in-memory UI deletion, resets on refresh)
+    setClients(prev => prev.filter(c => !idsSet.has(c.id)))
+    setSelectedClientIds(prev => prev.filter(id => !idsSet.has(id)))
+
+    // If currently viewing a deleted client in details view, return to list
+    if (selectedClientForView && idsSet.has(selectedClientForView.id)) {
+      handleBackToList()
+    }
+
+    setDeleteModalState(null)
+    setDeleteSuccessToast(message)
+    setTimeout(() => {
+      setDeleteSuccessToast(null)
+    }, 5500)
+  }
 
   // Table horizontal drag-to-scroll state & handlers
   const tableContainerRef = useRef<HTMLDivElement>(null)
@@ -1309,6 +1430,31 @@ function BookOfBusinessContent() {
       {!selectedClientForView ? (
         <div>
 
+          {/* ───── Toast Notification for Deletion ───── */}
+          {deleteSuccessToast && (
+            <div className="mb-4 flex items-center justify-between rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/50 px-4 py-3 text-rose-900 dark:text-rose-200 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="flex items-center gap-2.5">
+                <Trash2 className="size-5 text-rose-600 dark:text-rose-400" />
+                <span className="text-[13px] font-medium">{deleteSuccessToast}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/broker/recycle-bin?tab=Clients"
+                  className="inline-flex items-center gap-1 text-[12px] font-bold text-rose-700 dark:text-rose-400 hover:underline"
+                >
+                  <span>View in Recycle Bin</span>
+                  <ChevronRight className="size-3" />
+                </Link>
+                <button
+                  onClick={() => setDeleteSuccessToast(null)}
+                  className="text-rose-600 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-200 p-1 cursor-pointer"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* ───── Header ───── */}
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
@@ -1324,6 +1470,13 @@ function BookOfBusinessContent() {
               </p>
             </div>
             <div className="flex items-center gap-2.5">
+              <Link
+                href="/broker/recycle-bin?tab=Clients"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 shadow-sm transition hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer"
+              >
+                <Trash2 className="size-4 text-slate-400" />
+                <span>Recycle Bin</span>
+              </Link>
               <button
                 onClick={() => {
                   alert(`Exporting ${filteredClients.length} clients to CSV...`)
@@ -1554,6 +1707,63 @@ function BookOfBusinessContent() {
             </div>
           </div>
 
+          {/* Toast Notification: Deletion Success */}
+          {deleteSuccessToast && (
+            <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/40 p-4 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="flex items-center gap-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white font-bold">
+                  <CheckCircle2 className="size-4" />
+                </div>
+                <p className="text-xs sm:text-sm font-semibold text-emerald-900 dark:text-emerald-200">
+                  {deleteSuccessToast}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDeleteSuccessToast(null)}
+                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+          )}
+
+          {/* ───── Bulk Actions Bar ───── */}
+          {selectedClientIds.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/70 dark:bg-rose-950/30 px-4 sm:px-5 py-3 shadow-xs animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="flex items-center gap-2.5">
+                <span className="flex size-7 items-center justify-center rounded-xl bg-rose-600 text-xs font-bold text-white shadow-xs">
+                  {selectedClientIds.length}
+                </span>
+                <div>
+                  <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {selectedClientIds.length === 1 ? '1 client selected' : `${selectedClientIds.length} clients selected`}
+                  </span>
+                  <span className="hidden sm:inline text-xs text-slate-500 dark:text-slate-400 ml-1.5">
+                    · Ready for batch deletion
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setSelectedClientIds([])}
+                  className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer shadow-2xs"
+                >
+                  Deselect All
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDeleteModalState({ type: 'bulk', count: selectedClientIds.length, ids: selectedClientIds })}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-rose-700 transition cursor-pointer"
+                >
+                  <Trash2 className="size-3.5" />
+                  <span>Delete Selected ({selectedClientIds.length})</span>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* ───── 4.1 All Clients Listing Table ───── */}
           <div className="mt-6 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/60 shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden">
             <div
@@ -1566,9 +1776,23 @@ function BookOfBusinessContent() {
               className={`overflow-x-auto custom-scrollbar-table ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'
                 }`}
             >
-              <table className="w-full min-w-[1480px] text-left border-collapse">
+              <table className="w-full min-w-[1520px] text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200/80 dark:border-white/10 bg-slate-50/70 dark:bg-slate-900 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 select-none">
+                    {/* Checkbox Column */}
+                    <th className="py-3 px-3 w-[46px] select-none text-center">
+                      <input
+                        type="checkbox"
+                        checked={isAllSelected}
+                        ref={(el) => {
+                          if (el) el.indeterminate = isSomeSelected
+                        }}
+                        onChange={handleSelectAll}
+                        className="size-4 rounded border-slate-300 dark:border-slate-600 text-[#0170FE] focus:ring-[#0170FE]/20 cursor-pointer accent-[#0170FE]"
+                        title={isAllSelected ? 'Deselect all clients' : 'Select all visible clients'}
+                      />
+                    </th>
+
                     {/* 1. Client Name (Sortable: A to Z / Z to A) */}
                     <th className="px-4 py-3 min-w-[210px]">
                       <button
@@ -1790,7 +2014,7 @@ function BookOfBusinessContent() {
                 <tbody>
                   {filteredClients.length === 0 ? (
                     <tr>
-                      <td colSpan={11} className="py-12 text-center text-slate-400 dark:text-slate-500">
+                      <td colSpan={12} className="py-12 text-center text-slate-400 dark:text-slate-500">
                         <Users className="mx-auto size-8 text-slate-300 dark:text-slate-600 mb-2" />
                         <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">No clients matched your criteria</p>
                         <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Try selecting another status tab or resetting the search filter.</p>
@@ -1805,8 +2029,23 @@ function BookOfBusinessContent() {
                       return (
                         <tr
                           key={`${client.id}-${idx}`}
-                          className="group border-b border-slate-100 dark:border-white/5 transition-colors last:border-0 hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
+                          className={`group border-b border-slate-100 dark:border-white/5 transition-colors last:border-0 ${
+                            selectedClientIds.includes(client.id)
+                              ? 'bg-rose-50/40 dark:bg-rose-950/20'
+                              : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/40'
+                          }`}
                         >
+                          {/* Checkbox */}
+                          <td className="py-3.5 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              checked={selectedClientIds.includes(client.id)}
+                              onChange={() => handleToggleClient(client.id)}
+                              className="size-4 rounded border-slate-300 dark:border-slate-600 text-[#0170FE] focus:ring-[#0170FE]/20 cursor-pointer accent-[#0170FE]"
+                              title={`Select ${client.name}`}
+                            />
+                          </td>
+
                           {/* 1. Client Name */}
                           <td className="px-4 py-3.5">
                             <div className="flex items-center gap-3">
@@ -1959,7 +2198,7 @@ function BookOfBusinessContent() {
                           </td>
 
                           {/* 11. Actions */}
-                          <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[130px] w-[130px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] dark:bg-[#0b0f19] dark:group-hover:bg-[#111726] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] dark:md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.5)] transition-colors">
+                          <td className="py-3.5 pl-4 pr-6 whitespace-nowrap text-right min-w-[145px] w-[145px] md:sticky md:right-0 md:z-10 bg-white group-hover:bg-[#f8fafc] dark:bg-[#0b0f19] dark:group-hover:bg-[#111726] md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] dark:md:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.5)] transition-colors">
                             <div className="inline-flex items-center justify-end gap-1.5 whitespace-nowrap">
                               {client.status === 'Draft' || client.status === 'Draft / Incomplete' ? (
                                 <>
@@ -1978,6 +2217,13 @@ function BookOfBusinessContent() {
                                   >
                                     <Eye className="size-3.5" />
                                   </button>
+                                  <button
+                                    onClick={() => setDeleteModalState({ type: 'single', client, ids: [client.id] })}
+                                    className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 p-1.5 text-slate-400 dark:text-slate-500 shadow-xs transition hover:border-rose-300 dark:hover:border-rose-900/60 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 shrink-0 cursor-pointer"
+                                    title="Delete Draft Client"
+                                  >
+                                    <Trash2 className="size-3.5" />
+                                  </button>
                                 </>
                               ) : (
                                 <>
@@ -1994,6 +2240,13 @@ function BookOfBusinessContent() {
                                     title="Edit Client"
                                   >
                                     <Edit3 className="size-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => setDeleteModalState({ type: 'single', client, ids: [client.id] })}
+                                    className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 p-1.5 text-slate-400 dark:text-slate-500 shadow-xs transition hover:border-rose-300 dark:hover:border-rose-900/60 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 shrink-0 cursor-pointer"
+                                    title="Delete Client"
+                                  >
+                                    <Trash2 className="size-3.5" />
                                   </button>
                                 </>
                               )}
@@ -2166,6 +2419,15 @@ Address: ${selectedClientForView.street}, ${selectedClientForView.city}, ${selec
                 >
                   <Download className="size-3.5 text-slate-500 dark:text-slate-400" />
                   Commission history
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDeleteModalState({ type: 'single', client: selectedClientForView, ids: [selectedClientForView.id] })}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/60 dark:bg-rose-950/30 px-3.5 py-2.5 text-xs font-semibold text-rose-600 dark:text-rose-400 shadow-xs hover:bg-rose-100 dark:hover:bg-rose-900/50 transition cursor-pointer"
+                  title="Permanently remove client record"
+                >
+                  <Trash2 className="size-3.5 text-rose-500" />
+                  <span>Delete Client</span>
                 </button>
               </div>
             </div>
@@ -3656,6 +3918,104 @@ Address: ${selectedClientForView.street}, ${selectedClientForView.city}, ${selec
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────
+          DELETE CLIENT CONFIRMATION MODAL (Single & Multiple)
+      ─────────────────────────────────────────────────────────────── */}
+      {deleteModalState && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-black/75 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 mb-3">
+              <Trash2 className="size-6" />
+            </div>
+
+            <div className="inline-flex items-center gap-1 rounded-full bg-rose-50 dark:bg-rose-950/50 px-2.5 py-0.5 text-[11px] font-bold text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 mb-2">
+              Step 1 of 2 · Move to Recycle Bin
+            </div>
+
+            <h3 className="text-[17px] font-bold text-slate-900 dark:text-slate-100">
+              {deleteModalState.type === 'single'
+                ? 'Move Client to Recycle Bin'
+                : `Move ${deleteModalState.ids.length} Selected Clients to Recycle Bin`}
+            </h3>
+
+            <p className="text-[12.5px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+              {deleteModalState.type === 'single' ? (
+                <>
+                  Are you sure you want to move <strong className="text-slate-800 dark:text-slate-200">{deleteModalState.client?.name}</strong> to the Recycle Bin? Client records are safely retained for <strong>30 days</strong> before permanent erasure, and can be recovered anytime.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to move <strong className="text-slate-800 dark:text-slate-200">{deleteModalState.ids.length} clients</strong> to the Recycle Bin? Records can be recovered anytime within <strong>30 days</strong>.
+                </>
+              )}
+            </p>
+
+            {deleteModalState.type === 'single' && deleteModalState.client && (
+              <div className="mt-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3.5 text-[12px] space-y-1.5 border border-slate-200/60 dark:border-white/5">
+                <div className="flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Client ID</span>
+                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{deleteModalState.client.id}</span>
+                </div>
+                {deleteModalState.client.businessName !== '—' && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">Business</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{deleteModalState.client.businessName}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Phone</span>
+                  <span className="font-medium text-slate-800 dark:text-slate-200">{deleteModalState.client.phone}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Active Policies</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">
+                    {deleteModalState.client.policies.length} {deleteModalState.client.policies.length === 1 ? 'policy' : 'policies'}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {deleteModalState.type === 'bulk' && (
+              <div className="mt-4 max-h-40 overflow-y-auto rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 text-[12px] space-y-1.5 border border-slate-200/60 dark:border-white/5">
+                {deleteModalState.ids.map(id => {
+                  const item = clients.find(c => c.id === id)
+                  return (
+                    <div key={id} className="flex items-center justify-between py-0.5">
+                      <span className="font-medium text-slate-800 dark:text-slate-200 truncate max-w-[240px]">
+                        {item ? item.name : id}
+                      </span>
+                      <span className="font-mono text-[11px] text-slate-400">{id}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setDeleteModalState(null)}
+                className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 text-[12px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-5 py-2 text-[12px] font-bold text-white shadow-md hover:bg-rose-700 transition cursor-pointer"
+              >
+                <Trash2 className="size-3.5" />
+                <span>
+                  {deleteModalState.type === 'single'
+                    ? 'Move to Recycle Bin'
+                    : `Move (${deleteModalState.ids.length}) to Recycle Bin`}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -60,6 +60,7 @@ import {
   type LeadNote,
   type LeadTimelineEvent,
 } from '@/data/broker/leads'
+import { addRecycledItem } from '@/data/broker/recycleBin'
 
 export interface ConsentRecordItem {
   id: string
@@ -176,34 +177,27 @@ export default function LeadsPage() {
   } | null>(null)
   const [deleteSuccessToast, setDeleteSuccessToast] = useState<string | null>(null)
 
-  // Load leads from localStorage on initial render
+  // In-memory UI mode: clear previous session custom leads so refresh always restores full roster
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('broker_custom_leads')
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setLeads(parsed)
-        }
-      }
+      localStorage.removeItem('broker_custom_leads')
+      setLeads(initialLeads)
     } catch (err) {
-      console.error('Failed to load leads from localStorage', err)
+      console.error('Failed to reset leads on mount', err)
     }
-  }, [])
 
-  // Persist leads whenever they change
-  const isFirstRender = useRef(true)
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      return
+    const handleRestored = (e: any) => {
+      const item = e.detail?.item
+      if (item && item.type === 'lead' && item.originalData) {
+        setLeads(prev => {
+          if (prev.some(l => l.id === item.originalData.id)) return prev
+          return [item.originalData, ...prev]
+        })
+      }
     }
-    try {
-      localStorage.setItem('broker_custom_leads', JSON.stringify(leads))
-    } catch (err) {
-      console.error('Failed to persist leads to localStorage', err)
-    }
-  }, [leads])
+    window.addEventListener('broker_recycle_bin_restored', handleRestored)
+    return () => window.removeEventListener('broker_recycle_bin_restored', handleRestored)
+  }, [])
 
   // Quick Add Note state
   const [newNoteText, setNewNoteText] = useState('')
@@ -868,34 +862,65 @@ export default function LeadsPage() {
     )
   }
 
-  // Deletion execution
+  // Deletion execution (Step 1: Move to Recycle Bin)
   function handleConfirmDelete() {
     if (!deleteModalState) return
 
     if (deleteModalState.type === 'single') {
-      const leadId = deleteModalState.lead.id
-      const leadName = deleteModalState.lead.name
+      const lead = deleteModalState.lead
+      const leadId = lead.id
+      const leadName = lead.name
+
+      // Add to Recycle Bin
+      addRecycledItem({
+        originalId: lead.id,
+        type: 'lead',
+        title: lead.name,
+        subtitle: lead.businessName,
+        details: `${lead.insuranceType} · ${lead.estimatedPremium}`,
+        email: lead.email,
+        phone: lead.phone,
+        originalData: lead,
+      })
+
       setLeads(prev => prev.filter(l => l.id !== leadId))
       setSelectedLeadIds(prev => prev.filter(id => id !== leadId))
       if (selectedLeadForView?.id === leadId) {
         setSelectedLeadForView(null)
       }
-      setDeleteSuccessToast(`Lead "${leadName}" was permanently removed.`)
+      setDeleteSuccessToast(`Lead "${leadName}" moved to Recycle Bin. (30 days to recover or purge)`)
     } else if (deleteModalState.type === 'bulk') {
       const idsToDelete = new Set(deleteModalState.ids)
       const count = deleteModalState.count
+
+      // Add each to Recycle Bin
+      leads.forEach(l => {
+        if (idsToDelete.has(l.id)) {
+          addRecycledItem({
+            originalId: l.id,
+            type: 'lead',
+            title: l.name,
+            subtitle: l.businessName,
+            details: `${l.insuranceType} · ${l.estimatedPremium}`,
+            email: l.email,
+            phone: l.phone,
+            originalData: l,
+          })
+        }
+      })
+
       setLeads(prev => prev.filter(l => !idsToDelete.has(l.id)))
       setSelectedLeadIds(prev => prev.filter(id => !idsToDelete.has(id)))
       if (selectedLeadForView && idsToDelete.has(selectedLeadForView.id)) {
         setSelectedLeadForView(null)
       }
-      setDeleteSuccessToast(`${count} leads were permanently removed.`)
+      setDeleteSuccessToast(`${count} leads moved to Recycle Bin (30-day retention buffer).`)
     }
 
     setDeleteModalState(null)
     setTimeout(() => {
       setDeleteSuccessToast(null)
-    }, 4000)
+    }, 5500)
   }
 
   // Bulk Status change
@@ -1041,12 +1066,21 @@ export default function LeadsPage() {
               <Trash2 className="size-5 text-rose-600 dark:text-rose-400" />
               <span className="text-[13px] font-medium">{deleteSuccessToast}</span>
             </div>
-            <button
-              onClick={() => setDeleteSuccessToast(null)}
-              className="text-rose-600 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-200 p-1 cursor-pointer"
-            >
-              <X className="size-4" />
-            </button>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/broker/recycle-bin?tab=Leads"
+                className="inline-flex items-center gap-1 text-[12px] font-bold text-rose-700 dark:text-rose-400 hover:underline"
+              >
+                <span>View in Recycle Bin</span>
+                <ChevronRight className="size-3" />
+              </Link>
+              <button
+                onClick={() => setDeleteSuccessToast(null)}
+                className="text-rose-600 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-200 p-1 cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
           </div>
         )}
 
@@ -1067,6 +1101,15 @@ export default function LeadsPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {/* Recycle Bin CTA */}
+            <Link
+              href="/broker/recycle-bin?tab=Leads"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-xs transition hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer"
+            >
+              <Trash2 className="size-4 text-slate-400" />
+              <span>Recycle Bin</span>
+            </Link>
+
             {/* 5.5 QR Code Button */}
             <button
               onClick={() => setIsQrModalOpen(true)}
@@ -2158,6 +2201,16 @@ export default function LeadsPage() {
                 )}
 
                 <button
+                  type="button"
+                  onClick={() => setDeleteModalState({ type: 'single', lead: selectedLeadForView })}
+                  className="inline-flex items-center gap-1 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/60 dark:bg-rose-950/30 px-3 py-1.5 text-[11px] font-semibold text-rose-600 dark:text-rose-400 shadow-xs hover:bg-rose-100 dark:hover:bg-rose-900/50 transition cursor-pointer"
+                  title="Delete Lead Record"
+                >
+                  <Trash2 className="size-3.5 text-rose-500" />
+                  <span>Delete</span>
+                </button>
+
+                <button
                   onClick={() => setSelectedLeadForView(null)}
                   className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition cursor-pointer"
                 >
@@ -3099,6 +3152,106 @@ export default function LeadsPage() {
                   Close Audit Record
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────
+          DELETE LEAD CONFIRMATION MODAL (Single & Multiple)
+      ─────────────────────────────────────────────────────────────── */}
+      {deleteModalState && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-black/75 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 mb-3">
+              <Trash2 className="size-6" />
+            </div>
+
+            <div className="inline-flex items-center gap-1 rounded-full bg-rose-50 dark:bg-rose-950/50 px-2.5 py-0.5 text-[11px] font-bold text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 mb-2">
+              Step 1 of 2 · Move to Recycle Bin
+            </div>
+
+            <h3 className="text-[17px] font-bold text-slate-900 dark:text-slate-100">
+              {deleteModalState.type === 'single'
+                ? 'Move Lead to Recycle Bin'
+                : `Move ${deleteModalState.count} Selected Leads to Recycle Bin`}
+            </h3>
+
+            <p className="text-[12.5px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+              {deleteModalState.type === 'single' ? (
+                <>
+                  Are you sure you want to move <strong className="text-slate-800 dark:text-slate-200">{deleteModalState.lead?.name}</strong> to the Recycle Bin? Records are safely retained for <strong>30 days</strong> before permanent erasure, and can be recovered anytime.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to move <strong className="text-slate-800 dark:text-slate-200">{deleteModalState.count} leads</strong> to the Recycle Bin? Records can be recovered anytime within <strong>30 days</strong>.
+                </>
+              )}
+            </p>
+
+            {deleteModalState.type === 'single' && deleteModalState.lead && (
+              <div className="mt-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3.5 text-[12px] space-y-1.5 border border-slate-200/60 dark:border-white/5">
+                <div className="flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Lead ID</span>
+                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{deleteModalState.lead.id}</span>
+                </div>
+                {deleteModalState.lead.businessName && deleteModalState.lead.businessName !== '—' && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">Business</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{deleteModalState.lead.businessName}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Coverage Line</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{deleteModalState.lead.insuranceType}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Est. Premium</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400">{deleteModalState.lead.estimatedPremium}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Status</span>
+                  <span className="font-medium text-slate-800 dark:text-slate-200">{deleteModalState.lead.status}</span>
+                </div>
+              </div>
+            )}
+
+            {deleteModalState.type === 'bulk' && (
+              <div className="mt-4 max-h-40 overflow-y-auto rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 text-[12px] space-y-1.5 border border-slate-200/60 dark:border-white/5">
+                {deleteModalState.ids.map(id => {
+                  const item = leads.find(l => l.id === id)
+                  return (
+                    <div key={id} className="flex items-center justify-between py-0.5">
+                      <span className="font-medium text-slate-800 dark:text-slate-200 truncate max-w-[240px]">
+                        {item ? item.name : id}
+                      </span>
+                      <span className="font-mono text-[11px] text-slate-400">{id}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setDeleteModalState(null)}
+                className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 text-[12px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-5 py-2 text-[12px] font-bold text-white shadow-md hover:bg-rose-700 transition cursor-pointer"
+              >
+                <Trash2 className="size-3.5" />
+                <span>
+                  {deleteModalState.type === 'single'
+                    ? 'Move to Recycle Bin'
+                    : `Move (${deleteModalState.count}) to Recycle Bin`}
+                </span>
+              </button>
             </div>
           </div>
         </div>
